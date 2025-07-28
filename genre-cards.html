@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genre Cards - GentleReaders</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .genre-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        /* Multi-Strip Card Styling */
+        .multi-strip-card {
+            width: 210px; /* User specified width */
+            height: 254px; /* User specified height */
+            border-radius: 4px;
+            background: #f5f5dc; /* Cream beige background */
+            display: flex;
+            gap: 5px;
+            padding: 0.4em;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08); /* Consistent with other cards */
+            overflow: hidden; /* Important for internal elements */
+        }
+
+        .multi-strip-card .strip-item {
+            height: 100%;
+            flex: 1;
+            overflow: hidden;
+            cursor: pointer;
+            border-radius: 2px;
+            transition: all 0.5s ease; /* Smooth transition */
+            background: #f5f5dc; /* Match card background */
+            border: 1px solid #c4a484; /* A light brown/tan border */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative; /* For absolute positioning of title/image */
+        }
+
+        .multi-strip-card .strip-item:hover {
+            flex: 4; /* Expands on hover */
+        }
+
+        .multi-strip-card .strip-title {
+            position: absolute;
+            padding: 0.5em;
+            text-align: center;
+            transform: rotate(-90deg); /* Initial vertical text */
+            transform-origin: center;
+            transition: all 0.5s ease;
+            text-transform: uppercase;
+            color: #5e2217; /* Dark brown text */
+            letter-spacing: 0.1em;
+            white-space: nowrap; /* Prevent title from wrapping */
+            z-index: 2; /* Above image when present */
+            font-size: 0.9em; /* Adjust font size for better fit */
+            font-weight: 600;
+        }
+
+        .multi-strip-card .strip-image {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0; /* Initially hidden */
+            transition: opacity 0.5s ease;
+            z-index: 1;
+        }
+
+        .multi-strip-card .strip-item:hover .strip-title {
+            transform: rotate(0deg); /* Horizontal text on hover */
+            opacity: 0; /* Hide title on hover */
+        }
+
+        .multi-strip-card .strip-item:hover .strip-image {
+            opacity: 1; /* Show image on hover */
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .genre-grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 15px;
+            }
+            
+            .multi-strip-card {
+                width: 100%;
+                max-width: 210px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center; color: #5e2217; margin-bottom: 30px;">Browse by Genre</h1>
+        
+        <div class="genre-grid">
+            <!-- Religious Genre Card -->
+            <div class="multi-strip-card">
+                <p class="strip-item" onclick="location.href='religious.html'">
+                    <span class="strip-title">RELIGIOUS</span>
+                    <img
+                        src="https://placehold.co/210x254/FCF8D5/5E2217?font=inter&text=Religious"
+                        alt="Religious Books"
+                        class="strip-image"
+                    />
+                </p>
+                <p class="strip-item" onclick="location.href='religious.html'">
+                    <span class="strip-title">SPIRITUAL</span>
+                    <img
+                        src="https://placehold.co/210x254/FCF8D5/5E2217?font=inter&text=Spiritual"
+                        alt="Spiritual Books"
+                        class="strip-image"
+                    />
+                </p>
+                <p class="strip-item" onclick="location.href='religious.html'">
+                    <span class="strip-title">FAITH</span>
+                    <img
+                        src="https://placehold.co/210x254/FCF8D5/5E2217?font=inter&text=Faith"
+                        alt="Faith Books"
+                        class="strip-image"
+                    />
+                </p>
+            </div>
+
+            <!-- Romance Genre Card -->
+            <div class="multi-strip-card">
+                <p class="strip-item" onclick="location.href='romance.html'">
+                    <span class="strip-title">ROMANCE</span>
+                    <img
+                        src="https://placehold.co/210x254/FCF8D5/5E2217?font=inter&text=Romance"
+                        alt="Romance Books"
+                        class="strip-image"
+                    />
+                </p>
+                <p class="strip-item" onclick="location.href='romance.html'">
+                    <span class="strip-title">LOVE</span>
+                    <img
+                        src="https://placehold.co/210x254/FCF8D5/5E2217?font=inter&text=Love"
+                        alt="Love Stories"
+                        class="strip-image"
+                    />
+                </p>
+                <p class="strip-item" onclick="location.href='romance.html'">
+                    <span class="strip-title">PASSION</span>
+                    <img
+                        src="https://placehold.co/210x254/FCF8D5/5E2217?font=inter&text=Passion"
+                        alt="Passionate Stories"
+                        class="strip-image"
+                    />
+                </p>
+            </div>
+
+            <!-- Fiction Genre Card -->
+            <div class="multi-strip-card">
+                <p class="strip-item" onclick="location.href='fiction.html'">
+                    <span class="strip-title">FICTION</span>
+                    <img
+                        src="https://placehold.co/210x254/FCF8D5/5E2217?font=inter&text=Fiction"
+                        alt="Fiction Books"
+                        class="strip-image"
+                    />
+                </p>
+                <p class="strip-item" onclick="location.href='fiction.html'">
+                    <span class="strip-title">STORY</span>
+                    <img
+                        src="https://placehold.co/210x254/FCF8D5/5E2217?font=inter&text=Story"
+                        alt="Stories"
+                        class="strip-image"
+                    />
+                </p>
+                <p class="strip-item" onclick="location.href='fiction.html'">
+                    <span class="strip-title">TALE</span>
+                    <img
+                        src="https://placehold.co/210x254/FCF8D5/5E2217?font=inter&text=Tale"
+                        alt="Tales"
+                        class="strip-image"
+                    />
+                </p>
+            </div>
+
+            <!-- Development Genre Card -->
+            <div class="multi-strip-card">
+                <p class="strip-item" onclick="location.href='development.html'">
+                    <span class="strip-title">DEVELOPMENT</span>
+                    <img
+                        src="https://placehold.co/210x254/FCF8D5/5E2217?font=inter&text=Development"
+                        alt="Development Books"
+                        class="strip-image"
+                    />
+                </p>
+                <p class="strip-item" onclick="location.href='development.html'">
+                    <span class="strip-title">GROWTH</span>
+                    <img
+                        src="https://placehold.co/210x254/FCF8D5/5E2217?font=inter&text=Growth"
+                        alt="Personal Growth"
+                        class="strip-image"
+                    />
+                </p>
+                <p class="strip-item" onclick="location.href='development.html'">
+                    <span class="strip-title">SELF-HELP</span>
+                    <img
+                        src="https://placehold.co/210x254/FCF8D5/5E2217?font=inter&text=Self-Help"
+                        alt="Self-Help Books"
+                        class="strip-image"
+                    />
+                </p>
+            </div>
+
+            <!-- Horror Genre Card -->
+            <div class="multi-strip-card">
+                <p class="strip-item" onclick="location.href='horror.html'">
+                    <span class="strip-title">HORROR</span>
+                    <img
+                        src="https://placehold.co/210x254/FCF8D5/5E2217?font=inter&text=Horror"
+                        alt="Horror Books"
+                        class="strip-image"
+                    />
+                </p>
+                <p class="strip-item" onclick="location.href='horror.html'">
+                    <span class="strip-title">THRILLER</span>
+                    <img
+                        src="https://placehold.co/210x254/FCF8D5/5E2217?font=inter&text=Thriller"
+                        alt="Thriller Books"
+                        class="strip-image"
+                    />
+                </p>
+                <p class="strip-item" onclick="location.href='horror.html'">
+                    <span class="strip-title">SUSPENSE</span>
+                    <img
+                        src="https://placehold.co/210x254/FCF8D5/5E2217?font=inter&text=Suspense"
+                        alt="Suspense Books"
+                        class="strip-image"
+                    />
+                </p>
+            </div>
+
+            <!-- Novels Genre Card -->
+            <div class="multi-strip-card">
+                <p class="strip-item" onclick="location.href='novels.html'">
+                    <span class="strip-title">NOVELS</span>
+                    <img
+                        src="https://placehold.co/210x254/FCF8D5/5E2217?font=inter&text=Novels"
+                        alt="Novels"
+                        class="strip-image"
+                    />
+                </p>
+                <p class="strip-item" onclick="location.href='novels.html'">
+                    <span class="strip-title">LITERATURE</span>
+                    <img
+                        src="https://placehold.co/210x254/FCF8D5/5E2217?font=inter&text=Literature"
+                        alt="Literature"
+                        class="strip-image"
+                    />
+                </p>
+                <p class="strip-item" onclick="location.href='novels.html'">
+                    <span class="strip-title">CLASSICS</span>
+                    <img
+                        src="https://placehold.co/210x254/FCF8D5/5E2217?font=inter&text=Classics"
+                        alt="Classic Novels"
+                        class="strip-image"
+                    />
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

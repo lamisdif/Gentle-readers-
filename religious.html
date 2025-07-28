@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Religious Books</title>
+  <link rel="stylesheet" href="index.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    .main-title, .title {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <!-- Back to Home Button -->
+  <div class="fixed top-4 left-4 z-50">
+    <button onclick="window.location.href='index.html'" class="bg-[#5E2217] text-white px-4 py-2 rounded-lg hover:bg-[#4a1a14] transition-colors">
+      <i class="fas fa-arrow-left mr-2"></i>Back to Home
+    </button>
+  </div>
+  <div class="main-content flex flex-col">
+    <!-- Hero Section -->
+    <section class="hero-new mb-8">
+      <div class="content text-center">
+        <h1 class="main-title text-4xl font-bold mb-2" id="religious-hero-title">كتب دينية</h1>
+        <p class="description text-lg text-gray-700" id="religious-hero-desc">A curated collection of religious books to enrich the soul and mind.</p>
+      </div>
+    </section>
+    <!-- Books Section -->
+    <section class="latest-books-online">
+      <div class="section-header">
+        <p class="sub-title uppercase text-xs tracking-widest text-gray-500" id="religious-section-sub">RELIGIOUS COLLECTION</p>
+        <h2 class="main-title" id="religious-section-title">Our Religious Books</h2>
+      </div>
+      <div class="slider mx-auto" style="--width: 220px; --height: 300px; --quantity: 5;">
+        <div class="list">
+          <div class="item" style="--position: 1">
+            <div class="card" onclick="openBook('fi_sohbat_al_habib')" style="cursor: pointer; position: relative; z-index: 100;">
+              <button class="add-to-cart-btn" onclick="addToCartFromCard('fi_sohbat_al_habib', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
+                <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                  <title>icon-cart</title>
+                  <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                </svg>
+              </button>
+              <div class="flip-book-card-wrapper">
+                <div class="flip-book-card-content">
+                  <div class="flip-book-card-front">
+                    <div class="book-cover-image">
+                      <img src="imgs/في صحبة الحبيب.jpg" alt="في صحبة الحبيب" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                    </div>
+                    <p class="book-title">في صحبة الحبيب</p>
+                    <p class="book-author">د. كفاح أبو هنود</p>
+                    <p class="book-price text-sm">Price: 1,600.00</p>
+                  </div>
+                  <div class="flip-book-card-back">
+                    <div class="flip-book-card-back-content">
+                      <h4 class="text-lg font-bold mb-2">About the Book</h4>
+                      <p class="summary-text" id="religious-desc-book1">This book presents the biography of Prophet Muhammad (peace be upon him) in a contemporary style, highlighting inspiring moments and values from his blessed life in a simple and engaging way.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="item" style="--position: 2">
+            <div class="card" onclick="openBook('manhajiyat_al_seer')" style="cursor: pointer; position: relative; z-index: 100;">
+              <button class="add-to-cart-btn" onclick="addToCartFromCard('manhajiyat_al_seer', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
+                <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                  <title>icon-cart</title>
+                  <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                </svg>
+              </button>
+              <div class="flip-book-card-wrapper">
+                <div class="flip-book-card-content">
+                  <div class="flip-book-card-front">
+                    <div class="book-cover-image">
+                      <img src="imgs/منهجية السير الى الله.jpg"onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                    </div>
+                    <p class="book-title">منهجية السير إلى الله</p>
+                    <p class="book-author">د. كفاح أبو هنود</p>
+                    <p class="book-price text-sm">Price: 1,500.00</p>
+                  </div>
+                  <div class="flip-book-card-back">
+                    <div class="flip-book-card-back-content">
+                      <h4 class="text-lg font-bold mb-2">About the Book</h4>
+                      <p class="summary-text" id="religious-desc-book2">A spiritual guidebook that outlines the methodology and steps for drawing closer to Allah, offering practical advice and inspiration for seekers on the path of faith.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="item" style="--position: 3">
+            <div class="card" onclick="openBook('inna_rabbi_latif')" style="cursor: pointer; position: relative; z-index: 100;">
+              <button class="add-to-cart-btn" onclick="addToCartFromCard('inna_rabbi_latif', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
+                <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                  <title>icon-cart</title>
+                  <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                </svg>
+              </button>
+              <div class="flip-book-card-wrapper">
+                <div class="flip-book-card-content">
+                  <div class="flip-book-card-front">
+                    <div class="book-cover-image">
+                      <img src="imgs/ان ربي لطيف.jpg" alt="إن ربي لطيف" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                    </div>
+                    <p class="book-title">إن ربي لطيف</p>
+                    <p class="book-author">عبدالرحمن مسعد</p>
+                    <p class="book-price text-sm">Price: 900.00</p>
+                  </div>
+                  <div class="flip-book-card-back">
+                    <div class="flip-book-card-back-content">
+                      <h4 class="text-lg font-bold mb-2">About the Book</h4>
+                      <p class="summary-text" id="religious-desc-book3">A book that reflects on the subtle kindness and mercy of Allah in our lives, reminding readers of divine gentleness even in moments they may not notice.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="item" style="--position: 4">
+            <div class="card" onclick="openBook('yaj3al_lak_makhraja')" style="cursor: pointer; position: relative; z-index: 100;">
+              <button class="add-to-cart-btn" onclick="addToCartFromCard('yaj3al_lak_makhraja', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
+                <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                  <title>icon-cart</title>
+                  <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                </svg>
+              </button>
+              <div class="flip-book-card-wrapper">
+                <div class="flip-book-card-content">
+                  <div class="flip-book-card-front">
+                    <div class="book-cover-image">
+                      <img src="imgs/يجعل الله لك مخرجا.jpg" alt="يجعلك الله لك مخرجا" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                    </div>
+                    <p class="book-title">يجعلك الله لك مخرجا</p>
+                    <p class="book-author">أحمد الصابوني</p>
+                    <p class="book-price text-sm">Price: 1,400.00</p>
+                  </div>
+                  <div class="flip-book-card-back">
+                    <div class="flip-book-card-back-content">
+                      <h4 class="text-lg font-bold mb-2">About the Book</h4>
+                      <p class="summary-text" id="religious-desc-book4">This book offers hope and reassurance, focusing on how Allah provides relief and solutions in times of hardship, and encourages trust in divine wisdom.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="item" style="--position: 5">
+            <div class="card" onclick="openBook('thani_ithnayn')" style="cursor: pointer; position: relative; z-index: 100;">
+              <button class="add-to-cart-btn" onclick="addToCartFromCard('thani_ithnayn', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
+                <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                  <title>icon-cart</title>
+                  <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                </svg>
+              </button>
+              <div class="flip-book-card-wrapper">
+                <div class="flip-book-card-content">
+                  <div class="flip-book-card-front">
+                    <div class="book-cover-image">
+                      <img src="imgs/ثاني اثنين.jpg" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                    </div>
+                    <p class="book-title">ثاني اثنين</p>
+                    <p class="book-author">أدهم شرقاوي</p>
+                    <p class="book-price text-sm">Price: 1,200.00</p>
+                  </div>
+                  <div class="flip-book-card-back">
+                    <div class="flip-book-card-back-content">
+                      <h4 class="text-lg font-bold mb-2">About the Book</h4>
+                      <p class="summary-text" id="religious-desc-book5">A novel inspired by the story of the Prophet's migration, exploring themes of faith, companionship, and trust in Allah during life's most challenging journeys.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+    function openBook(id) {
+      window.location.href = `book.html?id=${id}`;
+    }
+    
+    function addToCartFromCard(bookId, event) {
+      event.stopPropagation();
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      if (!cart.includes(bookId)) {
+        cart.push(bookId);
+        localStorage.setItem('cart', JSON.stringify(cart));
+        
+        // Animate the cart icon in navigation
+        const cartIcon = document.querySelector('.btn-cart');
+        if (cartIcon) {
+          cartIcon.style.transform = 'scale(1.2)';
+          setTimeout(() => {
+            cartIcon.style.transform = 'scale(1)';
+          }, 200);
+        }
+      }
+    }
+    
+    function updateCartCounter() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const cartButtons = document.querySelectorAll('.btn-cart');
+      cartButtons.forEach(button => {
+        button.setAttribute('data-quantity', cart.length);
+      });
+    }
+    updateCartCounter();
+  </script>
+  <script src="lang.js"></script>
+  <script>
+  // Add translations and setLanguage for religious page
+  const translations = {
+    en: {
+      'religious-hero-title': 'Religious Books',
+      'religious-hero-desc': 'A curated collection of religious books to enrich the soul and mind.',
+      'religious-section-sub': 'RELIGIOUS COLLECTION',
+      'religious-section-title': 'Our Religious Books',
+      'Book Summary': 'Book Summary',
+      'Price': 'Price',
+    },
+    ar: {
+      'religious-hero-title': 'كتب دينية',
+      'religious-hero-desc': 'مجموعة مختارة من الكتب الدينية لإثراء الروح والعقل.',
+      'religious-section-sub': 'مجموعة الكتب الدينية',
+      'religious-section-title': 'كتبنا الدينية',
+      'Book Summary': 'ملخص الكتاب',
+      'Price': 'السعر',
+    }
+  };
+  const bookDescs = {
+    'religious-desc-book1': {
+      en: 'This book presents the biography of Prophet Muhammad (peace be upon him) in a contemporary style, highlighting inspiring moments and values from his blessed life in a simple and engaging way.',
+      ar: 'كتاب يقدم سيرة النبي محمد صلى الله عليه وسلم بأسلوب معاصر، ويبرز القيم والمواقف الملهمة من حياته المباركة.'
+    },
+    'religious-desc-book2': {
+      en: 'A spiritual guidebook that outlines the methodology and steps for drawing closer to Allah, offering practical advice and inspiration for seekers on the path of faith.',
+      ar: 'دليل روحي يوضح منهجية وخطوات التقرب إلى الله، ويقدم نصائح عملية وإلهاماً للسائرين في طريق الإيمان.'
+    },
+    'religious-desc-book3': {
+      en: 'A book that reflects on the subtle kindness and mercy of Allah in our lives, reminding readers of divine gentleness even in moments they may not notice.',
+      ar: 'كتاب يتأمل في لطف ورحمة الله الخفية في حياتنا، ويذكر القارئ بلطف الله حتى في اللحظات التي قد لا يلاحظها.'
+    },
+    'religious-desc-book4': {
+      en: 'This book offers hope and reassurance, focusing on how Allah provides relief and solutions in times of hardship, and encourages trust in divine wisdom.',
+      ar: 'كتاب يمنح الأمل والطمأنينة، ويركز على كيف أن الله يفرج الكرب ويوفر الحلول في أوقات الشدة، ويشجع على الثقة بحكمة الله.'
+    },
+    'religious-desc-book5': {
+      en: 'A novel inspired by the story of the Prophet\'s migration, exploring themes of faith, companionship, and trust in Allah during life\'s most challenging journeys.',
+      ar: 'رواية مستوحاة من قصة هجرة النبي، وتتناول موضوعات الإيمان والصحبة والثقة بالله في أصعب الرحلات.'
+    }
+  };
+  function setLanguage(lang) {
+    document.body.setAttribute('lang', lang);
+    if (lang === 'ar') {
+      document.body.style.direction = 'rtl';
+      document.body.style.textAlign = 'right';
+    } else {
+      document.body.style.direction = 'ltr';
+      document.body.style.textAlign = 'left';
+    }
+    // Update all translatable elements
+    Object.keys(translations[lang]).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = translations[lang][id];
+    });
+    // Update book summary headers and price labels
+    document.querySelectorAll('.flip-book-card-back-content h4').forEach(function(el) {
+      el.textContent = translations[lang]['Book Summary'];
+    });
+    document.querySelectorAll('.book-price').forEach(function(el) {
+      var price = el.textContent.match(/\d+[\d,.]*/);
+      el.textContent = translations[lang]['Price'] + ': ' + (price ? price[0] : '');
+    });
+    // Update book descriptions
+    for (let i = 1; i <= 5; i++) {
+      var descElem = document.getElementById('religious-desc-book' + i);
+      if (descElem && bookDescs['religious-desc-book' + i]) {
+        descElem.innerHTML = bookDescs['religious-desc-book' + i][lang] || bookDescs['religious-desc-book' + i]['en'];
+      }
+    }
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    var lang = localStorage.getItem('lang') || 'en';
+    setLanguage(lang);
+  });
+  </script>
+</body>
+</html> 

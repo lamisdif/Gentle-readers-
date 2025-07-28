@@ -1,0 +1,53 @@
+<!-- cart.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shopping Cart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+  <div class="max-w-xl mx-auto bg-white shadow-md rounded-lg p-6">
+    <h1 class="text-2xl font-bold mb-4">Your Cart</h1>
+    <ul id="cart-items" class="list-disc list-inside space-y-2 text-gray-700"></ul>
+    <div class="mt-6 space-y-3">
+      <button onclick="clearCart()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Clear Cart</button>
+      <button onclick="proceedToCheckout()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 ml-2">Proceed to Checkout</button>
+    </div>
+  </div>
+
+  <script>
+    function loadCart() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const list = document.getElementById('cart-items');
+      list.innerHTML = '';
+      if (cart.length === 0) {
+        list.innerHTML = '<li>Your cart is empty.</li>';
+        return;
+      }
+      cart.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        list.appendChild(li);
+      });
+    }
+
+    function clearCart() {
+      localStorage.removeItem('cart');
+      loadCart();
+    }
+
+    function proceedToCheckout() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      if (cart.length === 0) {
+        alert('Your cart is empty!');
+        return;
+      }
+      window.location.href = 'checkout.html';
+    }
+
+    window.onload = loadCart;
+  </script>
+</body>
+</html>

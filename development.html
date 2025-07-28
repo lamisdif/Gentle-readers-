@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Development - GentleReaders</title>
+  <link rel="stylesheet" href="index.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
+  <style>
+    /* Cart Icon Styles */
+    .btn-cart {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      border: none;
+      background-color: transparent;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .btn-cart::after {
+      content: attr(data-quantity);
+      width: fit-content;
+      height: fit-content;
+      position: absolute;
+      font-size: 15px;
+      color: white;
+      font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+      opacity: 0;
+      visibility: hidden;
+      transition: .2s linear;
+      top: 115%;
+    }
+
+    .icon-cart {
+      width: 24.38px;
+      height: 30.52px;
+      transition: .2s linear;
+    }
+
+    .icon-cart path {
+      fill: rgb(240, 8, 8);
+      transition: .2s linear;
+    }
+
+    .btn-cart:hover > .icon-cart {
+      transform: scale(1.2);
+    }
+
+    .btn-cart:hover > .icon-cart path {
+      fill: rgb(186, 34, 233);
+    }
+
+    .btn-cart:hover::after {
+      visibility: visible;
+      opacity: 1;
+      top: 105%;
+    }
+
+    .quantity {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Cart Icon -->
+  <div class="fixed top-4 right-4 z-50">
+    <button data-quantity="0" class="btn-cart" onclick="window.location.href='cart.html'">
+      <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="30.52" width="24.38" xmlns="http://www.w3.org/2000/svg">
+        <title>icon-cart</title>
+        <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+      </svg>
+      <span class="quantity"></span>
+    </button>
+  </div>
+
+  <!-- Back to Home Button -->
+  <div class="fixed top-4 left-4 z-50">
+    <button onclick="window.location.href='index.html'" class="bg-[#5E2217] text-white px-4 py-2 rounded-lg hover:bg-[#4a1a14] transition-colors" id="back-home-btn">
+      <i class="fas fa-arrow-left mr-2"></i><span id="back-home-text">Back to Home</span>
+    </button>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content flex flex-col">
+    <!-- Hero Section -->
+    <section class="hero-new hidden lg:flex mb-8">
+      <div class="content">
+        <p class="subtitle stagger-animate stagger-1" id="development-hero-subtitle">Discover Our Development Collection</p>
+        <h1 class="title stagger-animate stagger-2" id="development-hero-title">Development</h1>
+        <p class="description stagger-animate stagger-3" id="development-hero-desc">Self-help and personal growth books</p>
+      </div>
+    </section>
+
+    <!-- Development Books Section: 13 books with real covers, researched titles, and descriptions -->
+    <section class="latest-books-online">
+      <div class="section-header">
+        <p class="sub-title uppercase text-xs tracking-widest text-gray-500" id="development-section-sub">DEVELOPMENT COLLECTION</p>
+        <h2 class="main-title" id="development-section-title">Our Development Books</h2>
+      </div>
+      <div class="slider mx-auto" style="--width: 220px; --height: 300px; --quantity: 13;">
+        <div class="list">
+          <!-- Book 1: أحببت وغدا -->
+          <div class="item" style="--position: 1">
+            <div class="card" onclick="openBook('ahbabt_wghadan')" style="cursor: pointer; position: relative; z-index: 100;">
+              <div class="flip-book-card-wrapper">
+                <div class="flip-book-card-content">
+                  <div class="flip-book-card-front">
+                    <div class="book-cover-image">
+                      <img src="imgs/احببت وغدا.jpg" alt="أحببت وغدا" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                    </div>
+                    <p class="book-title">أحببت وغدا</p>
+                    <p class="book-author">د. عماد رشاد عثمان</p>
+                    <p class="book-price text-sm">Price: 1,700.00</p>
+                  </div>
+                  <div class="flip-book-card-back">
+                    <div class="flip-book-card-back-content">
+                      <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                      <p class="summary-text" id="development-desc-book1">A book about healing from toxic relationships, offering practical advice for self-understanding, overcoming emotional pain, and building healthy connections.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button class="add-to-cart-btn" onclick="addToCartFromCard('ahbabt_wghadan', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20;">
+                <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                  <title>icon-cart</title>
+                  <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <!-- Book 2: اسأل تعط -->
+          <div class="item" style="--position: 2">
+            <div class="card" onclick="openBook('ask_and_it_is_given')" style="cursor: pointer; position: relative; z-index: 100;">
+              <div class="flip-book-card-wrapper">
+                <div class="flip-book-card-content">
+                  <div class="flip-book-card-front">
+                    <div class="book-cover-image">
+                      <img src="imgs/اسأل تعط.jpg" alt="اسأل تعط" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+ailable'" />
+                    </div>
+                    <p class="book-title">اسأل تعط</p>
+                    <p class="book-author">إستر وجيري هيكس</p>
+                    <p class="book-price text-sm">Price: 1,700.00</p>
+                  </div>
+                  <div class="flip-book-card-back">
+                    <div class="flip-book-card-back-content">
+                      <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                      <p class="summary-text" id="development-desc-book2">A self-development book explaining the Law of Attraction and how to achieve your desires through positive thinking and changing beliefs.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button class="add-to-cart-btn" onclick="addToCartFromCard('ask_and_it_is_given', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20;">
+                <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                  <title>icon-cart</title>
+                  <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <!-- Book 3: إعادة برمجة جهازك العصبي -->
+          <div class="item" style="--position: 3">
+            <div class="card" onclick="openBook('vagus_nerve_reset')" style="cursor: pointer; position: relative; z-index: 100;">
+              <div class="flip-book-card-wrapper">
+                <div class="flip-book-card-content">
+                  <div class="flip-book-card-front">
+                    <div class="book-cover-image">
+                      <img src="imgs/اعادة برمجة.jpg" alt="إعادة برمجة جهازك العصبي" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                    </div>
+                    <p class="book-title">إعادة برمجة جهازك العصبي</p>
+                    <p class="book-author">آنا فيرجسون</p>
+                    <p class="book-price text-sm">Price: 1,300.00</p>
+                  </div>
+                  <div class="flip-book-card-back">
+                    <div class="flip-book-card-back-content">
+                      <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                      <p class="summary-text" id="development-desc-book3">A practical guide to training your body to recover from stress, anxiety, and trauma through nervous system exercises.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button class="add-to-cart-btn" onclick="addToCartFromCard('vagus_nerve_reset', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20;">
+                <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                  <title>icon-cart</title>
+                  <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <!-- Book 4: اعرف وجهك الآخر -->
+          <div class="item" style="--position: 4">
+            <div class="card" onclick="openBook('know_your_other_face')" style="cursor: pointer; position: relative; z-index: 100;">
+              <div class="flip-book-card-wrapper">
+                <div class="flip-book-card-content">
+                  <div class="flip-book-card-front">
+                    <div class="book-cover-image">
+                      <img src="imgs/اعرف وجهك.jpg" alt="اعرف وجهك الآخر" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                    </div>
+                    <p class="book-title">اعرف وجهك الآخر</p>
+                    <p class="book-author">د. يوسف الحسني</p>
+                    <p class="book-price text-sm">Price: 1,500.00</p>
+                  </div>
+                  <div class="flip-book-card-back">
+                    <div class="flip-book-card-back-content">
+                      <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                      <p class="summary-text" id="development-desc-book4">A book that sheds light on the hidden aspects of personality and how to discover and develop your true self.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button class="add-to-cart-btn" onclick="addToCartFromCard('know_your_other_face', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20;">
+                <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                  <title>icon-cart</title>
+                  <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <!-- Book 5: التعافي من الرفض -->
+          <div class="item" style="--position: 5">
+            <div class="card" onclick="openBook('bouncing_back_from_rejection')" style="cursor: pointer; position: relative; z-index: 100;">
+              <div class="flip-book-card-wrapper">
+                <div class="flip-book-card-content">
+                  <div class="flip-book-card-front">
+                    <div class="book-cover-image">
+                      <img src="imgs/التعافي من الرفض.jpg" alt="التعافي من الرفض" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                    </div>
+                    <p class="book-title">التعافي من الرفض</p>
+                    <p class="book-author">د. ليزلي بيكر فيلبس</p>
+                    <p class="book-price text-sm">Price: 1,500.00</p>
+                  </div>
+                  <div class="flip-book-card-back">
+                    <div class="flip-book-card-back-content">
+                      <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                      <p class="summary-text" id="development-desc-book5">A book that helps you build psychological resilience, overcome feelings of rejection and frustration, and regain self-confidence.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button class="add-to-cart-btn" onclick="addToCartFromCard('bouncing_back_from_rejection', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20;">
+                <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                  <title>icon-cart</title>
+                  <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <!-- Book 6: الجبل هو أنت -->
+          <div class="item" style="--position: 6">
+            <div class="card" onclick="openBook('the_mountain_is_you')" style="cursor: pointer; position: relative; z-index: 100;">
+              <div class="flip-book-card-wrapper">
+                <div class="flip-book-card-content">
+                  <div class="flip-book-card-front">
+                    <div class="book-cover-image">
+                      <img src="imgs/الجبل هو انت.jpg" alt="الجبل هو أنت" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                    </div>
+                    <p class="book-title">الجبل هو أنت</p>
+                    <p class="book-author">بريانا ويست</p>
+                    <p class="book-price text-sm">Price: 1,400.00</p>
+                  </div>
+                  <div class="flip-book-card-back">
+                    <div class="flip-book-card-back-content">
+                      <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                      <p class="summary-text" id="development-desc-book6">A book about turning self-sabotage into self-mastery and how to face internal obstacles to achieve success.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button class="add-to-cart-btn" onclick="addToCartFromCard('the_mountain_is_you', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20;">
+                <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                  <title>icon-cart</title>
+                  <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <!-- Book 7: المخ الأبله -->
+          <div class="item" style="--position: 7">
+            <div class="card" onclick="openBook('the_idiot_brain')" style="cursor: pointer; position: relative; z-index: 100;">
+              <div class="flip-book-card-wrapper">
+                <div class="flip-book-card-content">
+                  <div class="flip-book-card-front">
+                    <div class="book-cover-image">
+                      <img src="imgs/المخ الابله.jpg" alt="المخ الأبله" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                    </div>
+                    <p class="book-title">المخ الأبله</p>
+                    <p class="book-author">دين برنيت</p>
+                    <p class="book-price text-sm">Price: 1,900.00</p>
+                  </div>
+                  <div class="flip-book-card-back">
+                    <div class="flip-book-card-back-content">
+                      <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                      <p class="summary-text" id="development-desc-book7">A popular science book that explains how the human brain works and why it sometimes behaves irrationally or strangely.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button class="add-to-cart-btn" onclick="addToCartFromCard('the_idiot_brain', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20;">
+                <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                  <title>icon-cart</title>
+                  <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <!-- Book 8: الوحش الذي يسكنك -->
+          <div class="item" style="--position: 8">
+            <div class="card" onclick="openBook('the_monster_within')" style="cursor: pointer; position: relative; z-index: 100;">
+              <div class="flip-book-card-wrapper">
+                <div class="flip-book-card-content">
+                  <div class="flip-book-card-front">
+                    <div class="book-cover-image">
+                      <img src="imgs/الوحش الذي.jpg" alt="الوحش الذي يسكنك" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                    </div>
+                    <p class="book-title">الوحش الذي يسكنك</p>
+                    <p class="book-author">إيناس سمير</p>
+                    <p class="book-price text-sm">Price: 1,300.00</p>
+                  </div>
+                  <div class="flip-book-card-back">
+                    <div class="flip-book-card-back-content">
+                      <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                      <p class="summary-text" id="development-desc-book8">A book about facing personal fears and dealing with the darker sides of human nature.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button class="add-to-cart-btn" onclick="addToCartFromCard('the_monster_within', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20;">
+                <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                  <title>icon-cart</title>
+                  <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <!-- Book 9: ضعي حدا للتوتر -->
+          <div class="item" style="--position: 9">
+            <div class="card" onclick="openBook('stop_stress_before_it_stops_you')" style="cursor: pointer; position: relative; z-index: 100;">
+              <div class="flip-book-card-wrapper">
+                <div class="flip-book-card-content">
+                  <div class="flip-book-card-front">
+                    <div class="book-cover-image">
+                      <img src="imgs/ضعي حدا للتوتر.jpg" alt="ضعي حدا للتوتر" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                    </div>
+                    <p class="book-title">ضعي حدا للتوتر</p>
+                    <p class="book-author">كيفن ليمان</p>
+                    <p class="book-price text-sm">Price: 1,300.00</p>
+                  </div>
+                  <div class="flip-book-card-back">
+                    <div class="flip-book-card-back-content">
+                      <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                      <p class="summary-text" id="development-desc-book9">A book offering practical solutions for mothers to manage daily stress and achieve psychological balance.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button class="add-to-cart-btn" onclick="addToCartFromCard('stop_stress_before_it_stops_you', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20;">
+                <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                  <title>icon-cart</title>
+                  <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <!-- Book 10: دليل الحياة الزوجية -->
+          <div class="item" style="--position: 10">
+            <div class="card" onclick="openBook('marriage_life_guide')" style="cursor: pointer; position: relative; z-index: 100;">
+              <div class="flip-book-card-wrapper">
+                <div class="flip-book-card-content">
+                  <div class="flip-book-card-front">
+                    <div class="book-cover-image">
+                      <img src="imgs/دليل الحياة الزوجية.jpg" alt="دليل الحياة الزوجية" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                    </div>
+                    <p class="book-title">دليل الحياة الزوجية</p>
+                    <p class="book-author">كيفن ليمان</p>
+                    <p class="book-price text-sm">Price: 1,500.00</p>
+                  </div>
+                  <div class="flip-book-card-back">
+                    <div class="flip-book-card-back-content">
+                      <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                      <p class="summary-text" id="development-desc-book10">A book that reveals the secrets of successful marital relationships and offers advice for maintaining romance and understanding between spouses.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button class="add-to-cart-btn" onclick="addToCartFromCard('marriage_life_guide', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20;">
+                <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                  <title>icon-cart</title>
+                  <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <!-- Book 11: عقدك النفسية -->
+          <div class="item" style="--position: 11">
+            <div class="card" onclick="openBook('your_psychological_complexes')" style="cursor: pointer; position: relative; z-index: 100;">
+              <div class="flip-book-card-wrapper">
+                <div class="flip-book-card-content">
+                  <div class="flip-book-card-front">
+                    <div class="book-cover-image">
+                      <img src="imgs/عقدك النفسية.jpg" alt="عقدك النفسية" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                    </div>
+                    <p class="book-title">عقدك النفسية</p>
+                    <p class="book-author">د. يوسف الحسني</p>
+                    <p class="book-price text-sm">Price: 1,500.00</p>
+                  </div>
+                  <div class="flip-book-card-back">
+                    <div class="flip-book-card-back-content">
+                      <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                      <p class="summary-text" id="development-desc-book11">A book discussing the psychological roots of personal complexes and how to break free from them for a better life.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button class="add-to-cart-btn" onclick="addToCartFromCard('your_psychological_complexes', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20;">
+                <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                  <title>icon-cart</title>
+                  <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <!-- Book 12: لا يمكنك إيذائي -->
+          <div class="item" style="--position: 12">
+            <div class="card" onclick="openBook('cant_hurt_me')" style="cursor: pointer; position: relative; z-index: 100;">
+              <div class="flip-book-card-wrapper">
+                <div class="flip-book-card-content">
+                  <div class="flip-book-card-front">
+                    <div class="book-cover-image">
+                      <img src="imgs/لا يمكنك ايذائي.jpg" alt="لا يمكنك إيذائي" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                    </div>
+                    <p class="book-title">لا يمكنك إيذائي</p>
+                    <p class="book-author">ديفيد جوجينز</p>
+                    <p class="book-price text-sm">Price: 1,900.00</p>
+                  </div>
+                  <div class="flip-book-card-back">
+                    <div class="flip-book-card-back-content">
+                      <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                      <p class="summary-text" id="development-desc-book12">An inspiring autobiography about overcoming adversity and pushing the limits of personal endurance to achieve success.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button class="add-to-cart-btn" onclick="addToCartFromCard('cant_hurt_me', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20;">
+                <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                  <title>icon-cart</title>
+                  <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <!-- Book 13: نجاحك في صباحك -->
+          <div class="item" style="--position: 13">
+            <div class="card" onclick="openBook('success_in_your_morning')" style="cursor: pointer; position: relative; z-index: 100;">
+              <div class="flip-book-card-wrapper">
+                <div class="flip-book-card-content">
+                  <div class="flip-book-card-front">
+                    <div class="book-cover-image">
+                      <img src="imgs/نجاحك في صباحك.jpg" alt="نجاحك في صباحك" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                    </div>
+                    <p class="book-title">نجاحك في صباحك</p>
+                    <p class="book-author">بنيامين سبول ومايكل زاندر</p>
+                    <p class="book-price text-sm">Price: 1,450.00</p>
+                  </div>
+                  <div class="flip-book-card-back">
+                    <div class="flip-book-card-back-content">
+                      <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                      <p class="summary-text" id="development-desc-book13">A book about the importance of morning habits and how to use your mornings to achieve success and productivity throughout the day.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button class="add-to-cart-btn" onclick="addToCartFromCard('success_in_your_morning', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20;">
+                <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                  <title>icon-cart</title>
+                  <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="lang.js"></script>
+  <script>
+    // Add translations and setLanguage for development page
+    const translations = {
+      en: {
+        'development-hero-subtitle': 'Discover Our Development Collection',
+        'development-hero-title': 'Development',
+        'development-hero-desc': 'Self-help and personal growth books',
+        'development-section-sub': 'DEVELOPMENT COLLECTION',
+        'development-section-title': 'Our Development Books',
+        'Book Summary': 'Book Summary',
+        'Price': 'Price',
+      },
+      ar: {
+        'development-hero-subtitle': 'اكتشف مجموعة تطوير الذات',
+        'development-hero-title': 'تطوير الذات',
+        'development-hero-desc': 'كتب تطوير الذات والنمو الشخصي',
+        'development-section-sub': 'مجموعة تطوير الذات',
+        'development-section-title': 'كتب تطوير الذات لدينا',
+        'Book Summary': 'ملخص الكتاب',
+        'Price': 'السعر',
+      }
+    };
+    const bookDescs = {
+      'development-desc-book1': {
+        en: 'A book about healing from toxic relationships, offering practical advice for self-understanding, overcoming emotional pain, and building healthy connections.',
+        ar: 'كتاب عن التعافي من العلاقات السامة، يقدم نصائح عملية لفهم الذات والتغلب على الألم العاطفي وبناء علاقات صحية.'
+      },
+      'development-desc-book2': {
+        en: 'A self-development book explaining the Law of Attraction and how to achieve your desires through positive thinking and changing beliefs.',
+        ar: 'كتاب تطوير الذات يشرح قانون الجذب وكيفية تحقيق الرغبات من خلال التفكير الإيجابي وتغيير المعتقدات.'
+      },
+      'development-desc-book3': {
+        en: 'A practical guide to training your body to recover from stress, anxiety, and trauma through nervous system exercises.',
+        ar: 'دليل عملي لتدريب الجسم على التعافي من التوتر والقلق والصدمات من خلال تمارين الجهاز العصبي.'
+      },
+      'development-desc-book4': {
+        en: 'A book that sheds light on the hidden aspects of personality and how to discover and develop your true self.',
+        ar: 'كتاب يسلط الضوء على الجوانب الخفية من الشخصية وكيفية اكتشاف وتطوير ذاتك الحقيقية.'
+      },
+      'development-desc-book5': {
+        en: 'A book that helps you build psychological resilience, overcome feelings of rejection and frustration, and regain self-confidence.',
+        ar: 'كتاب يساعدك على بناء المرونة النفسية والتغلب على مشاعر الرفض والإحباط واستعادة الثقة بالنفس.'
+      },
+      'development-desc-book6': {
+        en: 'A book about turning self-sabotage into self-mastery and how to face internal obstacles to achieve success.',
+        ar: 'كتاب عن تحويل هدم الذات إلى إتقان الذات وكيفية مواجهة العقبات الداخلية لتحقيق النجاح.'
+      },
+      'development-desc-book7': {
+        en: 'A popular science book that explains how the human brain works and why it sometimes behaves irrationally or strangely.',
+        ar: 'كتاب علمي مبسط يشرح كيفية عمل الدماغ البشري ولماذا يتصرف أحياناً بشكل غير منطقي أو غريب.'
+      },
+      'development-desc-book8': {
+        en: 'A book about facing personal fears and dealing with the darker sides of human nature.',
+        ar: 'كتاب عن مواجهة المخاوف الشخصية والتعامل مع الجوانب المظلمة للطبيعة البشرية.'
+      },
+      'development-desc-book9': {
+        en: 'A book offering practical solutions for mothers to manage daily stress and achieve psychological balance.',
+        ar: 'كتاب يقدم حلولاً عملية للأمهات لإدارة التوتر اليومي وتحقيق التوازن النفسي.'
+      },
+      'development-desc-book10': {
+        en: 'A book that reveals the secrets of successful marital relationships and offers advice for maintaining romance and understanding between spouses.',
+        ar: 'كتاب يكشف أسرار العلاقات الزوجية الناجحة ويقدم نصائح للحفاظ على الرومانسية والتفاهم بين الزوجين.'
+      },
+      'development-desc-book11': {
+        en: 'A book discussing the psychological roots of personal complexes and how to break free from them for a better life.',
+        ar: 'كتاب يناقش الجذور النفسية للعقد الشخصية وكيفية التحرر منها لحياة أفضل.'
+      },
+      'development-desc-book12': {
+        en: 'An inspiring autobiography about overcoming adversity and pushing the limits of personal endurance to achieve success.',
+        ar: 'سيرة ذاتية ملهمة عن التغلب على الشدائد وتحدي حدود التحمل الشخصي لتحقيق النجاح.'
+      },
+      'development-desc-book13': {
+        en: 'A book about the importance of morning habits and how to use your mornings to achieve success and productivity throughout the day.',
+        ar: 'كتاب عن أهمية عادات الصباح وكيفية استغلال الصباح لتحقيق النجاح والإنتاجية طوال اليوم.'
+      }
+    };
+    function setLanguage(lang) {
+      document.body.setAttribute('lang', lang);
+      if (lang === 'ar') {
+        document.body.style.direction = 'rtl';
+        document.body.style.textAlign = 'right';
+      } else {
+        document.body.style.direction = 'ltr';
+        document.body.style.textAlign = 'left';
+      }
+      // Update all translatable elements
+      Object.keys(translations[lang]).forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = translations[lang][id];
+      });
+      // Update book summary headers and price labels
+      document.querySelectorAll('.flip-book-card-back-content h4').forEach(function(el) {
+        el.textContent = translations[lang]['Book Summary'];
+      });
+      document.querySelectorAll('.book-price').forEach(function(el) {
+        var price = el.textContent.match(/\d+[\d,.]*/);
+        el.textContent = translations[lang]['Price'] + ': ' + (price ? price[0] : '');
+      });
+      // Update book descriptions
+      for (let i = 1; i <= 13; i++) {
+        var descElem = document.getElementById('development-desc-book' + i);
+        if (descElem && bookDescs['development-desc-book' + i]) {
+          descElem.innerHTML = bookDescs['development-desc-book' + i][lang] || bookDescs['development-desc-book' + i]['en'];
+        }
+      }
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      var lang = localStorage.getItem('lang') || 'en';
+      setLanguage(lang);
+    });
+  </script>
+  <script>
+    function openBook(id) {
+      window.location.href = `book.html?id=${id}`;
+    }
+    
+    function addToCartFromCard(bookId, event) {
+      event.stopPropagation();
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      if (!cart.includes(bookId)) {
+        cart.push(bookId);
+        localStorage.setItem('cart', JSON.stringify(cart));
+        
+        // Animate the cart icon in navigation
+        const cartIcon = document.querySelector('.btn-cart');
+        if (cartIcon) {
+          cartIcon.style.transform = 'scale(1.2)';
+          setTimeout(() => {
+            cartIcon.style.transform = 'scale(1)';
+          }, 200);
+        }
+      }
+    }
+
+    // Update cart counter on page load
+    function updateCartCounter() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const cartButtons = document.querySelectorAll('.btn-cart');
+      
+      cartButtons.forEach(button => {
+        button.setAttribute('data-quantity', cart.length);
+      });
+    }
+
+    // Update cart counter when page loads
+    updateCartCounter();
+  </script>
+</body>
+</html> 
