@@ -257,6 +257,45 @@ html,
          }
        }
        
+       /* Ensure text fallback logo uses Dalton White font */
+       #text-logo-fallback {
+         font-family: 'Dalton White', Georgia, 'Times New Roman', serif !important;
+         font-weight: normal !important;
+         font-style: normal !important;
+       }
+       
+       /* Force font loading for all logo text elements */
+       .mobile-header * {
+         font-family: 'Dalton White', Georgia, 'Times New Roman', serif !important;
+       }
+       
+       /* BULLETPROOF LOGO STYLING - This will definitely work */
+       .bulletproof-logo {
+         font-family: 'Dalton White', Georgia, 'Times New Roman', serif !important;
+         font-size: 2.5rem !important;
+         font-weight: bold !important;
+         color: #5e2217 !important;
+         text-align: center !important;
+         line-height: 1.2 !important;
+         text-shadow: 2px 2px 4px rgba(0,0,0,0.1) !important;
+         white-space: nowrap !important;
+         overflow: visible !important;
+         max-width: none !important;
+         width: auto !important;
+         height: auto !important;
+       }
+       
+       /* Ensure the logo text is always visible and properly sized */
+       .bulletproof-logo div {
+         font-family: 'Dalton White', Georgia, 'Times New Roman', serif !important;
+         font-size: inherit !important;
+         font-weight: inherit !important;
+         color: inherit !important;
+         line-height: inherit !important;
+         margin: 0 !important;
+         padding: 0 !important;
+       }
+       
        /* Ensure logo text uses Dalton White font */
        .mobile-header {
          font-family: 'Dalton White', Arial, Helvetica, sans-serif !important;

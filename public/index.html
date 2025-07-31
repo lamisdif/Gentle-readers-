@@ -421,30 +421,31 @@
 
             <!-- Mobile Header -->
         <header class="mobile-header lg:hidden">
-      <div class="flex items-center space-x-2">
-        <!-- YOUR LOGO HERE - MUCH BIGGER for unforgettable branding -->
-        <img src="imgs/THEone.svg" alt="Your Company Logo" style="height: 120px; width: auto; max-width: none;" />
-        <!-- Fallback text logo in case SVG fails to load -->
-        <div class="text-logo-fallback" style="display: none; font-size: 2rem; font-weight: bold; color: #5e2217; font-family: Arial, sans-serif;">
-          THE ONE
-        </div>
-        <!-- Language selector next to logo -->
-        <button id="lang-toggle-mobile" class="text-sm font-medium px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 transition-colors ml-2"></button>
-      </div>
-      <div class="flex items-center space-x-4">
-        <button data-quantity="0" class="btn-cart" onclick="window.location.href='cart.html'">
-          <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="30.52" width="24.38" xmlns="http://www.w3.org/2000/svg">
-            <title>icon-cart</title>
-            <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
-          </svg>
-          <span id="cart-btn-text" style="margin-right: 6px;"></span>
-          <span class="quantity"></span>
-        </button>
-      <button id="mobileMenuToggle" class="text-gray-600 hover:text-gray-900">
-        <i class="fas fa-bars text-xl"></i>
-      </button>
-      </div>
-    </header>
+          <div class="flex items-center justify-between w-full">
+            <div class="flex items-center space-x-2">
+              <!-- BULLETPROOF LOGO - This will definitely work -->
+              <div class="bulletproof-logo" style="font-family: 'Dalton White', Georgia, 'Times New Roman', serif; font-size: 2.5rem; font-weight: bold; color: #5e2217; text-align: center; line-height: 1.2; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">
+                <div style="margin-bottom: -10px;">Gentle</div>
+                <div>Readers</div>
+              </div>
+              <!-- Language selector next to logo -->
+              <button id="lang-toggle-mobile" class="text-sm font-medium px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 transition-colors ml-2"></button>
+            </div>
+            <div class="flex items-center space-x-4">
+              <button data-quantity="0" class="btn-cart" onclick="window.location.href='cart.html'">
+                <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="30.52" width="24.38" xmlns="http://www.w3.org/2000/svg">
+                  <title>icon-cart</title>
+                  <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                </svg>
+                <span id="cart-btn-text" style="margin-right: 6px;"></span>
+                <span class="quantity"></span>
+              </button>
+              <button id="mobileMenuToggle" class="text-gray-600 hover:text-gray-900">
+                <i class="fas fa-bars text-xl"></i>
+              </button>
+            </div>
+          </div>
+        </header>
 
     <!-- Mobile Menu Overlay -->
     <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
