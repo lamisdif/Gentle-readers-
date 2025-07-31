@@ -423,10 +423,12 @@
         <header class="mobile-header lg:hidden">
           <div class="flex items-center justify-between w-full">
             <div class="flex items-center space-x-2">
-              <!-- BULLETPROOF LOGO - This will definitely work -->
-              <div class="bulletproof-logo" style="font-family: 'Dalton White', Georgia, 'Times New Roman', serif; font-size: 2.5rem; font-weight: bold; color: #5e2217; text-align: center; line-height: 1.2; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">
+              <!-- YOUR ORIGINAL LOGO WITH BUNNY - Restored -->
+              <img src="imgs/THEone.svg" alt="Gentle Readers Logo with Bunny" style="height: 120px; width: auto; max-width: none;" onerror="this.style.display='none'; document.getElementById('bunny-logo-fallback').style.display='block';" />
+              <!-- Bunny logo fallback in case SVG fails -->
+              <div id="bunny-logo-fallback" style="display: none; font-family: 'Dalton White', Georgia, 'Times New Roman', serif; font-size: 2.5rem; font-weight: bold; color: #5e2217; text-align: center; line-height: 1.2;">
                 <div style="margin-bottom: -10px;">Gentle</div>
-                <div>Readers</div>
+                <div>🐰 Readers</div>
               </div>
               <!-- Language selector next to logo -->
               <button id="lang-toggle-mobile" class="text-sm font-medium px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 transition-colors ml-2"></button>
