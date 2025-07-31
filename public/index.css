@@ -1,5 +1,16 @@
- html,
-      body {
+ /* Font face declarations for custom fonts */
+@font-face {
+  font-family: 'YourCustomFont';
+  src: url('fonts/your-font.woff2') format('woff2'),
+       url('fonts/your-font.woff') format('woff'),
+       url('fonts/your-font.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap; /* This helps with font loading performance */
+}
+
+html,
+       body {
         height: 100%; /* Ensure html and body take full height for sticky/fixed elements */
         margin: 0;
         overflow-x: hidden; /* Prevent horizontal scrollbars from content overflow */
@@ -149,13 +160,26 @@
           display: none; /* Hide on desktop */
         }
       }
-      /* Mobile header logo style */
-      .mobile-header img {
-        height: 60px; /* Reduced height to fit properly in header */
-        width: auto;
-        max-width: 100%;
-        object-fit: contain; /* Ensure logo fits properly */
-      }
+             /* Mobile header logo style */
+       .mobile-header img {
+         height: 120px; /* Match the inline style we set earlier */
+         width: auto;
+         max-width: 100%;
+         object-fit: contain; /* Ensure logo fits properly */
+         filter: none; /* Ensure no filters are applied */
+       }
+       
+       /* Ensure SVG logo displays properly */
+       .mobile-header svg {
+         height: 120px;
+         width: auto;
+         max-width: 100%;
+       }
+       
+       /* Ensure logo text uses reliable fonts */
+       .mobile-header {
+         font-family: Arial, Helvetica, sans-serif !important;
+       }
 
       .mobile-menu-overlay {
         position: fixed;

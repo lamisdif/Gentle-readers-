@@ -12,6 +12,8 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
+    <!-- Preload custom fonts for better performance -->
+    <link rel="preload" href="fonts/your-font.woff2" as="font" type="font/woff2" crossorigin>
     <!-- Font Awesome for icons -->
     <link
       rel="stylesheet"
@@ -406,6 +408,10 @@
       <div class="flex items-center space-x-2">
         <!-- YOUR LOGO HERE - MUCH BIGGER for unforgettable branding -->
         <img src="imgs/THEone.svg" alt="Your Company Logo" style="height: 120px; width: auto; max-width: none;" />
+        <!-- Fallback text logo in case SVG fails to load -->
+        <div class="text-logo-fallback" style="display: none; font-size: 2rem; font-weight: bold; color: #5e2217; font-family: Arial, sans-serif;">
+          THE ONE
+        </div>
         <!-- Language selector next to logo -->
         <button id="lang-toggle-mobile" class="text-sm font-medium px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 transition-colors ml-2"></button>
       </div>
