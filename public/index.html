@@ -314,11 +314,7 @@
         <span>Loading</span>
       </div>
     </div>
-    <!-- Add this at the top of the <body>, just after <body> tag -->
-    <div id="lang-switcher" style="position: absolute; top: 10px; right: 10px; z-index: 1000;">
-      <button id="btn-en">EN</button>
-      <button id="btn-ar">AR</button>
-    </div>
+
     <!-- Left Sidebar -->
     <aside class="left-sidebar lg:flex" id="leftSidebar">
       <div>
@@ -405,13 +401,13 @@
       </div>
     </aside>
 
-    <!-- Mobile Header (Visible on smaller screens) -->
-    <header class="mobile-header lg:hidden">
+            <!-- Mobile Header -->
+        <header class="mobile-header lg:hidden">
       <div class="flex items-center space-x-2">
-        <!-- YOUR LOGO HERE - Increased height in CSS to 4rem -->
-        <img src="imgs/THEone.svg" alt="Your Company Logo" />
-        <!-- Retained original text-gray-900 color for ChapterOne text -->
-       
+        <!-- YOUR LOGO HERE - MUCH BIGGER for unforgettable branding -->
+        <img src="imgs/THEone.svg" alt="Your Company Logo" style="height: 120px; width: auto; max-width: none;" />
+        <!-- Language selector next to logo -->
+        <button id="lang-toggle-mobile" class="text-sm font-medium px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 transition-colors ml-2"></button>
       </div>
       <div class="flex items-center space-x-4">
         <button data-quantity="0" class="btn-cart" onclick="window.location.href='cart.html'">
@@ -431,6 +427,11 @@
     <!-- Mobile Menu Overlay -->
     <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
 
+    <!-- Floating Mobile Menu Button -->
+    <button id="floatingMobileMenu" class="floating-menu-btn lg:hidden">
+      <i class="fas fa-bars"></i>
+    </button>
+
     <!-- Main Content Area -->
     <div class="main-content flex flex-col">
       <!-- Hero Section -->
@@ -442,12 +443,11 @@
           <p class="description stagger-animate stagger-3" id="hero-desc">
             Inkwooven For GentleReaders
           </p>
-          <a href="#genreScrollContainer" class="read-more-btn stagger-animate stagger-4" id="hero-browse">Browse Books</a>
         </div>
       </section>
 
       <!-- Multi-Strip Genre Cards Section (inserted under hero section) -->
-      <div class="flex flex-row gap-8 justify-center my-8">
+      <div class="flex flex-col md:flex-row gap-4 md:gap-8 justify-center my-8 px-4">
         <!-- Multi-Strip Card 1: Religious, Romance, Fiction -->
         <div class="multi-strip-card">
           <p class="strip-item" onclick="location.href='religious.html'">
@@ -854,7 +854,7 @@
           <p class="sub-title uppercase text-xs tracking-widest text-gray-500">
             MORE GOOD ONLINE
           </p>
-          <h2 class="main-title">More Latest books online</h2>
+          <h2 class="main-title">Latest books online</h2>
         </div>
         <!-- Slider for book cards -->
         <div class="slider mx-auto" style="--width: 220px; --height: 300px; --quantity: 8;">
@@ -1190,14 +1190,26 @@
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         const mobileMenuToggle = document.getElementById("mobileMenuToggle");
+        const floatingMobileMenu = document.getElementById("floatingMobileMenu");
         const leftSidebar = document.getElementById("leftSidebar");
         const mobileMenuOverlay = document.getElementById("mobileMenuOverlay");
         const closeMobileMenu = document.getElementById("closeMobileMenu"); // Get the new close button
 
-        mobileMenuToggle.addEventListener("click", () => {
-          leftSidebar.classList.toggle("open");
-          mobileMenuOverlay.classList.toggle("active");
-        });
+        // Handle floating mobile menu button
+        if (floatingMobileMenu) {
+          floatingMobileMenu.addEventListener("click", () => {
+            leftSidebar.classList.toggle("open");
+            mobileMenuOverlay.classList.toggle("active");
+          });
+        }
+
+        // Handle original mobile menu toggle (if it exists)
+        if (mobileMenuToggle) {
+          mobileMenuToggle.addEventListener("click", () => {
+            leftSidebar.classList.toggle("open");
+            mobileMenuOverlay.classList.toggle("active");
+          });
+        }
 
         mobileMenuOverlay.addEventListener("click", () => {
           leftSidebar.classList.remove("open");
@@ -1346,7 +1358,10 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
       const langToggle = document.getElementById('lang-toggle');
+      const langToggleMobile = document.getElementById('lang-toggle-mobile');
       const currentLang = localStorage.getItem('lang') || 'en';
+      
+      // Desktop language toggle
       if (langToggle) {
         if (currentLang === 'ar') {
           langToggle.textContent = 'EN';
@@ -1354,6 +1369,17 @@
         } else {
           langToggle.textContent = 'AR';
           langToggle.onclick = function() { changeLanguage('ar'); };
+        }
+      }
+      
+      // Mobile language toggle
+      if (langToggleMobile) {
+        if (currentLang === 'ar') {
+          langToggleMobile.textContent = 'EN';
+          langToggleMobile.onclick = function() { changeLanguage('en'); };
+        } else {
+          langToggleMobile.textContent = 'AR';
+          langToggleMobile.onclick = function() { changeLanguage('ar'); };
         }
       }
     });

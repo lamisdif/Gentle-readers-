@@ -169,14 +169,29 @@ document.addEventListener('DOMContentLoaded', function() {
   // Language switcher logic
   var btnEn = document.getElementById('btn-en');
   var btnAr = document.getElementById('btn-ar');
+  var btnEnMobile = document.getElementById('btn-en-mobile');
+  var btnArMobile = document.getElementById('btn-ar-mobile');
+  
+  // Function to handle language switching
+  function switchToEnglish() {
+    localStorage.setItem('lang', 'en');
+    setLanguage('en');
+  }
+  
+  function switchToArabic() {
+    localStorage.setItem('lang', 'ar');
+    setLanguage('ar');
+  }
+  
+  // Desktop language buttons
   if (btnEn && btnAr) {
-    btnEn.onclick = function() {
-      localStorage.setItem('lang', 'en');
-      setLanguage('en');
-    };
-    btnAr.onclick = function() {
-      localStorage.setItem('lang', 'ar');
-      setLanguage('ar');
-    };
+    btnEn.onclick = switchToEnglish;
+    btnAr.onclick = switchToArabic;
+  }
+  
+  // Mobile language buttons
+  if (btnEnMobile && btnArMobile) {
+    btnEnMobile.onclick = switchToEnglish;
+    btnArMobile.onclick = switchToArabic;
   }
 }); 

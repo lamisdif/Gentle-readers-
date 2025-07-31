@@ -119,8 +119,14 @@
         width: 100%; /* Ensure main content always takes full width on mobile */
         position: relative; /* Context for children */
         z-index: 1; /* Below mobile header and sidebar overlay */
+        padding-top: 0; /* No top padding since mobile header is hidden */
       }
-      /* On desktop, the flex layout handles the remaining space */
+      /* On desktop, remove the top padding since there's no mobile header */
+      @media (min-width: 1024px) {
+        .main-content {
+          padding-top: 0; /* Remove top padding on desktop */
+        }
+      }
 
       /* Mobile Header for Left Menu */
       .mobile-header {
@@ -135,6 +141,8 @@
         top: 0;
         left: 0;
         z-index: 50; /* Above main content, lower than sidebar */
+        height: 140px; /* Increased height to accommodate bigger logo */
+        box-sizing: border-box; /* Include padding in height calculation */
       }
       @media (min-width: 1024px) {
         .mobile-header {
@@ -143,9 +151,10 @@
       }
       /* Mobile header logo style */
       .mobile-header img {
-        height: 10rem; /* Increased height for larger logo */
+        height: 60px; /* Reduced height to fit properly in header */
         width: auto;
         max-width: 100%;
+        object-fit: contain; /* Ensure logo fits properly */
       }
 
       .mobile-menu-overlay {
@@ -161,6 +170,41 @@
       }
       .mobile-menu-overlay.active {
         display: block; /* Show when active */
+      }
+
+      /* Floating Mobile Menu Button - Hidden since we have mobile header */
+      .floating-menu-btn {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        width: 50px;
+        height: 50px;
+        background-color: #f5f5dc;
+        border: 2px solid #5e2217;
+        border-radius: 50%;
+        display: none; /* Hide since we have mobile header */
+        align-items: center;
+        justify-content: center;
+        z-index: 1002;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .floating-menu-btn:hover {
+        background-color: #5e2217;
+        color: #f5f5dc;
+        transform: scale(1.1);
+      }
+
+      .floating-menu-btn i {
+        font-size: 1.2rem;
+        color: #5e2217;
+        transition: color 0.3s ease;
+      }
+
+      .floating-menu-btn:hover i {
+        color: #f5f5dc;
       }
 
       /* Hero Section (New Design) */
@@ -938,14 +982,14 @@
 
       @media (max-width: 768px) {
   .category-cards-section {
-    margin-bottom: 15rem !important;
+    margin-bottom: 2rem !important;
     padding-bottom: 2rem !important;
     z-index: 1;
     position: relative;
   }
 
   .latest-books-online {
-    margin-top: 15rem !important;
+    margin-top: 2rem !important;
     position: relative;
     z-index: 0;
   }
@@ -1270,4 +1314,403 @@ body[lang="ar"] {
 body[lang="en"] {
   direction: ltr;
   text-align: left;
+}
+
+/* Fix mobile viewport issues */
+@media (max-width: 1023px) {
+  body {
+    overflow-x: hidden; /* Prevent horizontal scrolling on mobile */
+    width: 100vw; /* Ensure body takes full viewport width */
+  }
+  
+  /* Force section headers to wrap and not get cut off */
+  .section-header {
+    overflow: visible !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 1rem !important;
+    box-sizing: border-box !important;
+  }
+  
+  .section-header .main-title,
+  .section-header .sub-title {
+    overflow: visible !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    white-space: normal !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 0 0.5rem !important;
+  }
+  
+  .main-content {
+    width: 100vw; /* Ensure main content takes full viewport width */
+    max-width: 100vw; /* Prevent content from exceeding viewport */
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    /* Add top padding for mobile header */
+    padding-top: 80px;
+  }
+  
+  /* Make hero section match desktop proportions */
+  .hero-new {
+    padding: 6rem 2rem 10rem 2rem; /* Match desktop padding */
+    min-height: 80vh; /* Match desktop height proportions */
+    /* Ensure background image and text styling matches desktop */
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('imgs/zach-plank-o-cpCRdEgxs-unsplash.jpg');
+    background-size: cover;
+    background-position: center;
+    color: #fff;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  }
+  
+  /* Match desktop spacing for sections */
+  .category-cards-section {
+    padding: 4rem 2rem; /* Match desktop padding */
+    margin-bottom: 4rem !important; /* Match desktop margin */
+  }
+  
+  /* Match desktop spacing for latest books sections */
+  .latest-books-online {
+    padding: 4rem 2rem; /* Match desktop padding */
+    margin-top: 4rem !important; /* Match desktop margin */
+  }
+  
+  /* Make Latest Books titles match desktop styling */
+  .section-header .main-title {
+    font-size: 2.5rem; /* Match desktop font size */
+    line-height: 1.2; /* Match desktop line height */
+    padding: 0; /* Remove mobile-specific padding */
+    margin-bottom: 1rem; /* Match desktop spacing */
+    text-align: center; /* Ensure center alignment */
+    width: 100%; /* Ensure full width for centering */
+    word-wrap: break-word; /* Prevent text overflow */
+    hyphens: auto; /* Enable automatic hyphenation */
+    overflow-wrap: break-word; /* Force word breaking if needed */
+    white-space: normal; /* Allow text to wrap */
+    max-width: 100%; /* Prevent overflow */
+    box-sizing: border-box; /* Include padding in width calculation */
+  }
+  
+  .section-header .sub-title {
+    font-size: 0.875rem; /* Match desktop subtitle size */
+    margin-bottom: 0.5rem; /* Match desktop spacing */
+    text-align: center; /* Ensure center alignment */
+    width: 100%; /* Ensure full width for centering */
+    word-wrap: break-word; /* Prevent text overflow */
+    overflow-wrap: break-word; /* Force word breaking if needed */
+    white-space: normal; /* Allow text to wrap */
+    max-width: 100%; /* Prevent overflow */
+    box-sizing: border-box; /* Include padding in width calculation */
+  }
+  
+  /* Make multi-strip cards match desktop proportions */
+  .multi-strip-card {
+    width: 210px; /* Match desktop width */
+    height: 254px; /* Match desktop height */
+    margin: 0 auto; /* Center individual cards */
+  }
+  
+  /* Match desktop scroll container styling */
+  .scroll-wrapper {
+    padding-left: 2rem; /* Match desktop padding */
+    padding-right: 2rem;
+  }
+  
+  .books-scroll-container > div,
+  .category-scroll-container > div {
+    margin-right: 3rem; /* Match desktop margin */
+  }
+  
+  /* Match desktop footer spacing */
+  .site-footer {
+    padding: 4rem 2rem; /* Match desktop padding */
+  }
+  
+  /* Match desktop quote section spacing */
+  .quote-section {
+    padding: 4rem 2rem; /* Match desktop padding */
+  }
+  
+  /* Show mobile header */
+  .mobile-header {
+    display: flex !important; /* Show mobile header */
+  }
+  
+  /* Ensure proper spacing for multi-strip cards container */
+  .flex.flex-col.md\\:flex-row {
+    align-items: center; /* Center cards vertically when stacked */
+    justify-content: center; /* Center cards horizontally */
+    gap: 2rem; /* Match desktop gap */
+    padding: 0 2rem; /* Match desktop padding */
+    width: 100%; /* Ensure full width for centering */
+    max-width: 100%; /* Prevent overflow */
+  }
+  
+  /* Fix any potential overflow issues */
+  * {
+    box-sizing: border-box; /* Ensure all elements use border-box */
+  }
+  
+  /* Ensure images don't overflow */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Ensure sidebar is properly positioned */
+  .left-sidebar {
+    z-index: 1001; /* Ensure sidebar is above other elements when open */
+  }
+  
+  /* Match desktop slider styling */
+  .slider {
+    margin: 0 auto; /* Center slider like desktop */
+  }
+  
+  /* Match desktop book card styling */
+  .flip-book-card-wrapper {
+    width: 220px; /* Match desktop card width */
+    height: 300px; /* Match desktop card height */
+  }
+  
+  /* Match desktop section header spacing */
+  .section-header {
+    margin-bottom: 3rem; /* Match desktop margin */
+    text-align: center; /* Match desktop alignment */
+    display: flex; /* Use flexbox for better centering */
+    flex-direction: column; /* Stack title and subtitle vertically */
+    align-items: center; /* Center items horizontally */
+    justify-content: center; /* Center items vertically */
+    width: 100%; /* Ensure full width */
+    padding: 0 2rem; /* Add horizontal padding */
+  }
+}
+
+/* Enhanced mobile responsiveness for "Latest books online" section headers */
+@media (max-width: 1023px) {
+  /* Ensure both "Latest books online" sections are perfectly centered on mobile */
+  .latest-books-online {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+  }
+  
+  /* Enhanced centering for section headers on mobile */
+  .section-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 0 1rem;
+    box-sizing: border-box;
+  }
+  
+  /* Enhanced responsive styling for "Latest books online" titles */
+  .section-header .main-title {
+    font-size: clamp(1.5rem, 5vw, 2.5rem); /* More responsive font sizing */
+    line-height: 1.3;
+    text-align: center;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 1rem;
+    box-sizing: border-box;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    hyphens: auto;
+    word-break: break-word;
+  }
+  
+  /* Enhanced responsive styling for subtitles */
+  .section-header .sub-title {
+    font-size: clamp(0.7rem, 2.5vw, 0.875rem); /* More responsive font sizing */
+    text-align: center;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto 0.5rem auto;
+    padding: 0 1rem;
+    box-sizing: border-box;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    hyphens: auto;
+    word-break: break-word;
+  }
+}
+
+/* Additional responsive fixes for smaller mobile screens */
+@media (max-width: 480px) {
+  /* Maintain desktop proportions even on very small screens */
+  .hero-new {
+    padding: 4rem 1rem 8rem 1rem; /* Slightly reduced but still proportional */
+    min-height: 70vh;
+  }
+  
+  .latest-books-online {
+    padding: 3rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .category-cards-section {
+    padding: 3rem 1rem;
+  }
+  
+  .site-footer {
+    padding: 3rem 1rem;
+  }
+  
+  .quote-section {
+    padding: 3rem 1rem;
+  }
+  
+  .section-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding: 0 0.5rem;
+  }
+  
+  .section-header .main-title {
+    font-size: clamp(1.2rem, 4vw, 1.8rem); /* Even more responsive for small screens */
+    line-height: 1.4;
+    text-align: center;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 0.5rem;
+    box-sizing: border-box;
+  }
+  
+  .section-header .sub-title {
+    font-size: clamp(0.6rem, 2vw, 0.75rem); /* Even more responsive for small screens */
+    text-align: center;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto 0.25rem auto;
+    padding: 0 0.5rem;
+    box-sizing: border-box;
+  }
+  
+  /* Adjust multi-strip cards for very small screens while maintaining proportions */
+  .multi-strip-card {
+    width: 180px;
+    height: 220px;
+    margin: 0 auto; /* Ensure cards are centered */
+  }
+  
+  .flex.flex-col.md\\:flex-row {
+    padding: 0 1rem;
+    gap: 1rem;
+    justify-content: center; /* Ensure horizontal centering */
+    align-items: center; /* Ensure vertical centering when stacked */
+  }
+}
+
+/* Additional centering for multi-strip cards container */
+.flex.flex-col.md\\:flex-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Ensure multi-strip cards are centered in their container */
+.multi-strip-card {
+  display: flex;
+  margin: 0 auto;
+}
+
+/* Additional responsive fixes for very small screens (320px and below) */
+@media (max-width: 320px) {
+  .latest-books-online {
+    padding: 2rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .section-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    text-align: center;
+    margin-bottom: 1rem;
+    padding: 0 0.25rem;
+  }
+  
+  .section-header .main-title {
+    font-size: clamp(1rem, 3.5vw, 1.5rem); /* Most responsive for very small screens */
+    line-height: 1.5;
+    text-align: center;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 0.25rem;
+    box-sizing: border-box;
+  }
+  
+  .section-header .sub-title {
+    font-size: clamp(0.5rem, 1.8vw, 0.7rem); /* Most responsive for very small screens */
+    text-align: center;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto 0.2rem auto;
+    padding: 0 0.25rem;
+    box-sizing: border-box;
+  }
+}
+
+/* Force text wrapping for section headers to prevent cutoff */
+.section-header .main-title,
+.section-header .sub-title {
+  word-break: break-all !important; /* Force break at any character */
+  overflow-wrap: anywhere !important; /* Break anywhere if needed */
+  hyphens: manual !important; /* Manual hyphenation */
+  -webkit-hyphens: manual !important;
+  -ms-hyphens: manual !important;
+  white-space: pre-wrap !important; /* Preserve whitespace but allow wrapping */
+  max-width: 100vw !important; /* Ensure it doesn't exceed viewport width */
+  box-sizing: border-box !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+
+/* Specific fix for "Latest books online" text */
+#section-latest-books,
+.section-header h2.main-title {
+  font-size: clamp(1.2rem, 4vw, 2.5rem) !important; /* Responsive font size */
+  line-height: 1.3 !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  white-space: normal !important;
+  text-align: center !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
+  padding: 0 1rem !important;
+  box-sizing: border-box !important;
 }
