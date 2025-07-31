@@ -1,33 +1,31 @@
- /* FINAL BULLETPROOF FONT LOADING - 100% GUARANTEED TO WORK */
+ /* Dalton White Font - Primary font for the site */
 @font-face {
   font-family: 'Dalton White';
-  src: url('./fonts/Dalton White.woff2') format('woff2');
+  src: url('/fonts/DaltonWhite.woff2') format('woff2'),
+       url('/fonts/DaltonWhite.woff') format('woff'),
+       url('/fonts/DaltonWhite.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap; /* Optimize font loading performance */
+}
+
+/* Fallback font-face for different hosting setups */
+@font-face {
+  font-family: 'Dalton White';
+  src: url('./fonts/DaltonWhite.woff2') format('woff2'),
+       url('./fonts/DaltonWhite.woff') format('woff'),
+       url('./fonts/DaltonWhite.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
 
-/* Additional paths for different hosting setups */
+/* Additional fallback for Render.com hosting */
 @font-face {
   font-family: 'Dalton White';
-  src: url('/fonts/Dalton White.woff2') format('woff2');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Dalton White';
-  src: url('fonts/Dalton White.woff2') format('woff2');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* Fallback for older browsers */
-@font-face {
-  font-family: 'Dalton White';
-  src: url('./fonts/Dalton White.otf') format('opentype');
+  src: url('fonts/DaltonWhite.woff2') format('woff2'),
+       url('fonts/DaltonWhite.woff') format('woff'),
+       url('fonts/DaltonWhite.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -222,88 +220,21 @@ html,
          dominant-baseline: alphabetic; /* Ensure proper baseline */
        }
        
-       /* Fallback styling when Dalton White font fails to load */
-       .dalton-white-fallback .mobile-header svg text,
-       .dalton-white-fallback .mobile-header svg tspan {
-         font-family: Georgia, 'Times New Roman', serif !important;
-         font-weight: normal !important;
-         font-style: normal !important;
-       }
+
        
-       /* Enhanced font loading for better mobile compatibility */
-       @supports (font-display: swap) {
-         .mobile-header svg text,
-         .mobile-header svg tspan {
-           font-display: swap;
-         }
-       }
-       
-       /* Force font loading on mobile devices */
-       @media (max-width: 1023px) {
-         .mobile-header svg text,
-         .mobile-header svg tspan {
-           font-family: 'Dalton White', Georgia, 'Times New Roman', serif !important;
-           font-weight: normal !important;
-           font-style: normal !important;
-         }
-       }
-       
-       /* Ensure text fallback logo uses Dalton White font */
-       #text-logo-fallback {
-         font-family: 'Dalton White', Georgia, 'Times New Roman', serif !important;
-         font-weight: normal !important;
-         font-style: normal !important;
-       }
-       
-       /* Force font loading for all logo text elements */
-       .mobile-header * {
+       /* Apply Dalton White font to site titles and headings (NOT the logo) */
+       .hero-new .title,
+       .section-header .main-title,
+       .flip-book-card-front .book-title,
+       .site-footer h4,
+       .left-sidebar h3,
+       .left-sidebar h4 {
          font-family: 'Dalton White', Georgia, 'Times New Roman', serif !important;
        }
        
-       /* FINAL GUARANTEE - Force Dalton White font loading */
-       .mobile-header img,
-       .mobile-header svg,
-       .mobile-header svg text,
-       .mobile-header svg tspan {
-         font-family: 'Dalton White', Georgia, serif !important;
-       }
-       
-       /* Ensure SVG text elements use the correct font */
-       svg text,
-       svg tspan {
-         font-family: 'Dalton White', Georgia, serif !important;
-       }
-       
-       /* BULLETPROOF LOGO STYLING - This will definitely work */
-       .bulletproof-logo {
-         font-family: 'Dalton White', Georgia, 'Times New Roman', serif !important;
-         font-size: 2.5rem !important;
-         font-weight: bold !important;
-         color: #5e2217 !important;
-         text-align: center !important;
-         line-height: 1.2 !important;
-         text-shadow: 2px 2px 4px rgba(0,0,0,0.1) !important;
-         white-space: nowrap !important;
-         overflow: visible !important;
-         max-width: none !important;
-         width: auto !important;
-         height: auto !important;
-       }
-       
-       /* Ensure the logo text is always visible and properly sized */
-       .bulletproof-logo div {
-         font-family: 'Dalton White', Georgia, 'Times New Roman', serif !important;
-         font-size: inherit !important;
-         font-weight: inherit !important;
-         color: inherit !important;
-         line-height: inherit !important;
-         margin: 0 !important;
-         padding: 0 !important;
-       }
-       
-       /* Ensure logo text uses Dalton White font */
+       /* Keep mobile header using normal font (logo is separate) */
        .mobile-header {
-         font-family: 'Dalton White', Arial, Helvetica, sans-serif !important;
+         font-family: 'Inter', sans-serif !important;
        }
        
        /* Language toggle buttons should use normal font */
@@ -313,16 +244,16 @@ html,
          font-style: normal !important;
        }
        
-       /* Ensure SVG logo text displays properly with Dalton White font */
+       /* SVG elements should use normal fonts (logo is separate image) */
        .mobile-header svg text {
-         font-family: 'Dalton White', Arial, Helvetica, sans-serif !important;
+         font-family: 'Inter', sans-serif !important;
          font-weight: normal !important;
          font-style: normal !important;
        }
        
        /* Fallback for SVG text elements */
        .mobile-header svg tspan {
-         font-family: 'Dalton White', Arial, Helvetica, sans-serif !important;
+         font-family: 'Inter', sans-serif !important;
        }
 
       .mobile-menu-overlay {
