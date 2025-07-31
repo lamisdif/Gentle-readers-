@@ -13,7 +13,23 @@
       rel="stylesheet"
     />
     <!-- Preload Dalton White font for better performance -->
+    <link rel="preload" href="./Dalton White.otf" as="font" type="font/otf" crossorigin>
     <link rel="preload" href="Dalton White.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="/Dalton White.otf" as="font" type="font/otf" crossorigin>
+    
+    <!-- Font loading detection script -->
+    <script>
+    // Check if Dalton White font is loaded
+    document.fonts.ready.then(function() {
+      if (document.fonts.check('1em "Dalton White"')) {
+        console.log('Dalton White font loaded successfully');
+        document.body.classList.add('dalton-white-loaded');
+      } else {
+        console.log('Dalton White font not loaded, using fallback');
+        document.body.classList.add('dalton-white-fallback');
+      }
+    });
+    </script>
     <!-- Font Awesome for icons -->
     <link
       rel="stylesheet"
@@ -1388,6 +1404,14 @@
           langToggleMobile.onclick = function() { changeLanguage('ar'); };
         }
       }
+      
+      // Fix for missing image files
+      const images = document.querySelectorAll('img');
+      images.forEach(img => {
+        img.onerror = function() {
+          this.style.display = 'none'; // Hide broken images
+        };
+      });
     });
     </script>
     <!-- Remove the inline <script> block that defines translations and setLanguage, and ensure index.js is loaded instead -->
