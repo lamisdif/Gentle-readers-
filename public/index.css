@@ -1,20 +1,25 @@
- /* Dalton White Font - Primary font for the site */
+ /* Font face declarations for Dalton White font - Multiple paths for hosting compatibility */
 @font-face {
   font-family: 'Dalton White';
-  src: url('/fonts/DaltonWhite.woff2') format('woff2'),
-       url('/fonts/DaltonWhite.woff') format('woff'),
-       url('/fonts/DaltonWhite.otf') format('opentype');
+  src: url('./Dalton White.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
-  font-display: swap; /* Optimize font loading performance */
+  font-display: swap; /* This helps with font loading performance */
+}
+
+/* Additional font-face for better browser compatibility */
+@font-face {
+  font-family: 'Dalton White';
+  src: url('../Dalton White.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }
 
 /* Fallback font-face for different hosting setups */
 @font-face {
   font-family: 'Dalton White';
-  src: url('./fonts/DaltonWhite.woff2') format('woff2'),
-       url('./fonts/DaltonWhite.woff') format('woff'),
-       url('./fonts/DaltonWhite.otf') format('opentype');
+  src: url('Dalton White.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -23,12 +28,18 @@
 /* Additional fallback for Render.com hosting */
 @font-face {
   font-family: 'Dalton White';
-  src: url('fonts/DaltonWhite.woff2') format('woff2'),
-       url('fonts/DaltonWhite.woff') format('woff'),
-       url('fonts/DaltonWhite.otf') format('opentype');
+  src: url('/Dalton White.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
+}
+
+/* Web-safe fallback fonts for immediate display */
+@font-face {
+  font-family: 'Dalton White Fallback';
+  src: local('Georgia'), local('Times New Roman'), serif;
+  font-weight: normal;
+  font-style: normal;
 }
 
 html,
@@ -220,40 +231,37 @@ html,
          dominant-baseline: alphabetic; /* Ensure proper baseline */
        }
        
-
-       
-       /* Apply Dalton White font to site titles and headings (NOT the logo) */
-       .hero-new .title,
-       .section-header .main-title,
-       .flip-book-card-front .book-title,
-       .site-footer h4,
-       .left-sidebar h3,
-       .left-sidebar h4 {
-         font-family: 'Dalton White', Georgia, 'Times New Roman', serif !important;
+       /* Fallback styling when Dalton White font fails to load */
+       .dalton-white-fallback .mobile-header svg text,
+       .dalton-white-fallback .mobile-header svg tspan {
+         font-family: Georgia, 'Times New Roman', serif !important;
+         font-weight: normal !important;
+         font-style: normal !important;
        }
        
-       /* Keep mobile header using normal font (logo is separate) */
+       /* Ensure logo text uses Dalton White font */
        .mobile-header {
-         font-family: 'Inter', sans-serif !important;
+         font-family: 'Dalton White', Arial, Helvetica, sans-serif !important;
        }
        
        /* Language toggle buttons should use normal font */
+       .mobile-header button,
        .mobile-header #lang-toggle-mobile {
          font-family: 'Inter', sans-serif !important;
          font-weight: 600 !important;
          font-style: normal !important;
        }
        
-       /* SVG elements should use normal fonts (logo is separate image) */
+       /* Ensure SVG logo text displays properly with Dalton White font */
        .mobile-header svg text {
-         font-family: 'Inter', sans-serif !important;
+         font-family: 'Dalton White', Arial, Helvetica, sans-serif !important;
          font-weight: normal !important;
          font-style: normal !important;
        }
        
        /* Fallback for SVG text elements */
        .mobile-header svg tspan {
-         font-family: 'Inter', sans-serif !important;
+         font-family: 'Dalton White', Arial, Helvetica, sans-serif !important;
        }
 
       .mobile-menu-overlay {
