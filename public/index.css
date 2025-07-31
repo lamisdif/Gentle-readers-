@@ -1,9 +1,7 @@
- /* Font face declarations for custom fonts */
+ /* Font face declarations for Dalton White font */
 @font-face {
-  font-family: 'YourCustomFont';
-  src: url('fonts/your-font.woff2') format('woff2'),
-       url('fonts/your-font.woff') format('woff'),
-       url('fonts/your-font.ttf') format('truetype');
+  font-family: 'Dalton White';
+  src: url('Dalton White.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
   font-display: swap; /* This helps with font loading performance */
@@ -176,9 +174,9 @@ html,
          max-width: 100%;
        }
        
-       /* Ensure logo text uses reliable fonts */
+       /* Ensure logo text uses Dalton White font */
        .mobile-header {
-         font-family: Arial, Helvetica, sans-serif !important;
+         font-family: 'Dalton White', Arial, Helvetica, sans-serif !important;
        }
 
       .mobile-menu-overlay {
