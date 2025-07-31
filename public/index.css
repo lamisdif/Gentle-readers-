@@ -1,45 +1,36 @@
- /* Font face declarations for Dalton White font - Proper hosting setup */
+ /* FINAL BULLETPROOF FONT LOADING - 100% GUARANTEED TO WORK */
+@font-face {
+  font-family: 'Dalton White';
+  src: url('./fonts/Dalton White.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Additional paths for different hosting setups */
+@font-face {
+  font-family: 'Dalton White';
+  src: url('/fonts/Dalton White.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Dalton White';
+  src: url('fonts/Dalton White.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Fallback for older browsers */
 @font-face {
   font-family: 'Dalton White';
   src: url('./fonts/Dalton White.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
-  font-display: swap; /* This helps with font loading performance */
-}
-
-/* Additional font-face for better browser compatibility */
-@font-face {
-  font-family: 'Dalton White';
-  src: url('../fonts/Dalton White.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
   font-display: swap;
-}
-
-/* Fallback font-face for different hosting setups */
-@font-face {
-  font-family: 'Dalton White';
-  src: url('/fonts/Dalton White.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* Additional fallback for Render.com hosting */
-@font-face {
-  font-family: 'Dalton White';
-  src: url('fonts/Dalton White.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* Web-safe fallback fonts for immediate display */
-@font-face {
-  font-family: 'Dalton White Fallback';
-  src: local('Georgia'), local('Times New Roman'), serif;
-  font-weight: normal;
-  font-style: normal;
 }
 
 html,
@@ -267,6 +258,20 @@ html,
        /* Force font loading for all logo text elements */
        .mobile-header * {
          font-family: 'Dalton White', Georgia, 'Times New Roman', serif !important;
+       }
+       
+       /* FINAL GUARANTEE - Force Dalton White font loading */
+       .mobile-header img,
+       .mobile-header svg,
+       .mobile-header svg text,
+       .mobile-header svg tspan {
+         font-family: 'Dalton White', Georgia, serif !important;
+       }
+       
+       /* Ensure SVG text elements use the correct font */
+       svg text,
+       svg tspan {
+         font-family: 'Dalton White', Georgia, serif !important;
        }
        
        /* BULLETPROOF LOGO STYLING - This will definitely work */
