@@ -122,13 +122,19 @@ document.getElementById("checkoutForm").addEventListener("submit", async functio
   const familyName = document.getElementById("checkout-family-input").value.trim();
   const phoneNumber = document.getElementById("checkout-number-input").value.trim();
   const deliveryMethod = document.getElementById("checkout-delivery-select").value;
-  const items = JSON.parse(localStorage.getItem("cart")) || [];
+  const cartItems = JSON.parse(localStorage.getItem("cart")) || [];
 
   // Basic validation
-  if (!firstName || !familyName || !phoneNumber || !deliveryMethod || items.length === 0) {
+  if (!firstName || !familyName || !phoneNumber || !deliveryMethod || cartItems.length === 0) {
     alert("Please fill in all fields and make sure your cart is not empty.");
     return;
   }
+
+  // Extract only book titles from cart items
+  const items = cartItems.map(bookId => {
+    const book = books[bookId];
+    return book ? book.title : `Unknown Book (${bookId})`;
+  });
 
   // Send to backend
   try {
