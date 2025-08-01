@@ -96,70 +96,223 @@ function setLanguage(lang) {
     document.body.style.direction = 'ltr';
     document.body.style.textAlign = 'left';
   }
-  // Sidebar/menu
-  document.getElementById('nav-home').textContent = translations[lang].HOME;
-  document.getElementById('nav-pages').childNodes[0].textContent = translations[lang].PAGES + ' ';
-  document.getElementById('nav-religious').textContent = translations[lang].RELIGIOUS;
-  document.getElementById('nav-romance').textContent = translations[lang].ROMANCE;
-  document.getElementById('nav-fiction').textContent = translations[lang].FICTION;
-  document.getElementById('nav-development').textContent = translations[lang].DEVELOPMENT;
-  document.getElementById('nav-horror').textContent = translations[lang].HORROR;
-  document.getElementById('nav-novels').textContent = translations[lang].NOVELS;
-  var acc = document.getElementById('nav-account');
-  if (acc) acc.textContent = translations[lang]["MY ACCOUNT"];
-  document.querySelector('.explore-btn-sidebar').textContent = translations[lang]["Explore"];
-
-  // Hero section
-  document.getElementById('hero-welcome').textContent = translations[lang]["Welcome to GentleReaders"];
-  document.getElementById('hero-title').textContent = translations[lang]["Your Next Great Read Awaits"];
-  document.getElementById('hero-desc').textContent = translations[lang]["Inkwooven For GentleReaders"];
-  document.getElementById('hero-browse').textContent = translations[lang]["Browse Books"];
-
-  // Genre cards
-  var strips = document.querySelectorAll('.strip-title');
-  var genreKeys = ["RELIGIOUS", "ROMANCE", "FICTION", "DEVELOPMENT", "HORROR", "NOVELS"];
-  strips.forEach(function(el, i) {
-    el.textContent = translations[lang][genreKeys[i]];
-  });
-
-  // Section headers
-  document.getElementById('section-good-online').textContent = translations[lang]["GOOD ONLINE"];
-  document.getElementById('section-latest-books').textContent = translations[lang]["Latest books online"];
-
-  // Book descriptions (first slider)
-  for (let i = 1; i <= 8; i++) {
-    var desc = document.getElementById('desc-book' + i);
-    if (desc) desc.innerHTML = translations[lang]['desc_book' + i];
-  }
-  // Book descriptions (second slider)
-  for (let i = 9; i <= 16; i++) {
-    var desc = document.getElementById('desc-book' + i);
-    if (desc) desc.innerHTML = translations[lang]['desc_book' + i];
+  
+  // Sidebar/menu - with error handling
+  try {
+    var navHome = document.getElementById('nav-home');
+    if (navHome) navHome.textContent = translations[lang].HOME;
+    
+    var navPages = document.getElementById('nav-pages');
+    if (navPages && navPages.childNodes[0]) navPages.childNodes[0].textContent = translations[lang].PAGES + ' ';
+    
+    var navReligious = document.getElementById('nav-religious');
+    if (navReligious) navReligious.textContent = translations[lang].RELIGIOUS;
+    
+    var navRomance = document.getElementById('nav-romance');
+    if (navRomance) navRomance.textContent = translations[lang].ROMANCE;
+    
+    var navFiction = document.getElementById('nav-fiction');
+    if (navFiction) navFiction.textContent = translations[lang].FICTION;
+    
+    var navDevelopment = document.getElementById('nav-development');
+    if (navDevelopment) navDevelopment.textContent = translations[lang].DEVELOPMENT;
+    
+    var navHorror = document.getElementById('nav-horror');
+    if (navHorror) navHorror.textContent = translations[lang].HORROR;
+    
+    var navNovels = document.getElementById('nav-novels');
+    if (navNovels) navNovels.textContent = translations[lang].NOVELS;
+    
+    var acc = document.getElementById('nav-account');
+    if (acc) acc.textContent = translations[lang]["MY ACCOUNT"];
+    
+    var exploreBtn = document.querySelector('.explore-btn-sidebar');
+    if (exploreBtn) exploreBtn.textContent = translations[lang]["Explore"];
+  } catch (e) {
+    console.log('Some navigation elements not found:', e);
   }
 
-  // Second section headers
-  var moreGood = document.querySelectorAll('.section-header .sub-title');
-  if (moreGood[1]) moreGood[1].textContent = translations[lang]["MORE GOOD ONLINE"];
-  var moreLatest = document.querySelectorAll('.section-header .main-title');
-  if (moreLatest[1]) moreLatest[1].textContent = translations[lang]["More Latest books online"];
+  // Hero section - with error handling
+  try {
+    var heroWelcome = document.getElementById('hero-welcome');
+    if (heroWelcome) heroWelcome.textContent = translations[lang]["Welcome to GentleReaders"];
+    
+    var heroTitle = document.getElementById('hero-title');
+    if (heroTitle) heroTitle.textContent = translations[lang]["Your Next Great Read Awaits"];
+    
+    var heroDesc = document.getElementById('hero-desc');
+    if (heroDesc) heroDesc.textContent = translations[lang]["Inkwooven For GentleReaders"];
+    
+    var heroBrowse = document.getElementById('hero-browse');
+    if (heroBrowse) heroBrowse.textContent = translations[lang]["Browse Books"];
+  } catch (e) {
+    console.log('Some hero elements not found:', e);
+  }
 
-  // Quote section
-  document.getElementById('quote-main').textContent = translations[lang]["Every book you pick up has its own humor or trauma, and gets either the bad or good from whatever it read."];
-  document.getElementById('quote-author').textContent = translations[lang]["JOHNATAN MASST"];
+  // Genre cards - with error handling
+  try {
+    var strips = document.querySelectorAll('.strip-title');
+    var genreKeys = ["RELIGIOUS", "ROMANCE", "FICTION", "DEVELOPMENT", "HORROR", "NOVELS"];
+    strips.forEach(function(el, i) {
+      if (genreKeys[i]) {
+        el.textContent = translations[lang][genreKeys[i]];
+      }
+    });
+  } catch (e) {
+    console.log('Genre cards translation error:', e);
+  }
 
-  // Footer
-  document.getElementById('footer-brand').textContent = 'GentleReaders';
-  document.getElementById('footer-desc').textContent = translations[lang]["Stay in touch with GentleReaders, follow us on social media and learn about new promotions!"];
+  // Section headers - with error handling
+  try {
+    var sectionGoodOnline = document.getElementById('section-good-online');
+    if (sectionGoodOnline) sectionGoodOnline.textContent = translations[lang]["GOOD ONLINE"];
+    
+    var sectionLatestBooks = document.getElementById('section-latest-books');
+    if (sectionLatestBooks) sectionLatestBooks.textContent = translations[lang]["Latest books online"];
+  } catch (e) {
+    console.log('Section headers translation error:', e);
+  }
 
-  // Book summary headers
-  document.querySelectorAll('.flip-book-card-back-content h4').forEach(function(el) {
-    el.textContent = translations[lang]["Book Summary"];
-  });
-  // Book price labels
-  document.querySelectorAll('.book-price').forEach(function(el) {
-    var price = el.textContent.match(/\d+[\d,.]*/);
-    el.textContent = translations[lang]["Price"] + ': ' + (price ? price[0] : '');
-  });
+  // Book descriptions (first slider) - with error handling
+  try {
+    for (let i = 1; i <= 8; i++) {
+      var desc = document.getElementById('desc-book' + i);
+      if (desc && translations[lang]['desc_book' + i]) {
+        desc.innerHTML = translations[lang]['desc_book' + i];
+      }
+    }
+  } catch (e) {
+    console.log('First slider translation error:', e);
+  }
+  
+  // Book descriptions (second slider) - with error handling
+  try {
+    for (let i = 9; i <= 16; i++) {
+      var desc = document.getElementById('desc-book' + i);
+      if (desc && translations[lang]['desc_book' + i]) {
+        desc.innerHTML = translations[lang]['desc_book' + i];
+      }
+    }
+  } catch (e) {
+    console.log('Second slider translation error:', e);
+  }
+
+  // Second section headers - with error handling
+  try {
+    var moreGood = document.querySelectorAll('.section-header .sub-title');
+    if (moreGood[1]) moreGood[1].textContent = translations[lang]["MORE GOOD ONLINE"];
+    
+    var moreLatest = document.querySelectorAll('.section-header .main-title');
+    if (moreLatest[1]) moreLatest[1].textContent = translations[lang]["More Latest books online"];
+  } catch (e) {
+    console.log('Second section headers translation error:', e);
+  }
+
+  // Quote section - with error handling
+  try {
+    var quoteMain = document.getElementById('quote-main');
+    if (quoteMain) quoteMain.textContent = translations[lang]["Every book you pick up has its own humor or trauma, and gets either the bad or good from whatever it read."];
+    
+    var quoteAuthor = document.getElementById('quote-author');
+    if (quoteAuthor) quoteAuthor.textContent = translations[lang]["JOHNATAN MASST"];
+  } catch (e) {
+    console.log('Quote section translation error:', e);
+  }
+
+  // Footer - with error handling
+  try {
+    var footerBrand = document.getElementById('footer-brand');
+    if (footerBrand) footerBrand.textContent = 'GentleReaders';
+    
+    var footerDesc = document.getElementById('footer-desc');
+    if (footerDesc) footerDesc.textContent = translations[lang]["Stay in touch with GentleReaders, follow us on social media and learn about new promotions!"];
+  } catch (e) {
+    console.log('Footer translation error:', e);
+  }
+
+  // Book summary headers - with error handling
+  try {
+    document.querySelectorAll('.flip-book-card-back-content h4').forEach(function(el) {
+      el.textContent = translations[lang]["Book Summary"];
+    });
+  } catch (e) {
+    console.log('Book summary headers translation error:', e);
+  }
+  
+  // Book price labels - with error handling
+  try {
+    document.querySelectorAll('.book-price').forEach(function(el) {
+      var price = el.textContent.match(/\d+[\d,.]*/);
+      el.textContent = translations[lang]["Price"] + ': ' + (price ? price[0] : '');
+    });
+  } catch (e) {
+    console.log('Book price labels translation error:', e);
+  }
+  
+  // Genre page hero sections - with error handling
+  try {
+    // Religious page hero
+    var religiousTitle = document.getElementById('religious-hero-title');
+    if (religiousTitle) {
+      religiousTitle.textContent = lang === 'ar' ? 'كتب دينية' : 'Religious';
+    }
+    var religiousDesc = document.getElementById('religious-hero-desc');
+    if (religiousDesc) {
+      religiousDesc.textContent = lang === 'ar' ? 'قصص دينية وإرشادات روحية' : 'A curated collection of religious books to enrich the soul and mind.';
+    }
+    
+    // Romance page hero
+    var romanceTitle = document.getElementById('romance-hero-title');
+    if (romanceTitle) {
+      romanceTitle.textContent = lang === 'ar' ? 'رومانسي' : 'Romance';
+    }
+    var romanceDesc = document.getElementById('romance-hero-desc');
+    if (romanceDesc) {
+      romanceDesc.textContent = lang === 'ar' ? 'قصص حب وعاطفة' : 'Love stories that touch the heart';
+    }
+    
+    // Fiction page hero
+    var fictionTitle = document.getElementById('fiction-hero-title');
+    if (fictionTitle) {
+      fictionTitle.textContent = lang === 'ar' ? 'خيال' : 'Fiction';
+    }
+    var fictionDesc = document.getElementById('fiction-hero-desc');
+    if (fictionDesc) {
+      fictionDesc.textContent = lang === 'ar' ? 'قصص خيالية وسرد إبداعي' : 'Imaginative stories and creative narratives';
+    }
+    
+    // Development page hero
+    var developmentTitle = document.getElementById('development-hero-title');
+    if (developmentTitle) {
+      developmentTitle.textContent = lang === 'ar' ? 'تطوير الذات' : 'Development';
+    }
+    var developmentDesc = document.getElementById('development-hero-desc');
+    if (developmentDesc) {
+      developmentDesc.textContent = lang === 'ar' ? 'كتب المساعدة الذاتية والنمو الشخصي' : 'Self-help and personal growth books';
+    }
+    
+    // Horror page hero
+    var horrorTitle = document.getElementById('horror-hero-title');
+    if (horrorTitle) {
+      horrorTitle.textContent = lang === 'ar' ? 'رعب' : 'Horror';
+    }
+    var horrorDesc = document.getElementById('horror-hero-desc');
+    if (horrorDesc) {
+      horrorDesc.textContent = lang === 'ar' ? 'قصص تثير الخوف والغموض' : 'Stories that inspire fear and mystery';
+    }
+    
+    // Novels page hero
+    var novelsTitle = document.getElementById('novels-hero-title');
+    if (novelsTitle) {
+      novelsTitle.textContent = lang === 'ar' ? 'روايات' : 'Novels';
+    }
+    var novelsDesc = document.getElementById('novels-hero-desc');
+    if (novelsDesc) {
+      novelsDesc.textContent = lang === 'ar' ? 'قصص خالدة وسرد آسر' : 'Discover timeless stories and captivating narratives';
+    }
+  } catch (e) {
+    console.log('Genre page hero sections translation error:', e);
+  }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -171,16 +324,24 @@ document.addEventListener('DOMContentLoaded', function() {
   var btnAr = document.getElementById('btn-ar');
   var btnEnMobile = document.getElementById('btn-en-mobile');
   var btnArMobile = document.getElementById('btn-ar-mobile');
+  var langToggle = document.getElementById('lang-toggle');
+  var langToggleMobile = document.getElementById('lang-toggle-mobile');
   
   // Function to handle language switching
   function switchToEnglish() {
     localStorage.setItem('lang', 'en');
     setLanguage('en');
+    // Update toggle buttons
+    if (langToggle) langToggle.textContent = 'AR';
+    if (langToggleMobile) langToggleMobile.textContent = 'AR';
   }
   
   function switchToArabic() {
     localStorage.setItem('lang', 'ar');
     setLanguage('ar');
+    // Update toggle buttons
+    if (langToggle) langToggle.textContent = 'EN';
+    if (langToggleMobile) langToggleMobile.textContent = 'EN';
   }
   
   // Desktop language buttons
@@ -193,5 +354,35 @@ document.addEventListener('DOMContentLoaded', function() {
   if (btnEnMobile && btnArMobile) {
     btnEnMobile.onclick = switchToEnglish;
     btnArMobile.onclick = switchToArabic;
+  }
+  
+  // Toggle button functionality
+  if (langToggle) {
+    langToggle.onclick = function() {
+      if (langToggle.textContent === 'AR') {
+        switchToArabic();
+      } else {
+        switchToEnglish();
+      }
+    };
+  }
+  
+  if (langToggleMobile) {
+    langToggleMobile.onclick = function() {
+      if (langToggleMobile.textContent === 'AR') {
+        switchToArabic();
+      } else {
+        switchToEnglish();
+      }
+    };
+  }
+  
+  // Set initial toggle button text
+  if (lang === 'ar') {
+    if (langToggle) langToggle.textContent = 'EN';
+    if (langToggleMobile) langToggleMobile.textContent = 'EN';
+  } else {
+    if (langToggle) langToggle.textContent = 'AR';
+    if (langToggleMobile) langToggleMobile.textContent = 'AR';
   }
 }); 

@@ -48,6 +48,17 @@ html,
         margin: 0;
         overflow-x: hidden; /* Prevent horizontal scrollbars from content overflow */
       }
+      
+      /* Remove all spacing for genre pages */
+      .genre-page {
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      
+      .genre-page body {
+        margin: 0 !important;
+        padding: 0 !important;
+      }
       body {
         font-family: "Inter", sans-serif;
         background-color: #f8f8f8;
@@ -103,12 +114,12 @@ html,
         align-items: center;
         margin-bottom: 2rem;
       }
-      /* Adjusted logo image styling for sidebar (desktop) */
-      .left-sidebar .logo-container img {
-        height: 10rem; /* جرب قيمة مثل 15rem أو 12rem هنا لجعله كبيراً جداً */
-        width: auto; /* Maintain aspect ratio */
-        max-width: 100%; /* Ensure logo doesn't overflow container */
-      }
+             /* Adjusted logo image styling for sidebar (desktop) */
+       .left-sidebar .logo-container img {
+         height: 15rem; /* Much bigger logo - increased from 10rem to 15rem */
+         width: auto; /* Maintain aspect ratio */
+         max-width: 100%; /* Ensure logo doesn't overflow container */
+       }
 
       .left-sidebar .nav-list a {
         display: block;
@@ -173,21 +184,21 @@ html,
       }
 
       /* Mobile Header for Left Menu */
-      .mobile-header {
-        display: flex; /* Always visible on mobile by default */
-        background-color: white;
-        padding: 1rem;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        justify-content: space-between;
-        align-items: center;
-        position: fixed; /* Changed to fixed to stay on top */
-        width: 100%; /* Ensure it spans full width */
-        top: 0;
-        left: 0;
-        z-index: 50; /* Above main content, lower than sidebar */
-        height: 140px; /* Increased height to accommodate bigger logo */
-        box-sizing: border-box; /* Include padding in height calculation */
-      }
+             .mobile-header {
+         display: flex; /* Always visible on mobile by default */
+         background-color: white;
+         padding: 1rem;
+         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+         justify-content: space-between;
+         align-items: center;
+         position: fixed; /* Changed to fixed to stay on top */
+         width: 100%; /* Ensure it spans full width */
+         top: 0;
+         left: 0;
+         z-index: 50; /* Above main content, lower than sidebar */
+         height: 200px; /* Much bigger height to accommodate much bigger logo */
+         box-sizing: border-box; /* Include padding in height calculation */
+       }
       @media (min-width: 1024px) {
         .mobile-header {
           display: none; /* Hide on desktop */
@@ -195,7 +206,7 @@ html,
       }
              /* Mobile header logo style */
        .mobile-header img {
-         height: 120px; /* Match the inline style we set earlier */
+         height: 180px; /* Much bigger logo - increased from 120px to 180px */
          width: auto;
          max-width: 100%;
          object-fit: contain; /* Ensure logo fits properly */
@@ -204,7 +215,7 @@ html,
        
        /* Ensure SVG logo displays properly */
        .mobile-header svg {
-         height: 120px;
+         height: 180px; /* Much bigger logo - increased from 120px to 180px */
          width: auto;
          max-width: 100%;
          overflow: visible; /* Prevent SVG clipping */
@@ -588,13 +599,13 @@ html,
         color: #5e2217; /* Dark text for contrast */
         padding: 3rem 2rem;
       }
-      /* No filter needed if logo is already bright or suitable for light background */
-      .site-footer .logo-container img {
-        height: 15rem; /* جرب قيمة مثل 15rem هنا */
-        width: auto;
-        max-width: 100%;
-        margin-top: 0px;
-      }
+             /* No filter needed if logo is already bright or suitable for light background */
+       .site-footer .logo-container img {
+         height: 20rem; /* Much bigger logo - increased from 15rem to 20rem */
+         width: auto;
+         max-width: 100%;
+         margin-top: 0px;
+       }
 
       .footer-column h4 {
         font-size: 1.1rem;
@@ -1174,6 +1185,14 @@ a {
   cursor: pointer;
 }
 
+/* Mobile-specific cart icon styling - smaller size */
+@media (max-width: 1023px) {
+  .btn-cart {
+    width: 24px; /* Much smaller - same size as hamburger menu */
+    height: 24px; /* Much smaller - same size as hamburger menu */
+  }
+}
+
 .btn-cart::after {
   content: attr(data-quantity);
   width: fit-content;
@@ -1192,6 +1211,14 @@ a {
   width: 24.38px;
   height: 30.52px;
   transition: .2s linear;
+}
+
+/* Mobile-specific cart icon size - smaller */
+@media (max-width: 1023px) {
+  .icon-cart {
+    width: 14px; /* Much smaller - proportional to smaller button */
+    height: 17px; /* Much smaller - proportional to smaller button */
+  }
 }
 
 .icon-cart path {
@@ -1456,7 +1483,7 @@ body[lang="en"] {
     max-width: 100vw; /* Prevent content from exceeding viewport */
     overflow-x: hidden; /* Prevent horizontal scrolling */
     /* Add top padding for mobile header */
-    padding-top: 80px;
+    padding-top: 200px; /* Reduced padding to eliminate white space gap */
   }
   
   /* Make hero section match desktop proportions */
@@ -1469,6 +1496,72 @@ body[lang="en"] {
     background-position: center;
     color: #fff;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  }
+  
+  /* Genre page hero sections - mobile specific */
+  .genre-page .hero-new {
+    margin-top: 0 !important; /* Remove any top margin */
+    padding-top: 0 !important; /* Start from the very top */
+    min-height: 70vh; /* Increased height for better centering */
+    height: 70vh; /* Fixed height for consistent centering */
+    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('imgs/zach-plank-o-cpCRdEgxs-unsplash.jpg');
+    position: relative;
+    top: 0;
+    display: flex;
+    align-items: center; /* Center the content vertically */
+    justify-content: center; /* Center the content horizontally */
+  }
+  
+  /* Remove any body or html spacing for genre pages */
+  .genre-page {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .genre-page .main-content {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+  
+  /* Override any potential spacing from other classes */
+  .genre-page .hero-new,
+  .genre-page .hero-new * {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+  
+  /* Ensure the first element starts from the very top */
+  .genre-page .main-content > *:first-child {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+  
+  /* Genre page hero content - mobile specific */
+  .genre-page .hero-new .content {
+    padding-top: 0; /* Remove top padding */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* Move content to bottom of hero section */
+    align-items: center; /* Center content horizontally */
+    height: 100%; /* Take full height of hero section */
+    min-height: 60vh; /* Ensure minimum height for centering */
+    padding-bottom: 4rem; /* Add bottom padding to move text up from very bottom */
+  }
+  
+  /* Genre page hero titles - mobile specific */
+  .genre-page .hero-new .main-title {
+    font-size: 3rem; /* Large title for mobile */
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #fcf4cc; /* Light color for visibility */
+    font-family: 'Great Vibes', cursive; /* Same as desktop */
+  }
+  
+  /* Genre page hero descriptions - mobile specific */
+  .genre-page .hero-new .description {
+    font-size: 1.2rem;
+    color: #e0e0e0;
+    font-family: 'Great Vibes', cursive; /* Same as desktop */
   }
   
   /* Match desktop spacing for sections */
