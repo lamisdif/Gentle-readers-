@@ -1,5 +1,9 @@
 // JavaScript extracted from checkout.html
-import { supabase } from './supabaseClient.js'
+// تعريف Supabase مباشرة
+const supabaseUrl = "https://fsximdllrhglabxbqvay.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzeGltZGxscmhnbGFieGJxdmF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3NTg0NzgsImV4cCI6MjA3MjMzNDQ3OH0.KiRJdFoW4DtDAPMLqH9Im3-37GhIFmD269iDsY7ih2Q"; // حطي هنا المفتاح العام من Supabase
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
 
 document.addEventListener('DOMContentLoaded', function() {
   setLanguage(localStorage.getItem('lang') || 'en');
@@ -139,24 +143,21 @@ document.getElementById("checkoutForm").addEventListener("submit", async functio
 
   // Send to backend
   try {
-    const response = await fetch('/checkout', {
+    const { data, error } = await supabase
+      .from('orders')
+      .insert([{ firstName, familyName, phoneNumber, deliveryMethod, items }]);
 
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ firstName, familyName, phoneNumber, deliveryMethod, items })
-    });
-    const data = await response.json();
-    if (response.ok) {
-      alert("Order submitted successfully! Order ID: " + data.orderId);
+    if (error) {
+      alert("حدث خطأ: " + error.message);
+      console.error(error);
+    } else {
+      alert("تم تقديم الطلب بنجاح! رقم الطلب: " + data[0].id);
       localStorage.removeItem("cart");
       window.location.href = "index.html";
-    } else {
-      alert("Error: " + (data.error || "Failed to submit order."));
     }
   } catch (err) {
-    alert("Network error. Please try again later.");
+    alert("حدث خطأ في الشبكة، حاول مرة أخرى لاحقًا.");
+    console.error(err);
   }
 });
 // Animate sections on scroll
