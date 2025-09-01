@@ -1,4 +1,5 @@
 // JavaScript extracted from checkout.html
+import { supabase } from './supabaseClient.js'
 
 document.addEventListener('DOMContentLoaded', function() {
   setLanguage(localStorage.getItem('lang') || 'en');
