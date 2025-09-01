@@ -1,5 +1,4 @@
-// JavaScript extracted from checkout.html
-// تعريف Supabase مباشرة
+
 const supabaseUrl = "https://fsximdllrhglabxbqvay.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzeGltZGxscmhnbGFieGJxdmF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3NTg0NzgsImV4cCI6MjA3MjMzNDQ3OH0.KiRJdFoW4DtDAPMLqH9Im3-37GhIFmD269iDsY7ih2Q"; // حطي هنا المفتاح العام من Supabase
 const supabase = supabase.createClient(supabaseUrl, supabaseKey);
