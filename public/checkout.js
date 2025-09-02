@@ -147,21 +147,26 @@ document.getElementById("checkoutForm").addEventListener("submit", async functio
   try {
     const { data, error } = await supabase
       .from('orders')
-      .insert([{ firstName, familyName, phoneNumber, deliveryMethod, items }]);
+      .insert([{ firstName, familyName, phoneNumber, deliveryMethod, items }], { returning: 'representation' });
 
     if (error) {
-      alert("حدث خطأ: " + error.message);
+      alert("ERROR " + error.message);
       console.error(error);
+    } else if (data && data.length > 0) {
+      alert("Successfully submitted order! Order ID: " + data[0].id);
+      localStorage.removeItem("cart");
+      window.location.href = "index.html";
     } else {
-      alert("تم تقديم الطلب بنجاح! رقم الطلب: " + data[0].id);
+      alert("successfully submitted order!");
       localStorage.removeItem("cart");
       window.location.href = "index.html";
     }
   } catch (err) {
-    alert("حدث خطأ في الشبكة، حاول مرة أخرى لاحقًا.");
+    alert("Network error. Please try again later.");
     console.error(err);
   }
 });
+
 // Animate sections on scroll
 function animateOnScroll() {
   document.querySelectorAll('.animate-fade-in').forEach(el => {
