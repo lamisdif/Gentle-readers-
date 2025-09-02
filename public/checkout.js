@@ -122,7 +122,14 @@ function loadOrderSummary() {
     subtotal += price * qty;
     const itemDiv = document.createElement("div");
     itemDiv.className = "book-item";
-    itemDiv.innerHTML = `<span>${getBookTitle(book, lang)} × ${qty}</span><span>${price * qty} DZD</span>`;
+    itemDiv.innerHTML = `
+      <span>${getBookTitle(book, lang)}</span>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button aria-label="Decrease" data-id="${bookId}" class="qty-dec" style="background:#e5e7eb; padding:2px 8px; border-radius:6px;">-</button>
+        <span class="qty" data-id="${bookId}">${qty}</span>
+        <button aria-label="Increase" data-id="${bookId}" class="qty-inc" style="background:#e5e7eb; padding:2px 8px; border-radius:6px;">+</button>
+        <span style="min-width:80px; text-align:right;">${price * qty} DZD</span>
+      </div>`;
     cartItemsDiv.appendChild(itemDiv);
     const detailDiv = document.createElement("span");
     detailDiv.innerHTML = `${getBookTitle(book, lang)} × ${qty}`;
@@ -134,6 +141,23 @@ function loadOrderSummary() {
   totalPriceLabel.textContent = `${subtotal} DZD`;
 }
 document.addEventListener("DOMContentLoaded", loadOrderSummary);
+
+// Quantity controls (event delegation)
+document.addEventListener('click', function(e) {
+  if (e.target && (e.target.classList.contains('qty-inc') || e.target.classList.contains('qty-dec'))) {
+    const id = e.target.getAttribute('data-id');
+    const cart = getCartObject();
+    const delta = e.target.classList.contains('qty-inc') ? 1 : -1;
+    const next = (cart[id] || 0) + delta;
+    if (next <= 0) {
+      delete cart[id];
+    } else {
+      cart[id] = next;
+    }
+    localStorage.setItem('cart', JSON.stringify(cart));
+    loadOrderSummary();
+  }
+});
 document.getElementById("checkoutForm").addEventListener("submit", async function(e) {
   e.preventDefault();
   // Collect form data
