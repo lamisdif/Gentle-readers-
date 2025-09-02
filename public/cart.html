@@ -16,38 +16,7 @@
       <button onclick="proceedToCheckout()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 ml-2">Proceed to Checkout</button>
     </div>
   </div>
-
-  <script>
-    function loadCart() {
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
-      const list = document.getElementById('cart-items');
-      list.innerHTML = '';
-      if (cart.length === 0) {
-        list.innerHTML = '<li>Your cart is empty.</li>';
-        return;
-      }
-      cart.forEach(item => {
-        const li = document.createElement('li');
-        li.textContent = item;
-        list.appendChild(li);
-      });
-    }
-
-    function clearCart() {
-      localStorage.removeItem('cart');
-      loadCart();
-    }
-
-    function proceedToCheckout() {
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
-      if (cart.length === 0) {
-        alert('Your cart is empty!');
-        return;
-      }
-      window.location.href = 'checkout.html';
-    }
-
-    window.onload = loadCart;
-  </script>
+  <!-- Load cart logic that maps IDs to human-readable titles -->
+  <script src="cart.js"></script>
 </body>
 </html>
