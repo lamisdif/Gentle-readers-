@@ -13,7 +13,7 @@ const books = {
   frankenstein: { title: "نبوءة قصر السلطان" },
   odyssey: { title: "المخ الابله" },
   mobydick: { title: "وادي الذئاب" },
-  crimeandpunishment: { title: "عناق برائحة" },
+  crimeandpunishment: { title: "عناق برائحة الورق" },
   catcher: { title: "اعرف وجهك الاخر" },
   amarita: { title: "أماريتا" },
   amwaj_akma: { title: "أمواج أكما" },
