@@ -9,6 +9,26 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 document.addEventListener('DOMContentLoaded', function() {
   setLanguage(localStorage.getItem('lang') || 'en');
+  // Populate wilaya dropdown
+  const wilayaSelect = document.getElementById('checkout-wilaya-select');
+  if (wilayaSelect) {
+    const wilayas = [
+      'Adrar','Chlef','Laghouat','Oum El Bouaghi','Batna','Béjaïa','Biskra','Béchar','Blida','Bouira',
+      'Tamanrasset','Tébessa','Tlemcen','Tiaret','Tizi Ouzou','Algiers','Djelfa','Jijel','Sétif','Saïda',
+      'Skikda','Sidi Bel Abbès','Annaba','Guelma','Constantine','Médéa','Mostaganem','MSila','Mascara','Ouargla',
+      'Oran','El Bayadh','Illizi','Bordj Bou Arréridj','Boumerdès','El Tarf','Tindouf','Tissemsilt','El Oued','Khenchela',
+      'Souk Ahras','Tipaza','Mila','Aïn Defla','Naâma','Aïn Témouchent','Ghardaïa','Relizane','Timimoun','Bordj Badji Mokhtar',
+      'Ouled Djellal','Béni Abbès','In Salah','In Guezzam','Touggourt','Djanet','El Meghaier','El Meniaa'
+    ];
+    // Clear any stale options beyond placeholder
+    while (wilayaSelect.options.length > 1) wilayaSelect.remove(1);
+    wilayas.forEach((name, idx) => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      wilayaSelect.appendChild(opt);
+    });
+  }
 });
 // Full authoritative list of all books in the bookstore (copied from search.html)
 const books = {
@@ -165,10 +185,11 @@ document.getElementById("checkoutForm").addEventListener("submit", async functio
   const familyName = document.getElementById("checkout-family-input").value.trim();
   const phoneNumber = document.getElementById("checkout-number-input").value.trim();
   const deliveryMethod = document.getElementById("checkout-delivery-select").value;
+  const wilaya = document.getElementById("checkout-wilaya-select").value;
   const cartItems = getCartObject();
 
   // Basic validation
-  if (!firstName || !familyName || !phoneNumber || !deliveryMethod || Object.keys(cartItems).length === 0) {
+  if (!firstName || !familyName || !phoneNumber || !deliveryMethod || !wilaya || Object.keys(cartItems).length === 0) {
     alert("Please fill in all fields and make sure your cart is not empty.");
     return;
   }
@@ -185,7 +206,7 @@ document.getElementById("checkoutForm").addEventListener("submit", async functio
   try {
     const { data, error } = await supabase
       .from('orders')
-      .insert([{ firstName, familyName, phoneNumber, deliveryMethod, items }], { returning: 'representation' });
+      .insert([{ firstName, familyName, phoneNumber, deliveryMethod, wilaya, items }], { returning: 'representation' });
 
     if (error) {
       alert("ERROR " + error.message);
