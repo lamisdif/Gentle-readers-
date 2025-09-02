@@ -57,17 +57,58 @@ const books = {
   cant_hurt_me: { title: "لا يمكنك إيذائي" },
   success_in_your_morning: { title: "نجاحك في صباحك" }
 };
+function getCartObject() {
+  const stored = JSON.parse(localStorage.getItem('cart')) || {};
+  // Backward compatibility: if it's an array, convert to counts
+  if (Array.isArray(stored)) {
+    const obj = {};
+    stored.forEach(id => { obj[id] = (obj[id] || 0) + 1; });
+    localStorage.setItem('cart', JSON.stringify(obj));
+    return obj;
+  }
+  return stored;
+}
+
+function setCartObject(obj) {
+  localStorage.setItem('cart', JSON.stringify(obj));
+}
+
+function updateQty(bookId, delta) {
+  const cart = getCartObject();
+  const next = (cart[bookId] || 0) + delta;
+  if (next <= 0) {
+    delete cart[bookId];
+  } else {
+    cart[bookId] = next;
+  }
+  setCartObject(cart);
+  loadCart();
+}
+
 function loadCart() {
-  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const cart = getCartObject();
   const list = document.getElementById('cart-items');
   list.innerHTML = '';
-  if (cart.length === 0) {
+  const ids = Object.keys(cart);
+  if (ids.length === 0) {
     list.innerHTML = '<li>Your cart is empty.</li>';
     return;
   }
-  cart.forEach(item => {
+  ids.forEach(id => {
+    const quantity = cart[id];
     const li = document.createElement('li');
-    li.textContent = books[item] ? books[item].title : item;
+    li.style.display = 'flex';
+    li.style.alignItems = 'center';
+    li.style.justifyContent = 'space-between';
+    const title = books[id] ? books[id].title : id;
+    li.innerHTML = `
+      <span>${title}</span>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button aria-label="Decrease" onclick="updateQty('${id}', -1)" class="bg-gray-200 px-2 rounded">-</button>
+        <span>${quantity}</span>
+        <button aria-label="Increase" onclick="updateQty('${id}', 1)" class="bg-gray-200 px-2 rounded">+</button>
+      </div>
+    `;
     list.appendChild(li);
   });
 }
@@ -78,8 +119,8 @@ function clearCart() {
 }
 
 function proceedToCheckout() {
-  const cart = JSON.parse(localStorage.getItem('cart')) || [];
-  if (cart.length === 0) {
+  const cart = getCartObject();
+  if (Object.keys(cart).length === 0) {
     alert('Your cart is empty!');
     return;
   }

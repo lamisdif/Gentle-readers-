@@ -402,10 +402,15 @@
     // Add the addToCartFromCard function from index.html for full functionality
     function addToCartFromCard(bookId, event) {
       event.stopPropagation();
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
-      if (!cart.includes(bookId)) {
-      cart.push(bookId);
-      localStorage.setItem('cart', JSON.stringify(cart));
+      const stored = JSON.parse(localStorage.getItem('cart')) || {};
+      if (Array.isArray(stored)) {
+        const obj = {};
+        stored.forEach(id => { obj[id] = (obj[id] || 0) + 1; });
+        obj[bookId] = (obj[bookId] || 0) + 1;
+        localStorage.setItem('cart', JSON.stringify(obj));
+      } else {
+        stored[bookId] = (stored[bookId] || 0) + 1;
+        localStorage.setItem('cart', JSON.stringify(stored));
       }
       updateCartCounter();
       const navCartIcon = document.querySelector('.btn-cart');
@@ -419,10 +424,11 @@
     }
     // Add updateCartCounter for cart icon
     function updateCartCounter() {
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const stored = JSON.parse(localStorage.getItem('cart')) || {};
       const cartButtons = document.querySelectorAll('.btn-cart');
+      const totalQty = Array.isArray(stored) ? stored.length : Object.values(stored).reduce((a,b)=>a+b,0);
       cartButtons.forEach(button => {
-        button.setAttribute('data-quantity', cart.length);
+        button.setAttribute('data-quantity', totalQty);
       });
     }
     document.addEventListener('DOMContentLoaded', function() {

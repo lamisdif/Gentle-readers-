@@ -1266,12 +1266,12 @@
 
       // Function to update cart counter
       function updateCartCounter() {
-        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const stored = JSON.parse(localStorage.getItem('cart')) || {};
         const cartButtons = document.querySelectorAll('.btn-cart');
-        
+        const totalQty = Array.isArray(stored) ? stored.length : Object.values(stored).reduce((a,b)=>a+b,0);
         cartButtons.forEach(button => {
-          button.setAttribute('data-quantity', cart.length);
-      });
+          button.setAttribute('data-quantity', totalQty);
+        });
       }
 
       // Function to scroll containers (kept for genre section, removed for books)
@@ -1285,10 +1285,15 @@
       // Function to add book to cart from book cards
       function addToCartFromCard(bookId, event) {
         event.stopPropagation();
-        const cart = JSON.parse(localStorage.getItem('cart')) || [];
-        if (!cart.includes(bookId)) {
-          cart.push(bookId);
-          localStorage.setItem('cart', JSON.stringify(cart));
+        const stored = JSON.parse(localStorage.getItem('cart')) || {};
+        if (Array.isArray(stored)) {
+          const obj = {};
+          stored.forEach(id => { obj[id] = (obj[id] || 0) + 1; });
+          obj[bookId] = (obj[bookId] || 0) + 1;
+          localStorage.setItem('cart', JSON.stringify(obj));
+        } else {
+          stored[bookId] = (stored[bookId] || 0) + 1;
+          localStorage.setItem('cart', JSON.stringify(stored));
         }
         // Animate the cart icon in navigation
         const cartIcon = document.querySelector('.btn-cart');
@@ -1302,11 +1307,11 @@
       
       // Function to update cart counter
       function updateCartCounter() {
-        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const stored = JSON.parse(localStorage.getItem('cart')) || {};
         const cartButtons = document.querySelectorAll('.btn-cart');
-        
+        const totalQty = Array.isArray(stored) ? stored.length : Object.values(stored).reduce((a,b)=>a+b,0);
         cartButtons.forEach(button => {
-          button.setAttribute('data-quantity', cart.length);
+          button.setAttribute('data-quantity', totalQty);
         });
       }
       

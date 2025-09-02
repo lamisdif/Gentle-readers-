@@ -653,11 +653,11 @@
 
     // Update cart counter on page load
     function updateCartCounter() {
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const stored = JSON.parse(localStorage.getItem('cart')) || {};
       const cartButtons = document.querySelectorAll('.btn-cart');
-      
+      const totalQty = Array.isArray(stored) ? stored.length : Object.values(stored).reduce((a,b)=>a+b,0);
       cartButtons.forEach(button => {
-        button.setAttribute('data-quantity', cart.length);
+        button.setAttribute('data-quantity', totalQty);
       });
     }
 
@@ -665,15 +665,19 @@
     updateCartCounter();
 
     function addToCart() {
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
-      // Store the book ID, not the title
-      cart.push(id);
-      localStorage.setItem('cart', JSON.stringify(cart));
-      // Update cart counter immediately
+      const stored = JSON.parse(localStorage.getItem('cart')) || {};
+      if (Array.isArray(stored)) {
+        // migrate old array cart -> object with quantities
+        const obj = {};
+        stored.forEach(b => { obj[b] = (obj[b] || 0) + 1; });
+        obj[id] = (obj[id] || 0) + 1;
+        localStorage.setItem('cart', JSON.stringify(obj));
+      } else {
+        stored[id] = (stored[id] || 0) + 1;
+        localStorage.setItem('cart', JSON.stringify(stored));
+      }
       updateCartCounter();
-      // Show success message
       alert('Book added to cart successfully!');
-      // Stay on the same page (don't redirect)
     }
   </script>
 </body>

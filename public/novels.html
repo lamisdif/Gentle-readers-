@@ -370,27 +370,33 @@
     
     function addToCartFromCard(bookId, event) {
       event.stopPropagation();
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
-      if (!cart.includes(bookId)) {
-        cart.push(bookId);
-        localStorage.setItem('cart', JSON.stringify(cart));
-        updateCartCounter();
-        const navCartIcon = document.querySelector('.btn-cart');
-        if (navCartIcon) {
-          navCartIcon.style.transform = 'scale(1.2)';
-          navCartIcon.style.transition = 'transform 0.3s ease';
-          setTimeout(() => {
-            navCartIcon.style.transform = 'scale(1)';
-          }, 200);
-        }
+      const stored = JSON.parse(localStorage.getItem('cart')) || {};
+      if (Array.isArray(stored)) {
+        const obj = {};
+        stored.forEach(id => { obj[id] = (obj[id] || 0) + 1; });
+        obj[bookId] = (obj[bookId] || 0) + 1;
+        localStorage.setItem('cart', JSON.stringify(obj));
+      } else {
+        stored[bookId] = (stored[bookId] || 0) + 1;
+        localStorage.setItem('cart', JSON.stringify(stored));
+      }
+      updateCartCounter();
+      const navCartIcon = document.querySelector('.btn-cart');
+      if (navCartIcon) {
+        navCartIcon.style.transform = 'scale(1.2)';
+        navCartIcon.style.transition = 'transform 0.3s ease';
+        setTimeout(() => {
+          navCartIcon.style.transform = 'scale(1)';
+        }, 200);
       }
     }
 
     function updateCartCounter() {
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const stored = JSON.parse(localStorage.getItem('cart')) || {};
+      const totalQty = Array.isArray(stored) ? stored.length : Object.values(stored).reduce((a,b)=>a+b,0);
       const cartButtons = document.querySelectorAll('.btn-cart');
       cartButtons.forEach(button => {
-        button.setAttribute('data-quantity', cart.length);
+        button.setAttribute('data-quantity', totalQty);
       });
     }
 

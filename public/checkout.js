@@ -79,8 +79,19 @@ function getBookTitle(book, lang) {
   return book.title;
 }
 
+function getCartObject() {
+  const stored = JSON.parse(localStorage.getItem("cart")) || {};
+  if (Array.isArray(stored)) {
+    const obj = {};
+    stored.forEach(id => { obj[id] = (obj[id] || 0) + 1; });
+    localStorage.setItem("cart", JSON.stringify(obj));
+    return obj;
+  }
+  return stored;
+}
+
 function loadOrderSummary() {
-  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+  const cart = getCartObject();
   const cartItemsDiv = document.getElementById("cartItems");
   const orderDetailsDiv = document.getElementById("orderDetails");
   const totalPriceLabel = document.getElementById("totalPrice");
@@ -88,7 +99,7 @@ function loadOrderSummary() {
   cartItemsDiv.innerHTML = "";
   orderDetailsDiv.innerHTML = "";
   const lang = getCurrentLang();
-  cart.forEach(bookId => {
+  Object.keys(cart).forEach(bookId => {
     const book = books[bookId];
     if (!book) {
       const itemDiv = document.createElement("div");
@@ -103,19 +114,20 @@ function loadOrderSummary() {
       orderDetailsDiv.appendChild(priceDiv);
       return;
     }
+    const qty = cart[bookId] || 1;
     let price = 0;
     if (book.price) {
       price = parseFloat(book.price.replace(/[^\d.]/g, ""));
     }
-    subtotal += price;
+    subtotal += price * qty;
     const itemDiv = document.createElement("div");
     itemDiv.className = "book-item";
-    itemDiv.innerHTML = `<span>${getBookTitle(book, lang)}</span><span>${price} DZD</span>`;
+    itemDiv.innerHTML = `<span>${getBookTitle(book, lang)} × ${qty}</span><span>${price * qty} DZD</span>`;
     cartItemsDiv.appendChild(itemDiv);
     const detailDiv = document.createElement("span");
-    detailDiv.innerHTML = `${getBookTitle(book, lang)}`;
+    detailDiv.innerHTML = `${getBookTitle(book, lang)} × ${qty}`;
     const priceDiv = document.createElement("span");
-    priceDiv.innerHTML = `${price} DZD`;
+    priceDiv.innerHTML = `${price * qty} DZD`;
     orderDetailsDiv.appendChild(detailDiv);
     orderDetailsDiv.appendChild(priceDiv);
   });
@@ -129,18 +141,20 @@ document.getElementById("checkoutForm").addEventListener("submit", async functio
   const familyName = document.getElementById("checkout-family-input").value.trim();
   const phoneNumber = document.getElementById("checkout-number-input").value.trim();
   const deliveryMethod = document.getElementById("checkout-delivery-select").value;
-  const cartItems = JSON.parse(localStorage.getItem("cart")) || [];
+  const cartItems = getCartObject();
 
   // Basic validation
-  if (!firstName || !familyName || !phoneNumber || !deliveryMethod || cartItems.length === 0) {
+  if (!firstName || !familyName || !phoneNumber || !deliveryMethod || Object.keys(cartItems).length === 0) {
     alert("Please fill in all fields and make sure your cart is not empty.");
     return;
   }
 
   // Extract only book titles from cart items
-  const items = cartItems.map(bookId => {
+  const items = Object.keys(cartItems).map(bookId => {
     const book = books[bookId];
-    return book ? book.title : `Unknown Book (${bookId})`;
+    const qty = cartItems[bookId] || 1;
+    const title = book ? book.title : `Unknown Book (${bookId})`;
+    return `${title} × ${qty}`;
   });
 
   // Send to backend
