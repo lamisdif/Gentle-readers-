@@ -150,11 +150,95 @@
 
   <script>
     const books = {
+      // New books from the latest images
+      ayyam_al_hijran: {
+        title: "أيام الهجران",
+        author: "إيلينا فيرانتي",
+        description: "Days of Abandonment is a powerful novel about a woman's emotional breakdown after her husband leaves her. Set in Naples, it explores themes of abandonment, motherhood, and the struggle to maintain sanity when life falls apart.",
+        description_ar: "أيام الهجران رواية قوية عن انهيار امرأة عاطفياً بعد أن يتركها زوجها. تدور أحداثها في نابولي وتستكشف مواضيع الهجران والأمومة والصراع للحفاظ على العقل عندما تنهار الحياة.",
+        cover: "imgs/أيام الهجران.jpg",
+        price: "1,800.00",
+        isbn: "9789776543211"
+      },
+      al_3adat_al_dharia: {
+        title: "العادات الذرية",
+        author: "جيمس كلير",
+        description: "Atomic Habits offers a proven framework for improving every day. Learn how tiny changes in behavior can result in remarkable outcomes. This book shows you how to build good habits and break bad ones using practical strategies.",
+        description_ar: "العادات الذرية يقدم إطار عمل مثبت لتحسين كل يوم. تعلم كيف يمكن للتغييرات الصغيرة في السلوك أن تؤدي إلى نتائج مذهلة. يوضح لك هذا الكتاب كيفية بناء العادات الجيدة وكسر العادات السيئة باستخدام استراتيجيات عملية.",
+        cover: "imgs/العادات الذرية.jpg",
+        price: "1,600.00",
+        isbn: "9789776543212"
+      },
+      eva_luna: {
+        title: "إيفا لونا",
+        author: "إيزابيل الليندي",
+        description: "Eva Luna is a magical realist novel about a young woman with the gift of storytelling. Born in the jungle, she navigates through love, revolution, and the power of imagination in Latin America, creating her own destiny through her stories.",
+        description_ar: "إيفا لونا رواية واقعية سحرية عن شابة تمتلك موهبة رواية القصص. ولدت في الغابة وتتنقل عبر الحب والثورة وقوة الخيال في أمريكا اللاتينية، مخلقة مصيرها الخاص من خلال قصصها.",
+        cover: "imgs/ايفا لونا.jpg",
+        price: "1,400.00",
+        isbn: "9789776543213"
+      },
+      ghusoon_bunduq_1: {
+        title: "غصون البندق - الكتاب الأول",
+        author: "منى سلامة",
+        description: "The first book in the Hazelnut Branches series explores themes of growth, resilience, and the beauty of nature. A story that connects human emotions with the natural world, following characters as they discover strength in unexpected places.",
+        description_ar: "الكتاب الأول في سلسلة غصون البندق يستكشف مواضيع النمو والقدرة على التحمل وجمال الطبيعة. قصة تربط المشاعر الإنسانية بالعالم الطبيعي، تتبع شخصيات تكتشف القوة في أماكن غير متوقعة.",
+        cover: "imgs/غصون البندق.jpg",
+        price: "1,200.00",
+        isbn: "9789776543214"
+      },
+      ghusoon_bunduq_2: {
+        title: "غصون البندق - الكتاب الثاني",
+        author: "منى سلامة",
+        description: "The second book continues the journey of growth and discovery, deepening the connection between human experience and the natural world. Characters face new challenges and discover deeper truths about themselves and their relationships.",
+        description_ar: "الكتاب الثاني يواصل رحلة النمو والاكتشاف، ويعمق الصلة بين التجربة الإنسانية والعالم الطبيعي. تواجه الشخصيات تحديات جديدة وتكتشف حقائق أعمق عن أنفسها وعلاقاتها.",
+        cover: "imgs/غصون البندق2.jpg",
+        price: "1,200.00",
+        isbn: "9789776543215"
+      },
+      kayf_tajid_al_hob: {
+        title: "كيف تجد الحب",
+        author: "آلان دو بوتون",
+        description: "Part of The School of Life series, this book explores the philosophy and psychology of love. It offers insights into how to find and maintain meaningful relationships, examining the complexities of modern love and attachment.",
+        description_ar: "جزء من سلسلة مدرسة الحياة، يستكشف هذا الكتاب فلسفة وعلم نفس الحب. يقدم رؤى حول كيفية العثور على العلاقات الهادفة والحفاظ عليها، ويفحص تعقيدات الحب الحديث والتعلق.",
+        cover: "imgs/كيف تجد الحب.jpg",
+        price: "1,300.00",
+        isbn: "9789776543216"
+      },
+      masarrat_saghira: {
+        title: "مسرات صغيرة",
+        author: "آلان دو بوتون",
+        description: "Another installment from The School of Life series, focusing on finding joy in everyday moments and appreciating the small pleasures that make life beautiful. It teaches readers to savor simple moments and find happiness in the ordinary.",
+        description_ar: "جزء آخر من سلسلة مدرسة الحياة، يركز على إيجاد الفرح في اللحظات اليومية وتقدير المسرات الصغيرة التي تجعل الحياة جميلة. يعلم القراء الاستمتاع باللحظات البسيطة وإيجاد السعادة في العادي.",
+        cover: "imgs/مسرات صغيرة.jpg",
+        price: "1,300.00",
+        isbn: "9789776543217"
+      },
+      hal_sata2kul_qatti: {
+        title: "هل ستأكل قطتي مقلتي؟",
+        author: "كيتلين دوتي",
+        description: "Will My Cat Eat My Eyeballs? is a fascinating and humorous exploration of death-related questions that curious minds often wonder about. Caitlin Doughty makes the topic of mortality approachable and educational through her unique perspective.",
+        description_ar: "هل ستأكل قطتي مقلتي؟ استكشاف رائع ومضحك للأسئلة المتعلقة بالموت التي غالباً ما يتساءل عنها العقول الفضولية. تجعل كيتلين دوتي موضوع الموت أكثر سهولة في الوصول إليه وتعليمياً من خلال منظورها الفريد.",
+        cover: "imgs/هل ستأكل قطتي مقلتي.jpg",
+        price: "1,500.00",
+        isbn: "9789776543218"
+      },
+      maktabat_muntasaf_al_layl: {
+        title: "مكتبة منتصف الليل",
+        author: "مات هيغ",
+        description: "The Midnight Library is a Sunday Times bestselling novel about infinite possibilities and second chances. Between life and death, there's a library where each book represents a different life you could have lived, offering the chance to undo regrets.",
+        description_ar: "مكتبة منتصف الليل رواية من أكثر الكتب مبيعاً في صنداي تايمز عن الاحتمالات اللانهائية والفرص الثانية. بين الحياة والموت توجد مكتبة حيث يمثل كل كتاب حياة مختلفة كان يمكن أن تعيشها، مما يوفر فرصة لإلغاء الندم.",
+        cover: "imgs/مكتبة منتصف الليل.jpg",
+        price: "1,400.00",
+        isbn: "9789776543219"
+      },
+      
+      // Existing popular books
       el9adimon: {
         title: "القادمون",
         author: "أحمد خالد مصطفى",
-        description: "A timeless tale of love, class, and societal expectations. Elizabeth Bennet navigates the complexities of Regency-era England.",
-        description_ar: "قصة خيالية عن الحب والفوارق الطبقية وتوقعات المجتمع في إنجلترا القديمة.",
+        description: "The Arrivals is a science fiction novel about mysterious visitors who arrive on Earth, bringing both hope and chaos. The story explores themes of first contact, human nature, and the consequences of encountering the unknown.",
+        description_ar: "القادمون رواية خيال علمي عن زوار غامضين يصلون إلى الأرض، يجلبون الأمل والفوضى معاً. تستكشف القصة مواضيع الاتصال الأول والطبيعة البشرية وعواقب مواجهة المجهول.",
         cover: "imgs/el9adimon.jpg",
         price: "1,800.00",
         isbn: "9789776543210"
@@ -162,476 +246,470 @@
       ard_zikola: {
         title: "أرض زيكولا",
         author: "عمرو عبد الحميد",
-        description: "A compelling narrative about a mysterious land and its inhabitants, exploring themes of identity, belonging, and the search for meaning in an unfamiliar world.",
-        description_ar: "رواية مشوقة عن أرض غامضة وسكانها، تدور حول الهوية والانتماء والبحث عن المعنى.",
-        cover: "imgs/ارض زيكولا.jpg"
+        description: "Land of Zikola is a fantasy novel about a mysterious land where reality and imagination blur. The story follows characters as they discover the secrets of this strange world and confront their own inner demons.",
+        description_ar: "أرض زيكولا رواية خيالية عن أرض غامضة حيث يختلط الواقع والخيال. تتبع القصة شخصيات تكتشف أسرار هذا العالم الغريب وتواجه شياطينها الداخلية.",
+        cover: "imgs/ارض زيكولا.jpg",
+        price: "1,200.00",
+        isbn: "9789776543220"
       },
       fatat_al_yaka: {
         title: "فتاة الياقة",
         author: "عمرو عبد الحميد",
-        description: "A story about a girl with a distinctive collar, exploring themes of uniqueness, social expectations, and the courage to be different in a conformist world.",
-        description_ar: "قصة عن فتاة ذات ياقة مميزة، تدور حول التميز وتوقعات المجتمع وشجاعة الاختلاف.",
-        cover: "imgs/فتاة الياقة.jpg"
+        description: "The Collar Girl is a novel about a young woman who wears a distinctive collar that sets her apart from society. The story explores themes of uniqueness, social expectations, and the courage to be different in a conformist world.",
+        description_ar: "فتاة الياقة رواية عن شابة ترتدي ياقة مميزة تميزها عن المجتمع. تستكشف القصة مواضيع التفرد والتوقعات الاجتماعية والشجاعة لتكون مختلفة في عالم متوافق.",
+        cover: "imgs/فتاة الياقة.jpg",
+        price: "1,400.00",
+        isbn: "9789776543221"
       },
       beit_khalati: {
         title: "بيت خالتي",
         author: "أحمد خيري العمري",
-        description: "A nostalgic journey back to an aunt's house, filled with memories, family bonds, and the warmth of childhood experiences that shape who we become.",
+        description: "My Aunt's House is a nostalgic journey back to childhood memories and family bonds. The story explores themes of home, belonging, and the warmth of family relationships that shape who we become.",
+        description_ar: "بيت خالتي رحلة حنينية إلى ذكريات الطفولة والروابط العائلية. تستكشف القصة مواضيع البيت والانتماء ودفء العلاقات العائلية التي تشكل من نحن.",
         cover: "imgs/بيت خالتي.jpg",
         price: "1,600.00",
         isbn: "9789779921136"
       },
-      pride_and_prejudice: {
-        title: "Pride and Prejudice",
-        author: "Jane Austen",
-        description: "A classic romance novel about the relationship between Elizabeth Bennet and Mr. Darcy, exploring themes of love, marriage, and social class.",
-        cover: "imgs/مرتفعات ويذرنج.jpg"
-      },
-      greatgatsby: {
-        title: "مرتفعات ويذرنج",
-        author: "إيميلي برونتي",
-        description: "A passionate and tumultuous love story set on the Yorkshire moors, exploring themes of revenge, obsession, and the destructive power of love.",
-        cover: "imgs/مرتفعات ويذرنج.jpg"
-      },
-      مرتفعات_ويذرنج: {
-        title: "مرتفعات ويذرنج",
-        author: "إيميلي برونتي",
-        description: "رواية كلاسيكية عن الحب والانتقام في مرتفعات ويذرنج، تتناول قصة حب عاصف بين كاثرين إيرنشو وهيثكليف.",
-        cover: "imgs/مرتفعات ويذرنج.jpg"
-      },
-      1984: {
-        title: "عقدك النفسية",
-        author: "د.يوسف الحسني",
-        description: "A psychological exploration of human behavior and the complex mental patterns that shape our lives and relationships.",
-        cover: "imgs/عقدك النفسية.jpg"
-      },
-      mockingbird: {
-        title: "المستذلون المهانون",
-        author: "فيودور دوستويفسكي",
-        description: "A compelling narrative about the marginalized and oppressed, exploring themes of social justice and human dignity.",
-        cover: "imgs/المستذلون المهانون.jpg"
-      },
-      dune: {
-        title: "The Idiot",
-        author: "Fyodor Dostoevsky",
-        description: "A psychological masterpiece exploring the depths of human nature, morality, and the consequences of our actions.",
-        cover: "imgs/الابلة 1.jpg"
-      },
-      الابلة: {
-        title: "الابلة",
-        author: "فيودور دوستويفسكي",
-        description: "رواية روسية كلاسيكية تتناول قصة حب معقدة بين الأمير ميشكين وناستاسيا فيليبوفنا، مع عناصر من الحب والجنون.",
-        cover: "imgs/الابلة 1.jpg"
-      },
       hobbit: {
         title: "القلق الاستباقي",
         author: "د.سالي م.وينستون د.مارتن ن.سيف",
-        description: "An insightful exploration of anticipatory anxiety and how to manage the psychological challenges of modern life.",
-        cover: "imgs/القلق الاستباقي.jpg"
+        description: "Anticipatory Anxiety is a comprehensive guide to understanding and managing anxiety about future events. The book provides practical strategies for dealing with worry and fear, helping readers develop resilience and coping mechanisms.",
+        description_ar: "القلق الاستباقي دليل شامل لفهم وإدارة القلق حول الأحداث المستقبلية. يوفر الكتاب استراتيجيات عملية للتعامل مع القلق والخوف، مما يساعد القراء على تطوير المرونة وآليات التكيف.",
+        cover: "imgs/القلق الاستباقي.jpg",
+        price: "1,300.00",
+        isbn: "9789776543222"
       },
       sapiens: {
         title: "واحة يعقوب",
         author: "عمرو عبد الحميد",
-        description: "A tale of refuge and renewal, where an oasis becomes a symbol of hope and transformation in the midst of life's challenges.",
-        cover: "imgs/واحة يعقوب.jpg"
+        description: "Jacob's Oasis is a spiritual novel about finding inner peace and spiritual renewal. The story follows characters as they discover an oasis that represents hope, transformation, and the possibility of starting over.",
+        description_ar: "واحة يعقوب رواية روحية عن إيجاد السلام الداخلي والتجديد الروحي. تتبع القصة شخصيات تكتشف واحة تمثل الأمل والتحول وإمكانية البدء من جديد.",
+        cover: "imgs/واحة يعقوب.jpg",
+        price: "1,400.00",
+        isbn: "9789776543223"
       },
       alchemist: {
         title: "الهلكوت",
         author: "أحمد خالد مصطفى",
-        description: "A philosophical exploration of destruction and renewal, examining the cycles of life and the inevitability of change.",
-        cover: "imgs/الهلكوت.jpg"
+        description: "Hell is a dark fantasy novel about a journey into the underworld. The story explores themes of good versus evil, redemption, and the consequences of our choices as characters navigate through a realm of darkness and temptation.",
+        description_ar: "الهلكوت رواية خيالية مظلمة عن رحلة إلى العالم السفلي. تستكشف القصة مواضيع الخير ضد الشر والفداء وعواقب خياراتنا بينما تتنقل الشخصيات عبر عالم من الظلام والإغراء.",
+        cover: "imgs/الهلكوت.jpg",
+        price: "1,300.00",
+        isbn: "9789776543224"
+      },
+      warandpeace: {
+        title: "الشيطان يحكي",
+        author: "أحمد خالد مصطفى",
+        description: "A compelling story where the devil tells his tale, exploring themes of good versus evil and moral choices.",
+        description_ar: "قصة مشوقة حيث يحكي الشيطان حكايته، تستكشف مواضيع الخير ضد الشر والخيارات الأخلاقية.",
+        cover: "imgs/الشيطان يحكي.jpg",
+        price: "1,500.00",
+        isbn: "9789776543225"
       },
       hitchhikers: {
         title: "اعادة برمجة",
-        author: "انا فيرجسون",
+        author: "آنا فيرجسون",
         description: "A comprehensive guide to self-development and reprogramming the mind to achieve success and happiness in life.",
-        cover: "imgs/اعادة برمجة.jpg"
+        description_ar: "دليل شامل للتطوير الذاتي وإعادة برمجة العقل لتحقيق النجاح والسعادة في الحياة.",
+        cover: "imgs/اعادة برمجة.jpg",
+        price: "1,300.00",
+        isbn: "9789776543226"
       },
       lotr: {
         title: "دليل الحياة الزوجية",
         author: "كيفن ليمان",
         description: "A comprehensive guide to a successful married life, covering the foundations of a healthy relationship and effective communication between spouses.",
-        cover: "imgs/دليل الحياة الزوجية.jpg"
+        description_ar: "دليل شامل لحياة زوجية ناجحة، يغطي أسس العلاقة الصحية والتواصل الفعال بين الزوجين.",
+        cover: "imgs/دليل الحياة الزوجية.jpg",
+        price: "1,500.00",
+        isbn: "9789776543227"
+      },
+      frankenstein: {
+        title: "نبوءة قصر السلطان",
+        author: "مروى جوهر",
+        description: "A mysterious prophecy about the Sultan's palace, filled with intrigue, secrets, and ancient wisdom.",
+        description_ar: "نبوءة غامضة عن قصر السلطان، مليئة بالمؤامرات والأسرار والحكمة القديمة.",
+        cover: "imgs/نبوءة قصر السلطان.jpg",
+        price: "1,500.00",
+        isbn: "9789776543228"
       },
       odyssey: {
         title: "المخ الابله",
         author: "دين برنيت",
-        description: "An exploration of the insatiable mind and its endless quest for knowledge, understanding, and meaning in life.",
-        cover: "imgs/المخ الابله.jpg"
+        description: "An exploration of how our brains can sometimes work against us, with insights into cognitive biases and mental shortcuts.",
+        description_ar: "استكشاف لكيفية عمل أدمغتنا أحياناً ضدنا، مع رؤى حول التحيزات المعرفية والاختصارات العقلية.",
+        cover: "imgs/المخ الابله.jpg",
+        price: "1,900.00",
+        isbn: "9789776543229"
       },
       mobydick: {
         title: "وادي الذئاب",
         author: "عمرو عبد الحميد",
-        description: "A thrilling adventure set in a mysterious valley where danger and discovery await, exploring themes of survival and primal instincts.",
+        description: "A thrilling adventure in the Valley of Wolves, where danger and mystery await at every turn.",
+        description_ar: "مغامرة مثيرة في وادي الذئاب، حيث ينتظر الخطر والغموض في كل منعطف.",
         cover: "imgs/وادي الذئاب.jpg",
         price: "1,400.00",
-        isbn: "9789931886655"
-      },
-      warandpeace: {
-        title: "الشيطان يحكي",
-        author: "أحمد خالد مصطفى",
-        description: "A dark and compelling narrative where the devil himself tells stories, revealing the hidden truths and moral complexities of human nature.",
-        cover: "imgs/الشيطان يحكي.jpg"
+        isbn: "9789776543230"
       },
       crimeandpunishment: {
         title: "عناق برائحة الورق",
         author: "منى سلامة",
-        description: "A sensual and evocative tale exploring the power of scent and touch in human relationships, where memories are intertwined with fragrance.",
-        cover: "imgs/عناق برائحة الورق.jpg"
-      },
-      عناق_برائحة: {
-        title: "عناق برائحة الورق",
-        author: "أحمد خالد توفيق",
-        description: "رواية رومانسية تتناول قصة حب عاطفية مع عناصر من الخيال والرومانسية، من سلسلة ما وراء الطبيعة.",
-        cover: "imgs/عناق برائحة الورق.jpg"
+        description: "A poetic novel about the embrace of paper and the scent of books, celebrating the love of reading and literature.",
+        description_ar: "رواية شعرية عن عناق الورق ورائحة الكتب، تحتفل بحب القراءة والأدب.",
+        cover: "imgs/عناق برائحة الورق.jpg",
+        price: "1,400.00",
+        isbn: "9789776543231"
       },
       catcher: {
         title: "اعرف وجهك الاخر",
         author: "د.يوسف الحسني",
-        description: "A journey of self-discovery and identity exploration, where the protagonist learns to recognize and accept their true self.",
-        cover: "imgs/اعرف وجهك.jpg"
+        description: "A psychological exploration of discovering your other face, understanding hidden aspects of your personality.",
+        description_ar: "استكشاف نفسي لاكتشاف وجهك الآخر، فهم الجوانب المخفية من شخصيتك.",
+        cover: "imgs/اعرف وجهك الاخر.jpg",
+        price: "1,500.00",
+        isbn: "9789776543232"
       },
-      it_ends_with_us: {
-        title: "It Ends With Us",
-        author: "Colleen Hoover",
-        description: "A powerful story about love, resilience, and the courage to make difficult choices in the face of domestic violence.",
-        description_ar: "قصة مؤثرة عن الحب والصمود وشجاعة اتخاذ القرارات الصعبة في مواجهة العنف الأسري.",
-        cover: "imgs/it end with us.jpg"
-      },
-      it_starts_with_us: {
-        title: "It Starts With Us",
-        author: "Colleen Hoover",
-        description: "The sequel to It Ends With Us, continuing Lily's story as she navigates co-parenting and finding love again.",
-        description_ar: "الجزء الثاني من رواية It Ends With Us، تتابع فيه ليلي رحلتها في تربية ابنتها والبحث عن الحب من جديد.",
-        cover: "imgs/it starts with us.jpg"
-      },
-      twisted_love: {
-        title: "Twisted Love",
-        author: "Ana Huang",
-        description: "A steamy romance about Alex Volkov, a ruthless businessman, and Ava Chen, who becomes entangled in his dangerous world.",
-        description_ar: "رواية رومانسية مشوقة عن أليكس فولكوف رجل الأعمال القاسي وآفا تشين التي تدخل عالمه الخطير.",
-        cover: "imgs/twisted love.jpg"
-      },
-      ugly_love: {
-        title: "Ugly Love",
-        author: "Colleen Hoover",
-        description: "A passionate romance about Tate Collins and Miles Archer, exploring themes of love, loss, and healing from past trauma.",
-        description_ar: "رواية رومانسية عميقة عن تايت كولينز ومايلز آرتشر، تدور حول الحب والفقدان والتعافي من جراح الماضي.",
-        cover: "imgs/ugly love.jpg"
-      },
-      al_dawood: {
-        title: "عمارة آل داوود",
-        author: "مروى جوهر",
-        description: "A novel inspired by true events, revolving around a mysterious building and terrifying incidents in an Egyptian city.",
-        description_ar: "رواية حقيقية تستوحي من أحداث حقيقية، تدور حول بناء غامض وأحداث مرعبة في مدينة مصر.",
-        cover: "imgs/ال داوود.jpg"
-      },
-      al_houl: {
-        title: "الهول",
-        author: "أحمد خالد توفيق",
-        description: "A horror novel about mysterious and terrifying events in a suspenseful psychological atmosphere.",
-        description_ar: "رواية رعب عن أحداث غامضة ومرعبة في أجواء نفسية مشوقة.",
-        cover: "imgs/الهول.jpg",
-        price: "1,000.00",
-        isbn: "46"
-      },
-      yohdoth_laylan: {
-        title: "يحدث ليلاً في الغرفة المغلقة",
-        author: "مروى جوهر",
-        description: "Terrifying and mysterious events take place in a locked room, inspired by true events.",
-        description_ar: "أحداث مرعبة وغامضة تدور في غرفة مغلقة، مستوحاة من أحداث حقيقية.",
-        cover: "imgs/يحدث ليلا.jpg"
-      },
-      the_witcher_sword_of_destiny: {
-        title: "ذا ويتشر: سيف المصير",
-        author: "أندجي سابكوفيسكي",
-        description: "The Witcher: Sword of Destiny is a collection of short stories following Geralt of Rivia as he faces monsters, moral dilemmas, and the destiny that binds him to Ciri.",
-        description_ar: "ذا ويتشر: سيف المصير مجموعة قصص قصيرة تتبع جيرالت في مواجهته للوحوش والمصير الذي يربطه بسيري.",
-        cover: "imgs/الوي.jpg"
-      },
-      the_witcher_last_wish: {
-        title: "ذا ويتشر: الأمنية الأخيرة",
-        author: "أندجي سابكوفيسكي",
-        description: "The Witcher: The Last Wish introduces Geralt of Rivia, a monster hunter whose adventures blend dark fantasy, folklore, and moral complexity.",
-        description_ar: "ذا ويتشر: الأمنية الأخيرة تقدم جيرالت كصياد وحوش في مغامرات تمزج بين الفانتازيا والقصص الشعبية والتعقيد الأخلاقي.",
-        cover: "imgs/الويتشر .jpg"
-      },
-      // DEVELOPMENT BOOKS
-      ahbabt_wghadan: {
-        title: "أحببت وغدا",
-        author: "د. عماد رشاد عثمان",
-        description: "A book about healing from toxic relationships, offering practical advice for self-understanding, overcoming emotional pain, and building healthy connections.",
-        description_ar: "كتاب عن التعافي من العلاقات السامة، يقدم نصائح عملية لفهم الذات والتغلب على الألم العاطفي وبناء علاقات صحية.",
-        cover: "imgs/احببت وغدا.jpg"
-      },
-      ask_and_it_is_given: {
-        title: "اسأل تعط",
-        author: "إستر وجيري هيكس",
-        description: "A self-development book explaining the Law of Attraction and how to achieve your desires through positive thinking and changing beliefs.",
-        description_ar: "كتاب تطوير الذات يشرح قانون الجذب وكيفية تحقيق الرغبات من خلال التفكير الإيجابي وتغيير المعتقدات.",
-        cover: "imgs/اسأل تعط.jpg"
-      },
-      vagus_nerve_reset: {
-        title: "إعادة برمجة جهازك العصبي",
-        author: "آنا فيرجسون",
-        description: "A practical guide to training your body to recover from stress, anxiety, and trauma through nervous system exercises.",
-        description_ar: "دليل عملي لتدريب الجسم على التعافي من التوتر والقلق والصدمات من خلال تمارين الجهاز العصبي.",
-        cover: "imgs/اعادة برمجة.jpg"
-      },
-      know_your_other_face: {
-        title: "اعرف وجهك الآخر",
-        author: "د. يوسف الحسني",
-        description: "A book that sheds light on the hidden aspects of personality and how to discover and develop your true self.",
-        description_ar: "كتاب يسلط الضوء على الجوانب الخفية من الشخصية وكيفية اكتشاف وتطوير ذاتك الحقيقية.",
-        cover: "imgs/اعرف وجهك.jpg"
-      },
-      bouncing_back_from_rejection: {
-        title: "التعافي من الرفض",
-        author: "د. ليزلي بيكر فيلبس",
-        description: "A book that helps you build psychological resilience, overcome feelings of rejection and frustration, and regain self-confidence.",
-        description_ar: "كتاب يساعدك على بناء المرونة النفسية والتغلب على مشاعر الرفض والإحباط واستعادة الثقة بالنفس.",
-        cover: "imgs/التعافي من الرفض.jpg"
-      },
-      the_mountain_is_you: {
-        title: "الجبل هو أنت",
-        author: "بريانـا ويست",
-        description: "A book about turning self-sabotage into self-mastery and how to face internal obstacles to achieve success.",
-        description_ar: "كتاب عن تحويل هدم الذات إلى إتقان الذات وكيفية مواجهة العقبات الداخلية لتحقيق النجاح.",
-        cover: "imgs/الجبل هو انت.jpg"
-      },
-      the_idiot_brain: {
-        title: "المخ الأبله",
-        author: "دين برنيت",
-        description: "A popular science book that explains how the human brain works and why it sometimes behaves irrationally or strangely.",
-        description_ar: "كتاب علمي مبسط يشرح كيفية عمل الدماغ البشري ولماذا يتصرف أحياناً بشكل غير منطقي أو غريب.",
-        cover: "imgs/المخ الابله.jpg"
-      },
-      the_monster_within: {
-        title: "الوحش الذي يسكنك",
-        author: "إيناس سمير",
-        description: "A book about facing personal fears and dealing with the darker sides of human nature.",
-        description_ar: "كتاب عن مواجهة المخاوف الشخصية والتعامل مع الجوانب المظلمة للطبيعة البشرية.",
-        cover: "imgs/الوحش الذي.jpg"
-      },
-      stop_stress_before_it_stops_you: {
-        title: "ضعي حدا للتوتر",
-        author: "كيفن ليمان",
-        description: "A book offering practical solutions for mothers to manage daily stress and achieve psychological balance.",
-        description_ar: "كتاب يقدم حلولاً عملية للأمهات لإدارة التوتر اليومي وتحقيق التوازن النفسي.",
-        cover: "imgs/ضعي حدا للتوتر.jpg"
-      },
-      marriage_life_guide: {
-        title: "دليل الحياة الزوجية",
-        author: "كيفن ليمان",
-        description: "A book that reveals the secrets of successful marital relationships and offers advice for maintaining romance and understanding between spouses.",
-        description_ar: "كتاب يكشف أسرار العلاقات الزوجية الناجحة ويقدم نصائح للحفاظ على الرومانسية والتفاهم بين الزوجين.",
-        cover: "imgs/دليل الحياة الزوجية.jpg"
-      },
-      your_psychological_complexes: {
-        title: "عقدك النفسية",
-        author: "د. يوسف الحسني",
-        description: "A book discussing the psychological roots of personal complexes and how to break free from them for a better life.",
-        description_ar: "كتاب يناقش الجذور النفسية للعقد الشخصية وكيفية التحرر منها لحياة أفضل.",
-        cover: "imgs/عقدك النفسية.jpg"
-      },
-      cant_hurt_me: {
-        title: "لا يمكنك إيذائي",
-        author: "ديفيد جوجينز",
-        description: "An inspiring autobiography about overcoming adversity and pushing the limits of personal endurance to achieve success.",
-        description_ar: "سيرة ذاتية ملهمة عن التغلب على الشدائد وتحدي حدود التحمل الشخصي لتحقيق النجاح.",
-        cover: "imgs/لا يمكنك ايذائي.jpg"
-      },
-      success_in_your_morning: {
-        title: "نجاحك في صباحك",
-        author: "بنيامين سبول ومايكل زاندر",
-        description: "A book about the importance of morning habits and how to use your mornings to achieve success and productivity throughout the day.",
-        description_ar: "كتاب عن أهمية عادات الصباح وكيفية استغلال الصباح لتحقيق النجاح والإنتاجية طوال اليوم.",
-        cover: "imgs/نجاحك في صباحك.jpg"
-      },
-      // RELIGIOUS BOOKS
-      fi_sohbat_al_habib: {
-        title: "في صحبة الحبيب",
-        author: "د. كفاح أبو هنود",
-        description: "This book presents the biography of Prophet Muhammad (peace be upon him) in a contemporary style, highlighting inspiring moments and values from his blessed life in a simple and engaging way.",
-        description_ar: "كتاب يقدم سيرة النبي محمد صلى الله عليه وسلم بأسلوب معاصر، ويبرز القيم والمواقف الملهمة من حياته المباركة.",
-        cover: "imgs/في صحبة الحبيب.jpg"
-      },
-      manhajiyat_al_seer: {
-        title: "منهجية السير إلى الله",
-        author: "د. كفاح أبو هنود",
-        description: "A spiritual guidebook that outlines the methodology and steps for drawing closer to Allah, offering practical advice and inspiration for seekers on the path of faith.",
-        description_ar: "دليل روحي يوضح منهجية وخطوات التقرب إلى الله، ويقدم نصائح عملية وإلهاماً للسائرين في طريق الإيمان.",
-        cover: "imgs/منهجية السير الى الله.jpg"
-      },
-      inna_rabbi_latif: {
-        title: "إن ربي لطيف",
-        author: "عبدالرحمن مسعد",
-        description: "A book that reflects on the subtle kindness and mercy of Allah in our lives, reminding readers of divine gentleness even in moments they may not notice.",
-        description_ar: "كتاب يتأمل في لطف ورحمة الله الخفية في حياتنا، ويذكر القارئ بلطف الله حتى في اللحظات التي قد لا يلاحظها.",
-        cover: "imgs/ان ربي لطيف.jpg"
-      },
-      yaj3al_lak_makhraja: {
-        title: "يجعلك الله لك مخرجا",
-        author: "أحمد الصابوني",
-        description: "This book offers hope and reassurance, focusing on how Allah provides relief and solutions in times of hardship, and encourages trust in divine wisdom.",
-        description_ar: "كتاب يمنح الأمل والطمأنينة، ويركز على كيف أن الله يفرج الكرب ويوفر الحلول في أوقات الشدة، ويشجع على الثقة بحكمة الله.",
-        cover: "imgs/يجعل الله لك مخرجا.jpg"
-      },
-      thani_ithnayn: {
-        title: "ثاني اثنين",
-        author: "أدهم شرقاوي",
-        description: "A novel inspired by the story of the Prophet's migration, exploring themes of faith, companionship, and trust in Allah during life's most challenging journeys.",
-        description_ar: "رواية مستوحاة من قصة هجرة النبي، وتتناول موضوعات الإيمان والصحبة والثقة بالله في أصعب الرحلات.",
-        cover: "imgs/ثاني اثنين.jpg"
-      },
-      // ROMANCE BOOKS
-      "3inaq_bara2i7a": {
-        title: "عناق برائحة الورق",
-        author: "أحمد خالد توفيق",
-        description: "A romantic novel that tells a passionate love story with elements of fantasy and romance, from the Ma Wara' al-Tabi'a series.",
-        description_ar: "رواية رومانسية عن قصة حب عاطفية مع عناصر من الخيال والرومانسية، من سلسلة ما وراء الطبيعة.",
-        cover: "imgs/عناق برائحة الورق.jpg"
-      },
-      ghusoon_bunduq_1: {
-        title: "غصون البندق - الكتاب الأول",
-        author: "منى سلامة",
-        description: "The first part of the 'Ghusoon al-Bunduq' novel by Mona Salama.",
-        description_ar: "الجزء الأول من رواية غصون البندق للكاتبة منى سلامة، بداية قصة مشوقة مليئة بالأحداث.",
-        cover: "imgs/غصون البندق.jpg"
-      },
-      ghusoon_bunduq_2: {
-        title: "غصون البندق - الكتاب الثاني",
-        author: "منى سلامة",
-        description: "The second part of the 'Ghusoon al-Bunduq' novel by Mona Salama.",
-        description_ar: "الجزء الثاني من رواية غصون البندق للكاتبة منى سلامة، يواصل أحداث القصة في أجواء مشوقة.",
-        cover: "imgs/غصون البندق2.jpg"
-      },
-      // FICTION BOOKS
       amarita: {
-        title: "اماريتا",
+        title: "أماريتا",
         author: "عمرو عبد الحميد",
-        description: "A fascinating tale of adventure and discovery, set in a world where ancient secrets come to life.",
-        description_ar: "حكاية رائعة عن المغامرة والاكتشاف في عالم تنبض فيه الأسرار القديمة بالحياة.",
-        cover: "imgs/اماريتا.jpg"
+        description: "A mysterious tale about Amarita, filled with intrigue, secrets, and unexpected revelations.",
+        description_ar: "حكاية غامضة عن أماريتا، مليئة بالمؤامرات والأسرار والكشوفات غير المتوقعة.",
+        cover: "imgs/اماريتا.jpg",
+        price: "1,200.00",
+        isbn: "9789776543233"
       },
       amwaj_akma: {
-        title: "امواج اكما",
+        title: "أمواج أكما",
         author: "عمرو عبد الحميد",
-        description: "A story of resilience and hope, where characters navigate through life's unpredictable waves.",
-        description_ar: "قصة عن الصمود والأمل، حيث يواجه الأبطال أمواج الحياة غير المتوقعة.",
-        cover: "imgs/امواج اكما.jpg"
+        description: "A story about the waves of Akma, exploring themes of change, transformation, and the power of nature.",
+        description_ar: "قصة عن أمواج أكما، تستكشف مواضيع التغيير والتحول وقوة الطبيعة.",
+        cover: "imgs/امواج اكما.jpg",
+        price: "1,450.00",
+        isbn: "9789776543234"
       },
       qawaed: {
-        title: "قواعد",
-        author: "Unknown",
-        description: "A fiction book with unique rules and a mysterious plot.",
-        description_ar: "كتاب خيالي بقواعد فريدة وحبكة غامضة.",
-        cover: "imgs/قواعد.jpg"
+        title: "جارتين قواعد",
+        author: "عمرو عبد الحميد",
+        description: "A story about two neighbors and their rules, exploring themes of community, boundaries, and relationships.",
+        description_ar: "قصة عن جارتين وقواعدهما، تستكشف مواضيع المجتمع والحدود والعلاقات.",
+        cover: "imgs/قواعد.jpg",
+        price: "1,350.00",
+        isbn: "9789776543235"
       },
-      // HORROR BOOKS
-      al_dawood: {
-        title: "عمارة آل داوود",
-        author: "مروى جوهر",
-        description: "A novel inspired by true events, revolving around a mysterious building and terrifying incidents in an Egyptian city.",
-        description_ar: "رواية حقيقية تستوحي من أحداث حقيقية، تدور حول بناء غامض وأحداث مرعبة في مدينة مصر.",
-        cover: "imgs/ال داوود.jpg"
+      daqat_al_shamo: {
+        title: "دقات الشامو",
+        author: "عمرو عبد الحميد",
+        description: "A rhythmic tale about the beats of Shamoo, exploring themes of music, rhythm, and life's cadence.",
+        description_ar: "حكاية إيقاعية عن دقات الشامو، تستكشف مواضيع الموسيقى والإيقاع وإيقاع الحياة.",
+        cover: "imgs/دقات الشامو.jpg",
+        price: "1,450.00",
+        isbn: "9789776543236"
       },
-      al_houl: {
-        title: "الهول",
-        author: "أحمد خالد توفيق",
-        description: "A horror novel about mysterious and terrifying events in a suspenseful psychological atmosphere.",
-        description_ar: "رواية رعب عن أحداث غامضة ومرعبة في أجواء نفسية مشوقة.",
-        cover: "imgs/الهول.jpg"
-      },
-      yohdoth_laylan: {
-        title: "يحدث ليلاً في الغرفة المغلقة",
-        author: "مروى جوهر",
-        description: "Terrifying and mysterious events take place in a locked room, inspired by true events.",
-        description_ar: "أحداث مرعبة وغامضة تدور في غرفة مغلقة، مستوحاة من أحداث حقيقية.",
-        cover: "imgs/يحدث ليلا.jpg"
-      },
-      nobowat_sultan: {
-        title: "نبوءة قصر السلطان",
-        author: "مروى جوهر",
-        description: "A horror novel about a mysterious palace and a terrifying prophecy, inspired by true events.",
-        cover: "imgs/نبوءة قصر السلطان.jpg"
-      },
-      // NOVELS BOOKS
-      alsadis_ahmar: {
-        title: "السادس احمر",
-        author: "أحمد خيري العمري",
-        description: "A coming-of-age novel that explores the memories and experiences of a young boy during his school years, focusing on the symbolism of the color red and its impact on his life and identity.",
-        cover: "imgs/السادس احمر.jpg"
-      },
-      bayt_khalati: {
-        title: "بيت خالتي",
-        author: "أحمد خيري العمري",
-        description: "A nostalgic journey back to an aunt's house, filled with childhood memories and family bonds that shape our understanding of home and belonging.",
-        cover: "imgs/بيت خالتي.jpg",
-        price: "1,600.00",
-        isbn: "9789779921136"
-      },
-      tariq_jahannam: {
-        title: "طريق جهنم",
-        author: "أيمن العتوم",
-        description: "A political novel that delves into the life and rule of Muammar Gaddafi, exploring the brutality, oppression, and psychological manipulation of his regime in Libya.",
-        cover: "imgs/طريق جهنم.jpg",
-        price: "2,000.00",
-        isbn: "9789953858852"
-      },
-      "3inaq_bara2i7a": {
-        title: "عناق برائحة الورق",
-        author: "منى سلامة",
-        description: "A romantic novel that tells a passionate love story with elements of fantasy and romance, exploring the depths of human emotions and relationships.",
-        description_ar: "رواية رومانسية عن قصة حب عاطفية مع عناصر من الخيال والرومانسية، من سلسلة ما وراء الطبيعة.",
-        cover: "imgs/عناق برائحة الورق.jpg"
-      },
-      qadaya_sherlock: {
-        title: "قضايا شيرلوك هولمز",
-        author: "أرثر كونان دويل",
-        description: "A collection of detective stories featuring the brilliant Sherlock Holmes and his loyal companion Dr. Watson, solving complex mysteries through deductive reasoning.",
-        cover: "imgs/قضايا شيرلوك هولمز.jpg"
-      },
-      matjar_daljot: {
-        title: "متجر دالجوت للأحلام",
-        author: "لي مي بيه",
-        description: "A fantasy novel that explores the concept of dreams as a commodity, where people can buy and sell their dreams in a mysterious shop, blending reality with imagination.",
-        cover: "imgs/متجر دالجوت للأحلام.jpg"
-      },
-      hal_sata2kul_qatti: {
-        title: "هل ستأكل قطتي مقلتي",
-        author: "أحمد خالد توفيق",
-        description: "A humorous and satirical novel that explores the absurdities of modern life through the lens of a cat's perspective, blending comedy with social commentary.",
-        cover: "imgs/هل ستأكل قطتي مقلتي.jpg"
-      },
-      yasma3un_hasisaha: {
-        title: "يسمعون حسيسها",
-        author: "أحمد خالد توفيق",
-        description: "A psychological thriller that explores the depths of human consciousness and the thin line between reality and imagination, where characters hear whispers that may or may not be real.",
-        description_ar: "رواية خيالية عن عمق الوعي البشري والخط الرفيع بين الواقع والخيال، حيث يسمع الأبطال أصوات تأتي من الصوت قد تكون أو لا تكون حقيقية.",
-        cover: "imgs/يسمعون حسيسها.jpg",
-        price: "2,000.00",
-        isbn: "20"
-      },
-      nafar_min_al_jinn: {
-        title: "نفر من الجن",
-        author: "أيمن العتوم",
-        description: "A gripping horror novel that explores the mysterious world of jinn and the supernatural. The story blends reality with myth, following characters as they confront their deepest fears and the unknown. Through psychological and spiritual struggles, the novel delves into the boundaries between the seen and unseen worlds, challenging the characters' perceptions of reality and faith.",
-        description_ar: "رواية رعب مشوقة تستكشف عالم الجن وما وراء الطبيعة، وتدمج بين الواقع والأسطورة في رحلة نفسية وروحية.",
-        cover: "imgs/نفر من الجن.jpg"
-      },
-      alwicher: {
-        title: "الويتشر",
-        author: "Unknown",
-        description: "A fantasy novel inspired by the Witcher universe, full of magic and adventure.",
-        cover: "imgs/الوي.jpg"
+      wadi_al_dhiab: {
+        title: "وادي الذئاب",
+        author: "عمرو عبد الحميد",
+        description: "Another adventure in the Valley of Wolves, with new challenges and discoveries.",
+        description_ar: "مغامرة أخرى في وادي الذئاب، مع تحديات واكتشافات جديدة.",
+        cover: "imgs/وادي الذئاب.jpg",
+        price: "1,400.00",
+        isbn: "9789776543237"
       },
       waha_yaqub: {
         title: "واحة يعقوب",
         author: "عمرو عبد الحميد",
-        description: "A tale of refuge and renewal, where an oasis becomes a symbol of hope and transformation.",
-        description_ar: "حكاية عن الملاذ والتجدد، حيث تصبح الواحة رمزاً للأمل والتحول.",
-        cover: "imgs/واحة يعقوب.jpg"
+        description: "A continuation of the oasis story, with deeper exploration of spiritual themes.",
+        description_ar: "استمرار لقصة الواحة، مع استكشاف أعمق للمواضيع الروحية.",
+        cover: "imgs/واحة يعقوب.jpg",
+        price: "1,400.00",
+        isbn: "9789776543238"
+      },
+      the_witcher_sword_of_destiny: {
+        title: "ذا ويتشر: سيف المصير",
+        author: "أندجي سابكوفيسكي",
+        description: "A fantasy novel about the Witcher and the Sword of Destiny, filled with magic, monsters, and destiny.",
+        description_ar: "رواية خيالية عن الويتشر وسيف المصير، مليئة بالسحر والوحوش والمصير.",
+        cover: "imgs/الويتشر .jpg",
+        price: "1,600.00",
+        isbn: "9789776543239"
+      },
+      the_witcher_last_wish: {
+        title: "ذا ويتشر: الأمنية الأخيرة",
+        author: "أندجي سابكوفيسكي",
+        description: "The Witcher's last wish and the consequences that follow, exploring themes of choice and consequence.",
+        description_ar: "الأمنية الأخيرة للويتشر والعواقب التي تتبعها، تستكشف مواضيع الاختيار والعاقبة.",
+        cover: "imgs/الويتشر .jpg",
+        price: "1,500.00",
+        isbn: "9789776543240"
+      },
+      it_ends_with_us: {
+        title: "It Ends With Us",
+        author: "Colleen Hoover",
+        description: "A powerful novel about love, choices, and the courage to break cycles of abuse.",
+        description_ar: "رواية قوية عن الحب والخيارات والشجاعة لكسر دورات الإساءة.",
+        cover: "imgs/it end with us.jpg",
+        price: "1,200.00",
+        isbn: "9789776543241"
+      },
+      it_starts_with_us: {
+        title: "It Starts With Us",
+        author: "Colleen Hoover",
+        description: "A sequel exploring new beginnings and the power of second chances in love and life.",
+        description_ar: "تكملة تستكشف البدايات الجديدة وقوة الفرص الثانية في الحب والحياة.",
+        cover: "imgs/it starts with us.jpg",
+        price: "1,200.00",
+        isbn: "9789776543242"
+      },
+      twisted_love: {
+        title: "Twisted Love",
+        author: "Ana Huang",
+        description: "A dark romance about twisted love and the complexities of human relationships.",
+        description_ar: "رومانسية مظلمة عن الحب الملتوي وتعقيدات العلاقات الإنسانية.",
+        cover: "imgs/twisted love.jpg",
+        price: "1,200.00",
+        isbn: "9789776543243"
+      },
+      ugly_love: {
+        title: "Ugly Love",
+        author: "Colleen Hoover",
+        description: "A story about love that's not always beautiful, exploring the raw and real aspects of relationships.",
+        description_ar: "قصة عن الحب الذي ليس دائماً جميلاً، تستكشف الجوانب الخام والحقيقية للعلاقات.",
+        cover: "imgs/ugly love.jpg",
+        price: "1,200.00",
+        isbn: "9789776543244"
+      },
+      alsadis_ahmar: {
+        title: "السادس احمر",
+        author: "أحمد خيري العمري",
+        description: "A mysterious tale about the red sixth, filled with symbolism and hidden meanings.",
+        description_ar: "حكاية غامضة عن السادس الأحمر، مليئة بالرمزية والمعاني المخفية.",
+        cover: "imgs/السادس احمر.jpg",
+        price: "1,300.00",
+        isbn: "9789776543245"
+      },
+      tariq_jahannam: {
+        title: "طريق جهنم",
+        author: "أيمن العتوم",
+        description: "A journey down the road to hell, exploring themes of sin, redemption, and moral choices.",
+        description_ar: "رحلة في طريق جهنم، تستكشف مواضيع الخطيئة والفداء والخيارات الأخلاقية.",
+        cover: "imgs/طريق جهنم.jpg",
+        price: "1,900.00",
+        isbn: "9789776543246"
+      },
+      "3inaq_bara2i7a": {
+        title: "عناق برائحة الورق",
+        author: "منى سلامة",
+        description: "Another edition of the paper-scented embrace, celebrating the love of books and reading.",
+        description_ar: "إصدار آخر من عناق برائحة الورق، يحتفل بحب الكتب والقراءة.",
+        cover: "imgs/عناق برائحة الورق.jpg",
+        price: "1,400.00",
+        isbn: "9789776543247"
+      },
+      qadaya_sherlock: {
+        title: "قضايا شيرلوك هولمز",
+        author: "أرثر كونان دويل",
+        description: "Classic Sherlock Holmes cases, showcasing the brilliant detective's deductive reasoning and mystery-solving skills.",
+        description_ar: "قضايا شيرلوك هولمز الكلاسيكية، تعرض المنطق الاستنتاجي البارع للتحري ومهارات حل الألغاز.",
+        cover: "imgs/قضايا شيرلوك هولمز.jpg",
+        price: "1,600.00",
+        isbn: "9789776543248"
+      },
+      matjar_daljot: {
+        title: "متجر دالجوت للأحلام",
+        author: "لي مي بيه",
+        description: "A magical store where dreams are sold, exploring themes of hope, imagination, and the power of dreams.",
+        description_ar: "متجر سحري حيث تباع الأحلام، تستكشف مواضيع الأمل والخيال وقوة الأحلام.",
+        cover: "imgs/متجر دالجوت للأحلام.jpg",
+        price: "1,400.00",
+        isbn: "9789776543249"
+      },
+      yasma3un_hasisaha: {
+        title: "يسمعون حسيسها",
+        author: "أيمن العتوم",
+        description: "A story about hearing whispers and secrets, exploring themes of hidden knowledge and revelation.",
+        description_ar: "قصة عن سماع الهمسات والأسرار، تستكشف مواضيع المعرفة المخفية والكشف.",
+        cover: "imgs/يسمعون حسيسها.jpg",
+        price: "2,000.00",
+        isbn: "9789776543250"
+      },
+      al_houl: {
+        title: "الهول",
+        author: "أحمد خالد توفيق",
+        description: "A horror story about terror and fear, exploring the depths of human fear and the unknown.",
+        description_ar: "قصة رعب عن الرعب والخوف، تستكشف أعماق الخوف الإنساني والمجهول.",
+        cover: "imgs/الهول.jpg",
+        price: "1,000.00",
+        isbn: "9789776543251"
+      },
+      nafar_min_al_jinn: {
+        title: "نفر من الجن",
+        author: "أيمن العتوم",
+        description: "A supernatural tale about jinn and their interactions with humans, exploring themes of the unseen world.",
+        description_ar: "حكاية خارقة للطبيعة عن الجن وتفاعلاتهم مع البشر، تستكشف مواضيع العالم غير المرئي.",
+        cover: "imgs/نفر من الجن.jpg",
+        price: "2,000.00",
+        isbn: "9789776543252"
+      },
+      fi_sohbat_al_habib: {
+        title: "في صحبة الحبيب",
+        author: "د. كفاح أبو هنود",
+        description: "A spiritual guide about companionship with the beloved, exploring themes of love for God and spiritual connection.",
+        description_ar: "دليل روحي عن صحبة الحبيب، تستكشف مواضيع حب الله والاتصال الروحي.",
+        cover: "imgs/في صحبة الحبيب.jpg",
+        price: "1,600.00",
+        isbn: "9789776543253"
+      },
+      manhajiyat_al_seer: {
+        title: "منهجية السير إلى الله",
+        author: "د. كفاح أبو هنود",
+        description: "A systematic approach to walking the path to God, with practical steps for spiritual development.",
+        description_ar: "منهج منهجي للسير في طريق الله، مع خطوات عملية للتطوير الروحي.",
+        cover: "imgs/منهجية السير الى الله.jpg",
+        price: "1,500.00",
+        isbn: "9789776543254"
+      },
+      inna_rabbi_latif: {
+        title: "إن ربي لطيف",
+        author: "عبدالرحمن مسعد",
+        description: "A reflection on God's gentleness and kindness, exploring themes of divine mercy and compassion.",
+        description_ar: "تأمل في لطف الله ورحمته، تستكشف مواضيع الرحمة الإلهية والتعاطف.",
+        cover: "imgs/ان ربي لطيف.jpg",
+        price: "900.00",
+        isbn: "9789776543255"
+      },
+      yaj3al_lak_makhraja: {
+        title: "يجعلك الله لك مخرجا",
+        author: "أحمد الصابوني",
+        description: "A book about finding solutions and ways out of difficulties through faith and trust in God.",
+        description_ar: "كتاب عن إيجاد الحلول والطرق للخروج من الصعوبات من خلال الإيمان والثقة بالله.",
+        cover: "imgs/يجعل الله لك مخرجا.jpg",
+        price: "1,400.00",
+        isbn: "9789776543256"
+      },
+      thani_ithnayn: {
+        title: "ثاني اثنين",
+        author: "أدهم شرقاوي",
+        description: "A story about being second to two, exploring themes of competition, comparison, and self-worth.",
+        description_ar: "قصة عن كونك ثاني اثنين، تستكشف مواضيع المنافسة والمقارنة وتقدير الذات.",
+        cover: "imgs/ثاني اثنين.jpg",
+        price: "1,200.00",
+        isbn: "9789776543257"
+      },
+      ahbabt_wghadan: {
+        title: "أحببت وغدا",
+        author: "د. عماد رشاد عثمان",
+        description: "A story about loving and tomorrow, exploring themes of love, time, and the future.",
+        description_ar: "قصة عن الحب وغداً، تستكشف مواضيع الحب والوقت والمستقبل.",
+        cover: "imgs/احببت وغدا.jpg",
+        price: "1,700.00",
+        isbn: "9789776543258"
+      },
+      ask_and_it_is_given: {
+        title: "اسأل تعط",
+        author: "إستر وجيري هيكس",
+        description: "A guide about asking and receiving, exploring the law of attraction and manifestation.",
+        description_ar: "دليل عن السؤال والحصول، تستكشف قانون الجذب والتجسد.",
+        cover: "imgs/اسأل تعط.jpg",
+        price: "1,700.00",
+        isbn: "9789776543259"
+      },
+      vagus_nerve_reset: {
+        title: "إعادة برمجة جهازك العصبي",
+        author: "آنا فيرجسون",
+        description: "A guide to resetting your nervous system through the vagus nerve, with practical techniques for stress relief.",
+        description_ar: "دليل لإعادة ضبط جهازك العصبي من خلال العصب المبهم، مع تقنيات عملية لتخفيف التوتر.",
+        cover: "imgs/اعادة برمجة.jpg",
+        price: "1,300.00",
+        isbn: "9789776543260"
+      },
+      know_your_other_face: {
+        title: "اعرف وجهك الآخر",
+        author: "د. يوسف الحسني",
+        description: "A psychological guide to discovering your other face and understanding hidden aspects of your personality.",
+        description_ar: "دليل نفسي لاكتشاف وجهك الآخر وفهم الجوانب المخفية من شخصيتك.",
+        cover: "imgs/اعرف وجهك.jpg",
+        price: "1,500.00",
+        isbn: "9789776543261"
+      },
+      bouncing_back_from_rejection: {
+        title: "التعافي من الرفض",
+        author: "د. ليزلي بيكر فيلبس",
+        description: "A guide to recovering from rejection and building resilience in the face of setbacks.",
+        description_ar: "دليل للتعافي من الرفض وبناء المرونة في مواجهة النكسات.",
+        cover: "imgs/التعافي من الرفض.jpg",
+        price: "1,500.00",
+        isbn: "9789776543262"
+      },
+      the_mountain_is_you: {
+        title: "الجبل هو أنت",
+        author: "بريانا ويست",
+        description: "A metaphor about being your own mountain, exploring themes of self-empowerment and inner strength.",
+        description_ar: "استعارة عن كونك جبلك الخاص، تستكشف مواضيع تمكين الذات والقوة الداخلية.",
+        cover: "imgs/الجبل هو انت.jpg",
+        price: "1,400.00",
+        isbn: "9789776543263"
+      },
+      the_idiot_brain: {
+        title: "المخ الأبله",
+        author: "دين برنيت",
+        description: "An exploration of how our brains can sometimes work against us, with insights into cognitive biases.",
+        description_ar: "استكشاف لكيفية عمل أدمغتنا أحياناً ضدنا، مع رؤى حول التحيزات المعرفية.",
+        cover: "imgs/المخ الابله.jpg",
+        price: "1,900.00",
+        isbn: "9789776543264"
+      },
+      the_monster_within: {
+        title: "الوحش الذي يسكنك",
+        author: "إيناس سمير",
+        description: "A story about the monster within us, exploring themes of inner demons and self-acceptance.",
+        description_ar: "قصة عن الوحش الذي يسكننا، تستكشف مواضيع الشياطين الداخلية وتقبل الذات.",
+        cover: "imgs/الوحش الذي.jpg",
+        price: "1,300.00",
+        isbn: "9789776543265"
+      },
+      stop_stress_before_it_stops_you: {
+        title: "ضعي حدا للتوتر",
+        author: "كيفن ليمان",
+        description: "A guide to stopping stress before it stops you, with practical strategies for stress management.",
+        description_ar: "دليل لإيقاف التوتر قبل أن يوقفك، مع استراتيجيات عملية لإدارة التوتر.",
+        cover: "imgs/ضعي حدا للتوتر.jpg",
+        price: "1,300.00",
+        isbn: "9789776543266"
+      },
+      marriage_life_guide: {
+        title: "دليل الحياة الزوجية",
+        author: "كيفن ليمان",
+        description: "A comprehensive guide to successful married life, covering relationship foundations and communication.",
+        description_ar: "دليل شامل للحياة الزوجية الناجحة، يغطي أسس العلاقة والتواصل.",
+        cover: "imgs/دليل الحياة الزوجية.jpg",
+        price: "1,500.00",
+        isbn: "9789776543267"
+      },
+      your_psychological_complexes: {
+        title: "عقدك النفسية",
+        author: "د. يوسف الحسني",
+        description: "A guide to understanding and resolving your psychological complexes for better mental health.",
+        description_ar: "دليل لفهم وحل عقدك النفسية لصحة عقلية أفضل.",
+        cover: "imgs/عقدك النفسية.jpg",
+        price: "1,500.00",
+        isbn: "9789776543268"
+      },
+      cant_hurt_me: {
+        title: "لا يمكنك إيذائي",
+        author: "ديفيد جوجينز",
+        description: "A powerful story about mental toughness and overcoming adversity through discipline and determination.",
+        description_ar: "قصة قوية عن القوة العقلية والتغلب على الشدائد من خلال الانضباط والعزيمة.",
+        cover: "imgs/لا يمكنك ايذائي.jpg",
+        price: "1,900.00",
+        isbn: "9789776543269"
+      },
+      success_in_your_morning: {
+        title: "نجاحك في صباحك",
+        author: "بنيامين سبول ومايكل زاندر",
+        description: "A guide to making your mornings successful and productive, setting the tone for the entire day.",
+        description_ar: "دليل لجعل صباحك ناجحاً ومنتجاً، وتحديد النبرة ليوم كامل.",
+        cover: "imgs/نجاحك في صباحك.jpg",
+        price: "1,450.00",
+        isbn: "9789776543270"
       }
     };
 

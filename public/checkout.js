@@ -32,6 +32,18 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 // Full authoritative list of all books in the bookstore (copied from search.html)
 const books = {
+  // New books from the latest images
+  ayyam_al_hijran: { title: "أيام الهجران", author: "إيلينا فيرانتي", price: "1,450.00" },
+  al_3adat_al_dharia: { title: "العادات الذرية", author: "جيمس كلير", price: "1,400.00" },
+        eva_luna: { title: "إيفا لونا", author: "إيزابيل الليندي", price: "2,100.00" },
+  ghusoon_bunduq_1: { title: "غصون البندق - الكتاب الأول", author: "منى سلامة", price: "1,200.00" },
+  ghusoon_bunduq_2: { title: "غصون البندق - الكتاب الثاني", author: "منى سلامة", price: "1,200.00" },
+  kayf_tajid_al_hob: { title: "كيف تجد الحب", author: "آلان دو بوتون", price: "1,300.00" },
+  masarrat_saghira: { title: "مسرات صغيرة", author: "آلان دو بوتون", price: "1,300.00" },
+  hal_sata2kul_qatti: { title: "هل ستأكل قطتي مقلتي؟", author: "كيتلين دوتي", price: "2,250.00" },
+  maktabat_muntasaf_al_layl: { title: "مكتبة منتصف الليل", author: "مات هيغ", price: "1,600.00" },
+  
+  // Keep some existing popular books
   el9adimon: { title: "القادمون", author: "أحمد خالد مصطفى", price: "1,800.00" },
   ard_zikola: { title: "أرض زيكولا", author: "عمرو عبد الحميد", price: "1,200.00" },
   fatat_al_yaka: { title: "فتاة الياقة", author: "عمرو عبد الحميد", price: "1,400.00" },
@@ -40,7 +52,7 @@ const books = {
   sapiens: { title: "واحة يعقوب", author: "عمرو عبد الحميد", price: "1,400.00" },
   alchemist: { title: "الهلكوت", author: "أحمد خالد مصطفى", price: "1,300.00" },
   warandpeace: { title: "الشيطان يحكي", author: "أحمد خالد مصطفى", price: "1,500.00" },
-  hitchhikers: { title: "اعادة برمجة", author: "انا فيرجسون", price: "1,300.00" },
+  hitchhikers: { title: "اعادة برمجة", author: "آنا فيرجسون", price: "1,300.00" },
   lotr: { title: "دليل الحياة الزوجية", author: "كيفن ليمان", price: "1,500.00" },
   frankenstein: { title: "نبوءة قصر السلطان", author: "مروى جوهر", price: "1,500.00" },
   odyssey: { title: "المخ الابله", author: "دين برنيت", price: "1,900.00" },
@@ -59,16 +71,16 @@ const books = {
   it_starts_with_us: { title: "It Starts With Us", author: "Colleen Hoover", price: "1,200.00" },
   twisted_love: { title: "Twisted Love", author: "Ana Huang", price: "1,200.00" },
   ugly_love: { title: "Ugly Love", author: "Colleen Hoover", price: "1,200.00" },
-  ghusoon_bunduq_1: { title: "غصون البندق - الكتاب الأول", author: "منى سلامة", price: "1,200.00" },
-  ghusoon_bunduq_2: { title: "غصون البندق - الكتاب الثاني", author: "منى سلامة", price: "1,200.00" },
   alsadis_ahmar: { title: "السادس احمر", author: "أحمد خيري العمري", price: "1,300.00" },
   tariq_jahannam: { title: "طريق جهنم", author: "أيمن العتوم", price: "1,900.00" },
   "3inaq_bara2i7a": { title: "عناق برائحة الورق", author: "منى سلامة", price: "1,400.00" },
-  qadaya_sherlock: { title: "قضايا شيرلوك هولمز", author: "أرثر كونان دويل", price: "1,600.00" },
+  qadaya_sherlock: { title: "قضايا شيرلوك هولمز", author: "أرثر كونان دويل", price: "1,200.00" },
   matjar_daljot: { title: "متجر دالجوت للأحلام", author: "لي مي بيه", price: "1,400.00" },
-  hal_sata2kul_qatti: { title: "هل ستأكل قطتي مقلتي", author: "كيتلين دوتي", price: "2,250.00" },
   yasma3un_hasisaha: { title: "يسمعون حسيسها", author: "أيمن العتوم", price: "2,000.00" },
   al_houl: { title: "الهول", author: "أحمد خالد توفيق", price: "1,000.00" },
+  the_witcher_sword_of_destiny: { title: "الويتشر سيف المصير", author: "أندجي سابكوفسكي", price: "1,600.00" },
+  the_witcher_last_wish: { title: "الويتشر الأمنية الأخيرة", author: "أندجي سابكوفسكي", price: "1,500.00" },
+  kun_al_shakhs: { title: "كن الشخص الذي يجعلك سعيدا", author: "مجهول", price: "1,200.00" },
   nafar_min_al_jinn: { title: "نفر من الجن", author: "أيمن العتوم", price: "2,000.00" },
   fi_sohbat_al_habib: { title: "في صحبة الحبيب", author: "د. كفاح أبو هنود", price: "1,600.00" },
   manhajiyat_al_seer: { title: "منهجية السير إلى الله", author: "د. كفاح أبو هنود", price: "1,500.00" },

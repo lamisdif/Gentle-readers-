@@ -1,5 +1,17 @@
 // JavaScript extracted from cart.html
 const books = {
+  // New books from the latest images
+  ayyam_al_hijran: { title: "أيام الهجران" },
+  al_3adat_al_dharia: { title: "العادات الذرية" },
+  eva_luna: { title: "إيفا لونا" },
+  ghusoon_bunduq_1: { title: "غصون البندق - الكتاب الأول" },
+  ghusoon_bunduq_2: { title: "غصون البندق - الكتاب الثاني" },
+  kayf_tajid_al_hob: { title: "كيف تجد الحب" },
+  masarrat_saghira: { title: "مسرات صغيرة" },
+  hal_sata2kul_qatti: { title: "هل ستأكل قطتي مقلتي؟" },
+  maktabat_muntasaf_al_layl: { title: "مكتبة منتصف الليل" },
+  
+  // Keep some existing popular books
   el9adimon: { title: "القادمون" },
   ard_zikola: { title: "أرض زيكولا" },
   fatat_al_yaka: { title: " فتاة الياقة الزرقاء" },
@@ -27,14 +39,11 @@ const books = {
   it_starts_with_us: { title: "It Starts With Us" },
   twisted_love: { title: "Twisted Love" },
   ugly_love: { title: "Ugly Love" },
-  ghusoon_bunduq_1: { title: "غصون البندق - الكتاب الأول" },
-  ghusoon_bunduq_2: { title: "غصون البندق - الكتاب الثاني" },
   alsadis_ahmar: { title: "السادس احمر" },
   tariq_jahannam: { title: "طريق جهنم" },
   "3inaq_bara2i7a": { title: "عناق برائحة الورق" },
   qadaya_sherlock: { title: "قضايا شيرلوك هولمز" },
   matjar_daljot: { title: "متجر دالجوت للأحلام" },
-  hal_sata2kul_qatti: { title: "هل ستأكل قطتي مقلتي" },
   yasma3un_hasisaha: { title: "يسمعون حسيسها" },
   al_houl: { title: "الهول" },
   nafar_min_al_jinn: { title: "نفر من الجن" },
