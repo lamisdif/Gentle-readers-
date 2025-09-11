@@ -64,7 +64,16 @@ const books = {
   marriage_life_guide: { title: "دليل الحياة الزوجية" },
   your_psychological_complexes: { title: "عقدك النفسية" },
   cant_hurt_me: { title: "لا يمكنك إيذائي" },
-  success_in_your_morning: { title: "نجاحك في صباحك" }
+  success_in_your_morning: { title: "نجاحك في صباحك" },
+  
+  // Missing books from the images
+  al_baron: { title: "البارون" },
+  little_women: { title: "Little Women" },
+  oliver_twist: { title: "Oliver Twist" },
+  pride_and_prejudice: { title: "Pride and Prejudice" },
+  anne_of_green_gables: { title: "Anne of Green Gables" },
+  hasees: { title: "هسيس" },
+  hatha_ma_hadath_maaha: { title: "هذا ما حدث معها" }
 };
 function getCartObject() {
   const stored = JSON.parse(localStorage.getItem('cart')) || {};
