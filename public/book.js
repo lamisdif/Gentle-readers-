@@ -189,7 +189,7 @@ const books = {
     description: "An impactful novel that tells the story of a young girl in a desert village dealing with challenges and difficult circumstances. The story follows her journey in facing hardships and finding inner strength to overcome obstacles and achieve her dreams.",
     description_ar: "رواية مؤثرة تروي قصة فتاة صغيرة في قرية صحراوية تتعامل مع التحديات والظروف الصعبة. تتبع القصة رحلتها في مواجهة المصاعب وإيجاد القوة الداخلية للتغلب على العقبات وتحقيق أحلامها.",
     cover: "imgs/هذا ما حدث معها.jpg",
-    price: "1,700.00",
+    price: "1,200.00",
     isbn: "9789776543235"
   },
   al_baron: {
