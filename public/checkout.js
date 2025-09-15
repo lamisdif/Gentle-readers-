@@ -38,8 +38,8 @@ const books = {
         eva_luna: { title: "إيفا لونا", author: "إيزابيل الليندي", price: "2,100.00" },
   ghusoon_bunduq_1: { title: "غصون البندق - الكتاب الأول", author: "منى سلامة", price: "1,200.00" },
   ghusoon_bunduq_2: { title: "غصون البندق - الكتاب الثاني", author: "منى سلامة", price: "1,200.00" },
-  kayf_tajid_al_hob: { title: "كيف تجد الحب", author: "آلان دو بوتون", price: "1,300.00" },
-  masarrat_saghira: { title: "مسرات صغيرة", author: "آلان دو بوتون", price: "1,300.00" },
+  kayf_tajid_al_hob: { title: "كيف تجد الحب", author: "آلان دو بوتون", price: "1,000.00" },
+  masarrat_saghira: { title: "مسرات صغيرة", author: "آلان دو بوتون", price: "1,400.00" },
   hal_sata2kul_qatti: { title: "هل ستأكل قطتي مقلتي؟", author: "كيتلين دوتي", price: "2,250.00" },
   maktabat_muntasaf_al_layl: { title: "مكتبة منتصف الليل", author: "مات هيغ", price: "1,600.00" },
   

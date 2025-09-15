@@ -52,7 +52,7 @@ const books = {
     description: "Part of The School of Life series, this book explores the philosophy and psychology of love, offering insights into how to find and maintain meaningful relationships.",
     description_ar: "جزء من سلسلة مدرسة الحياة، يستكشف هذا الكتاب فلسفة وعلم نفس الحب، ويقدم رؤى حول كيفية العثور على العلاقات الهادفة والحفاظ عليها.",
     cover: "imgs/كيف تجد الحب.jpg",
-    price: "1,300.00",
+    price: "1,000.00",
     isbn: "9789776543216"
   },
   masarrat_saghira: {
@@ -61,7 +61,7 @@ const books = {
     description: "Another installment from The School of Life series, focusing on finding joy in everyday moments and appreciating the small pleasures that make life beautiful.",
     description_ar: "جزء آخر من سلسلة مدرسة الحياة، يركز على إيجاد الفرح في اللحظات اليومية وتقدير المسرات الصغيرة التي تجعل الحياة جميلة.",
     cover: "imgs/مسرات صغيرة.jpg",
-    price: "1,300.00",
+    price: "1,400.00",
     isbn: "9789776543217"
   },
   hal_sata2kul_qatti: {
