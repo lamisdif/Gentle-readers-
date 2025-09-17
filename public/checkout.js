@@ -111,6 +111,24 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   }
+
+  // Handle delivery method change to show/hide address field
+  const deliverySelect = document.getElementById('checkout-delivery-select');
+  const addressField = document.getElementById('address-field');
+  const addressInput = document.getElementById('checkout-address-input');
+  
+  if (deliverySelect && addressField && addressInput) {
+    deliverySelect.addEventListener('change', function() {
+      if (this.value === 'home') {
+        addressField.style.display = 'block';
+        addressInput.required = true;
+      } else {
+        addressField.style.display = 'none';
+        addressInput.required = false;
+        addressInput.value = ''; // Clear address when not needed
+      }
+    });
+  }
 });
 // Full authoritative list of all books in the bookstore (copied from search.html)
 const books = {
@@ -305,6 +323,7 @@ const checkoutForm = document.getElementById("checkoutForm");
 if (checkoutForm) {
   checkoutForm.addEventListener("submit", async function(e) {
     e.preventDefault();
+    
     // Collect form data
     const firstName = document.getElementById("checkout-name-input")?.value?.trim();
     const familyName = document.getElementById("checkout-family-input")?.value?.trim();
@@ -312,13 +331,42 @@ if (checkoutForm) {
     const deliveryMethod = document.getElementById("checkout-delivery-select")?.value;
     const wilaya = document.getElementById("checkout-wilaya-select")?.value;
     const daira = document.getElementById("checkout-daira-select")?.value;
+    const address = document.getElementById("checkout-address-input")?.value?.trim();
     const cartItems = getCartObject();
 
-  // Basic validation
-  if (!firstName || !familyName || !phoneNumber || !deliveryMethod || !wilaya || !daira || Object.keys(cartItems).length === 0) {
-    alert("Please fill in all fields and make sure your cart is not empty.");
-    return;
-  }
+    // Form validation
+    if (!firstName) {
+      alert('Please enter your first name');
+      return;
+    }
+    if (!familyName) {
+      alert('Please enter your family name');
+      return;
+    }
+    if (!phoneNumber) {
+      alert('Please enter your phone number');
+      return;
+    }
+    if (!deliveryMethod) {
+      alert('Please select a delivery method');
+      return;
+    }
+    if (!wilaya) {
+      alert('Please select a wilaya');
+      return;
+    }
+    if (!daira) {
+      alert('Please select a daira');
+      return;
+    }
+    if (deliveryMethod === 'home' && !address) {
+      alert('Please enter your address for home delivery');
+      return;
+    }
+    if (!cartItems || Object.keys(cartItems).length === 0) {
+      alert('Your cart is empty. Please add some books before placing an order.');
+      return;
+    }
 
   // Extract only book titles from cart items
   const items = Object.keys(cartItems).map(bookId => {
@@ -332,7 +380,7 @@ if (checkoutForm) {
   try {
     const { data, error } = await supabase
       .from('orders')
-      .insert([{ firstName, familyName, phoneNumber, deliveryMethod, wilaya, daira, items }], { returning: 'representation' });
+      .insert([{ firstName, familyName, phoneNumber, deliveryMethod, wilaya, daira, address, items }], { returning: 'representation' });
 
     if (error) {
       alert("ERROR " + error.message);
