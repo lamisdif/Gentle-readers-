@@ -4,30 +4,79 @@ const supabaseUrl = "https://fsximdllrhglabxbqvay.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzeGltZGxscmhnbGFieGJxdmF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3NTg0NzgsImV4cCI6MjA3MjMzNDQ3OH0.KiRJdFoW4DtDAPMLqH9Im3-37GhIFmD269iDsY7ih2Q"; // حطي هنا المفتاح العام من Supabase
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// Wilaya-Daira data structure
+const wilayaDairaData = {
+  'Adrar': ['Adrar', 'Aougrout', 'Aoulef', 'Bordj Badji Mokhtar', 'Charouine', 'Fenoughil', 'Reggane', 'Tamentit', 'Timimoun', 'Zaouiet Kounta'],
+  'Chlef': ['Chlef', 'Abou El Hassan', 'Ain Merane', 'Benaired', 'Boukadir', 'El Karimia', 'El Marsa', 'Hadj Mechri', 'Kadiria', 'Lardjem', 'Moussadek', 'Oued Fodda', 'Ouled Ben Abdelkader', 'Ouled Fares', 'Oum Drou', 'Sendjas', 'Sidi Abderrahmane', 'Sidi Akkacha', 'Sobha', 'Tadjena', 'Talassa', 'Taougrit', 'Tenes', 'Zeboudja'],
+  'Laghouat': ['Laghouat', 'Aflou', 'Ain Madhi', 'Ain Sidi Ali', 'Benacer Benchohra', 'Brida', 'El Assafia', 'El Ghicha', 'El Haouaita', 'Gueltat Sidi Saad', 'Hassi Delaa', 'Hassi R\'Mel', 'Kheneg', 'Ksar El Hirane', 'Mekhareg', 'Oued Morra', 'Oued M\'Zi', 'Sidi Bouzid', 'Sidi Makhlouf', 'Tadjemout', 'Tadjrouna', 'Taouiala'],
+  'Oum El Bouaghi': ['Oum El Bouaghi', 'Ain Babouche', 'Ain Beida', 'Ain Diss', 'Ain Fakroun', 'Ain Kercha', 'Ain M\'Lila', 'Ain Zitoun', 'Behir Chergui', 'Berriche', 'Bir Chouhada', 'Dhalaa', 'El Amiria', 'El Belala', 'El Fedjoudj Boughrara Saoudi', 'El Harmilia', 'Fkirina', 'Hanchir Toumghani', 'Ksar Sbahi', 'Meskiana', 'Oued Nini', 'Ouled Gacem', 'Ouled Hamla', 'Ouled Zouai', 'Rahia', 'Sigus', 'Souk Naamane', 'Zorg'],
+  'Batna': ['Batna', 'Ain Djasser', 'Ain Touta', 'Arris', 'Azil Abedelkader', 'Barika', 'Bitam', 'Boulhilat', 'Boumia', 'Boumerdes', 'Bouzina', 'Chemora', 'Chir', 'Djezzar', 'El Btiha', 'El Kantara', 'El Madher', 'Fesdis', 'Foum Toub', 'Ghassira', 'Gosbat', 'Guigba', 'Hidoussa', 'Ichmoul', 'Inoughissen', 'Kimmel', 'Ksar Bellezma', 'Larbaa', 'Lazrou', 'Lemsane', 'Maafa', 'Menaa', 'Merouana', 'N\'Gaous', 'Oued Chaaba', 'Oued El Ma', 'Ouled Aouf', 'Ouled Fadel', 'Ouled Selam', 'Ouled Si Slimane', 'Ras El Aioun', 'Seggana', 'Seriana', 'T\'Kout', 'Tazoult', 'Teniet El Abed', 'Tighanimine', 'Tigherghar', 'Tilatou', 'Timgad', 'Zanat El Beida'],
+  'Béjaïa': ['Béjaïa', 'Adekar', 'Ait R\'Zine', 'Ait Smail', 'Akbou', 'Akfadou', 'Amalou', 'Amizour', 'Aokas', 'Barbacha', 'Boudjellil', 'Bouhamza', 'Boukhelifa', 'Chemini', 'Darguina', 'Draa El Mizan', 'El Flaye', 'El Kseur', 'Fenaia Il Maten', 'Ferraoun', 'Ighil Ali', 'Ighram', 'Kendira', 'Kherrata', 'Lakhdaria', 'M\'Chedallah', 'M\'Sila', 'Oued Ghir', 'Ouzellaguen', 'Seddouk', 'Sidi Aich', 'Sidi Ayad', 'Souk El Tenine', 'Souk Oufella', 'Tala Hamza', 'Tamokra', 'Tamridjt', 'Taourirt Ighil', 'Taskriout', 'Tazmalt', 'Tibane', 'Tichy', 'Tifra', 'Timezrit', 'Tizi N\'Berber', 'Toudja', 'Village de Ait Abbas'],
+  'Biskra': ['Biskra', 'Ain Naga', 'Ain Zaatout', 'Besbes', 'Bordj Ben Azzouz', 'Bouchagroun', 'Branis', 'Chaiba', 'Chetma', 'Djemorah', 'Doucen', 'El Feidh', 'El Ghrous', 'El Hadjab', 'El Haouch', 'El Kantara', 'El Outaya', 'Foughala', 'Hassi Messaoud', 'Khenguet Sidi Nadji', 'Lichana', 'Lioua', 'M\'Chouneche', 'M\'Lili', 'Mekhadma', 'M\'Sila', 'Ouled Djellal', 'Oumache', 'Ourlal', 'Ras El Miaad', 'Sidi Khaled', 'Sidi Okba', 'Tolga', 'Zeribet El Oued'],
+  'Béchar': ['Béchar', 'Abadla', 'Béni Abbès', 'Béni Ikhlef', 'Béni Ounif', 'Boukais', 'El Ouata', 'Erg Ferradj', 'Igli', 'Kenadsa', 'Kerzaz', 'Lahmar', 'Mechraa Houari Boumediene', 'Meridja', 'Mogheul', 'Ouled Khodeir', 'Taghit', 'Tabelbala', 'Timoudi'],
+  'Blida': ['Blida', 'Ain Romana', 'Beni Mered', 'Beni Tamou', 'Beni Yenni', 'Bouarfa', 'Boufarik', 'Bougara', 'Bouinan', 'Boumedfaa', 'Chiffa', 'Chrea', 'Djebabra', 'El Affroun', 'El Khemis', 'Guerrouaou', 'Hammam Elouane', 'Larbaa', 'Larbatache', 'Mouzaia', 'Oued Alleug', 'Oued Djer', 'Ouled Yaich', 'Souhane', 'Soumaa', 'Tablat'],
+  'Bouira': ['Bouira', 'Ahl El Ksar', 'Ain Bessem', 'Ain El Hadjar', 'Ain Laloui', 'Ain Turk', 'Ait Laaziz', 'Aomar', 'Ath Mansour', 'Bechloul', 'Bir Ghbalou', 'Boghni', 'Bordj Okhriss', 'Bouderbala', 'Boudjima', 'Bouira', 'Boumerdes', 'Bouzegza Keddara', 'Chorfa', 'Dechmia', 'Dirrah', 'Djebahia', 'El Adjiba', 'El Asnam', 'El Hachimia', 'El Khemis', 'El Mokrani', 'Guerrouma', 'Hadjera Zerga', 'Haizer', 'Hanif', 'Kadiria', 'Lakhdaria', 'M\'Chedallah', 'Maala', 'Maamora', 'Mechdallah', 'Meftah', 'Mokrani', 'Naciria', 'Oued Djer', 'Ouled Rached', 'Raouraoua', 'Ridane', 'Saharidj', 'Souk El Had', 'Sour El Ghozlane', 'Taghzout', 'Taguedit', 'Zbarbar'],
+  'Sétif': ['Sétif', 'Ain Arnat', 'Ain Azel', 'Ain El Kebira', 'Ain Lahdjar', 'Ain Oulmene', 'Ain Roua', 'Ain Sebt', 'Ain Taghrout', 'Ain Temouchent', 'Ain Zana', 'Amoucha', 'Babor', 'Bazer Sakhra', 'Beidha Bordj', 'Belaa', 'Beni Aziz', 'Beni Chebana', 'Beni Fouda', 'Beni Hocine', 'Beni Ourtilane', 'Beni Oussine', 'Bir El Arch', 'Bir Haddada', 'Bouandas', 'Bougaa', 'Bouhamza', 'Bousselam', 'Boutaleb', 'Chechar', 'Dehamcha', 'Djemila', 'Draa Kebila', 'El Eulma', 'El Ouricia', 'El Ouldja', 'Guelal', 'Guelta Zerka', 'Guenzet', 'Hammam Guergour', 'Hammam Soukhna', 'Harbil', 'Ksar El Abtal', 'Maaouia', 'Maoklane', 'Mezloug', 'Oued El Barad', 'Ouled Addi Guebala', 'Ouled Sabor', 'Ouled Si Ahmed', 'Ouled Tebben', 'Rasfa', 'Salah Bey', 'Serdj El Ghoul', 'Tachouda', 'Talaifacene', 'Taya', 'Tella', 'Tizi N\'Bechar', 'Zemmora'],
+  'Tamanrasset': ['Tamanrasset', 'Abalessa', 'In Amguel', 'In Guezzam', 'In Salah', 'Tazrouk', 'Tin Zaouatine'],
+  'Tébessa': ['Tébessa', 'Ain Zerga', 'Bir Dheheb', 'Bir El Ater', 'Bir Mokadem', 'Boukhadra', 'El Aouinet', 'El Kouif', 'El Ma Labiodh', 'El Mezeraa', 'El Ogla', 'Ferkane', 'Guorriguer', 'Hammamet', 'Lahouidjbet', 'Morsott', 'Negrine', 'Ouenza', 'Oum Ali', 'Saf Saf El Ouesra', 'Stah Guentis', 'Tebessa', 'Tlidjene'],
+  'Tlemcen': ['Tlemcen', 'Ain Fezza', 'Ain Ghoraba', 'Ain Kihal', 'Ain Tallout', 'Ain Youcef', 'Amieur', 'Azails', 'Bab El Assa', 'Beni Boussaid', 'Beni Mester', 'Beni Ouarsous', 'Beni Snous', 'Bensekrane', 'Bouhlou', 'Bouihi', 'Chetouane', 'El Aricha', 'El Fehoul', 'El Gor', 'El Khemis', 'El Malah', 'El Menzeh', 'Fellaoucene', 'Ghazaouet', 'Hammam Boughrara', 'Hennaya', 'Honaïne', 'Maghnia', 'Marsa Ben M\'Hidi', 'Nedroma', 'Oued Lakhdar', 'Ouled Mimoun', 'Ouled Riyah', 'Remchi', 'Sabra', 'Sebbaa Chioukh', 'Sebdou', 'Sidi Abdelli', 'Sidi Djillali', 'Souahlia', 'Souk Thlata', 'Terni Beni Hediel', 'Tianet', 'Zemmora'],
+  'Tiaret': ['Tiaret', 'Ain Bouchekif', 'Ain Deheb', 'Ain El Hadid', 'Ain Kermes', 'Ain Zarit', 'Bougara', 'Chehaima', 'Dahmouni', 'Djebilet Rosfa', 'Faidja', 'Frenda', 'Guertoufa', 'Hamadia', 'Ksar Chellala', 'Madna', 'Mahdia', 'Mechraa Sfa', 'Medroussa', 'Meghila', 'Mellakou', 'Nadorah', 'Naima', 'Oued Lili', 'Rahouia', 'Rechaiga', 'Sebaine', 'Sebt', 'Serghine', 'Si Abdelghani', 'Sidi Abderrahmane', 'Sidi Ali Mellal', 'Sidi Bakhti', 'Sidi Hosni', 'Sougueur', 'Tagdemt', 'Takhemaret', 'Tidda', 'Tousnina', 'Zmalet El Emir Abdelkader'],
+  'Tizi Ouzou': ['Tizi Ouzou', 'Ain El Hammam', 'Ain Zaouia', 'Ait Aissa Mimoun', 'Ait Bouadou', 'Ait Chafaa', 'Ait Khelili', 'Ait Mahmoud', 'Ait Oumalou', 'Ait Toudert', 'Ait Yahia', 'Ait Yahia Moussa', 'Akbil', 'Akerrou', 'Assi Youcef', 'Azazga', 'Azeffoun', 'Beni Douala', 'Beni Yenni', 'Boghni', 'Boudjima', 'Bounouh', 'Bouzeguene', 'Draa Ben Khedda', 'Draa El Mizan', 'Freha', 'Frikat', 'Iboudrarene', 'Idjeur', 'Iferhounene', 'Ifigha', 'Iflissen', 'Illilten', 'Illoula Oumalou', 'Imsouhal', 'Irdjen', 'Larba Nath Irathen', 'M\'Kira', 'Maatkas', 'Makouda', 'Mechtras', 'Mekla', 'Mizrana', 'M\'kira', 'Ouacif', 'Ouadhia', 'Ouaguenoun', 'Sidi Namane', 'Souk El Thenine', 'Tadmait', 'Tigzirt', 'Timizart', 'Tirmitine', 'Tizi Gheniff', 'Tizi N\'Tleta', 'Tizi Rached', 'Yakouren', 'Zekri'],
+  'Algiers': ['Algiers', 'Ain Benian', 'Ain Taya', 'Bab Ezzouar', 'Baba Hassen', 'Baraki', 'Ben Aknoun', 'Beni Messous', 'Bir Khadem', 'Bir Mourad Rais', 'Birtouta', 'Bordj El Bahri', 'Bordj El Kiffan', 'Bouchaoui', 'Bouharoun', 'Bouinan', 'Bourouba', 'Casbah', 'Cheraga', 'Chéraga', 'Dar El Beida', 'Dely Brahim', 'Djasr Kasentina', 'Douera', 'Draria', 'El Achour', 'El Biar', 'El Harrach', 'El Madania', 'El Magharia', 'El Mouradia', 'Hammamet', 'Hussein Dey', 'Hydra', 'Kouba', 'Les Eucalyptus', 'Mahelma', 'Mohammedia', 'Oued Koriche', 'Oued Smar', 'Ouled Chebel', 'Ouled Fayet', 'Rais Hamidou', 'Reghaia', 'Rouiba', 'Saoula', 'Sidi Moussa', 'Souidania', 'Staoueli', 'Tessala El Merdja', 'Zeralda'],
+  'Djelfa': ['Djelfa', 'Ain El Ibel', 'Ain Fekka', 'Ain Maabed', 'Ain Oussera', 'Amourah', 'Benhar', 'Birine', 'Bouira Lahdab', 'Charef', 'Dar Chioukh', 'El Guedid', 'El Idrissia', 'El Khemis', 'El Oued', 'Faidh El Botma', 'Guernini', 'Guettara', 'Had Sahary', 'Hassi Bahbah', 'Hassi El Euch', 'Hassi Fedoul', 'M\'Liliha', 'Messaad', 'Moudjebara', 'Oum Laadham', 'Sed Rahal', 'Selmana', 'Sidi Baizid', 'Sidi Ladjel', 'Tadmit', 'Zaafrane', 'Zaccar'],
+  'Jijel': ['Jijel', 'Ain El Melh', 'Ain Errich', 'Ain Kechra', 'Ain N\'Chor', 'Ain Roua', 'Ain Tine', 'Bordj Tahar', 'Bouafia', 'Bouchtata', 'Boudriaa Ben Yadjis', 'Boussif Ouled Askeur', 'Chekfa', 'Djemaa Beni Habibi', 'Djemaa Ouled Cheikh', 'El Ancer', 'El Aouana', 'El Kennar Nouchfi', 'El Milia', 'Emir Abdelkader', 'Erraguene', 'Ghebala', 'Ghebala', 'Kaous', 'Kemir Oued Adjoul', 'Oudjana', 'Ouled Rabah', 'Ouled Yahia Khadrouch', 'Selma Benziada', 'Settara', 'Sidi Abdelaziz', 'Sidi Maarouf', 'Taher', 'Texenna', 'Ziama Mansouriah', 'Ziama Mansouriah'],
+  'Saïda': ['Saïda', 'Ain El Hadjar', 'Ain Sekhouna', 'Ain Soltane', 'Aoubellil', 'Benachiba Chelia', 'Bir El Hammam', 'Doui Thabet', 'El Hassasna', 'Hounet', 'Maamora', 'Moulay Larbi', 'Ouled Brahim', 'Ouled Khaled', 'Sidi Ahmed', 'Sidi Amar', 'Sidi Boubekeur', 'Tircine', 'Youb'],
+  'Skikda': ['Skikda', 'Ain Bouziane', 'Ain Charchar', 'Ain Kechra', 'Ain Zouit', 'Azzaba', 'Ben Azzouz', 'Beni Bechir', 'Beni Oulbane', 'Beni Zid', 'Bin El Ouiden', 'Bouchtata', 'Cheraia', 'Collo', 'Djendel Saadi Mohamed', 'El Ghedir', 'El Hadaiek', 'El Harrouch', 'El Marsa', 'Emdjez Edchich', 'Essebt', 'Filfila', 'Hamadi Krouma', 'Kanoua', 'Kerkera', 'Kheneg Mayoum', 'Oued Zehour', 'Ouled Attia', 'Ouled Bechih', 'Ouled Hebaba', 'Oum Toub', 'Ramdane Djamel', 'Salah Bouchaour', 'Sidi Mezghiche', 'Tamalous', 'Zerdazas', 'Zitouna'],
+  'Sidi Bel Abbès': ['Sidi Bel Abbès', 'Ain Adden', 'Ain El Berd', 'Ain Kada', 'Ain Thrid', 'Ain Tindamine', 'Amarnas', 'Badredine El Mokrani', 'Belarbi', 'Ben Badis', 'Benachiba Chelia', 'Bir El Hammam', 'Bouhanifia', 'Boukhanafis', 'Chetouane Belaila', 'Dhaya', 'El Hacaiba', 'Hassi Zehana', 'Hassi Zahana', 'Lamtar', 'Makedra', 'Mascara', 'Mekerra', 'Merine', 'Mostefa Ben Brahim', 'Moulay Slissen', 'Oued Taourira', 'Oued Sefioun', 'Ouled Khaled', 'Ras El Ma', 'Redjem Demouche', 'Sehala Thaoura', 'Sfisef', 'Sidi Ali Boussidi', 'Sidi Ali Benyoub', 'Sidi Brahim', 'Sidi Chaib', 'Sidi Dahou Zairs', 'Sidi Hamadouche', 'Sidi Khaled', 'Sidi Lahcene', 'Sidi Yacoub', 'Tabia', 'Tafissour', 'Taoudmout', 'Tefessour', 'Tenira', 'Tessala', 'Tilmouni', 'Zerouala'],
+  'Annaba': ['Annaba', 'Ain Berda', 'Ain Kerma', 'Annaba', 'Berrahal', 'Chetaibi', 'Cheurfa', 'El Bouni', 'El Hadjar', 'Eulma', 'Oued El Aneb', 'Oued Zitoun', 'Seraidi', 'Sidi Amar', 'Sidi Salem', 'Treat', 'Zighout Youcef'],
+  'Guelma': ['Guelma', 'Ain Ben Beida', 'Ain Larbi', 'Ain Makhlouf', 'Ain Reggada', 'Ain Sandel', 'Belkheir', 'Ben Djarah', 'Beni Mezline', 'Bordj Sabath', 'Bou Hachana', 'Bou Hamdane', 'Bouati Mahmoud', 'Bouchegouf', 'Boumahra Ahmed', 'Dahouara', 'Djeballah Khemissi', 'El Fedjoudj', 'Guelaat Bou Sbaa', 'Hammam Debagh', 'Hammam N\'Bails', 'Heliopolis', 'Kheirane', 'Khezarra', 'Medjez Amar', 'Medjez Sfa', 'Nechmaya', 'Oued Cheham', 'Oued Fragha', 'Oued Zenati', 'Ouled Ali', 'Ouled Dahmane', 'Ouled Rached', 'Ras El Agba', 'Roknia', 'Salaoua Announa', 'Tamlouka', 'Taya'],
+  'Constantine': ['Constantine', 'Ain Abid', 'Ain Kerma', 'Ain Smara', 'Ben Badis', 'Didouche Mourad', 'El Haria', 'El Khroub', 'Hamma Bouziane', 'Hamma Bouziane', 'Ibn Ziad', 'Messaoud Boudjriou', 'Ouled Rahmoune', 'Zighoud Youcef']
+};
+
 
 
 
 document.addEventListener('DOMContentLoaded', function() {
   setLanguage(localStorage.getItem('lang') || 'en');
+  
   // Populate wilaya dropdown
   const wilayaSelect = document.getElementById('checkout-wilaya-select');
+  const dairaSelect = document.getElementById('checkout-daira-select');
+  
   if (wilayaSelect) {
-    const wilayas = [
-      'Adrar','Chlef','Laghouat','Oum El Bouaghi','Batna','Béjaïa','Biskra','Béchar','Blida','Bouira',
-      'Tamanrasset','Tébessa','Tlemcen','Tiaret','Tizi Ouzou','Algiers','Djelfa','Jijel','Sétif','Saïda',
-      'Skikda','Sidi Bel Abbès','Annaba','Guelma','Constantine','Médéa','Mostaganem','MSila','Mascara','Ouargla',
-      'Oran','El Bayadh','Illizi','Bordj Bou Arréridj','Boumerdès','El Tarf','Tindouf','Tissemsilt','El Oued','Khenchela',
-      'Souk Ahras','Tipaza','Mila','Aïn Defla','Naâma','Aïn Témouchent','Ghardaïa','Relizane','Timimoun','Bordj Badji Mokhtar',
-      'Ouled Djellal','Béni Abbès','In Salah','In Guezzam','Touggourt','Djanet','El Meghaier','El Meniaa'
-    ];
+    const wilayas = Object.keys(wilayaDairaData);
     // Clear any stale options beyond placeholder
     while (wilayaSelect.options.length > 1) wilayaSelect.remove(1);
-    wilayas.forEach((name, idx) => {
+    wilayas.forEach((name) => {
       const opt = document.createElement('option');
       opt.value = name;
       opt.textContent = name;
       wilayaSelect.appendChild(opt);
     });
+    
+    // Add event listener for wilaya selection
+    wilayaSelect.addEventListener('change', function() {
+      const selectedWilaya = this.value;
+      updateDairaOptions(selectedWilaya);
+    });
+  }
+  
+  // Function to update daira options based on selected wilaya
+  function updateDairaOptions(wilaya) {
+    if (dairaSelect) {
+      // Clear existing options except placeholder
+      while (dairaSelect.options.length > 1) dairaSelect.remove(1);
+      
+      if (wilaya && wilayaDairaData[wilaya]) {
+        const dairas = wilayaDairaData[wilaya];
+        dairas.forEach((daira) => {
+          const opt = document.createElement('option');
+          opt.value = daira;
+          opt.textContent = daira;
+          dairaSelect.appendChild(opt);
+        });
+      }
+    }
   }
 });
 // Full authoritative list of all books in the bookstore (copied from search.html)
@@ -136,10 +185,27 @@ function loadOrderSummary() {
   const cartItemsDiv = document.getElementById("cartItems");
   const orderDetailsDiv = document.getElementById("orderDetails");
   const totalPriceLabel = document.getElementById("totalPrice");
+  
+  
+  // Check if required elements exist
+  if (!cartItemsDiv || !orderDetailsDiv || !totalPriceLabel) {
+    console.error("Required DOM elements not found");
+    return;
+  }
+  
   let subtotal = 0;
   cartItemsDiv.innerHTML = "";
   orderDetailsDiv.innerHTML = "";
   const lang = getCurrentLang();
+  
+  // Check if cart is empty
+  if (Object.keys(cart).length === 0) {
+    cartItemsDiv.innerHTML = '<div class="book-item" style="text-align: center; color: #666; font-style: italic;">Your cart is empty. Please add some books to continue.</div>';
+    orderDetailsDiv.innerHTML = '<span>No items</span><span>0 DZD</span>';
+    totalPriceLabel.textContent = "0 DZD";
+    return;
+  }
+  
   Object.keys(cart).forEach(bookId => {
     const book = books[bookId];
     if (!book) {
@@ -181,7 +247,10 @@ function loadOrderSummary() {
   });
   totalPriceLabel.textContent = `${subtotal} DZD`;
 }
-document.addEventListener("DOMContentLoaded", loadOrderSummary);
+document.addEventListener("DOMContentLoaded", function() {
+  // Add a small delay to ensure everything is loaded
+  setTimeout(loadOrderSummary, 100);
+});
 
 // Quantity controls (event delegation)
 document.addEventListener('click', function(e) {
@@ -199,18 +268,21 @@ document.addEventListener('click', function(e) {
     loadOrderSummary();
   }
 });
-document.getElementById("checkoutForm").addEventListener("submit", async function(e) {
-  e.preventDefault();
-  // Collect form data
-  const firstName = document.getElementById("checkout-name-input").value.trim();
-  const familyName = document.getElementById("checkout-family-input").value.trim();
-  const phoneNumber = document.getElementById("checkout-number-input").value.trim();
-  const deliveryMethod = document.getElementById("checkout-delivery-select").value;
-  const wilaya = document.getElementById("checkout-wilaya-select").value;
-  const cartItems = getCartObject();
+const checkoutForm = document.getElementById("checkoutForm");
+if (checkoutForm) {
+  checkoutForm.addEventListener("submit", async function(e) {
+    e.preventDefault();
+    // Collect form data
+    const firstName = document.getElementById("checkout-name-input")?.value?.trim();
+    const familyName = document.getElementById("checkout-family-input")?.value?.trim();
+    const phoneNumber = document.getElementById("checkout-number-input")?.value?.trim();
+    const deliveryMethod = document.getElementById("checkout-delivery-select")?.value;
+    const wilaya = document.getElementById("checkout-wilaya-select")?.value;
+    const daira = document.getElementById("checkout-daira-select")?.value;
+    const cartItems = getCartObject();
 
   // Basic validation
-  if (!firstName || !familyName || !phoneNumber || !deliveryMethod || !wilaya || Object.keys(cartItems).length === 0) {
+  if (!firstName || !familyName || !phoneNumber || !deliveryMethod || !wilaya || !daira || Object.keys(cartItems).length === 0) {
     alert("Please fill in all fields and make sure your cart is not empty.");
     return;
   }
@@ -227,7 +299,7 @@ document.getElementById("checkoutForm").addEventListener("submit", async functio
   try {
     const { data, error } = await supabase
       .from('orders')
-      .insert([{ firstName, familyName, phoneNumber, deliveryMethod, wilaya, items }], { returning: 'representation' });
+      .insert([{ firstName, familyName, phoneNumber, deliveryMethod, wilaya, daira, items }], { returning: 'representation' });
 
     if (error) {
       alert("ERROR " + error.message);
@@ -245,7 +317,8 @@ document.getElementById("checkoutForm").addEventListener("submit", async functio
     alert("Network error. Please try again later.");
     console.error(err);
   }
-});
+  });
+}
 
 // Animate sections on scroll
 function animateOnScroll() {
@@ -257,4 +330,4 @@ function animateOnScroll() {
   });
 }
 window.addEventListener('scroll', animateOnScroll);
-window.addEventListener('DOMContentLoaded', animateOnScroll); 
+window.addEventListener('DOMContentLoaded', animateOnScroll);

@@ -206,6 +206,12 @@
   <script>
     // Full authoritative list of all books in the bookstore (copied from book.html)
     const books = {
+      ayyam_al_hijran: { title: "أيام الهجران", author: "إيلينا فيرانتي", description: "A powerful novel about abandonment and the emotional journey of a woman who must rebuild her life after her husband leaves her. Set in Naples, it explores themes of love, loss, and resilience.", cover: "imgs/أيام الهجران.jpg", price: "1,450.00", isbn: "9789776543211" },
+      al_3adat_al_dharia: { title: "العادات الذرية", author: "جيمس كلير", description: "An easy approach to building good habits and getting rid of bad habits. Practical strategies for small changes that lead to remarkable results.", cover: "imgs/العادات الذرية.jpg", price: "1,400.00", isbn: "9789776543212" },
+      eva_luna: { title: "إيفا لونا", author: "إيزابيل الليندي", description: "A magical realist novel about a young woman with the gift of storytelling who navigates through love, revolution, and the power of imagination in Latin America.", cover: "imgs/ايفا لونا.jpg", price: "2,100.00", isbn: "9789776543213" },
+      masarrat_saghira: { title: "مسرات صغيرة", author: "آلان دو بوتون", description: "Another installment from The School of Life series, focusing on finding joy in everyday moments and appreciating the small pleasures that make life beautiful.", cover: "imgs/مسرات صغيرة.jpg", price: "1,400.00", isbn: "9789776543217" },
+      maktabat_muntasaf_al_layl: { title: "مكتبة منتصف الليل", author: "مات هيغ", description: "A Sunday Times bestselling novel about infinite possibilities and second chances. Between life and death, there's a library where each book represents a different life you could have lived.", cover: "imgs/مكتبة منتصف الليل.jpg", price: "1,600.00", isbn: "9789776543219" },
+      kayf_tajid_al_hob: { title: "كيف تجد الحب", author: "آلان دو بوتون", description: "Part of The School of Life series, this book explores the philosophy and psychology of love. It offers insights into how to find and maintain meaningful relationships.", cover: "imgs/كيف تجد الحب.jpg", price: "1,000.00", isbn: "9789776543216" },
       el9adimon: { title: "القادمون", author: "أحمد خالد مصطفى", description: "A timeless tale of love, class, and societal expectations. Elizabeth Bennet navigates the complexities of Regency-era England.", cover: "imgs/el9adimon.jpg", price: "1,800.00", isbn: "9789776543210" },
       ard_zikola: { title: "أرض زيكولا", author: "عمرو عبد الحميد", description: "A compelling narrative about a mysterious land and its inhabitants, exploring themes of identity, belonging, and the search for meaning in an unfamiliar world.", cover: "imgs/ارض زيكولا.jpg" },
       fatat_al_yaka: { title: "فتاة الياقة", author: "عمرو عبد الحميد", description: "A story about a girl with a distinctive collar, exploring themes of uniqueness, social expectations, and the courage to be different in a conformist world.", cover: "imgs/فتاة الياقة.jpg" },
@@ -399,23 +405,35 @@
       });
     }
     // Get search query from localStorage
-    const query = (localStorage.getItem('searchQuery') || '').trim().toLowerCase();
+    function normalizeArabic(text) {
+      return (text || '')
+        .toLowerCase()
+        .replace(/[\u064B-\u0652]/g, '') // remove diacritics
+        .replace(/[إأآٱ]/g, 'ا')
+        .replace(/ى/g, 'ي')
+        .replace(/ؤ/g, 'و')
+        .replace(/ئ/g, 'ي')
+        .replace(/ة/g, 'ه');
+    }
+    const rawQuery = (localStorage.getItem('searchQuery') || '').trim();
+    const query = normalizeArabic(rawQuery);
     const resultsHeader = document.getElementById('resultsHeader');
     const resultsList = document.getElementById('resultsList');
     if (!query) {
       resultsHeader.textContent = 'No search query provided.';
       resultsList.innerHTML = '';
     } else {
-      const filtered = allBooks.filter(book =>
-        book.title.toLowerCase().includes(query) ||
-        book.author.toLowerCase().includes(query) ||
-        book.genre.toLowerCase().includes(query) // Filter by genre
-      );
+      const filtered = allBooks.filter(book => {
+        const t = normalizeArabic(book.title);
+        const a = normalizeArabic(book.author);
+        const g = normalizeArabic(book.genre);
+        return t.includes(query) || a.includes(query) || g.includes(query);
+      });
       if (filtered.length === 0) {
         resultsHeader.textContent = 'No results found.';
         resultsList.innerHTML = '<div class="no-results">No books match your search.<br><span style="font-size:2.5rem;">📚</span></div>';
       } else {
-        resultsHeader.textContent = `Results for "${searchInput.value}"`;
+        resultsHeader.textContent = `Results for "${rawQuery}"`;
         resultsList.innerHTML = '';
         filtered.forEach(book => {
           resultsList.innerHTML += `
