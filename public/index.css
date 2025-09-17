@@ -1078,6 +1078,9 @@ html,
         flex-shrink: 0;
         position: relative;
         transition: filter 0.5s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
       .slider .list .item .card {
         width: 100%;
@@ -1274,6 +1277,14 @@ a {
   opacity: 1 !important;
   visibility: visible !important;
   z-index: 100 !important;
+}
+
+.slider .list {
+  display: flex !important;
+}
+
+.slider .list .item {
+  display: flex !important;
 }
 .loader-overlay {
   position: fixed;
