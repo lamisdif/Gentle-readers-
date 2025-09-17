@@ -1386,6 +1386,51 @@
       window.addEventListener('scroll', animateOnScroll);
       window.addEventListener('DOMContentLoaded', animateOnScroll);
       
+      // Pause auto-scroll when user manually scrolls
+      function initSliderControl() {
+        const sliders = document.querySelectorAll('.slider');
+        
+        sliders.forEach(slider => {
+          const list = slider.querySelector('.list');
+          if (!list) return;
+          
+          let isUserScrolling = false;
+          let scrollTimeout;
+          
+          // Detect when user starts scrolling
+          slider.addEventListener('scroll', () => {
+            isUserScrolling = true;
+            list.style.animationPlayState = 'paused';
+            
+            // Clear existing timeout
+            clearTimeout(scrollTimeout);
+            
+            // Resume auto-scroll after user stops scrolling
+            scrollTimeout = setTimeout(() => {
+              isUserScrolling = false;
+              list.style.animationPlayState = 'running';
+            }, 2000); // 2 second delay
+          });
+          
+          // Pause on touch start
+          slider.addEventListener('touchstart', () => {
+            list.style.animationPlayState = 'paused';
+          });
+          
+          // Resume on touch end with delay
+          slider.addEventListener('touchend', () => {
+            setTimeout(() => {
+              if (!isUserScrolling) {
+                list.style.animationPlayState = 'running';
+              }
+            }, 1000);
+          });
+        });
+      }
+      
+      // Initialize slider control when DOM is loaded
+      window.addEventListener('DOMContentLoaded', initSliderControl);
+      
     </script>
     <script>
     function showLoader() {

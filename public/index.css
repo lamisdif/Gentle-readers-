@@ -1049,42 +1049,35 @@ html,
       .slider {
         width: 100%;
         height: var(--height);
-        overflow: hidden;
+        overflow-x: auto;
+        overflow-y: hidden;
         position: relative;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
         /* mask-image: linear-gradient(to right, transparent, #000 10% 90%, transparent); */
         /* -webkit-mask-image: linear-gradient(to right, transparent, #000 10% 90%, transparent); */
       }
       
-      /* Enable touch scrolling on mobile while keeping animation */
-      @media (max-width: 768px) {
-        .slider {
-          overflow-x: auto;
-          -webkit-overflow-scrolling: touch;
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-        }
-        
-        .slider::-webkit-scrollbar {
-          display: none;
-        }
+      .slider::-webkit-scrollbar {
+        display: none;
       }
+      
       .slider .list {
         display: flex;
-        width: fit-content; /* Allow content to dictate width */
-        min-width: calc(var(--width) * var(--quantity)); /* Minimum width for all items */
-        position: relative; /* For absolute positioning of items */
+        width: fit-content;
+        min-width: calc(var(--width) * var(--quantity));
+        gap: 20px;
+        padding: 0 20px;
+        animation: autoScroll 30s linear infinite;
       }
+      
       .slider .list .item {
         width: var(--width);
         height: var(--height);
-        position: absolute; /* Position items for animation */
-        left: 100%; /* Start off-screen to the right */
-        animation: autoRun 20s linear infinite; /* Increased duration for smoother, slower slide */
+        flex-shrink: 0;
+        position: relative;
         transition: filter 0.5s;
-        /* Calculate animation delay for continuous loop */
-        animation-delay: calc(
-          (20s / var(--quantity)) * (var(--position) - 1) - 20s
-        ) !important;
       }
       .slider .list .item .card {
         width: 100%;
@@ -1097,18 +1090,22 @@ html,
         align-items: center;
       }
 
-      @keyframes autoRun {
-        from {
-          left: 100%; /* Start from right off-screen */
+      @keyframes autoScroll {
+        0% {
+          transform: translateX(0);
         }
-        to {
-          left: calc(var(--width) * -1 * var(--quantity)); /* Move left by total width of all items */
+        100% {
+          transform: translateX(calc(-1 * (var(--width) + 20px) * var(--quantity)));
         }
       }
-      .slider:hover .item {
+      .slider:hover .list {
         animation-play-state: paused !important; /* Pause animation on hover */
+      }
+      
+      .slider:hover .item {
         filter: grayscale(1); /* Grayscale effect on all items when slider is hovered */
       }
+      
       .slider .item:hover {
         filter: grayscale(0); /* Remove grayscale from individual item on hover */
       }
@@ -1930,3 +1927,4 @@ body[lang="en"] {
   padding: 0 1rem !important;
   box-sizing: border-box !important;
 }
+
