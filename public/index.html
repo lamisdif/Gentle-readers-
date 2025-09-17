@@ -575,10 +575,8 @@
           <h2 class="main-title" id="section-latest-books">Latest books online</h2>
         </div>
         <!-- Slider for book cards -->
-        <div class="slider-container">
-          <button class="slider-nav slider-nav-left" onclick="slideLeft(this)">‹</button>
-          <div class="slider mx-auto" style="--width: 220px; --height: 300px; --quantity: 9;">
-            <div class="list">
+        <div class="slider mx-auto" style="--width: 220px; --height: 300px; --quantity: 9;">
+          <div class="list">
             <!-- Book Card 1 - أيام الهجران -->
             <div class="item" style="--position: 1">
               <div class="card" onclick="openBook('ayyam_al_hijran')" style="cursor: pointer; position: relative; z-index: 100;">
@@ -905,7 +903,6 @@
               </div>
             </div>
           </div>
-          <button class="slider-nav slider-nav-right" onclick="slideRight(this)">›</button>
         </div>
       </section>
 
@@ -918,10 +915,8 @@
           <h2 class="main-title">Latest books online</h2>
         </div>
         <!-- Slider for book cards -->
-        <div class="slider-container">
-          <button class="slider-nav slider-nav-left" onclick="slideLeft(this)">‹</button>
-          <div class="slider mx-auto" style="--width: 220px; --height: 300px; --quantity: 8;">
-            <div class="list">
+        <div class="slider mx-auto" style="--width: 220px; --height: 300px; --quantity: 8;">
+          <div class="list">
             <!-- Book Card 1 - مكتبة منتصف الليل -->
             <div class="item" style="--position: 1">
               <div class="card" onclick="openBook('maktabat_muntasaf_al_layl')" style="cursor: pointer; position: relative; z-index: 100;">
@@ -1211,7 +1206,6 @@
               </div>
             </div>
           </div>
-          <button class="slider-nav slider-nav-right" onclick="slideRight(this)">›</button>
         </div>
       </section>
 
@@ -1391,35 +1385,6 @@
       }
       window.addEventListener('scroll', animateOnScroll);
       window.addEventListener('DOMContentLoaded', animateOnScroll);
-      
-      // Slider navigation functions
-      function slideLeft(button) {
-        const slider = button.parentElement.querySelector('.slider .list');
-        const currentTransform = slider.style.transform || 'translateX(0px)';
-        const currentX = parseFloat(currentTransform.replace('translateX(', '').replace('px)', '')) || 0;
-        const newX = Math.min(currentX + 240, 0); // Move right (positive X)
-        slider.style.transform = `translateX(${newX}px)`;
-        slider.style.animationPlayState = 'paused';
-        
-        // Resume animation after 3 seconds
-        setTimeout(() => {
-          slider.style.animationPlayState = 'running';
-        }, 3000);
-      }
-      
-      function slideRight(button) {
-        const slider = button.parentElement.querySelector('.slider .list');
-        const currentTransform = slider.style.transform || 'translateX(0px)';
-        const currentX = parseFloat(currentTransform.replace('translateX(', '').replace('px)', '')) || 0;
-        const newX = Math.max(currentX - 240, -480); // Move left (negative X)
-        slider.style.transform = `translateX(${newX}px)`;
-        slider.style.animationPlayState = 'paused';
-        
-        // Resume animation after 3 seconds
-        setTimeout(() => {
-          slider.style.animationPlayState = 'running';
-        }, 3000);
-      }
       
     </script>
     <script>
