@@ -1054,6 +1054,20 @@ html,
         /* mask-image: linear-gradient(to right, transparent, #000 10% 90%, transparent); */
         /* -webkit-mask-image: linear-gradient(to right, transparent, #000 10% 90%, transparent); */
       }
+      
+      /* Enable touch scrolling on mobile while keeping animation */
+      @media (max-width: 768px) {
+        .slider {
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        
+        .slider::-webkit-scrollbar {
+          display: none;
+        }
+      }
       .slider .list {
         display: flex;
         width: fit-content; /* Allow content to dictate width */
@@ -1099,22 +1113,6 @@ html,
         filter: grayscale(0); /* Remove grayscale from individual item on hover */
       }
       
-      /* Touch scrolling support for mobile */
-      .slider.touch-scrolling .list {
-        transform: translateX(0);
-        transition: transform 0.3s ease-out;
-      }
-      
-      .slider.touch-scrolling .item {
-        animation-play-state: paused !important;
-        position: relative;
-        left: auto;
-        transform: translateX(0);
-      }
-      
-      .slider.touch-scrolling .item:nth-child(n) {
-        animation: none;
-      }
 
       @media (max-width: 768px) {
   .category-cards-section {
