@@ -368,19 +368,29 @@ if (checkoutForm) {
       return;
     }
 
-  // Extract only book titles from cart items
+  // Extract only book titles from cart items and calculate total price
+  let totalPrice = 0;
   const items = Object.keys(cartItems).map(bookId => {
     const book = books[bookId];
     const qty = cartItems[bookId] || 1;
     const title = book ? book.title : `Unknown Book (${bookId})`;
+    
+    // Calculate price for this book
+    let price = 0;
+    if (book && book.price) {
+      price = parseFloat(book.price.replace(/[^\d.]/g, ""));
+    }
+    totalPrice += price * qty;
+    
     return `${title} × ${qty}`;
   });
 
   // Send to backend
+  console.log('Submitting order with total price:', totalPrice, 'DZD');
   try {
     const { data, error } = await supabase
       .from('orders')
-      .insert([{ firstName, familyName, phoneNumber, deliveryMethod, wilaya, daira, address, items }], { returning: 'representation' });
+      .insert([{ firstName, familyName, phoneNumber, deliveryMethod, wilaya, daira, address, items, total_price: totalPrice }], { returning: 'representation' });
 
     if (error) {
       alert("ERROR " + error.message);
