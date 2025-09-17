@@ -1049,38 +1049,77 @@ html,
       .slider {
         width: 100%;
         height: var(--height);
-        overflow-x: auto;
-        overflow-y: hidden;
+        overflow: hidden;
         position: relative;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
         /* mask-image: linear-gradient(to right, transparent, #000 10% 90%, transparent); */
         /* -webkit-mask-image: linear-gradient(to right, transparent, #000 10% 90%, transparent); */
-      }
-      
-      .slider::-webkit-scrollbar {
-        display: none;
       }
       
       .slider .list {
         display: flex;
         width: fit-content;
         min-width: calc(var(--width) * var(--quantity));
-        gap: 20px;
-        padding: 0 20px;
         position: relative;
       }
       
       .slider .list .item {
         width: var(--width);
         height: var(--height);
-        flex-shrink: 0;
-        position: relative;
+        position: absolute;
+        left: 100%;
+        animation: autoRun 20s linear infinite;
         transition: filter 0.5s;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        animation-delay: calc(
+          (20s / var(--quantity)) * (var(--position) - 1) - 20s
+        ) !important;
+      }
+      
+      @keyframes autoRun {
+        from {
+          left: 100%;
+        }
+        to {
+          left: calc(var(--width) * -1 * var(--quantity));
+        }
+      }
+      
+      .slider:hover .item {
+        animation-play-state: paused !important;
+        filter: grayscale(1);
+      }
+      
+      .slider .item:hover {
+        filter: grayscale(0);
+      }
+      
+      /* Mobile version - user controlled scrolling */
+      @media (max-width: 768px) {
+        .slider {
+          overflow-x: auto;
+          overflow-y: hidden;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        
+        .slider::-webkit-scrollbar {
+          display: none;
+        }
+        
+        .slider .list {
+          gap: 20px;
+          padding: 0 20px;
+        }
+        
+        .slider .list .item {
+          position: relative;
+          left: auto;
+          animation: none;
+          flex-shrink: 0;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
       }
       .slider .list .item .card {
         width: 100%;
