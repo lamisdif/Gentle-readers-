@@ -87,7 +87,11 @@ const books = {
   pride_and_prejudice: { title: "Pride and Prejudice", price: "1,000.00" },
   anne_of_green_gables: { title: "Anne of Green Gables", price: "850.00" },
   hasees: { title: "هسيس", price: "1,200.00" },
-  hatha_ma_hadath_maaha: { title: "هذا ما حدث معها", price: "1,200.00" }
+  hatha_ma_hadath_maaha: { title: "هذا ما حدث معها", price: "1,200.00" },
+  
+  // Added: The Kite Runner (Arabic) and The Hunger Games
+  adaa_al_ta2ira_al_waraqiya: { title: "عداء الطائرة الورقية", price: "1,500.00" },
+  the_hunger_games: { title: "The Hunger Games", price: "1,600.00" }
 };
 function getCartObject() {
   const stored = JSON.parse(localStorage.getItem('cart')) || {};

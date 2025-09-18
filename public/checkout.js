@@ -224,7 +224,11 @@ const books = {
   water_moon: { title: "Water Moon", author: "Samantha Sotto Yambao", price: "1,500.00" },
   these_violent_delights: { title: "These Violent Delights", author: "Chloe Gong", price: "1,500.00" },
   majdouline: { title: "ماجدولين", author: "مصطفى لطفى المنفلوطي", price: "850.00" },
-  la_yumkinuka_iidhaayi: { title: "لا يمكنك إيذائي", author: "ديفيد غوغينز", price: "1,500.00" }
+  la_yumkinuka_iidhaayi: { title: "لا يمكنك إيذائي", author: "ديفيد غوغينز", price: "1,500.00" },
+  
+  // Added: The Kite Runner (Arabic) and The Hunger Games
+  adaa_al_ta2ira_al_waraqiya: { title: "عداء الطائرة الورقية", author: "خالد حسيني", price: "1,500.00" },
+  the_hunger_games: { title: "The Hunger Games", author: "Suzanne Collins", price: "1,600.00" }
 };
 
 function getCurrentLang() {
