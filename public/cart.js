@@ -35,8 +35,22 @@ const books = {
   waha_yaqub: { title: "واحة يعقوب", price: "1,400.00" },
   the_witcher_sword_of_destiny: { title: "ذا ويتشر: سيف المصير", price: "1,600.00" },
   the_witcher_last_wish: { title: "ذا ويتشر: الأمنية الأخيرة", price: "1,500.00" },
-  it_ends_with_us: { title: "It Ends With Us", price: "1,200.00" },
+  
+  // NEW BOOKS - First Half
+  abi_alladhi_akraho: { title: "أبي الذي أكره", price: "1,000.00" },
+  ash3alni: { title: "أشعلني", price: "2,000.00" },
+  al_layali_al_bayda: { title: "الليالي البيضاء", price: "800.00" },
+  kull_azraq_al_sama: { title: "كل أزرق السماء", price: "2,000.00" },
+  hakadha_tata3afa: { title: "هكذا تتعافى", price: "1,200.00" },
+  caraval: { title: "Caraval", price: "1,500.00" },
+  
+  // NEW BOOKS - Second Half
+  it_ends_with_us: { title: "It Ends With Us", price: "1,400.00" },
   it_starts_with_us: { title: "It Starts With Us", price: "1,200.00" },
+  water_moon: { title: "Water Moon", price: "1,500.00" },
+  these_violent_delights: { title: "These Violent Delights", price: "1,500.00" },
+  majdouline: { title: "ماجدولين", price: "850.00" },
+  la_yumkinuka_iidhaayi: { title: "لا يمكنك إيذائي", price: "1,500.00" },
   twisted_love: { title: "Twisted Love", price: "1,200.00" },
   ugly_love: { title: "Ugly Love", price: "1,200.00" },
   alsadis_ahmar: { title: "السادس احمر", price: "1,300.00" },
