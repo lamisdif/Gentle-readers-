@@ -1386,6 +1386,23 @@
       window.addEventListener('scroll', animateOnScroll);
       window.addEventListener('DOMContentLoaded', animateOnScroll);
       
+      // Create infinite loop by duplicating books
+      function createInfiniteLoop() {
+        const sliders = document.querySelectorAll('.slider .list');
+        
+        sliders.forEach(list => {
+          // Clone all items and append them
+          const items = list.querySelectorAll('.item');
+          items.forEach(item => {
+            const clone = item.cloneNode(true);
+            list.appendChild(clone);
+          });
+        });
+      }
+      
+      // Initialize infinite loop when DOM is loaded
+      window.addEventListener('DOMContentLoaded', createInfiniteLoop);
+      
     </script>
     <script>
     function showLoader() {

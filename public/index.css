@@ -1049,18 +1049,28 @@ html,
       .slider {
         width: 100%;
         height: var(--height);
-        overflow: hidden;
+        overflow-x: auto;
+        overflow-y: hidden;
         position: relative;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
         /* mask-image: linear-gradient(to right, transparent, #000 10% 90%, transparent); */
         /* -webkit-mask-image: linear-gradient(to right, transparent, #000 10% 90%, transparent); */
+      }
+      
+      .slider::-webkit-scrollbar {
+        display: none;
       }
       
       .slider .list {
         display: flex;
         width: fit-content;
-        min-width: calc(var(--width) * var(--quantity));
+        min-width: calc(var(--width) * var(--quantity) * 2);
+        gap: 20px;
+        padding: 0 20px;
         position: relative;
-        animation: autoScroll 30s linear infinite;
+        animation: autoScroll 40s linear infinite;
       }
       
       .slider .list .item {
@@ -1089,38 +1099,11 @@ html,
         filter: grayscale(0);
       }
       
-      /* Mobile version - infinite loop + touch scrolling */
+      /* Mobile version - same as desktop */
       @media (max-width: 768px) {
-        .slider {
-          overflow-x: auto;
-          overflow-y: hidden;
-          -webkit-overflow-scrolling: touch;
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-        }
-        
-        .slider::-webkit-scrollbar {
-          display: none;
-        }
-        
-        .slider .list {
-          animation: autoScroll 30s linear infinite;
-          gap: 20px;
-          padding: 0 20px;
-        }
-        
-        .slider .list .item {
-          flex-shrink: 0;
-          position: relative;
-        }
-        
-        .slider:hover .item {
-          animation-play-state: paused !important;
-          filter: grayscale(1);
-        }
-        
-        .slider .item:hover {
-          filter: grayscale(0);
+        .slider .list .item .flip-book-card-wrapper {
+          width: 220px;
+          height: 300px;
         }
       }
       .slider .list .item .card {
