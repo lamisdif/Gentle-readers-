@@ -198,7 +198,7 @@ const books = {
   stop_stress_before_it_stops_you: { title: "ضعي حدا للتوتر", author: "كيفن ليمان", price: "1,300.00" },
   marriage_life_guide: { title: "دليل الحياة الزوجية", author: "كيفن ليمان", price: "1,500.00" },
   your_psychological_complexes: { title: "عقدك النفسية", author: "د. يوسف الحسني", price: "1,500.00" },
-  cant_hurt_me: { title: "لا يمكنك إيذائي", author: "ديفيد جوجينز", price: "1,900.00" },
+  cant_hurt_me: { title: "لا يمكنك إيذائي", author: "ديفيد جوجينز", price: "1,500.00" },
   success_in_your_morning: { title: "نجاحك في صباحك", author: "بنيامين سبول ومايكل زاندر", price: "1,450.00" },
   
   // Missing books from the images
