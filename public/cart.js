@@ -48,7 +48,7 @@ const books = {
   it_ends_with_us: { title: "It Ends With Us", price: "1,400.00" },
   it_starts_with_us: { title: "It Starts With Us", price: "1,200.00" },
   water_moon: { title: "Water Moon", price: "1,500.00" },
-  these_violent_delights: { title: "These Violent Delights", price: "1,500.00" },
+  
   majdouline: { title: "ماجدولين", price: "850.00" },
   la_yumkinuka_iidhaayi: { title: "لا يمكنك إيذائي", price: "1,500.00" },
   twisted_love: { title: "Twisted Love", price: "1,200.00" },

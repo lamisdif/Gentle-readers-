@@ -222,7 +222,7 @@ const books = {
   it_ends_with_us: { title: "It Ends With Us", author: "Colleen Hoover", price: "1,400.00" },
   it_starts_with_us: { title: "It Starts With Us", author: "Colleen Hoover", price: "1,200.00" },
   water_moon: { title: "Water Moon", author: "Samantha Sotto Yambao", price: "1,500.00" },
-  these_violent_delights: { title: "These Violent Delights", author: "Chloe Gong", price: "1,500.00" },
+  
   majdouline: { title: "ماجدولين", author: "مصطفى لطفى المنفلوطي", price: "850.00" },
   la_yumkinuka_iidhaayi: { title: "لا يمكنك إيذائي", author: "ديفيد غوغينز", price: "1,500.00" },
   
