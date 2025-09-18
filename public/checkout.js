@@ -208,7 +208,23 @@ const books = {
   pride_and_prejudice: { title: "Pride and Prejudice", author: "Jane Austen", price: "1,000.00" },
   anne_of_green_gables: { title: "Anne of Green Gables", author: "Lucy Maud Montgomery", price: "850.00" },
   hasees: { title: "هسيس", author: "عبدالله بوموزة", price: "1,200.00" },
-  hatha_ma_hadath_maaha: { title: "هذا ما حدث معها", author: "أسامة المسلم", price: "1,200.00" }
+  hatha_ma_hadath_maaha: { title: "هذا ما حدث معها", author: "أسامة المسلم", price: "1,200.00" },
+  
+  // NEW BOOKS - First Half
+  abi_alladhi_akraho: { title: "أبي الذي أكره", author: "د.عماد رشاد عثمان", price: "1,000.00" },
+  ash3alni: { title: "أشعلني", author: "طاهرة مافي", price: "2,000.00" },
+  al_layali_al_bayda: { title: "الليالي البيضاء", author: "دوستويفسكي", price: "800.00" },
+  kull_azraq_al_sama: { title: "كل أزرق السماء", author: "ميليسا را كوستا", price: "2,000.00" },
+  hakadha_tata3afa: { title: "هكذا تتعافى", author: "بريانا ويست", price: "1,200.00" },
+  caraval: { title: "Caraval", author: "Stephanie Garber", price: "1,500.00" },
+  
+  // NEW BOOKS - Second Half
+  it_ends_with_us: { title: "It Ends With Us", author: "Colleen Hoover", price: "1,400.00" },
+  it_starts_with_us: { title: "It Starts With Us", author: "Colleen Hoover", price: "1,200.00" },
+  water_moon: { title: "Water Moon", author: "Samantha Sotto Yambao", price: "1,500.00" },
+  these_violent_delights: { title: "These Violent Delights", author: "Chloe Gong", price: "1,500.00" },
+  majdouline: { title: "ماجدولين", author: "مصطفى لطفى المنفلوطي", price: "850.00" },
+  la_yumkinuka_iidhaayi: { title: "لا يمكنك إيذائي", author: "ديفيد غوغينز", price: "1,500.00" }
 };
 
 function getCurrentLang() {
