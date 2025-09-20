@@ -81,7 +81,7 @@ const books = {
   success_in_your_morning: { title: "نجاحك في صباحك", price: "1,450.00" },
   
   // Missing books from the images
-  al_baron: { title: "البارون", price: "1,300.00" },
+  al_baron: { title: "البارون", price: "1,500.00" },
   little_women: { title: "Little Women", price: "850.00" },
   oliver_twist: { title: "Oliver Twist", price: "1,800.00" },
   pride_and_prejudice: { title: "Pride and Prejudice", price: "1,400.00" },

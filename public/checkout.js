@@ -202,7 +202,7 @@ const books = {
   success_in_your_morning: { title: "نجاحك في صباحك", author: "بنيامين سبول ومايكل زاندر", price: "1,450.00" },
   
   // Missing books from the images
-  al_baron: { title: "البارون", author: "شهد قربان", price: "1,300.00" },
+  al_baron: { title: "البارون", author: "شهد قربان", price: "1,500.00" },
   little_women: { title: "Little Women", author: "Louisa May Alcott", price: "850.00" },
   oliver_twist: { title: "Oliver Twist", author: "Charles Dickens", price: "1,800.00" },
   pride_and_prejudice: { title: "Pride and Prejudice", author: "Jane Austen", price: "1,400.00" },
