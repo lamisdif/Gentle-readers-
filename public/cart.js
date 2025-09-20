@@ -110,6 +110,13 @@ function setCartObject(obj) {
 }
 
 function updateQty(bookId, delta) {
+  // Check if book is out of stock
+  const outOfStockBooks = ['la_yumkinuka_iidhaayi', 'the_hunger_games'];
+  if (outOfStockBooks.includes(bookId) && delta > 0) {
+    alert('This book is currently out of stock / هذا الكتاب نفدت الكمية حالياً');
+    return;
+  }
+  
   const cart = getCartObject();
   const next = (cart[bookId] || 0) + delta;
   if (next <= 0) {

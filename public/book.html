@@ -913,6 +913,26 @@
       document.getElementById("book-description").textContent =
         lang === 'ar' && book.description_ar ? book.description_ar : book.description;
       document.getElementById("book-image").src = book.cover;
+      
+      // Check if book is out of stock and update UI accordingly
+      const outOfStockBooks = ['la_yumkinuka_iidhaayi', 'the_hunger_games'];
+      if (outOfStockBooks.includes(id)) {
+        const button = document.querySelector('.button');
+        button.disabled = true;
+        button.style.backgroundColor = '#dc2626';
+        button.style.cursor = 'not-allowed';
+        button.style.opacity = '0.7';
+        button.innerHTML = '<span>Out of Stock / نفدت الكمية</span>';
+        
+        // Add out of stock notice
+        const notice = document.createElement('p');
+        notice.style.color = '#dc2626';
+        notice.style.fontWeight = 'bold';
+        notice.style.textAlign = 'center';
+        notice.style.margin = '10px 0';
+        notice.textContent = 'This book is currently out of stock / هذا الكتاب نفدت الكمية حالياً';
+        button.parentNode.insertBefore(notice, button);
+      }
     } else {
       document.body.innerHTML = "<p class='text-red-600 text-xl text-center'>Book not found.</p>";
     }
@@ -931,6 +951,13 @@
     updateCartCounter();
 
     function addToCart() {
+      // Check if book is out of stock
+      const outOfStockBooks = ['la_yumkinuka_iidhaayi', 'the_hunger_games'];
+      if (outOfStockBooks.includes(id)) {
+        alert('This book is currently out of stock / هذا الكتاب نفدت الكمية حالياً');
+        return;
+      }
+      
       const stored = JSON.parse(localStorage.getItem('cart')) || {};
       if (Array.isArray(stored)) {
         // migrate old array cart -> object with quantities

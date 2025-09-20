@@ -327,6 +327,14 @@ document.addEventListener("DOMContentLoaded", function() {
 document.addEventListener('click', function(e) {
   if (e.target && (e.target.classList.contains('qty-inc') || e.target.classList.contains('qty-dec'))) {
     const id = e.target.getAttribute('data-id');
+    
+    // Check if book is out of stock
+    const outOfStockBooks = ['la_yumkinuka_iidhaayi', 'the_hunger_games'];
+    if (outOfStockBooks.includes(id) && e.target.classList.contains('qty-inc')) {
+      alert('This book is currently out of stock / هذا الكتاب نفدت الكمية حالياً');
+      return;
+    }
+    
     const cart = getCartObject();
     const delta = e.target.classList.contains('qty-inc') ? 1 : -1;
     const next = (cart[id] || 0) + delta;
