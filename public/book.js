@@ -16,7 +16,7 @@ const books = {
     description: "An easy approach to building good habits and getting rid of bad habits. This book provides practical strategies for making small changes that lead to remarkable results in personal development.",
     description_ar: "منهج سهل لبناء العادات الجيدة والتخلص من العادات السيئة. يوفر هذا الكتاب استراتيجيات عملية لإجراء تغييرات صغيرة تؤدي إلى نتائج مذهلة في التطوير الشخصي.",
     cover: "imgs/العادات الذرية.jpg",
-    price: "1,400.00",
+    price: "1,600.00",
     isbn: "9789776543212"
   },
   eva_luna: {

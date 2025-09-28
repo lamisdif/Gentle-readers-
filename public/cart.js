@@ -2,7 +2,7 @@
 const books = {
   // New books from the latest images
   ayyam_al_hijran: { title: "أيام الهجران", price: "1,450.00" },
-  al_3adat_al_dharia: { title: "العادات الذرية", price: "1,400.00" },
+  al_3adat_al_dharia: { title: "العادات الذرية", price: "1,600.00" },
   eva_luna: { title: "إيفا لونا", price: "2,100.00" },
   ghusoon_bunduq_1: { title: "غصون البندق - الكتاب الأول", price: "1,200.00" },
   ghusoon_bunduq_2: { title: "غصون البندق - الكتاب الثاني", price: "1,200.00" },
