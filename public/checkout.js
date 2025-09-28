@@ -223,7 +223,7 @@ const books = {
   it_starts_with_us: { title: "It Starts With Us", author: "Colleen Hoover", price: "1,200.00" },
   water_moon: { title: "Water Moon", author: "Samantha Sotto Yambao", price: "1,500.00" },
   
-  majdouline: { title: "ماجدولين", author: "مصطفى لطفى المنفلوطي", price: "1000.00" },
+  majdouline: { title: "ماجدولين", author: "مصطفى لطفى المنفلوطي", price: "1200.00" },
   la_yumkinuka_iidhaayi: { title: "لا يمكنك إيذائي", author: "ديفيد غوغينز", price: "1,500.00" },
   
   // Added: The Kite Runner (Arabic) and The Hunger Games
