@@ -144,7 +144,7 @@ const books = {
     description: "A classic coming-of-age story following the four March sisters - Meg, Jo, Beth, and Amy - as they navigate life, love, and personal growth during the Civil War era. This timeless tale explores themes of family, independence, and the challenges of growing up.",
     description_ar: "قصة كلاسيكية عن النضج تتبع الأختين الأربع مارش - ميج وجو وبيث وإيمي - وهن يتنقلن في الحياة والحب والنمو الشخصي خلال عصر الحرب الأهلية. هذه الحكاية الخالدة تستكشف مواضيع الأسرة والاستقلالية وتحديات النمو.",
     cover: "imgs/Little women.jpg",
-    price: "1,500.00",
+    price: "900.00",
     isbn: "9789776543230"
   },
   oliver_twist: {

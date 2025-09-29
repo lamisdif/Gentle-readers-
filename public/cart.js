@@ -82,7 +82,7 @@ const books = {
   
   // Missing books from the images
   al_baron: { title: "البارون", price: "1,500.00" },
-  little_women: { title: "Little Women", price: "850.00" },
+  little_women: { title: "Little Women", price: "900.00" },
   oliver_twist: { title: "Oliver Twist", price: "1,800.00" },
   pride_and_prejudice: { title: "Pride and Prejudice", price: "1,400.00" },
   anne_of_green_gables: { title: "Anne of Green Gables", price: "850.00" },
