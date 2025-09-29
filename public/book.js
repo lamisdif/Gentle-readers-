@@ -34,7 +34,7 @@ const books = {
     description: "The first book in a series that explores themes of growth, resilience, and the beauty of nature. A story that connects human emotions with the natural world.",
     description_ar: "الكتاب الأول في سلسلة تستكشف مواضيع النمو والقدرة على التحمل وجمال الطبيعة. قصة تربط المشاعر الإنسانية بالعالم الطبيعي.",
     cover: "imgs/غصون البندق.jpg",
-    price: "1,200.00",
+    price: "1,400.00",
     isbn: "9789776543214"
   },
   ghusoon_bunduq_2: {
