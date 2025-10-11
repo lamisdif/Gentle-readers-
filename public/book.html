@@ -369,6 +369,28 @@
         price: "1,500.00",
         isbn: "9789776543232"
       },
+      al_layali_al_bayda: {
+        title: "الليالي البيضاء",
+        author: "دوستويفسكي",
+        description: "A classic novel by Dostoevsky that tells the story of a lonely young man in St. Petersburg who meets a young girl during the white summer nights. A touching story about love, loneliness, and hope, reflecting Dostoevsky's mastery in exploring the human psyche.",
+        description_ar: "رواية كلاسيكية رائعة من دوستويفسكي تروي قصة شاب وحيد في سانت بطرسبرغ يلتقي بفتاة شابة في الليالي البيضاء الصيفية. قصة مؤثرة عن الحب والوحدة والأمل، تعكس براعة دوستويفسكي في استكشاف النفس الإنسانية.",
+        cover: "imgs/الليالي البيضاء.jpg",
+        price: "850.00",
+        isbn: "9789776543238",
+        inStock: false
+      },
+      rasail_ila_milina: {
+        title: "رسائل إلى ميلينا",
+        author: "فرانز كافكا",
+        description: "A collection of intimate letters from Franz Kafka to Milena Jesenská, revealing the profound emotional and intellectual connection between two extraordinary minds. These letters offer a rare glimpse into Kafka's personal thoughts, fears, and desires, showcasing his literary genius in its most vulnerable form.",
+        description_ar: "مجموعة من الرسائل الحميمة من فرانز كافكا إلى ميلينا ييسينسكا، تكشف عن الصلة العاطفية والفكرية العميقة بين عقلين استثنائيين. هذه الرسائل تقدم نظرة نادرة على أفكار كافكا الشخصية ومخاوفه ورغباته، وتعرض عبقريته الأدبية في أكثر أشكالها ضعفاً.",
+        cover: "imgs/رسائل الى ميلينا.jpg",
+        price: "750.00",
+        originalPrice: "900.00",
+        isbn: "9789776543251",
+        inStock: true,
+        isDiscounted: true
+      },
       amarita: {
         title: "أماريتا",
         author: "عمرو عبد الحميد",
@@ -915,8 +937,7 @@
       document.getElementById("book-image").src = book.cover;
       
       // Check if book is out of stock and update UI accordingly
-      const outOfStockBooks = ['la_yumkinuka_iidhaayi', 'the_hunger_games'];
-      if (outOfStockBooks.includes(id)) {
+      if (book.inStock === false) {
         const button = document.querySelector('.button');
         button.disabled = true;
         button.style.backgroundColor = '#dc2626';

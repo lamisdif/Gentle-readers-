@@ -27,6 +27,7 @@ const books = {
   mobydick: { title: "وادي الذئاب", price: "1,400.00" },
   crimeandpunishment: { title: "عناق برائحة الورق", price: "1,400.00" },
   catcher: { title: "اعرف وجهك الاخر", price: "1,500.00" },
+  anne_of_green_gables: { title: "Anne of Green Gables", price: "850.00", inStock: false },
   amarita: { title: "أماريتا", price: "1,200.00" },
   amwaj_akma: { title: "أمواج أكما", price: "1,450.00" },
   qawaed: { title: "جارتين قواعد", price: "1,350.00" },
@@ -39,7 +40,8 @@ const books = {
   // NEW BOOKS - First Half
   abi_alladhi_akraho: { title: "أبي الذي أكره", price: "1,000.00" },
   ash3alni: { title: "أشعلني", price: "2,000.00" },
-  al_layali_al_bayda: { title: "الليالي البيضاء", price: "850.00" },
+  al_layali_al_bayda: { title: "الليالي البيضاء", price: "850.00", inStock: false },
+  rasail_ila_milina: { title: "رسائل إلى ميلينا", price: "750.00", originalPrice: "900.00", inStock: true, isDiscounted: true },
   kull_azraq_al_sama: { title: "كل أزرق السماء", price: "2,000.00" },
   hakadha_tata3afa: { title: "هكذا تتعافى", price: "1,200.00" },
   caraval: { title: "Caraval", price: "1,500.00" },
@@ -111,8 +113,7 @@ function setCartObject(obj) {
 
 function updateQty(bookId, delta) {
   // Check if book is out of stock
-  const outOfStockBooks = ['la_yumkinuka_iidhaayi', 'the_hunger_games'];
-  if (outOfStockBooks.includes(bookId) && delta > 0) {
+  if (books[bookId] && books[bookId].inStock === false && delta > 0) {
     alert('This book is currently out of stock / هذا الكتاب نفدت الكمية حالياً');
     return;
   }

@@ -172,7 +172,8 @@ const books = {
     description_ar: "قصة مؤثرة عن آن شيرلي، اليتيمة الخيالية والثرثارة التي يتم إرسالها بالخطأ للعيش مع ماريلا وماثيو كوثبرت في جزيرة الأمير إدوارد. هذا الكلاسيكي المحبوب يتبع مغامرات ونمو آن وهي تحول حياة كل من حولها.",
     cover: "imgs/Anne of green gables.jpg",
     price: "1,600.00",
-    isbn: "9789776543233"
+    isbn: "9789776543233",
+    inStock: false
   },
   hasees: {
     title: "هسيس",
@@ -328,6 +329,28 @@ const books = {
     cover: "imgs/اعرف وجهك.jpg",
     price: "1,500.00",
     isbn: "9789776543250"
+  },
+  al_layali_al_bayda: {
+    title: "الليالي البيضاء",
+    author: "دوستويفسكي",
+    description: "A classic novel by Dostoevsky that tells the story of a lonely young man in St. Petersburg who meets a young girl during the white summer nights. A touching story about love, loneliness, and hope, reflecting Dostoevsky's mastery in exploring the human psyche.",
+    description_ar: "رواية كلاسيكية رائعة من دوستويفسكي تروي قصة شاب وحيد في سانت بطرسبرغ يلتقي بفتاة شابة في الليالي البيضاء الصيفية. قصة مؤثرة عن الحب والوحدة والأمل، تعكس براعة دوستويفسكي في استكشاف النفس الإنسانية.",
+    cover: "imgs/الليالي البيضاء.jpg",
+    price: "850.00",
+    isbn: "9789776543238",
+    inStock: false
+  },
+  rasail_ila_milina: {
+    title: "رسائل إلى ميلينا",
+    author: "فرانز كافكا",
+    description: "A collection of intimate letters from Franz Kafka to Milena Jesenská, revealing the profound emotional and intellectual connection between two extraordinary minds. These letters offer a rare glimpse into Kafka's personal thoughts, fears, and desires, showcasing his literary genius in its most vulnerable form.",
+    description_ar: "مجموعة من الرسائل الحميمة من فرانز كافكا إلى ميلينا ييسينسكا، تكشف عن الصلة العاطفية والفكرية العميقة بين عقلين استثنائيين. هذه الرسائل تقدم نظرة نادرة على أفكار كافكا الشخصية ومخاوفه ورغباته، وتعرض عبقريته الأدبية في أكثر أشكالها ضعفاً.",
+    cover: "imgs/رسائل الى ميلينا.jpg",
+    price: "750.00",
+    originalPrice: "900.00",
+    isbn: "9789776543251",
+    inStock: true,
+    isDiscounted: true
   }
   // ... (rest of the books object as in book.html)
 };
@@ -336,6 +359,14 @@ function addToCart() {
   const urlParams = new URLSearchParams(window.location.search);
   const bookId = urlParams.get('id');
   if (!bookId) return;
+  
+  // Check if book is out of stock
+  if (books[bookId] && books[bookId].inStock === false) {
+    const lang = localStorage.getItem('lang') || 'en';
+    alert(lang === 'ar' ? 'هذا الكتاب نفدت الكمية حالياً' : 'This book is currently out of stock');
+    return;
+  }
+  
   const cart = JSON.parse(localStorage.getItem('cart')) || [];
   if (!cart.includes(bookId)) {
     cart.push(bookId);

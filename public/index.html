@@ -1018,8 +1018,49 @@
               </div>
             </div>
             
-            <!-- Book Card 13 - كل أزرق السماء -->
+            <!-- Book Card 13 - رسائل إلى ميلينا -->
             <div class="item" style="--position: 13">
+              <div class="card" onclick="openBook('rasail_ila_milina')" style="cursor: pointer; position: relative; z-index: 100;">
+                <button class="add-to-cart-btn" onclick="addToCartFromCard('rasail_ila_milina', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
+                  <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                    <title>icon-cart</title>
+                    <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                  </svg>
+                </button>
+                <div class="flip-book-card-wrapper" onclick="openBook('rasail_ila_milina')" style="cursor: pointer;">
+                  <div class="flip-book-card-content" onclick="openBook('rasail_ila_milina')" style="cursor: pointer;">
+                    <div class="flip-book-card-front" onclick="openBook('rasail_ila_milina')" style="cursor: pointer;">
+                      <div class="book-cover-image">
+                        <img
+                          src="imgs/رسائل الى ميلينا.jpg"
+                          alt="Book Cover"
+                          onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'"
+                        />
+                        <span>Cover Image Unavailable</span>
+                      </div>
+                      <p class="book-title">رسائل إلى ميلينا</p>
+                      <p class="book-author">فرانز كافكا</p>
+                      <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 5px 0;">
+                        <p class="book-price" style="color: #dc2626; font-weight: bold;">Price: 750.00</p>
+                        <p style="color: #6b7280; text-decoration: line-through; font-size: 12px;">900.00</p>
+                      </div>
+                      <p class="discount-tag" style="color: #dc2626; font-weight: bold; font-size: 12px; margin: 5px 0; text-align: center; background: rgba(220, 38, 38, 0.1); padding: 2px 8px; border-radius: 12px; display: inline-block;">DISCOUNT</p>
+                    </div>
+                    <div class="flip-book-card-back">
+                      <div class="flip-book-card-back-content">
+                        <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                        <p class="summary-text" id="desc-book13">
+                          مجموعة من الرسائل الحميمة من فرانز كافكا إلى ميلينا ييسينسكا، تكشف عن الصلة العاطفية والفكرية العميقة بين عقلين استثنائيين. هذه الرسائل تقدم نظرة نادرة على أفكار كافكا الشخصية ومخاوفه ورغباته، وتعرض عبقريته الأدبية في أكثر أشكالها ضعفاً.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Book Card 14 - كل أزرق السماء -->
+            <div class="item" style="--position: 14">
               <div class="card" onclick="openBook('kull_azraq_al_sama')" style="cursor: pointer; position: relative; z-index: 100;">
                 <button class="add-to-cart-btn" onclick="addToCartFromCard('kull_azraq_al_sama', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
                   <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
@@ -1046,7 +1087,7 @@
                     <div class="flip-book-card-back">
                       <div class="flip-book-card-back-content">
                         <h4 class="text-lg font-bold mb-2">Book Summary</h4>
-                        <p class="summary-text" id="desc-book13">
+                        <p class="summary-text" id="desc-book14">
                           رواية مؤثرة عن رحلة شفاء واكتشاف الذات. تتبع قصة شخصية تبدأ رحلة في فان قديم عبر المناظر الطبيعية الخلابة، بحثاً عن معنى الحياة والحرية. قصة جميلة عن المغامرة والتحرر من الماضي.
                         </p>
                       </div>
@@ -1056,8 +1097,8 @@
               </div>
             </div>
             
-            <!-- Book Card 14 - هكذا تتعافى -->
-            <div class="item" style="--position: 14">
+            <!-- Book Card 15 - هكذا تتعافى -->
+            <div class="item" style="--position: 15">
               <div class="card" onclick="openBook('hakadha_tata3afa')" style="cursor: pointer; position: relative; z-index: 100;">
                 <button class="add-to-cart-btn" onclick="addToCartFromCard('hakadha_tata3afa', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
                   <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">

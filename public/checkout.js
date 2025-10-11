@@ -206,14 +206,15 @@ const books = {
   little_women: { title: "Little Women", author: "Louisa May Alcott", price: "900.00" },
   oliver_twist: { title: "Oliver Twist", author: "Charles Dickens", price: "1,800.00" },
   pride_and_prejudice: { title: "Pride and Prejudice", author: "Jane Austen", price: "1,400.00" },
-  anne_of_green_gables: { title: "Anne of Green Gables", author: "Lucy Maud Montgomery", price: "850.00" },
+  anne_of_green_gables: { title: "Anne of Green Gables", author: "Lucy Maud Montgomery", price: "850.00", inStock: false },
   hasees: { title: "هسيس", author: "عبدالله بوموزة", price: "1,200.00" },
   hatha_ma_hadath_maaha: { title: "هذا ما حدث معها", author: "أسامة المسلم", price: "1,400.00" },
   
   // NEW BOOKS - First Half
   abi_alladhi_akraho: { title: "أبي الذي أكره", author: "د.عماد رشاد عثمان", price: "1,000.00" },
   ash3alni: { title: "أشعلني", author: "طاهرة مافي", price: "2,000.00" },
-  al_layali_al_bayda: { title: "الليالي البيضاء", author: "دوستويفسكي", price: "850.00" },
+  al_layali_al_bayda: { title: "الليالي البيضاء", author: "دوستويفسكي", price: "850.00", inStock: false },
+  rasail_ila_milina: { title: "رسائل إلى ميلينا", author: "فرانز كافكا", price: "750.00", originalPrice: "900.00", inStock: true, isDiscounted: true },
   kull_azraq_al_sama: { title: "كل أزرق السماء", author: "ميليسا را كوستا", price: "2,000.00" },
   hakadha_tata3afa: { title: "هكذا تتعافى", author: "بريانا ويست", price: "1,200.00" },
   caraval: { title: "Caraval", author: "Stephanie Garber", price: "1,500.00" },
