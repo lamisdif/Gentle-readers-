@@ -351,6 +351,18 @@ const books = {
     isbn: "9789776543251",
     inStock: true,
     isDiscounted: true
+  },
+  pride_and_prejudice: {
+    title: "كبرياء و هوى",
+    author: "جين أوستن",
+    description: "A classic novel of manners, love, and social class in 19th-century England. It follows the emotional development of Elizabeth Bennet, who learns the error of making hasty judgments and comes to appreciate the difference between superficial and essential goodness.",
+    description_ar: "رواية كلاسيكية عن الأخلاق والحب والطبقة الاجتماعية في إنجلترا في القرن التاسع عشر. تتبع التطور العاطفي لإليزابيث بينيت، التي تتعلم خطأ إصدار الأحكام المتسرعة وتدرك الفرق بين الخير السطحي والأساسي.",
+    cover: "imgs/كبرياء و هوى.jpg",
+    price: "900.00",
+    originalPrice: "1000.00",
+    isbn: "9789776543252",
+    inStock: true,
+    isDiscounted: true
   }
   // ... (rest of the books object as in book.html)
 };

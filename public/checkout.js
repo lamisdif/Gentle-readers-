@@ -215,6 +215,7 @@ const books = {
   ash3alni: { title: "أشعلني", author: "طاهرة مافي", price: "2,000.00" },
   al_layali_al_bayda: { title: "الليالي البيضاء", author: "دوستويفسكي", price: "850.00", inStock: false },
   rasail_ila_milina: { title: "رسائل إلى ميلينا", author: "فرانز كافكا", price: "750.00", originalPrice: "900.00", inStock: true, isDiscounted: true },
+  pride_and_prejudice: { title: "كبرياء و هوى", author: "جين أوستن", price: "900.00", originalPrice: "1000.00", inStock: true, isDiscounted: true },
   kull_azraq_al_sama: { title: "كل أزرق السماء", author: "ميليسا را كوستا", price: "2,000.00" },
   hakadha_tata3afa: { title: "هكذا تتعافى", author: "بريانا ويست", price: "1,200.00" },
   caraval: { title: "Caraval", author: "Stephanie Garber", price: "1,500.00" },
