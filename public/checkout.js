@@ -205,7 +205,7 @@ const books = {
   al_baron: { title: "البارون", author: "شهد قربان", price: "1,500.00" },
   little_women: { title: "Little Women", author: "Louisa May Alcott", price: "900.00" },
   oliver_twist: { title: "Oliver Twist", author: "Charles Dickens", price: "1,800.00" },
-  pride_and_prejudice: { title: "Pride and Prejudice", author: "Jane Austen", price: "1,400.00" },
+  pride_and_prejudice: { title: "كبرياء و هوى", author: "جين أوستن", price: "900.00", originalPrice: "1000.00", inStock: true, isDiscounted: true },
   anne_of_green_gables: { title: "Anne of Green Gables", author: "Lucy Maud Montgomery", price: "850.00", inStock: false },
   hasees: { title: "هسيس", author: "عبدالله بوموزة", price: "1,200.00" },
   hatha_ma_hadath_maaha: { title: "هذا ما حدث معها", author: "أسامة المسلم", price: "1,400.00" },

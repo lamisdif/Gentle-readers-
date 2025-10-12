@@ -87,7 +87,7 @@ const books = {
   al_baron: { title: "البارون", price: "1,500.00" },
   little_women: { title: "Little Women", price: "900.00" },
   oliver_twist: { title: "Oliver Twist", price: "1,800.00" },
-  pride_and_prejudice: { title: "Pride and Prejudice", price: "1,400.00" },
+  pride_and_prejudice: { title: "كبرياء و هوى", price: "900.00", originalPrice: "1000.00", inStock: true, isDiscounted: true },
   anne_of_green_gables: { title: "Anne of Green Gables", price: "850.00" },
   hasees: { title: "هسيس", price: "1,200.00" },
   hatha_ma_hadath_maaha: { title: "هذا ما حدث معها", price: "1,400.00" },
