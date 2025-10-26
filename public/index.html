@@ -294,27 +294,6 @@
     </style>
   </head>
   <body>
-    <!-- Pride and Prejudice Featured Image -->
-    <div class="w-full pride-prejudice-featured py-8 mb-6">
-      <div class="max-w-6xl mx-auto px-4">
-        <div class="flex flex-col md:flex-row items-center justify-center gap-8">
-          <div class="text-center md:text-left text-white">
-            <h1 class="text-4xl md:text-6xl font-bold mb-4 pride-prejudice-title" style="font-family: 'Great Vibes', cursive;">Pride and Prejudice</h1>
-            <p class="text-xl md:text-2xl mb-2 pride-prejudice-subtitle">by Jane Austen</p>
-            <p class="text-lg opacity-90 pride-prejudice-subtitle">A timeless classic of love, manners, and social class</p>
-            <div class="mt-6">
-              <span class="text-3xl font-bold">1,200 DZD</span>
-              <span class="text-lg line-through opacity-75 ml-2">1,500 DZD</span>
-            </div>
-          </div>
-          <div class="flex-shrink-0">
-            <img src="imgs/Pride and prejudice.jpg" alt="Pride and Prejudice by Jane Austen" 
-                 class="w-64 h-80 object-cover rounded-lg pride-prejudice-image" />
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Add this at the very top of the body -->
     <script>document.body.classList.add('loading');</script>
     <!-- Loader Overlay (Uiverse.io loader) -->
@@ -598,8 +577,8 @@
         <!-- Slider for book cards -->
         <div class="slider mx-auto" style="--width: 220px; --height: 300px; --quantity: 17;">
           <div class="list">
-            <!-- Book Card 0 - Pride and Prejudice (Featured) -->
-            <div class="item" style="--position: 0">
+            <!-- Book Card 1 - Pride and Prejudice -->
+            <div class="item" style="--position: 1">
               <div class="card" onclick="openBook('pride_and_prejudice')" style="cursor: pointer; position: relative; z-index: 100;">
                 <button class="add-to-cart-btn" onclick="addToCartFromCard('pride_and_prejudice', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
                   <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
@@ -613,19 +592,20 @@
                       <div class="book-cover-image">
                         <img
                           src="imgs/Pride and prejudice.jpg"
-                          alt="Pride and Prejudice by Jane Austen"
+                          alt="Book Cover"
                           onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'"
                         />
+                        <span>Cover Image Unavailable</span>
                       </div>
-                      <p class="book-title">Pride and Prejudice</p>
-                      <p class="book-author">Jane Austen</p>
-                      <p class="book-price">Price: 1,200.00 <span style="text-decoration: line-through; color: #999; font-size: 0.9em;">1,500.00</span></p>
+                      <p class="book-title">كبرياء و هوى</p>
+                      <p class="book-author">جين أوستن</p>
+                      <p class="book-price">Price: 1,200.00</p>
                     </div>
                     <div class="flip-book-card-back">
                       <div class="flip-book-card-back-content">
                         <h4 class="text-lg font-bold mb-2">Book Summary</h4>
-                        <p class="summary-text">
-                          A classic novel of manners, love, and social class in 19th-century England. It follows the emotional development of Elizabeth Bennet, who learns the error of making hasty judgments and comes to appreciate the difference between superficial and essential goodness.
+                        <p class="summary-text" id="desc-pride-prejudice">
+                          رواية كلاسيكية عن الأخلاق والحب والطبقة الاجتماعية في إنجلترا في القرن التاسع عشر. تتبع التطور العاطفي لإليزابيث بينيت، التي تتعلم خطأ إصدار الأحكام المتسرعة وتدرك الفرق بين الخير السطحي والأساسي.
                         </p>
                       </div>
                     </div>
@@ -633,9 +613,8 @@
                 </div>
               </div>
             </div>
-            
-            <!-- Book Card 1 - أيام الهجران -->
-            <div class="item" style="--position: 1">
+            <!-- Book Card 2 - أيام الهجران -->
+            <div class="item" style="--position: 2">
               <div class="card" onclick="openBook('ayyam_al_hijran')" style="cursor: pointer; position: relative; z-index: 100;">
                 <button class="add-to-cart-btn" onclick="addToCartFromCard('ayyam_al_hijran', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
                   <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
@@ -1277,10 +1256,46 @@
           <h2 class="main-title">Latest books online</h2>
         </div>
         <!-- Slider for book cards -->
-        <div class="slider mx-auto" style="--width: 220px; --height: 300px; --quantity: 14;">
+        <div class="slider mx-auto" style="--width: 220px; --height: 300px; --quantity: 15;">
           <div class="list">
-            <!-- Book Card 1 - مكتبة منتصف الليل -->
+            <!-- Book Card 1 - Pride and Prejudice -->
             <div class="item" style="--position: 1">
+              <div class="card" onclick="openBook('pride_and_prejudice')" style="cursor: pointer; position: relative; z-index: 100;">
+                <button class="add-to-cart-btn" onclick="addToCartFromCard('pride_and_prejudice', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
+                  <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                    <title>icon-cart</title>
+                    <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                  </svg>
+                </button>
+                <div class="flip-book-card-wrapper" onclick="openBook('pride_and_prejudice')" style="cursor: pointer;">
+                  <div class="flip-book-card-content" onclick="openBook('pride_and_prejudice')" style="cursor: pointer;">
+                    <div class="flip-book-card-front" onclick="openBook('pride_and_prejudice')" style="cursor: pointer;">
+                      <div class="book-cover-image">
+                        <img
+                          src="imgs/Pride and prejudice.jpg"
+                          alt="Book Cover"
+                          onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'"
+                        />
+                        <span>Cover Image Unavailable</span>
+                      </div>
+                      <p class="book-title">كبرياء و هوى</p>
+                      <p class="book-author">جين أوستن</p>
+                      <p class="book-price">Price: 1,200.00</p>
+                    </div>
+                    <div class="flip-book-card-back">
+                      <div class="flip-book-card-back-content">
+                        <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                        <p class="summary-text" id="desc-pride-prejudice-2">
+                          رواية كلاسيكية عن الأخلاق والحب والطبقة الاجتماعية في إنجلترا في القرن التاسع عشر. تتبع التطور العاطفي لإليزابيث بينيت، التي تتعلم خطأ إصدار الأحكام المتسرعة وتدرك الفرق بين الخير السطحي والأساسي.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Book Card 2 - مكتبة منتصف الليل -->
+            <div class="item" style="--position: 2">
               <div class="card" onclick="openBook('maktabat_muntasaf_al_layl')" style="cursor: pointer; position: relative; z-index: 100;">
                 <button class="add-to-cart-btn" onclick="addToCartFromCard('maktabat_muntasaf_al_layl', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
                   <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
