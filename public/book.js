@@ -354,6 +354,15 @@ const books = {
     isbn: "9789776543252",
     inStock: true,
     isDiscounted: true
+  },
+  al_naqous_al_zujaji: {
+    title: "الناقوس الزجاجي",
+    author: "سيلفيا بلاث",
+    description: "The Bell Jar is the only novel by American poet Sylvia Plath. The story follows Esther Greenwood, a talented young woman who wins an opportunity to work at a fashion magazine in New York. Despite apparent success, she suffers from increasing feelings of isolation and psychological distress, leading to a suicide attempt and her admission to a psychiatric hospital. The novel sheds light on Esther's internal struggles, especially regarding society's expectations of women and the constraints placed upon them. 'The Bell Jar' is used as a metaphor to represent the feeling of suffocation and isolation she experiences. This novel is considered one of the classic literary works that deeply and honestly addressed themes of mental health and female identity.",
+    description_ar: "رواية 'الناقوس الزجاجي' هي العمل الروائي الوحيد للشاعرة الأمريكية سيلفيا بلاث. تدور أحداث الرواية حول إيستر غرينوود، شابة موهوبة تفوز بفرصة للعمل في مجلة موضة بنيويورك. رغم النجاح الظاهري، تعاني من شعور متزايد بالعزلة والاضطراب النفسي، مما يؤدي بها إلى محاولة انتحار ودخولها مصحة نفسية. تُسلط الرواية الضوء على الصراعات الداخلية للبطلة، خاصة فيما يتعلق بتوقعات المجتمع من النساء والقيود المفروضة عليهن. يُستخدم 'الناقوس الزجاجي' كاستعارة لتمثيل الشعور بالاختناق والعزلة التي تعاني منها. تُعتبر هذه الرواية من الأعمال الأدبية الكلاسيكية التي تناولت موضوعات الصحة النفسية والهوية النسائية بعمق وصدق.",
+    cover: "imgs/الناقوس الزجاجي.jpg",
+    price: "1,700.00",
+    isbn: "9789776543250"
   }
   // ... (rest of the books object as in book.html)
 };
