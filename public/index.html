@@ -2275,8 +2275,22 @@
     </script>
     <script>
   function openBook(id) {
-    window.location.href = `book.html?id=${id}`;
+    try {
+      if (!id || id.trim() === '') {
+        console.error('openBook called with invalid ID:', id);
+        return;
+      }
+      // Encode the ID to handle special characters
+      const encodedId = encodeURIComponent(id);
+      window.location.href = `book.html?id=${encodedId}`;
+    } catch (error) {
+      console.error('Error in openBook:', error);
+      alert('An error occurred while opening the book. Please try again.');
+    }
   }
+  
+  // Make openBook available globally
+  window.openBook = openBook;
   
       // Function to add book to cart from book cards
       function addToCartFromCard(bookId, event) {
@@ -2393,8 +2407,19 @@
       }
     });
     window.openBook = function(id) {
-      showLoader();
-      window.location.href = `book.html?id=${id}`;
+      try {
+        if (!id || id.trim() === '') {
+          console.error('openBook called with invalid ID:', id);
+          return;
+        }
+        showLoader();
+        const encodedId = encodeURIComponent(id);
+        window.location.href = `book.html?id=${encodedId}`;
+      } catch (error) {
+        console.error('Error in openBook:', error);
+        hideLoader();
+        alert('An error occurred while opening the book. Please try again.');
+      }
     }
     window.changeLanguage = function(lang) {
       showLoader();

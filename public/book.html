@@ -150,6 +150,9 @@
   </div>
 
   <script>
+    // Wait for DOM to be fully loaded before executing
+    document.addEventListener('DOMContentLoaded', function() {
+      try {
     const books = {
       // New books from the latest images
       ayyam_al_hijran: {
@@ -960,83 +963,211 @@
         isbn: "9789776543253"
       }
     };
+    
+    // Debug: Log total books count
+    console.log('Total books loaded:', Object.keys(books).length);
 
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
+    
+    // Debug: Log the book ID being requested
+    console.log('Requested book ID:', id);
+    
+    if (!id) {
+      // If no ID provided, show error message but keep the page structure
+      const titleEl = document.getElementById("book-title");
+      const authorEl = document.getElementById("book-author");
+      const priceEl = document.getElementById("book-price");
+      const descEl = document.getElementById("book-description");
+      if (titleEl) titleEl.textContent = "Error: No book ID provided";
+      if (authorEl) authorEl.textContent = "";
+      if (priceEl) priceEl.textContent = "";
+      if (descEl) descEl.textContent = "Please select a book from the homepage.";
+      return;
+    }
+    
     const book = books[id];
+    
+    // Debug: Log if book was found
+    if (book) {
+      console.log('Book found:', book.title);
+    } else {
+      console.warn('Book not found for ID:', id);
+      console.log('Available book IDs:', Object.keys(books).slice(0, 10), '...');
+    }
 
     if (book) {
-      document.getElementById("book-title").textContent = book.title;
-      document.getElementById("book-author").textContent = "Author: " + book.author;
-      // Display price
-      if (book.price) {
-        document.getElementById("book-price").textContent = "Price: " + book.price + " DZD";
-      } else {
-        document.getElementById("book-price").textContent = "";
-      }
-      // Show Arabic description if language is 'ar', otherwise show English
-      const lang = localStorage.getItem('lang') || 'en';
-      document.getElementById("book-description").textContent =
-        lang === 'ar' && book.description_ar ? book.description_ar : book.description;
-      document.getElementById("book-image").src = book.cover;
-      
-      // Check if book is out of stock and update UI accordingly
-      if (book.inStock === false) {
-        const button = document.querySelector('.button');
-        button.disabled = true;
-        button.style.backgroundColor = '#dc2626';
-        button.style.cursor = 'not-allowed';
-        button.style.opacity = '0.7';
-        button.innerHTML = '<span>Out of Stock / نفدت الكمية</span>';
+      try {
+        const titleEl = document.getElementById("book-title");
+        const authorEl = document.getElementById("book-author");
+        const priceEl = document.getElementById("book-price");
+        const descEl = document.getElementById("book-description");
+        const imageEl = document.getElementById("book-image");
         
-        // Add out of stock notice
-        const notice = document.createElement('p');
-        notice.style.color = '#dc2626';
-        notice.style.fontWeight = 'bold';
-        notice.style.textAlign = 'center';
-        notice.style.margin = '10px 0';
-        notice.textContent = 'This book is currently out of stock / هذا الكتاب نفدت الكمية حالياً';
-        button.parentNode.insertBefore(notice, button);
+        if (titleEl) titleEl.textContent = book.title || "Unknown Title";
+        if (authorEl) authorEl.textContent = "Author: " + (book.author || "Unknown Author");
+        
+        // Display price
+        if (priceEl) {
+          if (book.price) {
+            priceEl.textContent = "Price: " + book.price + " DZD";
+          } else {
+            priceEl.textContent = "";
+          }
+        }
+        
+        // Show Arabic description if language is 'ar', otherwise show English
+        const lang = localStorage.getItem('lang') || 'en';
+        if (descEl) {
+          descEl.textContent = (lang === 'ar' && book.description_ar) ? book.description_ar : (book.description || "No description available.");
+        }
+        
+        if (imageEl) {
+          imageEl.src = book.cover || "";
+          imageEl.onerror = function() {
+            this.src = 'https://placehold.co/300x400/ccc/666?text=Cover+Not+Available';
+          };
+        }
+        
+        // Check if book is out of stock and update UI accordingly
+        if (book.inStock === false) {
+          const button = document.querySelector('.button');
+          if (button) {
+            button.disabled = true;
+            button.style.backgroundColor = '#dc2626';
+            button.style.cursor = 'not-allowed';
+            button.style.opacity = '0.7';
+            button.innerHTML = '<span>Out of Stock / نفدت الكمية</span>';
+            
+            // Add out of stock notice
+            const notice = document.createElement('p');
+            notice.style.color = '#dc2626';
+            notice.style.fontWeight = 'bold';
+            notice.style.textAlign = 'center';
+            notice.style.margin = '10px 0';
+            notice.textContent = 'This book is currently out of stock / هذا الكتاب نفدت الكمية حالياً';
+            button.parentNode.insertBefore(notice, button);
+          }
+        }
+      } catch (error) {
+        console.error("Error loading book:", error);
+        const titleEl = document.getElementById("book-title");
+        if (titleEl) titleEl.textContent = "Error loading book details";
       }
     } else {
-      document.body.innerHTML = "<p class='text-red-600 text-xl text-center'>Book not found.</p>";
+      // Book not found - show error but keep page structure
+      const titleEl = document.getElementById("book-title");
+      const authorEl = document.getElementById("book-author");
+      const priceEl = document.getElementById("book-price");
+      const descEl = document.getElementById("book-description");
+      const button = document.querySelector('.button');
+      
+      if (titleEl) titleEl.textContent = "Book Not Found";
+      if (authorEl) authorEl.textContent = "";
+      if (priceEl) priceEl.textContent = "";
+      if (descEl) descEl.textContent = "Sorry, the book you're looking for could not be found. Please return to the homepage and try again.";
+      if (button) {
+        button.innerHTML = '<span>Go to Homepage</span>';
+        button.onclick = function() { window.location.href = 'index.html'; };
+      }
+      
+      // Add a link to go back
+      const backLink = document.createElement('a');
+      backLink.href = 'index.html';
+      backLink.textContent = '← Back to Homepage';
+      backLink.className = 'text-blue-600 hover:text-blue-800 underline text-center block mt-4';
+      const container = document.querySelector('.max-w-md');
+      if (container) {
+        container.appendChild(backLink);
+      }
     }
 
     // Update cart counter on page load
     function updateCartCounter() {
-      const stored = JSON.parse(localStorage.getItem('cart')) || {};
-      const cartButtons = document.querySelectorAll('.btn-cart');
-      const totalQty = Array.isArray(stored) ? stored.length : Object.values(stored).reduce((a,b)=>a+b,0);
-      cartButtons.forEach(button => {
-        button.setAttribute('data-quantity', totalQty);
-      });
+      try {
+        const cartData = localStorage.getItem('cart');
+        const stored = cartData ? JSON.parse(cartData) : {};
+        const cartButtons = document.querySelectorAll('.btn-cart');
+        const totalQty = Array.isArray(stored) ? stored.length : Object.values(stored).reduce((a,b)=>a+b,0);
+        cartButtons.forEach(button => {
+          if (button) {
+            button.setAttribute('data-quantity', totalQty);
+          }
+        });
+      } catch (error) {
+        console.error("Error updating cart counter:", error);
+        // Set default value if error
+        const cartButtons = document.querySelectorAll('.btn-cart');
+        cartButtons.forEach(button => {
+          if (button) {
+            button.setAttribute('data-quantity', '0');
+          }
+        });
+      }
     }
 
     // Update cart counter when page loads
     updateCartCounter();
 
     function addToCart() {
-      // Check if book is out of stock
-      const outOfStockBooks = ['la_yumkinuka_iidhaayi', 'the_hunger_games'];
-      if (outOfStockBooks.includes(id)) {
-        alert('This book is currently out of stock / هذا الكتاب نفدت الكمية حالياً');
-        return;
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const bookId = params.get("id");
+        
+        if (!bookId) {
+          alert('Error: No book ID found. Please try again.');
+          return;
+        }
+        
+        const currentBook = books[bookId];
+        if (!currentBook) {
+          alert('Error: Book not found. Please try again.');
+          return;
+        }
+        
+        // Check if book is out of stock
+        if (currentBook.inStock === false) {
+          const lang = localStorage.getItem('lang') || 'en';
+          alert(lang === 'ar' ? 'هذا الكتاب نفدت الكمية حالياً' : 'This book is currently out of stock');
+          return;
+        }
+        
+        const stored = JSON.parse(localStorage.getItem('cart') || '{}');
+        if (Array.isArray(stored)) {
+          // migrate old array cart -> object with quantities
+          const obj = {};
+          stored.forEach(b => { obj[b] = (obj[b] || 0) + 1; });
+          obj[bookId] = (obj[bookId] || 0) + 1;
+          localStorage.setItem('cart', JSON.stringify(obj));
+        } else {
+          stored[bookId] = (stored[bookId] || 0) + 1;
+          localStorage.setItem('cart', JSON.stringify(stored));
+        }
+        updateCartCounter();
+        
+        const lang = localStorage.getItem('lang') || 'en';
+        alert(lang === 'ar' ? 'تم إضافة الكتاب إلى السلة بنجاح!' : 'Book added to cart successfully!');
+      } catch (error) {
+        console.error("Error adding to cart:", error);
+        alert('An error occurred while adding the book to cart. Please try again.');
       }
-      
-      const stored = JSON.parse(localStorage.getItem('cart')) || {};
-      if (Array.isArray(stored)) {
-        // migrate old array cart -> object with quantities
-        const obj = {};
-        stored.forEach(b => { obj[b] = (obj[b] || 0) + 1; });
-        obj[id] = (obj[id] || 0) + 1;
-        localStorage.setItem('cart', JSON.stringify(obj));
-      } else {
-        stored[id] = (stored[id] || 0) + 1;
-        localStorage.setItem('cart', JSON.stringify(stored));
-      }
-      updateCartCounter();
-      alert('Book added to cart successfully!');
     }
+    
+    // Make addToCart available globally
+    window.addToCart = addToCart;
+      } catch (error) {
+        console.error("Fatal error in book.html:", error);
+        // Show user-friendly error message
+        const titleEl = document.getElementById("book-title");
+        if (titleEl) {
+          titleEl.textContent = "Error Loading Page";
+          const descEl = document.getElementById("book-description");
+          if (descEl) {
+            descEl.textContent = "An error occurred while loading this page. Please try refreshing or return to the homepage.";
+          }
+        }
+      }
+    });
   </script>
 </body>
 </html>
