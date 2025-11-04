@@ -363,6 +363,33 @@ const books = {
     cover: "imgs/الناقوس الزجاجي.jpg",
     price: "1,700.00",
     isbn: "9789776543250"
+  },
+  oscar_wilde: {
+    title: "أوسكار وايلد",
+    author: "أوسكار وايلد",
+    description: "A collection of the complete short stories by Oscar Wilde, one of the most celebrated writers of the Victorian era. This collection showcases Wilde's wit, satire, and unique storytelling style, featuring tales that blend humor, morality, and social commentary.",
+    description_ar: "مجموعة من الأعمال القصصية الكاملة لأوسكار وايلد، أحد أشهر كتاب العصر الفيكتوري. تعرض هذه المجموعة براعة وايلد في السخرية والأسلوب القصصي الفريد، وتضم قصصاً تمزج بين الفكاهة والأخلاق والتعليق الاجتماعي.",
+    cover: "imgs/اوسكار وايلد.jpg",
+    price: "1,650.00",
+    isbn: "9789776543251"
+  },
+  sa_akun_hunak: {
+    title: "سأكون هناك",
+    author: "كيونج سوك شين",
+    description: "A powerful novel by Kyung-Sook Shin, winner of the Man Asian Booker Prize 2011. The story explores themes of loss, memory, and the enduring bonds of love and family. Set in contemporary Korea, it follows characters navigating through life's challenges and finding strength in connection.",
+    description_ar: "رواية قوية من تأليف كيونج سوك شين، الفائزة بجائزة المان بوكر الآسيوية 2011. تستكشف القصة مواضيع الفقدان والذاكرة والروابط الدائمة للحب والعائلة. تدور أحداثها في كوريا المعاصرة، وتتبع شخصيات تتنقل عبر تحديات الحياة وتجد القوة في الارتباط.",
+    cover: "imgs/سأكون هناك.jpg",
+    price: "1,800.00",
+    isbn: "9789776543252"
+  },
+  al_sindbad_al_a3ma: {
+    title: "السندباد الأعمى",
+    author: "بثينة العيسى",
+    description: "A surreal and captivating novel by Buthaina Al-Essa. The story follows 'The Blind Sinbad' on a journey through sea and war, exploring themes of memory, loss, and the search for meaning in a fragmented world. The novel blends reality with fantasy, creating a rich tapestry of human experience.",
+    description_ar: "رواية سريالية آسرة من تأليف بثينة العيسى. تتبع القصة 'السندباد الأعمى' في رحلة عبر البحر والحرب، مستكشفة مواضيع الذاكرة والفقدان والبحث عن المعنى في عالم مجزأ. تمزج الرواية بين الواقع والخيال، مخلقة نسيجاً غنياً من التجربة الإنسانية.",
+    cover: "imgs/السندباد الاعمى.jpg",
+    price: "1,700.00",
+    isbn: "9789776543253"
   }
   // ... (rest of the books object as in book.html)
 };

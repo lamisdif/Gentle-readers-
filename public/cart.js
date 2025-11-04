@@ -95,7 +95,12 @@ const books = {
   // Added: The Kite Runner (Arabic) and The Hunger Games
   adaa_al_ta2ira_al_waraqiya: { title: "عداء الطائرة الورقية", price: "1,500.00" },
   the_hunger_games: { title: "The Hunger Games", price: "1,600.00" },
-  al_naqous_al_zujaji: { title: "الناقوس الزجاجي", price: "1,700.00" }
+  al_naqous_al_zujaji: { title: "الناقوس الزجاجي", price: "1,700.00" },
+  
+  // New books with prices
+  oscar_wilde: { title: "أوسكار وايلد", price: "1,650.00" },
+  sa_akun_hunak: { title: "سأكون هناك", price: "1,800.00" },
+  al_sindbad_al_a3ma: { title: "السندباد الأعمى", price: "1,700.00" }
 };
 function getCartObject() {
   const stored = JSON.parse(localStorage.getItem('cart')) || {};
