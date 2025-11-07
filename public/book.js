@@ -390,8 +390,143 @@ const books = {
     cover: "imgs/السندباد الاعمى.jpg",
     price: "1,700.00",
     isbn: "9789776543253"
+  },
+  // Dostoevsky books
+  the_gambler: {
+    title: "المقامر",
+    author: "فيودور دوستويفسكي",
+    description: "The Gambler is a short novel by Fyodor Dostoevsky about a young tutor in the employment of a formerly wealthy Russian general. The novella reflects Dostoevsky's own addiction to roulette, which was in more ways than one the inspiration for the book.",
+    description_ar: "المقامر رواية قصيرة لفيودور دوستويفسكي عن مدرس شاب يعمل لدى جنرال روسي كان ثرياً سابقاً. تعكس الرواية إدمان دوستويفسكي نفسه على الروليت، والذي كان مصدر إلهام للكتاب بطرق عديدة.",
+    cover: "imgs/المقامر.jpg",
+    price: "1,300.00",
+    isbn: "9789776543254"
+  },
+  demons: {
+    title: "الشياطين",
+    author: "فيودور دوستويفسكي",
+    description: "Demons is a novel by Fyodor Dostoevsky, first published in 1871-72. It is considered one of the four masterworks written by Dostoevsky after his return from Siberian exile, along with Crime and Punishment, The Idiot, and The Brothers Karamazov.",
+    description_ar: "الشياطين رواية لفيودور دوستويفسكي، نُشرت لأول مرة في 1871-72. تُعتبر واحدة من أربع روائع كتبها دوستويفسكي بعد عودته من المنفى السيبيري، إلى جانب الجريمة والعقاب والأبله والإخوة كارامازوف.",
+    cover: "imgs/الشياطين.png",
+    price: "4,000.00",
+    isbn: "9789776543255"
+  },
+  the_idiot: {
+    title: "الأبله",
+    author: "فيودور دوستويفسكي",
+    description: "The Idiot is a novel by Fyodor Dostoevsky, first published serially in 1868-69. The title is an ironic reference to the central character of the novel, Prince Lev Nikolayevich Myshkin, a young man whose goodness, open-hearted simplicity, and guilelessness lead many of the more worldly characters he encounters to mistakenly assume that he lacks intelligence and insight.",
+    description_ar: "الأبله رواية لفيودور دوستويفسكي، نُشرت لأول مرة بشكل متسلسل في 1868-69. العنوان إشارة ساخرة إلى الشخصية المركزية في الرواية، الأمير ليف نيكولايفيتش ميشكين، شاب طيبته وبساطته وبراءته تجعل العديد من الشخصيات الأكثر دنيوية التي يقابلها تعتقد خطأً أنه يفتقر إلى الذكاء والبصيرة.",
+    cover: "imgs/الأبله.jpg",
+    price: "4,800.00",
+    isbn: "9789776543256"
+  },
+  the_brothers_karamazov: {
+    title: "الإخوة كارامازوف",
+    author: "فيودور دوستويفسكي",
+    description: "The Brothers Karamazov is the final novel by Russian author Fyodor Dostoevsky. Dostoevsky spent nearly two years writing The Brothers Karamazov, which was published as a serial in The Russian Messenger from January 1879 to November 1880.",
+    description_ar: "الإخوة كارامازوف هي الرواية الأخيرة للكاتب الروسي فيودور دوستويفسكي. قضى دوستويفسكي ما يقرب من عامين في كتابة الإخوة كارامازوف، والتي نُشرت كمسلسل في الرسول الروسي من يناير 1879 إلى نوفمبر 1880.",
+    cover: "imgs/الاخوة-كارامازوف-1.jpg",
+    price: "6,000.00",
+    isbn: "9789776543257"
+  },
+  poor_folk: {
+    title: "الفقراء",
+    author: "فيودور دوستويفسكي",
+    description: "Poor Folk is the first novel by Fyodor Dostoevsky, written over the span of nine months between 1844 and 1845. Dostoevsky was in financial difficulty because of his extravagant lifestyle and his developing gambling addiction.",
+    description_ar: "الفقراء هي أول رواية لفيودور دوستويفسكي، كُتبت على مدى تسعة أشهر بين 1844 و1845. كان دوستويفسكي في صعوبة مالية بسبب أسلوب حياته المترف وإدمانه المتزايد على القمار.",
+    cover: "imgs/الفقراء.jpg",
+    price: "1,250.00",
+    isbn: "9789776543258"
+  },
+  notes_from_underground: {
+    title: "في قبوي",
+    author: "فيودور دوستويفسكي",
+    description: "Notes from Underground is a novella by Fyodor Dostoevsky, first published in the journal Epoch in 1864. It is a first-person narrative in the form of a 'confession': the work was originally announced by Dostoevsky in Epoch under the title 'A Confession'.",
+    description_ar: "في قبوي رواية قصيرة لفيودور دوستويفسكي، نُشرت لأول مرة في مجلة العصر في 1864. إنها سرد من منظور الشخص الأول في شكل 'اعتراف': تم الإعلان عن العمل في الأصل من قبل دوستويفسكي في العصر تحت عنوان 'اعتراف'.",
+    cover: "imgs/في-قبوي.jpg",
+    price: "1,200.00",
+    isbn: "9789776543259"
+  },
+  the_house_of_the_dead: {
+    title: "ذكريات من منزل الأموات",
+    author: "فيودور دوستويفسكي",
+    description: "The House of the Dead is a semi-autobiographical novel published in 1860-2 in the journal Vremya by Russian author Fyodor Dostoevsky. It was the first published novel by Dostoevsky. The novel portrays the life of convicts in a Siberian prison camp.",
+    description_ar: "ذكريات من منزل الأموات رواية شبه سيرة ذاتية نُشرت في 1860-2 في مجلة الوقت للكاتب الروسي فيودور دوستويفسكي. كانت أول رواية منشورة لدوستويفسكي. تصور الرواية حياة المدانين في معسكر سجن سيبيري.",
+    cover: "imgs/ذكريات من منزل الأموات.jpg",
+    price: "1,850.00",
+    isbn: "9789776543260"
+  },
+  the_eternal_husband: {
+    title: "الزوج الأبدي",
+    author: "فيودور دوستويفسكي",
+    description: "The Eternal Husband is a novella by Fyodor Dostoevsky. The Eternal Husband describes the relationship between Velchaninov, a rich and idle bachelor, and Trusotsky, the husband of his former lover.",
+    description_ar: "الزوج الأبدي رواية قصيرة لفيودور دوستويفسكي. يصف الزوج الأبدي العلاقة بين فيلتشانينوف، عازب ثري وخامل، وتروسوتسكي، زوج حبيبته السابقة.",
+    cover: "imgs/الزوج-الأبدي.jpg",
+    price: "1,200.00",
+    isbn: "9789776543261"
+  },
+  winter_notes_on_summer_impressions: {
+    title: "ذكريات شتاء في مشاعر الصيف",
+    author: "فيودور دوستويفسكي",
+    description: "Winter Notes on Summer Impressions is an essay by Fyodor Dostoevsky that he wrote while traveling in western Europe. Many commentators believe that Dostoevsky's visit to the West led to his rejection of constitutionalism and the Western world in general.",
+    description_ar: "ذكريات شتاء في مشاعر الصيف مقال لفيودور دوستويفسكي كتبه أثناء سفره في أوروبا الغربية. يعتقد العديد من المعلقين أن زيارة دوستويفسكي للغرب أدت إلى رفضه للدستورية والعالم الغربي بشكل عام.",
+    cover: "imgs/ذكريات-شتاء-.jpg",
+    price: "1,200.00",
+    isbn: "9789776543262"
+  },
+  the_landlady_a_faint_heart: {
+    title: "الجارة والقلب الضعيف",
+    author: "فيودور دوستويفسكي",
+    description: "The Landlady and A Faint Heart are two short stories by Fyodor Dostoevsky. These works explore themes of psychological complexity, human relationships, and the inner struggles of the characters.",
+    description_ar: "الجارة والقلب الضعيف قصتان قصيرتان لفيودور دوستويفسكي. تستكشف هذه الأعمال مواضيع التعقيد النفسي والعلاقات الإنسانية والصّراعات الداخلية للشخصيات.",
+    cover: "imgs/الجارة قلب ضعيف.jpg",
+    price: "1,200.00",
+    isbn: "9789776543263"
+  },
+  the_double_a_nasty_story: {
+    title: "المثل وقصة أليمة",
+    author: "فيودور دوستويفسكي",
+    description: "The Double and A Nasty Story are works by Fyodor Dostoevsky. The Double is a novella written by Dostoevsky, first published in 1846. It tells the story of a government clerk who goes mad.",
+    description_ar: "المثل وقصة أليمة أعمال لفيودور دوستويفسكي. المثل رواية قصيرة كتبها دوستويفسكي، نُشرت لأول مرة في 1846. تحكي قصة كاتب حكومي يجن.",
+    cover: "imgs/غلاف-المثل.jpg",
+    price: "1,700.00",
+    isbn: "9789776543264"
+  },
+  a_little_hero: {
+    title: "البطل الصغير",
+    author: "فيودور دوستويفسكي",
+    description: "A Little Hero is a short story by Fyodor Dostoevsky. It was written in 1849 while the author was in prison, and first published in 1857.",
+    description_ar: "البطل الصغير قصة قصيرة لفيودور دوستويفسكي. كُتبت في 1849 بينما كان المؤلف في السجن، ونُشرت لأول مرة في 1857.",
+    cover: "imgs/197861510.jpg",
+    price: "1,200.00",
+    isbn: "9789776543265"
+  },
+  the_village_of_stepanchikovo: {
+    title: "قرية ستيبانتشيكوغو",
+    author: "فيودور دوستويفسكي",
+    description: "The Village of Stepanchikovo is a novella by Fyodor Dostoevsky, first published in 1859. It is a satirical work that explores themes of family relationships and social dynamics in a Russian village setting.",
+    description_ar: "قرية ستيبانتشيكوغو رواية قصيرة لفيودور دوستويفسكي، نُشرت لأول مرة في 1859. إنها عمل ساخر يستكشف مواضيع العلاقات العائلية والديناميكيات الاجتماعية في إعداد قرية روسية.",
+    cover: "imgs/غلاف-قرية-ستيبانتشيكوفو.jpg",
+    price: "1,700.00",
+    isbn: "9789776543266"
+  },
+  white_nights: {
+    title: "الليالي البيضاء",
+    author: "فيودور دوستويفسكي",
+    description: "White Nights is a short story by Fyodor Dostoevsky, originally published in 1848, early in the writer's career. Like many of Dostoevsky's stories, it was inspired by the writer's life in St. Petersburg.",
+    description_ar: "الليالي البيضاء قصة قصيرة لفيودور دوستويفسكي، نُشرت لأول مرة في 1848، في بداية مسيرة الكاتب. مثل العديد من قصص دوستويفسكي، استُلهمت من حياة الكاتب في سانت بطرسبرغ.",
+    cover: "imgs/الليالي-البيضاء.jpg",
+    price: "900.00",
+    isbn: "9789776543267"
+  },
+  humiliated_and_insulted: {
+    title: "مذلون مهانون",
+    author: "فيودور دوستويفسكي",
+    description: "Humiliated and Insulted is a novel by Fyodor Dostoevsky, first published in 1861 in the magazine Vremya. It was the first full-length novel that Dostoevsky published after his return from exile in Siberia.",
+    description_ar: "مذلون مهانون رواية لفيودور دوستويفسكي، نُشرت لأول مرة في 1861 في مجلة الوقت. كانت أول رواية كاملة الطول ينشرها دوستويفسكي بعد عودته من المنفى في سيبيريا.",
+    cover: "imgs/مذلون-مهانون-.jpg",
+    price: "2,500.00",
+    isbn: "9789776543268"
   }
-  // ... (rest of the books object as in book.html)
 };
 
 function addToCart() {

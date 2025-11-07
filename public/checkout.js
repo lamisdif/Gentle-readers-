@@ -236,7 +236,24 @@ const books = {
   // New books with prices
   oscar_wilde: { title: "أوسكار وايلد", author: "أوسكار وايلد", price: "1,650.00" },
   sa_akun_hunak: { title: "سأكون هناك", author: "كيونج سوك شين", price: "1,800.00" },
-  al_sindbad_al_a3ma: { title: "السندباد الأعمى", author: "بثينة العيسى", price: "1,700.00" }
+  al_sindbad_al_a3ma: { title: "السندباد الأعمى", author: "بثينة العيسى", price: "1,700.00" },
+  
+  // Dostoevsky books
+  the_gambler: { title: "المقامر", author: "فيودور دوستويفسكي", price: "1,300.00" },
+  demons: { title: "الشياطين", author: "فيودور دوستويفسكي", price: "4,000.00" },
+  the_idiot: { title: "الأبله", author: "فيودور دوستويفسكي", price: "4,800.00" },
+  the_brothers_karamazov: { title: "الإخوة كارامازوف", author: "فيودور دوستويفسكي", price: "6,000.00" },
+  poor_folk: { title: "الفقراء", author: "فيودور دوستويفسكي", price: "1,250.00" },
+  notes_from_underground: { title: "في قبوي", author: "فيودور دوستويفسكي", price: "1,200.00" },
+  the_house_of_the_dead: { title: "ذكريات من منزل الأموات", author: "فيودور دوستويفسكي", price: "1,850.00" },
+  the_eternal_husband: { title: "الزوج الأبدي", author: "فيودور دوستويفسكي", price: "1,200.00" },
+  winter_notes_on_summer_impressions: { title: "ذكريات شتاء في مشاعر الصيف", author: "فيودور دوستويفسكي", price: "1,200.00" },
+  the_landlady_a_faint_heart: { title: "الجارة والقلب الضعيف", author: "فيودور دوستويفسكي", price: "1,200.00" },
+  the_double_a_nasty_story: { title: "المثل وقصة أليمة", author: "فيودور دوستويفسكي", price: "1,700.00" },
+  a_little_hero: { title: "البطل الصغير", author: "فيودور دوستويفسكي", price: "1,200.00" },
+  the_village_of_stepanchikovo: { title: "قرية ستيبانتشيكوغو", author: "فيودور دوستويفسكي", price: "1,700.00" },
+  white_nights: { title: "الليالي البيضاء", author: "فيودور دوستويفسكي", price: "900.00" },
+  humiliated_and_insulted: { title: "مذلون مهانون", author: "فيودور دوستويفسكي", price: "2,500.00" }
 };
 
 function getCurrentLang() {

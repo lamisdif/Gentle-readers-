@@ -185,7 +185,23 @@
         
         .flip-book-card-content {
           height: auto !important;
-          min-height: 280px !important;
+          min-height: 320px !important;
+        }
+        
+        .flip-book-card-wrapper {
+          min-height: 340px !important;
+          padding-bottom: 20px !important;
+        }
+        
+        .flip-book-card-front {
+          min-height: 320px !important;
+          padding-bottom: 20px !important;
+        }
+        
+        .book-price {
+          margin-top: 10px !important;
+          margin-bottom: 10px !important;
+          padding: 5px 0 !important;
         }
         
         .section-header {
@@ -224,6 +240,113 @@
         
         .book-price {
           font-size: 0.95rem !important;
+        }
+      }
+      
+      /* Enhanced card styling to prevent cutoff and ensure price visibility */
+      .flip-book-card-wrapper {
+        min-height: 400px !important;
+        max-height: none !important;
+        overflow: visible !important;
+        padding-bottom: 20px !important;
+      }
+      
+      .flip-book-card-content {
+        min-height: 380px !important;
+        height: auto !important;
+        overflow: visible !important;
+      }
+      
+      .flip-book-card-front {
+        min-height: 380px !important;
+        height: auto !important;
+        overflow: visible !important;
+        padding-bottom: 20px !important;
+        padding-top: 15px !important;
+      }
+      
+      .book-price {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        font-weight: 700 !important;
+        color: #dc2626 !important;
+        margin-top: 12px !important;
+        margin-bottom: 12px !important;
+        font-size: 1.1rem !important;
+        padding: 4px 0 !important;
+        line-height: 1.4 !important;
+      }
+      
+      /* Ensure all cards have proper spacing */
+      .slider .list .item .card {
+        overflow: visible !important;
+        height: auto !important;
+        min-height: 400px !important;
+      }
+      
+      .slider .list .item {
+        overflow: visible !important;
+        height: auto !important;
+      }
+      
+      /* Dostoevsky slider specific adjustments */
+      .latest-books-online:has(.slider[style*="--quantity: 15"]) .flip-book-card-wrapper {
+        min-height: 400px !important;
+      }
+      
+      .latest-books-online:has(.slider[style*="--quantity: 15"]) .flip-book-card-content {
+        min-height: 380px !important;
+      }
+      
+      .latest-books-online:has(.slider[style*="--quantity: 15"]) .flip-book-card-front {
+        min-height: 380px !important;
+        padding-bottom: 25px !important;
+      }
+      
+      .latest-books-online:has(.slider[style*="--quantity: 15"]) .book-price {
+        margin-top: 15px !important;
+        margin-bottom: 15px !important;
+        padding: 6px 0 !important;
+      }
+      
+      /* Ensure slider container allows scrolling while maintaining loop */
+      .slider {
+        overflow-x: auto !important;
+        overflow-y: visible !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+      
+      .slider .list {
+        animation: autoScroll 40s linear infinite !important;
+        will-change: transform !important;
+      }
+      
+      /* Pause animation on hover/interaction for manual scrolling */
+      .slider:hover .list,
+      .slider:active .list,
+      .slider:focus .list {
+        animation-play-state: paused !important;
+      }
+      
+      /* Pause animation when user is scrolling */
+      .slider.is-scrolling .list {
+        animation-play-state: paused !important;
+      }
+      
+      /* Ensure all sliders have infinite loop animation */
+      .latest-books-online .slider .list {
+        animation: autoScroll 40s linear infinite !important;
+        will-change: transform !important;
+      }
+      
+      /* Define the autoScroll animation - accounts for width + gap (20px) */
+      @keyframes autoScroll {
+        0% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(calc(-1 * (var(--width) + 20px) * var(--quantity)));
         }
       }
     </style>
@@ -1517,6 +1640,500 @@
         </div>
       </section>
 
+      <!-- Dostoevsky Books Section with Slider -->
+      <section class="latest-books-online animate-fade-in">
+        <div class="section-header">
+          <p class="sub-title uppercase text-xs tracking-widest text-gray-500">
+            NEW ARRIVALS
+          </p>
+          <h2 class="main-title">فيودور دوستويفسكي - أعمال مختارة</h2>
+        </div>
+        <!-- Slider for Dostoevsky books -->
+        <div class="slider mx-auto" style="--width: 220px; --height: 420px; --quantity: 15;">
+          <div class="list">
+            <!-- Book Card 1 - المقامر -->
+            <div class="item" style="--position: 1">
+              <div class="card" onclick="openBook('the_gambler')" style="cursor: pointer; position: relative; z-index: 100;">
+                <button class="add-to-cart-btn" onclick="addToCartFromCard('the_gambler', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
+                  <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                    <title>icon-cart</title>
+                    <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                  </svg>
+                </button>
+                <div class="flip-book-card-wrapper" onclick="openBook('the_gambler')" style="cursor: pointer;">
+                  <div class="flip-book-card-content" onclick="openBook('the_gambler')" style="cursor: pointer;">
+                    <div class="flip-book-card-front" onclick="openBook('the_gambler')" style="cursor: pointer;">
+                      <div class="book-cover-image">
+                        <img src="imgs/المقامر.jpg" alt="Book Cover" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                        <span>Cover Image Unavailable</span>
+                      </div>
+                      <p class="book-title">المقامر</p>
+                      <p class="book-author">فيودور دوستويفسكي</p>
+                      <p class="book-price">Price: 1,300.00</p>
+                      <p class="new-tag" style="color: #10b981; font-weight: bold; font-size: 12px; margin: 5px 0; text-align: center; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 12px; display: inline-block;">NEW</p>
+                    </div>
+                    <div class="flip-book-card-back">
+                      <div class="flip-book-card-back-content">
+                        <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                        <p class="summary-text">المقامر رواية قصيرة لفيودور دوستويفسكي عن مدرس شاب يعمل لدى جنرال روسي كان ثرياً سابقاً. تعكس الرواية إدمان دوستويفسكي نفسه على الروليت، والذي كان مصدر إلهام للكتاب بطرق عديدة.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Book Card 2 - الشياطين -->
+            <div class="item" style="--position: 2">
+              <div class="card" onclick="openBook('demons')" style="cursor: pointer; position: relative; z-index: 100;">
+                <button class="add-to-cart-btn" onclick="addToCartFromCard('demons', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
+                  <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                    <title>icon-cart</title>
+                    <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                  </svg>
+                </button>
+                <div class="flip-book-card-wrapper" onclick="openBook('demons')" style="cursor: pointer;">
+                  <div class="flip-book-card-content" onclick="openBook('demons')" style="cursor: pointer;">
+                    <div class="flip-book-card-front" onclick="openBook('demons')" style="cursor: pointer;">
+                      <div class="book-cover-image">
+                        <img src="imgs/الشياطين.png" alt="Book Cover" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                        <span>Cover Image Unavailable</span>
+                      </div>
+                      <p class="book-title">الشياطين</p>
+                      <p class="book-author">فيودور دوستويفسكي</p>
+                      <p class="book-price">Price: 4,000.00</p>
+                      <p class="new-tag" style="color: #10b981; font-weight: bold; font-size: 12px; margin: 5px 0; text-align: center; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 12px; display: inline-block;">NEW</p>
+                    </div>
+                    <div class="flip-book-card-back">
+                      <div class="flip-book-card-back-content">
+                        <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                        <p class="summary-text">الشياطين رواية لفيودور دوستويفسكي، نُشرت لأول مرة في 1871-72. تُعتبر واحدة من أربع روائع كتبها دوستويفسكي بعد عودته من المنفى السيبيري، إلى جانب الجريمة والعقاب والأبله والإخوة كارامازوف.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Book Card 3 - الأبله -->
+            <div class="item" style="--position: 3">
+              <div class="card" onclick="openBook('the_idiot')" style="cursor: pointer; position: relative; z-index: 100;">
+                <button class="add-to-cart-btn" onclick="addToCartFromCard('the_idiot', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
+                  <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                    <title>icon-cart</title>
+                    <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                  </svg>
+                </button>
+                <div class="flip-book-card-wrapper" onclick="openBook('the_idiot')" style="cursor: pointer;">
+                  <div class="flip-book-card-content" onclick="openBook('the_idiot')" style="cursor: pointer;">
+                    <div class="flip-book-card-front" onclick="openBook('the_idiot')" style="cursor: pointer;">
+                      <div class="book-cover-image">
+                        <img src="imgs/الأبله.jpg" alt="Book Cover" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                        <span>Cover Image Unavailable</span>
+                      </div>
+                      <p class="book-title">الأبله</p>
+                      <p class="book-author">فيودور دوستويفسكي</p>
+                      <p class="book-price">Price: 4,800.00</p>
+                      <p class="new-tag" style="color: #10b981; font-weight: bold; font-size: 12px; margin: 5px 0; text-align: center; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 12px; display: inline-block;">NEW</p>
+                    </div>
+                    <div class="flip-book-card-back">
+                      <div class="flip-book-card-back-content">
+                        <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                        <p class="summary-text">الأبله رواية لفيودور دوستويفسكي، نُشرت لأول مرة بشكل متسلسل في 1868-69. العنوان إشارة ساخرة إلى الشخصية المركزية في الرواية، الأمير ليف نيكولايفيتش ميشكين، شاب طيبته وبساطته وبراءته تجعل العديد من الشخصيات الأكثر دنيوية التي يقابلها تعتقد خطأً أنه يفتقر إلى الذكاء والبصيرة.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Book Card 4 - الإخوة كارامازوف -->
+            <div class="item" style="--position: 4">
+              <div class="card" onclick="openBook('the_brothers_karamazov')" style="cursor: pointer; position: relative; z-index: 100;">
+                <button class="add-to-cart-btn" onclick="addToCartFromCard('the_brothers_karamazov', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
+                  <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                    <title>icon-cart</title>
+                    <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                  </svg>
+                </button>
+                <div class="flip-book-card-wrapper" onclick="openBook('the_brothers_karamazov')" style="cursor: pointer;">
+                  <div class="flip-book-card-content" onclick="openBook('the_brothers_karamazov')" style="cursor: pointer;">
+                    <div class="flip-book-card-front" onclick="openBook('the_brothers_karamazov')" style="cursor: pointer;">
+                      <div class="book-cover-image">
+                        <img src="imgs/الاخوة-كارامازوف-1.jpg" alt="Book Cover" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                        <span>Cover Image Unavailable</span>
+                      </div>
+                      <p class="book-title">الإخوة كارامازوف</p>
+                      <p class="book-author">فيودور دوستويفسكي</p>
+                      <p class="book-price">Price: 6,000.00</p>
+                      <p class="new-tag" style="color: #10b981; font-weight: bold; font-size: 12px; margin: 5px 0; text-align: center; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 12px; display: inline-block;">NEW</p>
+                    </div>
+                    <div class="flip-book-card-back">
+                      <div class="flip-book-card-back-content">
+                        <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                        <p class="summary-text">الإخوة كارامازوف هي الرواية الأخيرة للكاتب الروسي فيودور دوستويفسكي. قضى دوستويفسكي ما يقرب من عامين في كتابة الإخوة كارامازوف، والتي نُشرت كمسلسل في الرسول الروسي من يناير 1879 إلى نوفمبر 1880.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Book Card 5 - الفقراء -->
+            <div class="item" style="--position: 5">
+              <div class="card" onclick="openBook('poor_folk')" style="cursor: pointer; position: relative; z-index: 100;">
+                <button class="add-to-cart-btn" onclick="addToCartFromCard('poor_folk', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
+                  <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                    <title>icon-cart</title>
+                    <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                  </svg>
+                </button>
+                <div class="flip-book-card-wrapper" onclick="openBook('poor_folk')" style="cursor: pointer;">
+                  <div class="flip-book-card-content" onclick="openBook('poor_folk')" style="cursor: pointer;">
+                    <div class="flip-book-card-front" onclick="openBook('poor_folk')" style="cursor: pointer;">
+                      <div class="book-cover-image">
+                        <img src="imgs/الفقراء.jpg" alt="Book Cover" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                        <span>Cover Image Unavailable</span>
+                      </div>
+                      <p class="book-title">الفقراء</p>
+                      <p class="book-author">فيودور دوستويفسكي</p>
+                      <p class="book-price">Price: 1,250.00</p>
+                      <p class="new-tag" style="color: #10b981; font-weight: bold; font-size: 12px; margin: 5px 0; text-align: center; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 12px; display: inline-block;">NEW</p>
+                    </div>
+                    <div class="flip-book-card-back">
+                      <div class="flip-book-card-back-content">
+                        <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                        <p class="summary-text">الفقراء هي أول رواية لفيودور دوستويفسكي، كُتبت على مدى تسعة أشهر بين 1844 و1845. كان دوستويفسكي في صعوبة مالية بسبب أسلوب حياته المترف وإدمانه المتزايد على القمار.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Book Card 6 - في قبوي -->
+            <div class="item" style="--position: 6">
+              <div class="card" onclick="openBook('notes_from_underground')" style="cursor: pointer; position: relative; z-index: 100;">
+                <button class="add-to-cart-btn" onclick="addToCartFromCard('notes_from_underground', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
+                  <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                    <title>icon-cart</title>
+                    <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                  </svg>
+                </button>
+                <div class="flip-book-card-wrapper" onclick="openBook('notes_from_underground')" style="cursor: pointer;">
+                  <div class="flip-book-card-content" onclick="openBook('notes_from_underground')" style="cursor: pointer;">
+                    <div class="flip-book-card-front" onclick="openBook('notes_from_underground')" style="cursor: pointer;">
+                      <div class="book-cover-image">
+                        <img src="imgs/في-قبوي.jpg" alt="Book Cover" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                        <span>Cover Image Unavailable</span>
+                      </div>
+                      <p class="book-title">في قبوي</p>
+                      <p class="book-author">فيودور دوستويفسكي</p>
+                      <p class="book-price">Price: 1,200.00</p>
+                      <p class="new-tag" style="color: #10b981; font-weight: bold; font-size: 12px; margin: 5px 0; text-align: center; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 12px; display: inline-block;">NEW</p>
+                    </div>
+                    <div class="flip-book-card-back">
+                      <div class="flip-book-card-back-content">
+                        <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                        <p class="summary-text">في قبوي رواية قصيرة لفيودور دوستويفسكي، نُشرت لأول مرة في مجلة العصر في 1864. إنها سرد من منظور الشخص الأول في شكل 'اعتراف': تم الإعلان عن العمل في الأصل من قبل دوستويفسكي في العصر تحت عنوان 'اعتراف'.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Book Card 7 - ذكريات من منزل الأموات -->
+            <div class="item" style="--position: 7">
+              <div class="card" onclick="openBook('the_house_of_the_dead')" style="cursor: pointer; position: relative; z-index: 100;">
+                <button class="add-to-cart-btn" onclick="addToCartFromCard('the_house_of_the_dead', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
+                  <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                    <title>icon-cart</title>
+                    <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                  </svg>
+                </button>
+                <div class="flip-book-card-wrapper" onclick="openBook('the_house_of_the_dead')" style="cursor: pointer;">
+                  <div class="flip-book-card-content" onclick="openBook('the_house_of_the_dead')" style="cursor: pointer;">
+                    <div class="flip-book-card-front" onclick="openBook('the_house_of_the_dead')" style="cursor: pointer;">
+                      <div class="book-cover-image">
+                        <img src="imgs/ذكريات من منزل الأموات.jpg" alt="Book Cover" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                        <span>Cover Image Unavailable</span>
+                      </div>
+                      <p class="book-title">ذكريات من منزل الأموات</p>
+                      <p class="book-author">فيودور دوستويفسكي</p>
+                      <p class="book-price">Price: 1,850.00</p>
+                      <p class="new-tag" style="color: #10b981; font-weight: bold; font-size: 12px; margin: 5px 0; text-align: center; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 12px; display: inline-block;">NEW</p>
+                    </div>
+                    <div class="flip-book-card-back">
+                      <div class="flip-book-card-back-content">
+                        <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                        <p class="summary-text">ذكريات من منزل الأموات رواية شبه سيرة ذاتية نُشرت في 1860-2 في مجلة الوقت للكاتب الروسي فيودور دوستويفسكي. كانت أول رواية منشورة لدوستويفسكي. تصور الرواية حياة المدانين في معسكر سجن سيبيري.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Book Card 8 - الزوج الأبدي -->
+            <div class="item" style="--position: 8">
+              <div class="card" onclick="openBook('the_eternal_husband')" style="cursor: pointer; position: relative; z-index: 100;">
+                <button class="add-to-cart-btn" onclick="addToCartFromCard('the_eternal_husband', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
+                  <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                    <title>icon-cart</title>
+                    <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                  </svg>
+                </button>
+                <div class="flip-book-card-wrapper" onclick="openBook('the_eternal_husband')" style="cursor: pointer;">
+                  <div class="flip-book-card-content" onclick="openBook('the_eternal_husband')" style="cursor: pointer;">
+                    <div class="flip-book-card-front" onclick="openBook('the_eternal_husband')" style="cursor: pointer;">
+                      <div class="book-cover-image">
+                        <img src="imgs/الزوج-الأبدي.jpg" alt="Book Cover" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                        <span>Cover Image Unavailable</span>
+                      </div>
+                      <p class="book-title">الزوج الأبدي</p>
+                      <p class="book-author">فيودور دوستويفسكي</p>
+                      <p class="book-price">Price: 1,200.00</p>
+                      <p class="new-tag" style="color: #10b981; font-weight: bold; font-size: 12px; margin: 5px 0; text-align: center; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 12px; display: inline-block;">NEW</p>
+                    </div>
+                    <div class="flip-book-card-back">
+                      <div class="flip-book-card-back-content">
+                        <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                        <p class="summary-text">الزوج الأبدي رواية قصيرة لفيودور دوستويفسكي. يصف الزوج الأبدي العلاقة بين فيلتشانينوف، عازب ثري وخامل، وتروسوتسكي، زوج حبيبته السابقة.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Book Card 9 - ذكريات شتاء في مشاعر الصيف -->
+            <div class="item" style="--position: 9">
+              <div class="card" onclick="openBook('winter_notes_on_summer_impressions')" style="cursor: pointer; position: relative; z-index: 100;">
+                <button class="add-to-cart-btn" onclick="addToCartFromCard('winter_notes_on_summer_impressions', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
+                  <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                    <title>icon-cart</title>
+                    <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                  </svg>
+                </button>
+                <div class="flip-book-card-wrapper" onclick="openBook('winter_notes_on_summer_impressions')" style="cursor: pointer;">
+                  <div class="flip-book-card-content" onclick="openBook('winter_notes_on_summer_impressions')" style="cursor: pointer;">
+                    <div class="flip-book-card-front" onclick="openBook('winter_notes_on_summer_impressions')" style="cursor: pointer;">
+                      <div class="book-cover-image">
+                        <img src="imgs/ذكريات-شتاء-.jpg" alt="Book Cover" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                        <span>Cover Image Unavailable</span>
+                      </div>
+                      <p class="book-title">ذكريات شتاء في مشاعر الصيف</p>
+                      <p class="book-author">فيودور دوستويفسكي</p>
+                      <p class="book-price">Price: 1,200.00</p>
+                      <p class="new-tag" style="color: #10b981; font-weight: bold; font-size: 12px; margin: 5px 0; text-align: center; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 12px; display: inline-block;">NEW</p>
+                    </div>
+                    <div class="flip-book-card-back">
+                      <div class="flip-book-card-back-content">
+                        <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                        <p class="summary-text">ذكريات شتاء في مشاعر الصيف مقال لفيودور دوستويفسكي كتبه أثناء سفره في أوروبا الغربية. يعتقد العديد من المعلقين أن زيارة دوستويفسكي للغرب أدت إلى رفضه للدستورية والعالم الغربي بشكل عام.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Book Card 10 - الجارة والقلب الضعيف -->
+            <div class="item" style="--position: 10">
+              <div class="card" onclick="openBook('the_landlady_a_faint_heart')" style="cursor: pointer; position: relative; z-index: 100;">
+                <button class="add-to-cart-btn" onclick="addToCartFromCard('the_landlady_a_faint_heart', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
+                  <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                    <title>icon-cart</title>
+                    <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                  </svg>
+                </button>
+                <div class="flip-book-card-wrapper" onclick="openBook('the_landlady_a_faint_heart')" style="cursor: pointer;">
+                  <div class="flip-book-card-content" onclick="openBook('the_landlady_a_faint_heart')" style="cursor: pointer;">
+                    <div class="flip-book-card-front" onclick="openBook('the_landlady_a_faint_heart')" style="cursor: pointer;">
+                      <div class="book-cover-image">
+                        <img src="imgs/الجارة قلب ضعيف.jpg" alt="Book Cover" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                        <span>Cover Image Unavailable</span>
+                      </div>
+                      <p class="book-title">الجارة والقلب الضعيف</p>
+                      <p class="book-author">فيودور دوستويفسكي</p>
+                      <p class="book-price">Price: 1,200.00</p>
+                      <p class="new-tag" style="color: #10b981; font-weight: bold; font-size: 12px; margin: 5px 0; text-align: center; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 12px; display: inline-block;">NEW</p>
+                    </div>
+                    <div class="flip-book-card-back">
+                      <div class="flip-book-card-back-content">
+                        <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                        <p class="summary-text">الجارة والقلب الضعيف قصتان قصيرتان لفيودور دوستويفسكي. تستكشف هذه الأعمال مواضيع التعقيد النفسي والعلاقات الإنسانية والصّراعات الداخلية للشخصيات.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Book Card 11 - المثل وقصة أليمة -->
+            <div class="item" style="--position: 11">
+              <div class="card" onclick="openBook('the_double_a_nasty_story')" style="cursor: pointer; position: relative; z-index: 100;">
+                <button class="add-to-cart-btn" onclick="addToCartFromCard('the_double_a_nasty_story', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
+                  <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                    <title>icon-cart</title>
+                    <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                  </svg>
+                </button>
+                <div class="flip-book-card-wrapper" onclick="openBook('the_double_a_nasty_story')" style="cursor: pointer;">
+                  <div class="flip-book-card-content" onclick="openBook('the_double_a_nasty_story')" style="cursor: pointer;">
+                    <div class="flip-book-card-front" onclick="openBook('the_double_a_nasty_story')" style="cursor: pointer;">
+                      <div class="book-cover-image">
+                        <img src="imgs/غلاف-المثل.jpg" alt="Book Cover" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                        <span>Cover Image Unavailable</span>
+                      </div>
+                      <p class="book-title">المثل وقصة أليمة</p>
+                      <p class="book-author">فيودور دوستويفسكي</p>
+                      <p class="book-price">Price: 1,700.00</p>
+                      <p class="new-tag" style="color: #10b981; font-weight: bold; font-size: 12px; margin: 5px 0; text-align: center; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 12px; display: inline-block;">NEW</p>
+                    </div>
+                    <div class="flip-book-card-back">
+                      <div class="flip-book-card-back-content">
+                        <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                        <p class="summary-text">المثل وقصة أليمة أعمال لفيودور دوستويفسكي. المثل رواية قصيرة كتبها دوستويفسكي، نُشرت لأول مرة في 1846. تحكي قصة كاتب حكومي يجن.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Book Card 12 - البطل الصغير -->
+            <div class="item" style="--position: 12">
+              <div class="card" onclick="openBook('a_little_hero')" style="cursor: pointer; position: relative; z-index: 100;">
+                <button class="add-to-cart-btn" onclick="addToCartFromCard('a_little_hero', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
+                  <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                    <title>icon-cart</title>
+                    <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                  </svg>
+                </button>
+                <div class="flip-book-card-wrapper" onclick="openBook('a_little_hero')" style="cursor: pointer;">
+                  <div class="flip-book-card-content" onclick="openBook('a_little_hero')" style="cursor: pointer;">
+                    <div class="flip-book-card-front" onclick="openBook('a_little_hero')" style="cursor: pointer;">
+                      <div class="book-cover-image">
+                        <img src="imgs/197861510.jpg" alt="Book Cover" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                        <span>Cover Image Unavailable</span>
+                      </div>
+                      <p class="book-title">البطل الصغير</p>
+                      <p class="book-author">فيودور دوستويفسكي</p>
+                      <p class="book-price">Price: 1,200.00</p>
+                      <p class="new-tag" style="color: #10b981; font-weight: bold; font-size: 12px; margin: 5px 0; text-align: center; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 12px; display: inline-block;">NEW</p>
+                    </div>
+                    <div class="flip-book-card-back">
+                      <div class="flip-book-card-back-content">
+                        <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                        <p class="summary-text">البطل الصغير قصة قصيرة لفيودور دوستويفسكي. كُتبت في 1849 بينما كان المؤلف في السجن، ونُشرت لأول مرة في 1857.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Book Card 13 - قرية ستيبانتشيكوغو -->
+            <div class="item" style="--position: 13">
+              <div class="card" onclick="openBook('the_village_of_stepanchikovo')" style="cursor: pointer; position: relative; z-index: 100;">
+                <button class="add-to-cart-btn" onclick="addToCartFromCard('the_village_of_stepanchikovo', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
+                  <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                    <title>icon-cart</title>
+                    <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                  </svg>
+                </button>
+                <div class="flip-book-card-wrapper" onclick="openBook('the_village_of_stepanchikovo')" style="cursor: pointer;">
+                  <div class="flip-book-card-content" onclick="openBook('the_village_of_stepanchikovo')" style="cursor: pointer;">
+                    <div class="flip-book-card-front" onclick="openBook('the_village_of_stepanchikovo')" style="cursor: pointer;">
+                      <div class="book-cover-image">
+                        <img src="imgs/غلاف-قرية-ستيبانتشيكوفو.jpg" alt="Book Cover" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                        <span>Cover Image Unavailable</span>
+                      </div>
+                      <p class="book-title">قرية ستيبانتشيكوغو</p>
+                      <p class="book-author">فيودور دوستويفسكي</p>
+                      <p class="book-price">Price: 1,700.00</p>
+                      <p class="new-tag" style="color: #10b981; font-weight: bold; font-size: 12px; margin: 5px 0; text-align: center; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 12px; display: inline-block;">NEW</p>
+                    </div>
+                    <div class="flip-book-card-back">
+                      <div class="flip-book-card-back-content">
+                        <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                        <p class="summary-text">قرية ستيبانتشيكوغو رواية قصيرة لفيودور دوستويفسكي، نُشرت لأول مرة في 1859. إنها عمل ساخر يستكشف مواضيع العلاقات العائلية والديناميكيات الاجتماعية في إعداد قرية روسية.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Book Card 14 - الليالي البيضاء -->
+            <div class="item" style="--position: 14">
+              <div class="card" onclick="openBook('white_nights')" style="cursor: pointer; position: relative; z-index: 100;">
+                <button class="add-to-cart-btn" onclick="addToCartFromCard('white_nights', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
+                  <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                    <title>icon-cart</title>
+                    <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                  </svg>
+                </button>
+                <div class="flip-book-card-wrapper" onclick="openBook('white_nights')" style="cursor: pointer;">
+                  <div class="flip-book-card-content" onclick="openBook('white_nights')" style="cursor: pointer;">
+                    <div class="flip-book-card-front" onclick="openBook('white_nights')" style="cursor: pointer;">
+                      <div class="book-cover-image">
+                        <img src="imgs/الليالي-البيضاء.jpg" alt="Book Cover" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                        <span>Cover Image Unavailable</span>
+                      </div>
+                      <p class="book-title">الليالي البيضاء</p>
+                      <p class="book-author">فيودور دوستويفسكي</p>
+                      <p class="book-price">Price: 900.00</p>
+                      <p class="new-tag" style="color: #10b981; font-weight: bold; font-size: 12px; margin: 5px 0; text-align: center; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 12px; display: inline-block;">NEW</p>
+                    </div>
+                    <div class="flip-book-card-back">
+                      <div class="flip-book-card-back-content">
+                        <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                        <p class="summary-text">الليالي البيضاء قصة قصيرة لفيودور دوستويفسكي، نُشرت لأول مرة في 1848، في بداية مسيرة الكاتب. مثل العديد من قصص دوستويفسكي، استُلهمت من حياة الكاتب في سانت بطرسبرغ.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Book Card 15 - مذلون مهانون -->
+            <div class="item" style="--position: 15">
+              <div class="card" onclick="openBook('humiliated_and_insulted')" style="cursor: pointer; position: relative; z-index: 100;">
+                <button class="add-to-cart-btn" onclick="addToCartFromCard('humiliated_and_insulted', event)" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;">
+                  <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+                    <title>icon-cart</title>
+                    <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
+                  </svg>
+                </button>
+                <div class="flip-book-card-wrapper" onclick="openBook('humiliated_and_insulted')" style="cursor: pointer;">
+                  <div class="flip-book-card-content" onclick="openBook('humiliated_and_insulted')" style="cursor: pointer;">
+                    <div class="flip-book-card-front" onclick="openBook('humiliated_and_insulted')" style="cursor: pointer;">
+                      <div class="book-cover-image">
+                        <img src="imgs/مذلون-مهانون-.jpg" alt="Book Cover" onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                        <span>Cover Image Unavailable</span>
+                      </div>
+                      <p class="book-title">مذلون مهانون</p>
+                      <p class="book-author">فيودور دوستويفسكي</p>
+                      <p class="book-price">Price: 2,500.00</p>
+                      <p class="new-tag" style="color: #10b981; font-weight: bold; font-size: 12px; margin: 5px 0; text-align: center; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 12px; display: inline-block;">NEW</p>
+                    </div>
+                    <div class="flip-book-card-back">
+                      <div class="flip-book-card-back-content">
+                        <h4 class="text-lg font-bold mb-2">Book Summary</h4>
+                        <p class="summary-text">مذلون مهانون رواية لفيودور دوستويفسكي، نُشرت لأول مرة في 1861 في مجلة الوقت. كانت أول رواية كاملة الطول ينشرها دوستويفسكي بعد عودته من المنفى في سيبيريا.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Second Latest Books Online Section with Slider -->
       <section class="latest-books-online animate-fade-in">
         <div class="section-header">
@@ -2366,17 +2983,93 @@
         const sliders = document.querySelectorAll('.slider .list');
         
         sliders.forEach(list => {
-          // Clone all items and append them
-          const items = list.querySelectorAll('.item');
-          items.forEach(item => {
-            const clone = item.cloneNode(true);
-            list.appendChild(clone);
-          });
+          // Check if already cloned to avoid duplicates
+          if (list.dataset.cloned === 'true') {
+            return;
+          }
+          
+          // Clone all items and append them (clone multiple times for seamless loop)
+          const items = Array.from(list.querySelectorAll('.item'));
+          const originalCount = items.length;
+          
+          if (originalCount === 0) {
+            return; // Skip if no items
+          }
+          
+          // Clone items twice to ensure seamless loop
+          for (let cloneSet = 0; cloneSet < 2; cloneSet++) {
+            items.forEach((item, index) => {
+              const clone = item.cloneNode(true);
+              // Update position attribute for cloned items
+              const position = parseInt(item.style.getPropertyValue('--position') || '1');
+              clone.style.setProperty('--position', (position + originalCount * (cloneSet + 1)).toString());
+              list.appendChild(clone);
+            });
+          }
+          
+          // Mark as cloned
+          list.dataset.cloned = 'true';
+          
+          // Ensure animation is applied with proper timing
+          const quantity = parseInt(list.parentElement.style.getPropertyValue('--quantity') || '21');
+          const duration = 40; // seconds
+          list.style.animation = `autoScroll ${duration}s linear infinite`;
+          list.style.willChange = 'transform';
+          
+          console.log(`Slider initialized with ${originalCount} original items, ${list.children.length} total items`);
         });
       }
       
       // Initialize infinite loop when DOM is loaded
-      window.addEventListener('DOMContentLoaded', createInfiniteLoop);
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', createInfiniteLoop);
+      } else {
+        createInfiniteLoop();
+      }
+      
+      // Also run after a short delay to ensure all elements are rendered
+      setTimeout(createInfiniteLoop, 100);
+      setTimeout(createInfiniteLoop, 500);
+      
+      // Pause animation when user manually scrolls
+      document.querySelectorAll('.slider').forEach(slider => {
+        let scrollTimeout;
+        let isScrolling = false;
+        
+        slider.addEventListener('scroll', function() {
+          if (!isScrolling) {
+            isScrolling = true;
+            slider.classList.add('is-scrolling');
+          }
+          
+          clearTimeout(scrollTimeout);
+          scrollTimeout = setTimeout(() => {
+            isScrolling = false;
+            slider.classList.remove('is-scrolling');
+          }, 150);
+        });
+        
+        // Also pause on touch/mouse interaction
+        slider.addEventListener('mousedown', function() {
+          slider.classList.add('is-scrolling');
+        });
+        
+        slider.addEventListener('touchstart', function() {
+          slider.classList.add('is-scrolling');
+        });
+        
+        slider.addEventListener('mouseup', function() {
+          setTimeout(() => {
+            slider.classList.remove('is-scrolling');
+          }, 150);
+        });
+        
+        slider.addEventListener('touchend', function() {
+          setTimeout(() => {
+            slider.classList.remove('is-scrolling');
+          }, 150);
+        });
+      });
       
     </script>
     <script>
