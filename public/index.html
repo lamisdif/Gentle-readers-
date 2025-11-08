@@ -1893,7 +1893,7 @@
                       </div>
                       <p class="book-title">الزوج الأبدي</p>
                       <p class="book-author">فيودور دوستويفسكي</p>
-                      <p class="book-price">Price: 1,200.00</p>
+                      <p class="book-price">Price: 1,300.00</p>
                       <p class="new-tag" style="color: #10b981; font-weight: bold; font-size: 12px; margin: 5px 0; text-align: center; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 12px; display: inline-block;">NEW</p>
                     </div>
                     <div class="flip-book-card-back">
@@ -1957,7 +1957,7 @@
                       </div>
                       <p class="book-title">الجارة والقلب الضعيف</p>
                       <p class="book-author">فيودور دوستويفسكي</p>
-                      <p class="book-price">Price: 1,200.00</p>
+                      <p class="book-price">Price: 1,300.00</p>
                       <p class="new-tag" style="color: #10b981; font-weight: bold; font-size: 12px; margin: 5px 0; text-align: center; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 12px; display: inline-block;">NEW</p>
                     </div>
                     <div class="flip-book-card-back">
@@ -2823,6 +2823,35 @@
 
     <!-- JavaScript for Mobile Menu Toggle -->
     <script>
+      // Function to update cart counter - defined first with error handling
+      function updateCartCounter() {
+        try {
+          const cartData = localStorage.getItem('cart');
+          if (!cartData) {
+            // No cart data, set all buttons to 0
+            const cartButtons = document.querySelectorAll('.btn-cart');
+            cartButtons.forEach(button => {
+              if (button) button.setAttribute('data-quantity', '0');
+            });
+            return;
+          }
+          
+          const stored = JSON.parse(cartData);
+          const cartButtons = document.querySelectorAll('.btn-cart');
+          const totalQty = Array.isArray(stored) ? stored.length : Object.values(stored).reduce((a,b)=>a+b,0);
+          cartButtons.forEach(button => {
+            if (button) button.setAttribute('data-quantity', totalQty);
+          });
+        } catch (error) {
+          console.error('Error updating cart counter:', error);
+          // Set default value if error
+          const cartButtons = document.querySelectorAll('.btn-cart');
+          cartButtons.forEach(button => {
+            if (button) button.setAttribute('data-quantity', '0');
+          });
+        }
+      }
+
       document.addEventListener("DOMContentLoaded", () => {
         const mobileMenuToggle = document.getElementById("mobileMenuToggle");
         const floatingMobileMenu = document.getElementById("floatingMobileMenu");
@@ -2846,10 +2875,12 @@
           });
         }
 
-        mobileMenuOverlay.addEventListener("click", () => {
-          leftSidebar.classList.remove("open");
-          mobileMenuOverlay.classList.remove("active");
-        });
+        if (mobileMenuOverlay) {
+          mobileMenuOverlay.addEventListener("click", () => {
+            leftSidebar.classList.remove("open");
+            mobileMenuOverlay.classList.remove("active");
+          });
+        }
 
         // Add event listener for the new close button
         if (closeMobileMenu) {
@@ -2870,22 +2901,17 @@
             e.preventDefault();
             const query = sidebarSearchInput.value.trim();
             if (query) {
-              localStorage.setItem('searchQuery', query);
-              window.location.href = `search.html`;
+              try {
+                localStorage.setItem('searchQuery', query);
+                window.location.href = `search.html`;
+              } catch (error) {
+                console.error('Error saving search query:', error);
+                window.location.href = `search.html`;
+              }
             }
           });
         }
       });
-
-      // Function to update cart counter
-      function updateCartCounter() {
-        const stored = JSON.parse(localStorage.getItem('cart')) || {};
-        const cartButtons = document.querySelectorAll('.btn-cart');
-        const totalQty = Array.isArray(stored) ? stored.length : Object.values(stored).reduce((a,b)=>a+b,0);
-        cartButtons.forEach(button => {
-          button.setAttribute('data-quantity', totalQty);
-        });
-      }
 
       // Function to scroll containers (kept for genre section, removed for books)
       
@@ -2911,46 +2937,68 @@
   
       // Function to add book to cart from book cards
       function addToCartFromCard(bookId, event) {
-        event.stopPropagation();
-        
-        // Check if book is out of stock
-        const outOfStockBooks = ['kayf_tajid_al_hob', 'la_yumkinuka_iidhaayi', 'the_hunger_games'];
-        if (outOfStockBooks.includes(bookId)) {
-          alert('This book is currently out of stock / هذا الكتاب نفدت الكمية حالياً');
-          return;
-        }
-        
-        const stored = JSON.parse(localStorage.getItem('cart')) || {};
-        if (Array.isArray(stored)) {
-          const obj = {};
-          stored.forEach(id => { obj[id] = (obj[id] || 0) + 1; });
-          obj[bookId] = (obj[bookId] || 0) + 1;
-          localStorage.setItem('cart', JSON.stringify(obj));
-        } else {
-          stored[bookId] = (stored[bookId] || 0) + 1;
-          localStorage.setItem('cart', JSON.stringify(stored));
-        }
-        // Animate the cart icon in navigation
-        const cartIcon = document.querySelector('.btn-cart');
-        if (cartIcon) {
-          cartIcon.style.transform = 'scale(1.2)';
-          setTimeout(() => {
-            cartIcon.style.transform = 'scale(1)';
-          }, 200);
+        try {
+          if (event) {
+            event.stopPropagation();
+          }
+          
+          // Check if book is out of stock
+          const outOfStockBooks = ['kayf_tajid_al_hob', 'la_yumkinuka_iidhaayi', 'the_hunger_games'];
+          if (outOfStockBooks.includes(bookId)) {
+            alert('This book is currently out of stock / هذا الكتاب نفدت الكمية حالياً');
+            return;
+          }
+          
+          let cartData;
+          try {
+            cartData = localStorage.getItem('cart');
+          } catch (e) {
+            console.error('Error accessing localStorage:', e);
+            alert('Unable to add to cart. Please try again.');
+            return;
+          }
+          
+          const stored = cartData ? JSON.parse(cartData) : {};
+          if (Array.isArray(stored)) {
+            const obj = {};
+            stored.forEach(id => { obj[id] = (obj[id] || 0) + 1; });
+            obj[bookId] = (obj[bookId] || 0) + 1;
+            try {
+              localStorage.setItem('cart', JSON.stringify(obj));
+            } catch (e) {
+              console.error('Error saving to localStorage:', e);
+              alert('Unable to save to cart. Storage may be full.');
+              return;
+            }
+          } else {
+            stored[bookId] = (stored[bookId] || 0) + 1;
+            try {
+              localStorage.setItem('cart', JSON.stringify(stored));
+            } catch (e) {
+              console.error('Error saving to localStorage:', e);
+              alert('Unable to save to cart. Storage may be full.');
+              return;
+            }
+          }
+          
+          // Update cart counter
+          updateCartCounter();
+          
+          // Animate the cart icon in navigation
+          const cartIcon = document.querySelector('.btn-cart');
+          if (cartIcon) {
+            cartIcon.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+              cartIcon.style.transform = 'scale(1)';
+            }, 200);
+          }
+        } catch (error) {
+          console.error('Error in addToCartFromCard:', error);
+          alert('An error occurred. Please try again.');
         }
       }
       
-      // Function to update cart counter
-      function updateCartCounter() {
-        const stored = JSON.parse(localStorage.getItem('cart')) || {};
-        const cartButtons = document.querySelectorAll('.btn-cart');
-        const totalQty = Array.isArray(stored) ? stored.length : Object.values(stored).reduce((a,b)=>a+b,0);
-        cartButtons.forEach(button => {
-          button.setAttribute('data-quantity', totalQty);
-        });
-      }
-      
-      // Update cart counter when page loads
+      // Update cart counter when page loads (already defined above, just call it)
       document.addEventListener('DOMContentLoaded', function() {
         updateCartCounter();
       });
@@ -3115,12 +3163,48 @@
       }
     }
     window.changeLanguage = function(lang) {
-      showLoader();
-      localStorage.setItem('lang', lang);
-      location.reload();
+      try {
+        // Prevent multiple rapid reloads
+        if (window.isChangingLanguage) {
+          return;
+        }
+        window.isChangingLanguage = true;
+        
+        showLoader();
+        localStorage.setItem('lang', lang);
+        
+        // Use setTimeout to ensure loader is shown before reload
+        setTimeout(() => {
+          try {
+            location.reload();
+          } catch (e) {
+            console.error('Error reloading page:', e);
+            window.isChangingLanguage = false;
+            hideLoader();
+          }
+        }, 100);
+      } catch (error) {
+        console.error('Error changing language:', error);
+        window.isChangingLanguage = false;
+        hideLoader();
+      }
     }
     window.addEventListener('offline', showLoader);
     window.addEventListener('online', hideLoader);
+    
+    // Global error handler to prevent infinite reload loops
+    window.addEventListener('error', function(e) {
+      console.error('Global error caught:', e.error, e.message, e.filename, e.lineno);
+      // Prevent default error handling that might cause reload
+      e.preventDefault();
+      return true;
+    });
+    
+    // Prevent unhandled promise rejections from crashing the page
+    window.addEventListener('unhandledrejection', function(e) {
+      console.error('Unhandled promise rejection:', e.reason);
+      e.preventDefault();
+    });
     </script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {

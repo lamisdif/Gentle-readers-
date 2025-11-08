@@ -461,7 +461,7 @@ const books = {
     description: "The Eternal Husband is a novella by Fyodor Dostoevsky. The Eternal Husband describes the relationship between Velchaninov, a rich and idle bachelor, and Trusotsky, the husband of his former lover.",
     description_ar: "الزوج الأبدي رواية قصيرة لفيودور دوستويفسكي. يصف الزوج الأبدي العلاقة بين فيلتشانينوف، عازب ثري وخامل، وتروسوتسكي، زوج حبيبته السابقة.",
     cover: "imgs/الزوج-الأبدي.jpg",
-    price: "1,200.00",
+    price: "1,300.00",
     isbn: "9789776543261"
   },
   winter_notes_on_summer_impressions: {
@@ -479,7 +479,7 @@ const books = {
     description: "The Landlady and A Faint Heart are two short stories by Fyodor Dostoevsky. These works explore themes of psychological complexity, human relationships, and the inner struggles of the characters.",
     description_ar: "الجارة والقلب الضعيف قصتان قصيرتان لفيودور دوستويفسكي. تستكشف هذه الأعمال مواضيع التعقيد النفسي والعلاقات الإنسانية والصّراعات الداخلية للشخصيات.",
     cover: "imgs/الجارة قلب ضعيف.jpg",
-    price: "1,200.00",
+    price: "1,300.00",
     isbn: "9789776543263"
   },
   the_double_a_nasty_story: {
