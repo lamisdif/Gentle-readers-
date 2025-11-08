@@ -1071,6 +1071,9 @@ html,
         padding: 0 20px;
         position: relative;
         animation: autoScroll 40s linear infinite;
+        will-change: transform;
+        transform: translateZ(0); /* GPU acceleration */
+        backface-visibility: hidden; /* Prevent flickering */
       }
       
       .slider .list .item {
@@ -1079,14 +1082,16 @@ html,
         flex-shrink: 0;
         position: relative;
         transition: filter 0.5s;
+        contain: layout style paint; /* Performance optimization */
+        will-change: filter;
       }
       
       @keyframes autoScroll {
         0% {
-          transform: translateX(0);
+          transform: translateX(0) translateZ(0);
         }
         100% {
-          transform: translateX(calc(-1 * var(--width) * var(--quantity)));
+          transform: translateX(calc(-1 * var(--width) * var(--quantity))) translateZ(0);
         }
       }
       
@@ -1099,11 +1104,30 @@ html,
         filter: grayscale(0);
       }
       
-      /* Mobile version - same as desktop */
+      /* Mobile optimizations - slower animation, reduced effects */
       @media (max-width: 768px) {
+        .slider .list {
+          animation: autoScroll 60s linear infinite; /* Slower on mobile */
+          gap: 15px; /* Reduce gap for better performance */
+        }
+        
+        .slider .list .item {
+          will-change: auto; /* Reduce will-change on mobile */
+        }
+        
         .slider .list .item .flip-book-card-wrapper {
           width: 220px;
           height: 300px;
+        }
+        
+        /* Disable hover effects on mobile to reduce repaints */
+        .slider:hover .item {
+          filter: none !important;
+        }
+        
+        /* Reduce image quality on mobile for better performance */
+        .slider .list .item img {
+          image-rendering: -webkit-optimize-contrast;
         }
       }
       .slider .list .item .card {

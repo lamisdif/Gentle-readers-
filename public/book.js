@@ -209,7 +209,7 @@ const books = {
     author: "عمرو عبد الحميد",
     description: "A story about a girl with a distinctive collar, exploring themes of uniqueness, social expectations, and the courage to be different in a conformist world.",
     description_ar: "قصة عن فتاة ذات ياقة مميزة، تستكشف مواضيع التفرد والتوقعات الاجتماعية والشجاعة لتكون مختلفة في عالم متطابق.",
-    cover: "imgs/فتاة الياقة.jpg",
+    cover: "imgs/فتاة الياقة الزرقاء.jpg",
     price: "1,400.00",
     isbn: "9789776543238"
   },
