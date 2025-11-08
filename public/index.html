@@ -315,6 +315,8 @@
         overflow-x: auto !important;
         overflow-y: visible !important;
         -webkit-overflow-scrolling: touch !important;
+        scroll-behavior: smooth !important;
+        touch-action: pan-x !important;
       }
       
       .slider .list {
@@ -332,6 +334,41 @@
       /* Pause animation when user is scrolling */
       .slider.is-scrolling .list {
         animation-play-state: paused !important;
+      }
+      
+      /* Mobile-specific fixes for slider */
+      @media (max-width: 768px) {
+        .slider {
+          overflow-x: auto !important;
+          overflow-y: hidden !important;
+          -webkit-overflow-scrolling: touch !important;
+          touch-action: pan-x !important;
+          scroll-snap-type: none !important;
+          position: relative !important;
+          /* Prevent horizontal page scroll */
+          overscroll-behavior-x: contain !important;
+        }
+        
+        .slider .list {
+          animation: autoScroll 40s linear infinite !important;
+          will-change: transform !important;
+        }
+        
+        /* Pause animation immediately on touch */
+        .slider.touching .list,
+        .slider.is-touching .list {
+          animation-play-state: paused !important;
+        }
+        
+        /* Better touch handling */
+        .slider * {
+          -webkit-tap-highlight-color: transparent !important;
+        }
+        
+        /* Prevent slider from causing layout shifts */
+        .slider .list .item {
+          flex-shrink: 0 !important;
+        }
       }
       
       /* Ensure all sliders have infinite loop animation */
@@ -3083,8 +3120,12 @@
       document.querySelectorAll('.slider').forEach(slider => {
         let scrollTimeout;
         let isScrolling = false;
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let isTouching = false;
         
-        slider.addEventListener('scroll', function() {
+        // Handle scroll events
+        slider.addEventListener('scroll', function(e) {
           if (!isScrolling) {
             isScrolling = true;
             slider.classList.add('is-scrolling');
@@ -3094,29 +3135,72 @@
           scrollTimeout = setTimeout(() => {
             isScrolling = false;
             slider.classList.remove('is-scrolling');
-          }, 150);
+          }, 200);
         });
         
-        // Also pause on touch/mouse interaction
-        slider.addEventListener('mousedown', function() {
+        // Mouse events for desktop
+        slider.addEventListener('mousedown', function(e) {
           slider.classList.add('is-scrolling');
         });
         
-        slider.addEventListener('touchstart', function() {
+        slider.addEventListener('mouseup', function(e) {
+          setTimeout(() => {
+            slider.classList.remove('is-scrolling');
+          }, 200);
+        });
+        
+        // Enhanced touch events for mobile
+        slider.addEventListener('touchstart', function(e) {
+          isTouching = true;
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
           slider.classList.add('is-scrolling');
-        });
+          slider.classList.add('is-touching');
+          
+          // Pause animation immediately
+          const list = slider.querySelector('.list');
+          if (list) {
+            list.style.animationPlayState = 'paused';
+          }
+        }, { passive: true });
         
-        slider.addEventListener('mouseup', function() {
+        slider.addEventListener('touchmove', function(e) {
+          if (!isTouching) return;
+          
+          const touchX = e.touches[0].clientX;
+          const touchY = e.touches[0].clientY;
+          const deltaX = Math.abs(touchX - touchStartX);
+          const deltaY = Math.abs(touchY - touchStartY);
+          
+          // If horizontal scroll is greater than vertical, it's a horizontal swipe
+          if (deltaX > deltaY && deltaX > 10) {
+            slider.classList.add('is-scrolling');
+            const list = slider.querySelector('.list');
+            if (list) {
+              list.style.animationPlayState = 'paused';
+            }
+          }
+        }, { passive: true });
+        
+        slider.addEventListener('touchend', function(e) {
+          isTouching = false;
+          slider.classList.remove('is-touching');
+          
           setTimeout(() => {
             slider.classList.remove('is-scrolling');
-          }, 150);
-        });
+            // Resume animation after a delay if not actively scrolling
+            const list = slider.querySelector('.list');
+            if (list && !slider.classList.contains('is-scrolling')) {
+              list.style.animationPlayState = 'running';
+            }
+          }, 300);
+        }, { passive: true });
         
-        slider.addEventListener('touchend', function() {
-          setTimeout(() => {
-            slider.classList.remove('is-scrolling');
-          }, 150);
-        });
+        slider.addEventListener('touchcancel', function(e) {
+          isTouching = false;
+          slider.classList.remove('is-touching');
+          slider.classList.remove('is-scrolling');
+        }, { passive: true });
       });
       
     </script>
