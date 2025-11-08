@@ -392,141 +392,142 @@ const books = {
     isbn: "9789776543253"
   },
   // Dostoevsky books
-  the_gambler: {
+  al_muqamir: {
     title: "المقامر",
     author: "فيودور دوستويفسكي",
-    description: "The Gambler is a short novel by Fyodor Dostoevsky about a young tutor in the employment of a formerly wealthy Russian general. The novella reflects Dostoevsky's own addiction to roulette, which was in more ways than one the inspiration for the book.",
-    description_ar: "المقامر رواية قصيرة لفيودور دوستويفسكي عن مدرس شاب يعمل لدى جنرال روسي كان ثرياً سابقاً. تعكس الرواية إدمان دوستويفسكي نفسه على الروليت، والذي كان مصدر إلهام للكتاب بطرق عديدة.",
+    description: "The Gambler is a novel by Fyodor Dostoevsky about a young tutor who becomes obsessed with gambling. The story explores themes of addiction, passion, and the destructive power of obsession, set against the backdrop of a German gambling resort.",
+    description_ar: "المقامر رواية لفيودور دوستويفسكي عن مدرس شاب يصبح مهووساً بالمقامرة. تستكشف القصة مواضيع الإدمان والعاطفة والقوة المدمرة للهوس، في إطار منتجع ألماني للمقامرة.",
     cover: "imgs/المقامر.jpg",
     price: "1,300.00",
     isbn: "9789776543254"
   },
-  demons: {
+  al_shayatin: {
     title: "الشياطين",
     author: "فيودور دوستويفسكي",
-    description: "Demons is a novel by Fyodor Dostoevsky, first published in 1871-72. It is considered one of the four masterworks written by Dostoevsky after his return from Siberian exile, along with Crime and Punishment, The Idiot, and The Brothers Karamazov.",
-    description_ar: "الشياطين رواية لفيودور دوستويفسكي، نُشرت لأول مرة في 1871-72. تُعتبر واحدة من أربع روائع كتبها دوستويفسكي بعد عودته من المنفى السيبيري، إلى جانب الجريمة والعقاب والأبله والإخوة كارامازوف.",
+    description: "The Demons (also known as The Possessed) is one of Dostoevsky's most complex novels, exploring political radicalism, nihilism, and the moral decay of Russian society. The story follows a group of revolutionaries whose ideals lead to chaos and destruction.",
+    description_ar: "الشياطين (المعروف أيضاً باسم الممسوسون) هي واحدة من أكثر روايات دوستويفسكي تعقيداً، تستكشف الراديكالية السياسية والعدمية والانحلال الأخلاقي للمجتمع الروسي. تتبع القصة مجموعة من الثوريين الذين تؤدي أيديولوجياتهم إلى الفوضى والدمار.",
     cover: "imgs/الشياطين.png",
     price: "4,000.00",
     isbn: "9789776543255"
   },
-  the_idiot: {
+  al_ablah: {
     title: "الأبله",
     author: "فيودور دوستويفسكي",
-    description: "The Idiot is a novel by Fyodor Dostoevsky, first published serially in 1868-69. The title is an ironic reference to the central character of the novel, Prince Lev Nikolayevich Myshkin, a young man whose goodness, open-hearted simplicity, and guilelessness lead many of the more worldly characters he encounters to mistakenly assume that he lacks intelligence and insight.",
-    description_ar: "الأبله رواية لفيودور دوستويفسكي، نُشرت لأول مرة بشكل متسلسل في 1868-69. العنوان إشارة ساخرة إلى الشخصية المركزية في الرواية، الأمير ليف نيكولايفيتش ميشكين، شاب طيبته وبساطته وبراءته تجعل العديد من الشخصيات الأكثر دنيوية التي يقابلها تعتقد خطأً أنه يفتقر إلى الذكاء والبصيرة.",
+    description: "The Idiot is a novel about Prince Myshkin, a man of pure heart and innocence who returns to Russia after treatment for epilepsy. His goodness and naivety clash with the corrupt society around him, leading to tragedy.",
+    description_ar: "الأبله رواية عن الأمير ميشكين، رجل ذو قلب نقي وبراءة يعود إلى روسيا بعد علاج من الصرع. تتصادم خيرته وسذاجته مع المجتمع الفاسد من حوله، مما يؤدي إلى المأساة.",
     cover: "imgs/الأبله.jpg",
     price: "4,800.00",
     isbn: "9789776543256"
   },
-  the_brothers_karamazov: {
+  al_ikhwa_karamazov: {
     title: "الإخوة كارامازوف",
     author: "فيودور دوستويفسكي",
-    description: "The Brothers Karamazov is the final novel by Russian author Fyodor Dostoevsky. Dostoevsky spent nearly two years writing The Brothers Karamazov, which was published as a serial in The Russian Messenger from January 1879 to November 1880.",
-    description_ar: "الإخوة كارامازوف هي الرواية الأخيرة للكاتب الروسي فيودور دوستويفسكي. قضى دوستويفسكي ما يقرب من عامين في كتابة الإخوة كارامازوف، والتي نُشرت كمسلسل في الرسول الروسي من يناير 1879 إلى نوفمبر 1880.",
+    description: "The Brothers Karamazov is Dostoevsky's final and greatest novel, exploring themes of faith, doubt, free will, and morality through the story of three brothers and their relationship with their father. A profound philosophical and psychological masterpiece.",
+    description_ar: "الإخوة كارامازوف هي آخر وأعظم روايات دوستويفسكي، تستكشف مواضيع الإيمان والشك والإرادة الحرة والأخلاق من خلال قصة ثلاثة إخوة وعلاقتهم بأبيهم. تحفة فلسفية ونفسية عميقة.",
     cover: "imgs/الاخوة-كارامازوف-1.jpg",
     price: "6,000.00",
     isbn: "9789776543257"
   },
-  poor_folk: {
+  al_fuqara: {
     title: "الفقراء",
     author: "فيودور دوستويفسكي",
-    description: "Poor Folk is the first novel by Fyodor Dostoevsky, written over the span of nine months between 1844 and 1845. Dostoevsky was in financial difficulty because of his extravagant lifestyle and his developing gambling addiction.",
-    description_ar: "الفقراء هي أول رواية لفيودور دوستويفسكي، كُتبت على مدى تسعة أشهر بين 1844 و1845. كان دوستويفسكي في صعوبة مالية بسبب أسلوب حياته المترف وإدمانه المتزايد على القمار.",
+    description: "Poor Folk is Dostoevsky's first novel, an epistolary work that tells the story of two impoverished correspondents. The novel explores themes of poverty, love, and human dignity through their letters.",
+    description_ar: "الفقراء هي أول رواية لدوستويفسكي، عمل رسائلي يروي قصة مراسلين فقيرين. تستكشف الرواية مواضيع الفقر والحب والكرامة الإنسانية من خلال رسائلهما.",
     cover: "imgs/الفقراء.jpg",
     price: "1,250.00",
     isbn: "9789776543258"
   },
-  notes_from_underground: {
+  fi_qabwi: {
     title: "في قبوي",
     author: "فيودور دوستويفسكي",
-    description: "Notes from Underground is a novella by Fyodor Dostoevsky, first published in the journal Epoch in 1864. It is a first-person narrative in the form of a 'confession': the work was originally announced by Dostoevsky in Epoch under the title 'A Confession'.",
-    description_ar: "في قبوي رواية قصيرة لفيودور دوستويفسكي، نُشرت لأول مرة في مجلة العصر في 1864. إنها سرد من منظور الشخص الأول في شكل 'اعتراف': تم الإعلان عن العمل في الأصل من قبل دوستويفسكي في العصر تحت عنوان 'اعتراف'.",
+    description: "Notes from Underground (also known as In the Basement) is a philosophical novella that presents the confession of an isolated, bitter narrator. It explores themes of free will, determinism, and the nature of human consciousness.",
+    description_ar: "مذكرات من تحت الأرض (المعروف أيضاً باسم في قبوي) هي رواية فلسفية تقدم اعتراف راوٍ معزول ومرير. تستكشف مواضيع الإرادة الحرة والحتمية وطبيعة الوعي الإنساني.",
     cover: "imgs/في-قبوي.jpg",
     price: "1,200.00",
     isbn: "9789776543259"
   },
-  the_house_of_the_dead: {
+  dhikrayat_min_manzil_al_amwat: {
     title: "ذكريات من منزل الأموات",
     author: "فيودور دوستويفسكي",
-    description: "The House of the Dead is a semi-autobiographical novel published in 1860-2 in the journal Vremya by Russian author Fyodor Dostoevsky. It was the first published novel by Dostoevsky. The novel portrays the life of convicts in a Siberian prison camp.",
-    description_ar: "ذكريات من منزل الأموات رواية شبه سيرة ذاتية نُشرت في 1860-2 في مجلة الوقت للكاتب الروسي فيودور دوستويفسكي. كانت أول رواية منشورة لدوستويفسكي. تصور الرواية حياة المدانين في معسكر سجن سيبيري.",
+    description: "The House of the Dead is a semi-autobiographical novel based on Dostoevsky's experiences in a Siberian prison camp. It provides a detailed account of prison life and explores themes of human nature, suffering, and redemption.",
+    description_ar: "منزل الأموات رواية شبه سيرة ذاتية مبنية على تجارب دوستويفسكي في معسكر سجون سيبيريا. تقدم وصفاً مفصلاً لحياة السجن وتستكشف مواضيع الطبيعة البشرية والمعاناة والفداء.",
     cover: "imgs/ذكريات من منزل الأموات.jpg",
     price: "1,850.00",
     isbn: "9789776543260"
   },
-  the_eternal_husband: {
+  al_zawj_al_abadi: {
     title: "الزوج الأبدي",
     author: "فيودور دوستويفسكي",
-    description: "The Eternal Husband is a novella by Fyodor Dostoevsky. The Eternal Husband describes the relationship between Velchaninov, a rich and idle bachelor, and Trusotsky, the husband of his former lover.",
-    description_ar: "الزوج الأبدي رواية قصيرة لفيودور دوستويفسكي. يصف الزوج الأبدي العلاقة بين فيلتشانينوف، عازب ثري وخامل، وتروسوتسكي، زوج حبيبته السابقة.",
+    description: "The Eternal Husband is a psychological novella about a man who discovers his deceased wife had a lover. The story explores themes of jealousy, revenge, and the complex relationships between men, set in St. Petersburg.",
+    description_ar: "الزوج الأبدي رواية نفسية عن رجل يكتشف أن زوجته المتوفاة كان لها عاشق. تستكشف القصة مواضيع الغيرة والانتقام والعلاقات المعقدة بين الرجال، في إطار سانت بطرسبرغ.",
     cover: "imgs/الزوج-الأبدي.jpg",
     price: "1,300.00",
     isbn: "9789776543261"
   },
-  winter_notes_on_summer_impressions: {
+  dhikrayat_shita_fi_mashaer_al_sayf: {
     title: "ذكريات شتاء في مشاعر الصيف",
     author: "فيودور دوستويفسكي",
-    description: "Winter Notes on Summer Impressions is an essay by Fyodor Dostoevsky that he wrote while traveling in western Europe. Many commentators believe that Dostoevsky's visit to the West led to his rejection of constitutionalism and the Western world in general.",
-    description_ar: "ذكريات شتاء في مشاعر الصيف مقال لفيودور دوستويفسكي كتبه أثناء سفره في أوروبا الغربية. يعتقد العديد من المعلقين أن زيارة دوستويفسكي للغرب أدت إلى رفضه للدستورية والعالم الغربي بشكل عام.",
+    description: "Memories from Winter in Summer Feelings is a collection of Dostoevsky's works that explores the contrast between seasons and emotions. The stories delve into human psychology and the complexity of feelings across different times.",
+    description_ar: "ذكريات شتاء في مشاعر الصيف مجموعة من أعمال دوستويفسكي تستكشف التباين بين الفصول والعواطف. تغوص القصص في علم النفس البشري وتعقيد المشاعر عبر الأوقات المختلفة.",
     cover: "imgs/ذكريات-شتاء-.jpg",
     price: "1,200.00",
     isbn: "9789776543262"
   },
-  the_landlady_a_faint_heart: {
+  al_jara_wa_al_qalb_al_daif: {
     title: "الجارة والقلب الضعيف",
     author: "فيودور دوستويفسكي",
-    description: "The Landlady and A Faint Heart are two short stories by Fyodor Dostoevsky. These works explore themes of psychological complexity, human relationships, and the inner struggles of the characters.",
-    description_ar: "الجارة والقلب الضعيف قصتان قصيرتان لفيودور دوستويفسكي. تستكشف هذه الأعمال مواضيع التعقيد النفسي والعلاقات الإنسانية والصّراعات الداخلية للشخصيات.",
+    description: "The Neighbor and the Weak Heart is a collection of two stories by Dostoevsky. The stories explore themes of human relationships, emotional vulnerability, and the delicate nature of the human heart in social interactions.",
+    description_ar: "الجارة والقلب الضعيف مجموعة من قصتين لدوستويفسكي. تستكشف القصص مواضيع العلاقات الإنسانية والهشاشة العاطفية والطبيعة الحساسة للقلب البشري في التفاعلات الاجتماعية.",
     cover: "imgs/الجارة قلب ضعيف.jpg",
     price: "1,300.00",
     isbn: "9789776543263"
   },
-  the_double_a_nasty_story: {
+  al_mithl_wa_qissa_aleima: {
     title: "المثل وقصة أليمة",
     author: "فيودور دوستويفسكي",
-    description: "The Double and A Nasty Story are works by Fyodor Dostoevsky. The Double is a novella written by Dostoevsky, first published in 1846. It tells the story of a government clerk who goes mad.",
-    description_ar: "المثل وقصة أليمة أعمال لفيودور دوستويفسكي. المثل رواية قصيرة كتبها دوستويفسكي، نُشرت لأول مرة في 1846. تحكي قصة كاتب حكومي يجن.",
+    description: "The Idiot and a Painful Story combines two of Dostoevsky's works, exploring themes of innocence, suffering, and the human condition. The stories examine how pure hearts navigate a world filled with pain and complexity.",
+    description_ar: "المثل وقصة أليمة يجمع بين عملين لدوستويفسكي، يستكشفان مواضيع البراءة والمعاناة والحالة الإنسانية. تفحص القصص كيف تتنقل القلوب النقية في عالم مليء بالألم والتعقيد.",
     cover: "imgs/غلاف-المثل.jpg",
     price: "1,700.00",
     isbn: "9789776543264"
   },
-  a_little_hero: {
-    title: "البطل الصغير",
+  qaryat_stibanchikogo: {
+    title: "قرية ستيبانتشيكوفو",
     author: "فيودور دوستويفسكي",
-    description: "A Little Hero is a short story by Fyodor Dostoevsky. It was written in 1849 while the author was in prison, and first published in 1857.",
-    description_ar: "البطل الصغير قصة قصيرة لفيودور دوستويفسكي. كُتبت في 1849 بينما كان المؤلف في السجن، ونُشرت لأول مرة في 1857.",
-    cover: "imgs/197861510.jpg",
-    price: "1,200.00",
-    isbn: "9789776543265"
-  },
-  the_village_of_stepanchikovo: {
-    title: "قرية ستيبانتشيكوغو",
-    author: "فيودور دوستويفسكي",
-    description: "The Village of Stepanchikovo is a novella by Fyodor Dostoevsky, first published in 1859. It is a satirical work that explores themes of family relationships and social dynamics in a Russian village setting.",
-    description_ar: "قرية ستيبانتشيكوغو رواية قصيرة لفيودور دوستويفسكي، نُشرت لأول مرة في 1859. إنها عمل ساخر يستكشف مواضيع العلاقات العائلية والديناميكيات الاجتماعية في إعداد قرية روسية.",
+    description: "The Village of Stepanchikovo and Its Inhabitants is a satirical novel about a small Russian village and its eccentric residents. The story humorously explores social dynamics, hypocrisy, and the absurdities of rural Russian life.",
+    description_ar: "قرية ستيبانتشيكوفو وسكانها رواية ساخرة عن قرية روسية صغيرة وسكانها المثيرين. تستكشف القصة بشكل فكاهي ديناميكيات اجتماعية والنفاق وعبثيات الحياة الريفية الروسية.",
     cover: "imgs/غلاف-قرية-ستيبانتشيكوفو.jpg",
     price: "1,700.00",
-    isbn: "9789776543266"
+    isbn: "9789776543265"
   },
-  white_nights: {
+  al_layali_al_bayda_dostoevsky: {
     title: "الليالي البيضاء",
     author: "فيودور دوستويفسكي",
-    description: "White Nights is a short story by Fyodor Dostoevsky, originally published in 1848, early in the writer's career. Like many of Dostoevsky's stories, it was inspired by the writer's life in St. Petersburg.",
-    description_ar: "الليالي البيضاء قصة قصيرة لفيودور دوستويفسكي، نُشرت لأول مرة في 1848، في بداية مسيرة الكاتب. مثل العديد من قصص دوستويفسكي، استُلهمت من حياة الكاتب في سانت بطرسبرغ.",
+    description: "White Nights is a sentimental tale of a lonely dreamer who falls in love during the white nights of St. Petersburg. The story explores themes of loneliness, love, and the fleeting nature of happiness.",
+    description_ar: "الليالي البيضاء قصة عاطفية عن حالم وحيد يقع في الحب خلال الليالي البيضاء في سانت بطرسبرغ. تستكشف القصة مواضيع الوحدة والحب والطبيعة العابرة للسعادة.",
     cover: "imgs/الليالي-البيضاء.jpg",
     price: "900.00",
-    isbn: "9789776543267"
+    isbn: "9789776543266"
   },
-  humiliated_and_insulted: {
+  madhlun_mahzun: {
     title: "مذلون مهانون",
     author: "فيودور دوستويفسكي",
-    description: "Humiliated and Insulted is a novel by Fyodor Dostoevsky, first published in 1861 in the magazine Vremya. It was the first full-length novel that Dostoevsky published after his return from exile in Siberia.",
-    description_ar: "مذلون مهانون رواية لفيودور دوستويفسكي، نُشرت لأول مرة في 1861 في مجلة الوقت. كانت أول رواية كاملة الطول ينشرها دوستويفسكي بعد عودته من المنفى في سيبيريا.",
+    description: "Humiliated and Insulted is a novel about a young writer who becomes involved with a family torn apart by social injustice. The story explores themes of love, sacrifice, and the suffering of the innocent in a corrupt society.",
+    description_ar: "مذلون مهانون رواية عن كاتب شاب ينخرط مع عائلة ممزقة بسبب الظلم الاجتماعي. تستكشف القصة مواضيع الحب والتضحية ومعاناة الأبرياء في مجتمع فاسد.",
     cover: "imgs/مذلون-مهانون-.jpg",
     price: "2,500.00",
+    isbn: "9789776543267"
+  },
+  al_batal_al_saghir: {
+    title: "البطل الصغير",
+    author: "فيودور دوستويفسكي",
+    description: "The Little Hero is a short story by Dostoevsky that explores themes of childhood, innocence, and heroism in a small world. The story follows a young protagonist who discovers courage and meaning in everyday life.",
+    description_ar: "البطل الصغير قصة قصيرة لدوستويفسكي تستكشف مواضيع الطفولة والبراءة والبطولة في عالم صغير. تتبع القصة بطل شاب يكتشف الشجاعة والمعنى في الحياة اليومية.",
+    cover: "imgs/البطل الصغير.jpg",
+    price: "1,200.00",
     isbn: "9789776543268"
   }
+  // ... (rest of the books object as in book.html)
 };
 
 function addToCart() {

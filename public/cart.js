@@ -101,23 +101,22 @@ const books = {
   oscar_wilde: { title: "أوسكار وايلد", price: "1,650.00" },
   sa_akun_hunak: { title: "سأكون هناك", price: "1,800.00" },
   al_sindbad_al_a3ma: { title: "السندباد الأعمى", price: "1,700.00" },
-  
   // Dostoevsky books
-  the_gambler: { title: "المقامر", price: "1,300.00" },
-  demons: { title: "الشياطين", price: "4,000.00" },
-  the_idiot: { title: "الأبله", price: "4,800.00" },
-  the_brothers_karamazov: { title: "الإخوة كارامازوف", price: "6,000.00" },
-  poor_folk: { title: "الفقراء", price: "1,250.00" },
-  notes_from_underground: { title: "في قبوي", price: "1,200.00" },
-  the_house_of_the_dead: { title: "ذكريات من منزل الأموات", price: "1,850.00" },
-  the_eternal_husband: { title: "الزوج الأبدي", price: "1,300.00" },
-  winter_notes_on_summer_impressions: { title: "ذكريات شتاء في مشاعر الصيف", price: "1,200.00" },
-  the_landlady_a_faint_heart: { title: "الجارة والقلب الضعيف", price: "1,300.00" },
-  the_double_a_nasty_story: { title: "المثل وقصة أليمة", price: "1,700.00" },
-  a_little_hero: { title: "البطل الصغير", price: "1,200.00" },
-  the_village_of_stepanchikovo: { title: "قرية ستيبانتشيكوغو", price: "1,700.00" },
-  white_nights: { title: "الليالي البيضاء", price: "900.00" },
-  humiliated_and_insulted: { title: "مذلون مهانون", price: "2,500.00" }
+  al_muqamir: { title: "المقامر", price: "1,300.00" },
+  al_shayatin: { title: "الشياطين", price: "4,000.00" },
+  al_ablah: { title: "الأبله", price: "4,800.00" },
+  al_ikhwa_karamazov: { title: "الإخوة كارامازوف", price: "6,000.00" },
+  al_fuqara: { title: "الفقراء", price: "1,250.00" },
+  fi_qabwi: { title: "في قبوي", price: "1,200.00" },
+  dhikrayat_min_manzil_al_amwat: { title: "ذكريات من منزل الأموات", price: "1,850.00" },
+  al_zawj_al_abadi: { title: "الزوج الأبدي", price: "1,300.00" },
+  dhikrayat_shita_fi_mashaer_al_sayf: { title: "ذكريات شتاء في مشاعر الصيف", price: "1,200.00" },
+  al_jara_wa_al_qalb_al_daif: { title: "الجارة والقلب الضعيف", price: "1,300.00" },
+  al_mithl_wa_qissa_aleima: { title: "المثل وقصة أليمة", price: "1,700.00" },
+  qaryat_stibanchikogo: { title: "قرية ستيبانتشيكوفو", price: "1,700.00" },
+  al_layali_al_bayda_dostoevsky: { title: "الليالي البيضاء", price: "900.00" },
+  madhlun_mahzun: { title: "مذلون مهانون", price: "2,500.00" },
+  al_batal_al_saghir: { title: "البطل الصغير", price: "1,200.00" }
 };
 function getCartObject() {
   const stored = JSON.parse(localStorage.getItem('cart')) || {};
