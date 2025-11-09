@@ -321,16 +321,6 @@ const books = {
     price: "1,500.00",
     isbn: "9789776543250"
   },
-  al_layali_al_bayda: {
-    title: "الليالي البيضاء",
-    author: "دوستويفسكي",
-    description: "A classic novel by Dostoevsky that tells the story of a lonely young man in St. Petersburg who meets a young girl during the white summer nights. A touching story about love, loneliness, and hope, reflecting Dostoevsky's mastery in exploring the human psyche.",
-    description_ar: "رواية كلاسيكية رائعة من دوستويفسكي تروي قصة شاب وحيد في سانت بطرسبرغ يلتقي بفتاة شابة في الليالي البيضاء الصيفية. قصة مؤثرة عن الحب والوحدة والأمل، تعكس براعة دوستويفسكي في استكشاف النفس الإنسانية.",
-    cover: "imgs/الليالي البيضاء.jpg",
-    price: "850.00",
-    isbn: "9789776543238",
-    inStock: false
-  },
   rasail_ila_milina: {
     title: "رسائل إلى ميلينا",
     author: "فرانز كافكا",
@@ -499,15 +489,6 @@ const books = {
     cover: "imgs/غلاف-قرية-ستيبانتشيكوفو.jpg",
     price: "1,700.00",
     isbn: "9789776543265"
-  },
-  al_layali_al_bayda_dostoevsky: {
-    title: "الليالي البيضاء",
-    author: "فيودور دوستويفسكي",
-    description: "White Nights is a sentimental tale of a lonely dreamer who falls in love during the white nights of St. Petersburg. The story explores themes of loneliness, love, and the fleeting nature of happiness.",
-    description_ar: "الليالي البيضاء قصة عاطفية عن حالم وحيد يقع في الحب خلال الليالي البيضاء في سانت بطرسبرغ. تستكشف القصة مواضيع الوحدة والحب والطبيعة العابرة للسعادة.",
-    cover: "imgs/الليالي-البيضاء.jpg",
-    price: "900.00",
-    isbn: "9789776543266"
   },
   madhlun_mahzun: {
     title: "مذلون مهانون",

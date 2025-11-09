@@ -1,7 +1,7 @@
 // JavaScript extracted from cart.html
 const books = {
   // New books from the latest images
-  ayyam_al_hijran: { title: "أيام الهجران", price: "1,450.00" },
+  ayyam_al_hijran: { title: "أيام الهجران", price: "1,450.00", inStock: false },
   al_3adat_al_dharia: { title: "العادات الذرية", price: "1,600.00" },
   eva_luna: { title: "إيفا لونا", price: "2,100.00" },
   ghusoon_bunduq_1: { title: "غصون البندق - الكتاب الأول", price: "1,200.00" },
@@ -38,9 +38,8 @@ const books = {
   the_witcher_last_wish: { title: "ذا ويتشر: الأمنية الأخيرة", price: "1,500.00" },
   
   // NEW BOOKS - First Half
-  abi_alladhi_akraho: { title: "أبي الذي أكره", price: "1,000.00" },
+  abi_alladhi_akraho: { title: "أبي الذي أكره", price: "1,000.00", inStock: false },
   ash3alni: { title: "أشعلني", price: "2,000.00" },
-  al_layali_al_bayda: { title: "الليالي البيضاء", price: "850.00", inStock: false },
   rasail_ila_milina: { title: "رسائل إلى ميلينا", price: "750.00", originalPrice: "900.00", inStock: true, isDiscounted: true },
   pride_and_prejudice: { title: "كبرياء و هوى", price: "900.00", originalPrice: "1000.00", inStock: true, isDiscounted: true },
   kull_azraq_al_sama: { title: "كل أزرق السماء", price: "2,000.00" },
@@ -103,9 +102,9 @@ const books = {
   al_sindbad_al_a3ma: { title: "السندباد الأعمى", price: "1,700.00" },
   // Dostoevsky books
   al_muqamir: { title: "المقامر", price: "1,300.00" },
-  al_shayatin: { title: "الشياطين", price: "4,000.00" },
-  al_ablah: { title: "الأبله", price: "4,800.00" },
-  al_ikhwa_karamazov: { title: "الإخوة كارامازوف", price: "6,000.00" },
+  al_shayatin: { title: "الشياطين", price: "4,000.00", inStock: false },
+  al_ablah: { title: "الأبله", price: "4,800.00", inStock: false },
+  al_ikhwa_karamazov: { title: "الإخوة كارامازوف", price: "6,000.00", inStock: false },
   al_fuqara: { title: "الفقراء", price: "1,250.00" },
   fi_qabwi: { title: "في قبوي", price: "1,200.00" },
   dhikrayat_min_manzil_al_amwat: { title: "ذكريات من منزل الأموات", price: "1,850.00" },
@@ -114,7 +113,6 @@ const books = {
   al_jara_wa_al_qalb_al_daif: { title: "الجارة والقلب الضعيف", price: "1,300.00" },
   al_mithl_wa_qissa_aleima: { title: "المثل وقصة أليمة", price: "1,700.00" },
   qaryat_stibanchikogo: { title: "قرية ستيبانتشيكوفو", price: "1,700.00" },
-  al_layali_al_bayda_dostoevsky: { title: "الليالي البيضاء", price: "900.00" },
   madhlun_mahzun: { title: "مذلون مهانون", price: "2,500.00" },
   al_batal_al_saghir: { title: "البطل الصغير", price: "1,200.00" }
 };

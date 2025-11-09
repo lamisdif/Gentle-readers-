@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Full authoritative list of all books in the bookstore (copied from search.html)
 const books = {
   // New books from the latest images
-  ayyam_al_hijran: { title: "أيام الهجران", author: "إيلينا فيرانتي", price: "1,450.00" },
+  ayyam_al_hijran: { title: "أيام الهجران", author: "إيلينا فيرانتي", price: "1,450.00", inStock: false },
   al_3adat_al_dharia: { title: "العادات الذرية", author: "جيمس كلير", price: "1,600.00" },
         eva_luna: { title: "إيفا لونا", author: "إيزابيل الليندي", price: "2,100.00" },
   ghusoon_bunduq_1: { title: "غصون البندق - الكتاب الأول", author: "منى سلامة", price: "1,200.00" },
@@ -211,9 +211,8 @@ const books = {
   hatha_ma_hadath_maaha: { title: "هذا ما حدث معها", author: "أسامة المسلم", price: "1,400.00" },
   
   // NEW BOOKS - First Half
-  abi_alladhi_akraho: { title: "أبي الذي أكره", author: "د.عماد رشاد عثمان", price: "1,000.00" },
+  abi_alladhi_akraho: { title: "أبي الذي أكره", author: "د.عماد رشاد عثمان", price: "1,000.00", inStock: false },
   ash3alni: { title: "أشعلني", author: "طاهرة مافي", price: "2,000.00" },
-  al_layali_al_bayda: { title: "الليالي البيضاء", author: "دوستويفسكي", price: "850.00", inStock: false },
   rasail_ila_milina: { title: "رسائل إلى ميلينا", author: "فرانز كافكا", price: "750.00", originalPrice: "900.00", inStock: true, isDiscounted: true },
   pride_and_prejudice: { title: "PRIDE AND PREJUDICE", author: "جين أوستن", price: "1200", inStock: true },
   kull_azraq_al_sama: { title: "كل أزرق السماء", author: "ميليسا را كوستا", price: "2,000.00" },
@@ -239,9 +238,9 @@ const books = {
   al_sindbad_al_a3ma: { title: "السندباد الأعمى", author: "بثينة العيسى", price: "1,700.00" },
   // Dostoevsky books
   al_muqamir: { title: "المقامر", author: "فيودور دوستويفسكي", price: "1,300.00" },
-  al_shayatin: { title: "الشياطين", author: "فيودور دوستويفسكي", price: "4,000.00" },
-  al_ablah: { title: "الأبله", author: "فيودور دوستويفسكي", price: "4,800.00" },
-  al_ikhwa_karamazov: { title: "الإخوة كارامازوف", author: "فيودور دوستويفسكي", price: "6,000.00" },
+  al_shayatin: { title: "الشياطين", author: "فيودور دوستويفسكي", price: "4,000.00", inStock: false },
+  al_ablah: { title: "الأبله", author: "فيودور دوستويفسكي", price: "4,800.00", inStock: false },
+  al_ikhwa_karamazov: { title: "الإخوة كارامازوف", author: "فيودور دوستويفسكي", price: "6,000.00", inStock: false },
   al_fuqara: { title: "الفقراء", author: "فيودور دوستويفسكي", price: "1,250.00" },
   fi_qabwi: { title: "في قبوي", author: "فيودور دوستويفسكي", price: "1,200.00" },
   dhikrayat_min_manzil_al_amwat: { title: "ذكريات من منزل الأموات", author: "فيودور دوستويفسكي", price: "1,850.00" },
@@ -250,7 +249,6 @@ const books = {
   al_jara_wa_al_qalb_al_daif: { title: "الجارة والقلب الضعيف", author: "فيودور دوستويفسكي", price: "1,300.00" },
   al_mithl_wa_qissa_aleima: { title: "المثل وقصة أليمة", author: "فيودور دوستويفسكي", price: "1,700.00" },
   qaryat_stibanchikogo: { title: "قرية ستيبانتشيكوفو", author: "فيودور دوستويفسكي", price: "1,700.00" },
-  al_layali_al_bayda_dostoevsky: { title: "الليالي البيضاء", author: "فيودور دوستويفسكي", price: "900.00" },
   madhlun_mahzun: { title: "مذلون مهانون", author: "فيودور دوستويفسكي", price: "2,500.00" },
   al_batal_al_saghir: { title: "البطل الصغير", author: "فيودور دوستويفسكي", price: "1,200.00" }
 };
