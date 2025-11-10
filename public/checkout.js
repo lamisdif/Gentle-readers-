@@ -203,7 +203,7 @@ const books = {
   
   // Missing books from the images
   al_baron: { title: "البارون", author: "شهد قربان", price: "1,500.00" },
-  little_women: { title: "Little Women", author: "Louisa May Alcott", price: "900.00" },
+  little_women: { title: "نساء صغيرات", author: "لويزا ماي ألكوت", price: "3,000.00" },
   oliver_twist: { title: "Oliver Twist", author: "Charles Dickens", price: "1,800.00" },
   pride_and_prejudice: { title: "PRIDE AND PREJUDICE", author: "جين أوستن", price: "1200", inStock: true },
   anne_of_green_gables: { title: "Anne of Green Gables", author: "Lucy Maud Montgomery", price: "850.00", inStock: false },
@@ -251,7 +251,10 @@ const books = {
   al_mithl_wa_qissa_aleima: { title: "المثل وقصة أليمة", author: "فيودور دوستويفسكي", price: "1,700.00" },
   qaryat_stibanchikogo: { title: "قرية ستيبانتشيكوفو", author: "فيودور دوستويفسكي", price: "1,700.00" },
   madhlun_mahzun: { title: "مذلون مهانون", author: "فيودور دوستويفسكي", price: "2,500.00" },
-  al_batal_al_saghir: { title: "البطل الصغير", author: "فيودور دوستويفسكي", price: "1,200.00" }
+  al_batal_al_saghir: { title: "البطل الصغير", author: "فيودور دوستويفسكي", price: "1,200.00" },
+  awlad_haretna: { title: "أولاد حارتنا", author: "نجيب محفوظ", price: "3,000.00" },
+  al_masih_yuslab_min_jadid: { title: "المسيح يصلب من جديد", author: "نيكوس كازانتزاكيس", price: "1,500.00" },
+  isti3dadat_li_3aqd_qiran: { title: "استعدادات لعقد قران", author: "فرانتس كافكا", price: "900.00" }
 };
 
 function getCurrentLang() {

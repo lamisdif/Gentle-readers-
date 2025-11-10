@@ -140,12 +140,12 @@ const books = {
     isbn: "9789776543229"
   },
   little_women: {
-    title: "Little Women",
-    author: "Louisa May Alcott",
+    title: "نساء صغيرات",
+    author: "لويزا ماي ألكوت",
     description: "A classic coming-of-age story following the four March sisters - Meg, Jo, Beth, and Amy - as they navigate life, love, and personal growth during the Civil War era. This timeless tale explores themes of family, independence, and the challenges of growing up.",
     description_ar: "قصة كلاسيكية عن النضج تتبع الأختين الأربع مارش - ميج وجو وبيث وإيمي - وهن يتنقلن في الحياة والحب والنمو الشخصي خلال عصر الحرب الأهلية. هذه الحكاية الخالدة تستكشف مواضيع الأسرة والاستقلالية وتحديات النمو.",
-    cover: "imgs/Little women.jpg",
-    price: "900.00",
+    cover: "imgs/نساء صغيرات.jpg",
+    price: "3,000.00",
     isbn: "9789776543230"
   },
   oliver_twist: {
@@ -521,8 +521,34 @@ const books = {
     cover: "imgs/البطل الصغير.jpg",
     price: "1,200.00",
     isbn: "9789776543268"
+  },
+  awlad_haretna: {
+    title: "أولاد حارتنا",
+    author: "نجيب محفوظ",
+    description: "Children of Our Alley is one of Naguib Mahfouz's most famous and controversial novels. It tells the story of generations living in an alley in Cairo, exploring themes of power, religion, and human nature through allegorical characters and events.",
+    description_ar: "أولاد حارتنا من أشهر وأكثر روايات نجيب محفوظ إثارة للجدل. تحكي قصة أجيال تعيش في حارة بالقاهرة، مستكشفة مواضيع القوة والدين والطبيعة البشرية من خلال شخصيات وأحداث رمزية.",
+    cover: "imgs/أولاد حارتنا.png",
+    price: "3,000.00",
+    isbn: "9789776543269"
+  },
+  al_masih_yuslab_min_jadid: {
+    title: "المسيح يصلب من جديد",
+    author: "نيكوس كازانتزاكيس",
+    description: "Christ Recrucified is a powerful novel by Nikos Kazantzakis that tells the story of a Greek village that decides to reenact the Passion of Christ during Easter. The novel explores themes of faith, sacrifice, and the conflict between spiritual ideals and human nature.",
+    description_ar: "المسيح يصلب من جديد رواية قوية لنيكوس كازانتزاكيس تحكي قصة قرية يونانية تقرر إعادة تمثيل آلام المسيح خلال عيد الفصح. تستكشف الرواية مواضيع الإيمان والتضحية والصراع بين المثل الروحية والطبيعة البشرية.",
+    cover: "imgs/المسيح يصلب من جديد.png",
+    price: "1,500.00",
+    isbn: "9789776543270"
+  },
+  isti3dadat_li_3aqd_qiran: {
+    title: "استعدادات لعقد قران",
+    author: "فرانتس كافكا",
+    description: "Preparations for a Country Wedding is a collection of short stories by Franz Kafka, including the title story and other works. These stories showcase Kafka's unique style, exploring themes of alienation, bureaucracy, and the absurdity of modern life through surreal and symbolic narratives.",
+    description_ar: "استعدادات لعقد قران مجموعة قصص قصيرة لفرانتس كافكا، تتضمن القصة التي تحمل العنوان وأعمال أخرى. تعرض هذه القصص أسلوب كافكا الفريد، مستكشفة مواضيع الاغتراب والبيروقراطية وعبثية الحياة الحديثة من خلال سرديات سريالية ورمزية.",
+    cover: "imgs/استعدادات لعقد قران.png",
+    price: "900.00",
+    isbn: "9789776543271"
   }
-  // ... (rest of the books object as in book.html)
 };
 
 function addToCart() {
