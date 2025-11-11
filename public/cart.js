@@ -118,7 +118,13 @@ const books = {
   al_batal_al_saghir: { title: "البطل الصغير", price: "1,200.00" },
   awlad_haretna: { title: "أولاد حارتنا", price: "3,000.00" },
   al_masih_yuslab_min_jadid: { title: "المسيح يصلب من جديد", price: "1,500.00" },
-  isti3dadat_li_3aqd_qiran: { title: "استعدادات لعقد قران", price: "900.00" }
+  isti3dadat_li_3aqd_qiran: { title: "استعدادات لعقد قران", price: "900.00" },
+  tharthara_fawq_al_nil: { title: "ثرثرة فوق النيل", price: "1,300.00" },
+  al_maddah_al_sawda: { title: "المادة السوداء", price: "2,400.00" },
+  al_gharib: { title: "الغريب", price: "1,000.00" },
+  al_ta3oon: { title: "الطاعون", price: "1,350.00" },
+  qawa3id_al_3ishq_al_arba3oon: { title: "قواعد العشق الأربعون", price: "3,000.00" },
+  malhamat_al_harafish: { title: "ملحمة الحرافيش", price: "3,000.00" }
 };
 function getCartObject() {
   const stored = JSON.parse(localStorage.getItem('cart')) || {};

@@ -254,7 +254,13 @@ const books = {
   al_batal_al_saghir: { title: "البطل الصغير", author: "فيودور دوستويفسكي", price: "1,200.00" },
   awlad_haretna: { title: "أولاد حارتنا", author: "نجيب محفوظ", price: "3,000.00" },
   al_masih_yuslab_min_jadid: { title: "المسيح يصلب من جديد", author: "نيكوس كازانتزاكيس", price: "1,500.00" },
-  isti3dadat_li_3aqd_qiran: { title: "استعدادات لعقد قران", author: "فرانتس كافكا", price: "900.00" }
+  isti3dadat_li_3aqd_qiran: { title: "استعدادات لعقد قران", author: "فرانتس كافكا", price: "900.00" },
+  tharthara_fawq_al_nil: { title: "ثرثرة فوق النيل", author: "نجيب محفوظ", price: "1,300.00" },
+  al_maddah_al_sawda: { title: "المادة السوداء", author: "نيك كراوتش", price: "2,400.00" },
+  al_gharib: { title: "الغريب", author: "ألبير كامو", price: "1,000.00" },
+  al_ta3oon: { title: "الطاعون", author: "ألبير كامو", price: "1,350.00" },
+  qawa3id_al_3ishq_al_arba3oon: { title: "قواعد العشق الأربعون", author: "أليف شافاك", price: "3,000.00" },
+  malhamat_al_harafish: { title: "ملحمة الحرافيش", author: "نجيب محفوظ", price: "3,000.00" }
 };
 
 function getCurrentLang() {
@@ -382,6 +388,7 @@ if (checkoutForm) {
     const firstName = document.getElementById("checkout-name-input")?.value?.trim();
     const familyName = document.getElementById("checkout-family-input")?.value?.trim();
     const phoneNumber = document.getElementById("checkout-number-input")?.value?.trim();
+    const instagramUsername = document.getElementById("checkout-instagram-input")?.value?.trim();
     const deliveryMethod = document.getElementById("checkout-delivery-select")?.value;
     const wilaya = document.getElementById("checkout-wilaya-select")?.value;
     const daira = document.getElementById("checkout-daira-select")?.value;
@@ -444,7 +451,7 @@ if (checkoutForm) {
   try {
     const { data, error } = await supabase
       .from('orders')
-      .insert([{ firstName, familyName, phoneNumber, deliveryMethod, wilaya, daira, address, items, total_price: totalPrice }], { returning: 'representation' });
+      .insert([{ firstName, familyName, phoneNumber, instagramUsername, deliveryMethod, wilaya, daira, address, items, total_price: totalPrice }], { returning: 'representation' });
 
     if (error) {
       alert("ERROR " + error.message);
