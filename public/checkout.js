@@ -283,6 +283,35 @@ function loadOrderSummary() {
   totalPriceLabel.textContent = `${subtotal} DZD`;
 }
 document.addEventListener("DOMContentLoaded", function() {
+  populateWilayas();
+
+  const wilayaSelect = document.getElementById('checkout-wilaya-select');
+  const dairaSelect = document.getElementById('checkout-daira-select');
+  const deliverySelect = document.getElementById('checkout-delivery-select');
+
+  if (wilayaSelect) {
+    if (wilayaSelect.value) {
+      populateDairas(wilayaSelect.value);
+    }
+    wilayaSelect.addEventListener('change', function() {
+      populateDairas(this.value);
+      if (dairaSelect) {
+        dairaSelect.value = '';
+      }
+    });
+  }
+
+  if (dairaSelect && (!wilayaSelect || !wilayaSelect.value)) {
+    dairaSelect.disabled = true;
+  }
+
+  if (deliverySelect) {
+    toggleAddressField(deliverySelect.value);
+    deliverySelect.addEventListener('change', function() {
+      toggleAddressField(this.value);
+    });
+  }
+
   // Add a small delay to ensure everything is loaded
   setTimeout(loadOrderSummary, 100);
 });
@@ -402,6 +431,88 @@ if (checkoutForm) {
     console.error(err);
   }
   });
+}
+
+function getPlaceholderTexts(lang) {
+  return {
+    wilaya: lang === 'ar' ? 'اختر الولاية' : 'Select wilaya',
+    daira: lang === 'ar' ? 'اختر الدائرة' : 'Select daira',
+    delivery: lang === 'ar' ? 'اختر طريقة التوصيل' : 'Select delivery method'
+  };
+}
+
+function populateWilayas() {
+  const wilayaSelect = document.getElementById('checkout-wilaya-select');
+  const dairaSelect = document.getElementById('checkout-daira-select');
+  if (!wilayaSelect || !dairaSelect) return;
+
+  const lang = getCurrentLang();
+  const placeholders = getPlaceholderTexts(lang);
+
+  wilayaSelect.innerHTML = '';
+  const defaultOption = document.createElement('option');
+  defaultOption.value = '';
+  defaultOption.id = 'checkout-wilaya-placeholder';
+  defaultOption.textContent = `${placeholders.wilaya} / ${lang === 'ar' ? 'Choose wilaya' : 'اختر الولاية'}`;
+  wilayaSelect.appendChild(defaultOption);
+
+  Object.keys(wilayaDairaData).sort().forEach(wilaya => {
+    const option = document.createElement('option');
+    option.value = wilaya;
+    option.textContent = wilaya;
+    wilayaSelect.appendChild(option);
+  });
+
+  dairaSelect.innerHTML = '';
+  const dairaPlaceholder = document.createElement('option');
+  dairaPlaceholder.value = '';
+  dairaPlaceholder.id = 'checkout-daira-placeholder';
+  dairaPlaceholder.textContent = `${placeholders.daira} / ${lang === 'ar' ? 'Choose daira' : 'اختر الدائرة'}`;
+  dairaSelect.appendChild(dairaPlaceholder);
+  dairaSelect.disabled = true;
+}
+
+function populateDairas(selectedWilaya) {
+  const dairaSelect = document.getElementById('checkout-daira-select');
+  if (!dairaSelect) return;
+
+  const lang = getCurrentLang();
+  const placeholders = getPlaceholderTexts(lang);
+
+  dairaSelect.innerHTML = '';
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.id = 'checkout-daira-placeholder';
+  placeholder.textContent = `${placeholders.daira} / ${lang === 'ar' ? 'Choose daira' : 'اختر الدائرة'}`;
+  dairaSelect.appendChild(placeholder);
+
+  const options = wilayaDairaData[selectedWilaya] || [];
+  if (options.length === 0) {
+    dairaSelect.disabled = true;
+    return;
+  }
+
+  options.forEach(daira => {
+    const option = document.createElement('option');
+    option.value = daira;
+    option.textContent = daira;
+    dairaSelect.appendChild(option);
+  });
+  dairaSelect.disabled = false;
+}
+
+function toggleAddressField(deliveryMethod) {
+  const addressField = document.getElementById('address-field');
+  if (!addressField) return;
+
+  const shouldShow = deliveryMethod === 'home';
+  addressField.style.display = shouldShow ? 'block' : 'none';
+  if (!shouldShow) {
+    const addressInput = document.getElementById('checkout-address-input');
+    if (addressInput) {
+      addressInput.value = '';
+    }
+  }
 }
 
 // Animate sections on scroll
