@@ -246,8 +246,14 @@ function setLanguage(lang) {
   // Book price labels - with error handling
   try {
     document.querySelectorAll('.book-price').forEach(function(el) {
-      var price = el.textContent.match(/\d+[\d,.]*/);
-      el.textContent = translations[lang]["Price"] + ': ' + (price ? price[0] : '');
+      var priceSource = el.dataset.price || el.textContent;
+      var priceMatch = priceSource ? priceSource.match(/\d+[\d,.]*/) : null;
+      var currency = el.dataset.currency ? el.dataset.currency.trim() : '';
+      var translated = translations[lang]["Price"] + ': ' + (priceMatch ? priceMatch[0] : '');
+      if (currency) {
+        translated += ' ' + currency;
+      }
+      el.textContent = translated;
     });
   } catch (e) {
     console.log('Book price labels translation error:', e);

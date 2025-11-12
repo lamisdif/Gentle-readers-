@@ -63,7 +63,8 @@ const books = {
     description_ar: "جزء آخر من سلسلة مدرسة الحياة، يركز على إيجاد الفرح في اللحظات اليومية وتقدير المسرات الصغيرة التي تجعل الحياة جميلة.",
     cover: "imgs/مسرات صغيرة.jpg",
     price: "1,400.00",
-    isbn: "9789776543217"
+    isbn: "9789776543217",
+    inStock: false
   },
   hal_sata2kul_qatti: {
     title: "هل ستأكل قطتي مقلتي؟",
@@ -430,7 +431,8 @@ const books = {
     description_ar: "الليالي البيضاء قصة عاطفية من مذكرات حالم، تدور أحداثها في سانت بطرسبرغ. تحكي قصة شاب وحيد يقع في الحب مع شابة يلتقي بها خلال الليالي البيضاء في الصيف. حكاية جميلة عن الحب غير المتبادل ولحظات عابرة من التواصل.",
     cover: "imgs/الليالي-البيضاء.jpg",
     price: "900.00",
-    isbn: "9789776543263"
+    isbn: "9789776543263",
+    inStock: false
   },
   al_fuqara: {
     title: "الفقراء",
@@ -439,7 +441,8 @@ const books = {
     description_ar: "الفقراء هي أول رواية لدوستويفسكي، عمل رسائلي يروي قصة مراسلين فقيرين. تستكشف الرواية مواضيع الفقر والحب والكرامة الإنسانية من خلال رسائلهما.",
     cover: "imgs/الفقراء.jpg",
     price: "1,250.00",
-    isbn: "9789776543258"
+    isbn: "9789776543258",
+    inStock: false
   },
   fi_qabwi: {
     title: "في قبوي",
@@ -448,7 +451,8 @@ const books = {
     description_ar: "مذكرات من تحت الأرض (المعروف أيضاً باسم في قبوي) هي رواية فلسفية تقدم اعتراف راوٍ معزول ومرير. تستكشف مواضيع الإرادة الحرة والحتمية وطبيعة الوعي الإنساني.",
     cover: "imgs/في-قبوي.jpg",
     price: "1,200.00",
-    isbn: "9789776543259"
+    isbn: "9789776543259",
+    inStock: false
   },
   dhikrayat_min_manzil_al_amwat: {
     title: "ذكريات من منزل الأموات",
@@ -457,7 +461,8 @@ const books = {
     description_ar: "منزل الأموات رواية شبه سيرة ذاتية مبنية على تجارب دوستويفسكي في معسكر سجون سيبيريا. تقدم وصفاً مفصلاً لحياة السجن وتستكشف مواضيع الطبيعة البشرية والمعاناة والفداء.",
     cover: "imgs/ذكريات من منزل الأموات.jpg",
     price: "1,850.00",
-    isbn: "9789776543260"
+    isbn: "9789776543260",
+    inStock: false
   },
   al_zawj_al_abadi: {
     title: "الزوج الأبدي",
@@ -529,7 +534,17 @@ const books = {
     description_ar: "أولاد حارتنا من أشهر وأكثر روايات نجيب محفوظ إثارة للجدل. تحكي قصة أجيال تعيش في حارة بالقاهرة، مستكشفة مواضيع القوة والدين والطبيعة البشرية من خلال شخصيات وأحداث رمزية.",
     cover: "imgs/أولاد حارتنا.png",
     price: "3,000.00",
-    isbn: "9789776543269"
+    isbn: "9789776543269",
+    inStock: false
+  },
+  al_ayam: {
+    title: "الأيام",
+    author: "طه حسين",
+    description: "The Days is the celebrated autobiographical trilogy of Taha Hussein. He recounts his childhood in rural Egypt, his struggle with blindness, and his relentless pursuit of knowledge from the village kuttab to Al-Azhar and the Sorbonne, offering a profound portrait of resilience and intellectual awakening.",
+    description_ar: "\"الأيام\" هي السيرة الذاتية الشهيرة لطه حسين، حيث يروي طفولته في الريف المصري، ومعاناته مع فقدان البصر، وسعيه الدؤوب نحو العلم من الكُتّاب إلى الأزهر ثم السوربون. شهادة مؤثرة عن الصبر، والإصرار، والانبعاث الفكري.",
+    cover: "imgs/الايام HARDCOVER.jpg",
+    price: "3,500 DA",
+    isbn: "9789776543278"
   },
   al_masih_yuslab_min_jadid: {
     title: "المسيح يصلب من جديد",
