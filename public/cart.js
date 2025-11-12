@@ -125,7 +125,10 @@ const books = {
   al_gharib: { title: "الغريب", price: "1,000.00" },
   al_ta3oon: { title: "الطاعون", price: "1,350.00" },
   qawa3id_al_3ishq_al_arba3oon: { title: "قواعد العشق الأربعون", price: "3,000.00" },
-  malhamat_al_harafish: { title: "ملحمة الحرافيش", price: "3,000.00" }
+  malhamat_al_harafish: { title: "ملحمة الحرافيش", price: "3,000.00" },
+  al_muslim_al_yahudi: { title: "المسلم اليهودي", price: "2,000 DA" },
+  ayam_al_shatat: { title: "أيام الشتات", price: "2,200 DA" },
+  ahlam_al_3awda: { title: "أحلام العودة", price: "1,800 DA" }
 };
 function getCartObject() {
   const stored = JSON.parse(localStorage.getItem('cart')) || {};
