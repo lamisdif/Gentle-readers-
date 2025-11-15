@@ -546,6 +546,33 @@ const books = {
     price: "3,500 DA",
     isbn: "9789776543278"
   },
+  al_ayam_illustrated: {
+    title: "الأيام",
+    author: "طه حسين",
+    description: "The Days is the celebrated autobiographical trilogy of Taha Hussein in an illustrated graphic novel edition. This version brings the classic story to life through beautiful illustrations, making it accessible to a new generation of readers.",
+    description_ar: "\"الأيام\" هي السيرة الذاتية الشهيرة لطه حسين في طبعة رواية مصورة. هذه النسخة تجعل القصة الكلاسيكية تنبض بالحياة من خلال الرسوم الجميلة، مما يجعلها في متناول جيل جديد من القراء.",
+    cover: "imgs/الأيام.jpg",
+    price: "1,200.00",
+    isbn: "9789776543282"
+  },
+  the_days: {
+    title: "The Days",
+    author: "Taha Hussein",
+    description: "The Days is the celebrated autobiographical trilogy of Taha Hussein, translated into English. He recounts his childhood in rural Egypt, his struggle with blindness, and his relentless pursuit of knowledge from the village kuttab to Al-Azhar and the Sorbonne, offering a profound portrait of resilience and intellectual awakening.",
+    description_ar: "\"الأيام\" هي السيرة الذاتية الشهيرة لطه حسين، مترجمة إلى الإنجليزية. يروي طفولته في الريف المصري، ومعاناته مع فقدان البصر، وسعيه الدؤوب نحو العلم من الكُتّاب إلى الأزهر ثم السوربون. شهادة مؤثرة عن الصبر، والإصرار، والانبعاث الفكري.",
+    cover: "imgs/The days.jpg",
+    price: "1,200.00",
+    isbn: "9789776543283"
+  },
+  kull_shay_an_al_hob: {
+    title: "كل شيء عن الحب",
+    author: "بيل هوكس",
+    description: "All About Love by bell hooks is a powerful exploration of love in all its forms. The book challenges conventional notions of love and offers a transformative vision of love as a practice of freedom, justice, and healing.",
+    description_ar: "\"كل شيء عن الحب\" لبيل هوكس هو استكشاف قوي للحب بجميع أشكاله. يتحدى الكتاب المفاهيم التقليدية للحب ويقدم رؤية تحويلية للحب كممارسة للحرية والعدالة والشفاء.",
+    cover: "imgs/كل شيء عن الحب.png",
+    price: "1,700.00",
+    isbn: "9789776543284"
+  },
   al_masih_yuslab_min_jadid: {
     title: "المسيح يصلب من جديد",
     author: "نيكوس كازانتزاكيس",
