@@ -680,6 +680,15 @@ const books = {
     cover: "imgs/رايت يوسف.jpg",
     price: "1,500.00",
     isbn: "9789776543285"
+  },
+  hadith_al_sabah_wal_masa: {
+    title: "حديث الصباح والمساء",
+    author: "نجيب محفوظ",
+    description: "Morning and Evening Talk is a novel by Naguib Mahfouz that weaves together the stories of multiple generations in an Egyptian family, exploring themes of time, memory, and the passage of life through conversations and reflections that span from morning to evening.",
+    description_ar: "حديث الصباح والمساء رواية لنجيب محفوظ تنسج معاً قصص أجيال متعددة في عائلة مصرية، مستكشفة مواضيع الزمن والذاكرة ومرور الحياة من خلال محادثات وتأملات تمتد من الصباح إلى المساء.",
+    cover: "imgs/حديث الصباح والمساء.jpg",
+    price: "1,700.00",
+    isbn: "9789776543286"
   }
 };
 
