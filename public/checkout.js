@@ -136,7 +136,8 @@ const books = {
   malhamat_al_harafish: { title: "ملحمة الحرافيش", price: "3,000.00" },
   al_muslim_al_yahudi: { title: "المسلم اليهودي", price: "2,000 DA" },
   ayam_al_shatat: { title: "أيام الشتات", price: "2,200 DA" },
-  ahlam_al_3awda: { title: "أحلام العودة", price: "1,800 DA" }
+  ahlam_al_3awda: { title: "أحلام العودة", price: "1,800 DA" },
+  raaytu_yusuf: { title: "رأيت يوسف", price: "1,500 DA" }
 };
 
 // Wilaya-Daira data structure

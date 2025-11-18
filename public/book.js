@@ -671,6 +671,15 @@ const books = {
     cover: "imgs/أحلام العودة.jpg",
     price: "1,800.00",
     isbn: "9789776543281"
+  },
+  raaytu_yusuf: {
+    title: "رأيت يوسف",
+    author: "مروة عبد الجواد",
+    description: "I Saw Joseph is a novel by Marwa Abd El-Gawad that explores themes of identity, memory, and personal journey through a rich narrative style inspired by classical Arabic storytelling traditions.",
+    description_ar: "رأيت يوسف رواية لمروة عبد الجواد تستكشف مواضيع الهوية والذاكرة والرحلة الشخصية من خلال أسلوب سردي غني مستوحى من تقاليد السرد العربية الكلاسيكية.",
+    cover: "imgs/رايت يوسف.jpg",
+    price: "1,500.00",
+    isbn: "9789776543285"
   }
 };
 
