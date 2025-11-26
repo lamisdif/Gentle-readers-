@@ -645,6 +645,15 @@ const books = {
     price: "3,000.00",
     isbn: "9789776543277"
   },
+  al_mareedh: {
+    title: "المريض",
+    author: "خوان جوميز خورادو",
+    description: "EL PACIENTE (The Patient) is a gripping medical thriller by Juan Gómez-Jurado. A chilling and intense story that emphasizes themes of danger, mystery, and possibly a rogue medical professional. A novel that excites adrenaline and races against time.",
+    description_ar: "المريض (EL PACIENTE) رواية طبية مثيرة من خوان جوميز خورادو. قصة مروعة ومكثفة تؤكد على مواضيع الخطر والغموض وربما طبيب منحرف. رواية تثير الأدرينالين وتسابق الزمن.",
+    cover: "imgs/المريض.jpg",
+    price: "3,000.00",
+    isbn: "9789776543280"
+  },
   al_muslim_al_yahudi: {
     title: "المسلم اليهودي",
     author: "كمال رحيم",
