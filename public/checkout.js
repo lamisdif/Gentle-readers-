@@ -9,12 +9,12 @@ const books = {
   ayyam_al_hijran: { title: "أيام الهجران", price: "1,450.00", inStock: false },
   al_3adat_al_dharia: { title: "العادات الذرية", price: "1,600.00" },
   eva_luna: { title: "إيفا لونا", price: "2,100.00" },
-  ghusoon_bunduq_1: { title: "غصون البندق - الكتاب الأول", price: "1,200.00" },
-  ghusoon_bunduq_2: { title: "غصون البندق - الكتاب الثاني", price: "1,200.00" },
-  kayf_tajid_al_hob: { title: "كيف تجد الحب", price: "1,000.00" },
+  ghusoon_bunduq_1: { title: "غصون البندق - الكتاب الأول", price: "1,200.00", inStock: false },
+  ghusoon_bunduq_2: { title: "غصون البندق - الكتاب الثاني", price: "1,200.00", inStock: false },
+  kayf_tajid_al_hob: { title: "كيف تجد الحب", price: "1,000.00", inStock: false },
   masarrat_saghira: { title: "مسرات صغيرة", price: "1,400.00", inStock: false },
   hal_sata2kul_qatti: { title: "هل ستأكل قطتي مقلتي؟", price: "2,250.00" },
-  maktabat_muntasaf_al_layl: { title: "مكتبة منتصف الليل", price: "1,600.00" },
+  maktabat_muntasaf_al_layl: { title: "مكتبة منتصف الليل", price: "1,600.00", inStock: false },
   
   // Keep some existing popular books
   el9adimon: { title: "القادمون", price: "1,800.00" },
@@ -45,9 +45,9 @@ const books = {
   // NEW BOOKS - First Half
   abi_alladhi_akraho: { title: "أبي الذي أكره", price: "1,000.00", inStock: false },
   ash3alni: { title: "أشعلني", price: "2,000.00" },
-  rasail_ila_milina: { title: "رسائل إلى ميلينا", price: "750.00", originalPrice: "900.00", inStock: true, isDiscounted: true },
-  pride_and_prejudice: { title: "كبرياء و هوى", price: "900.00", originalPrice: "1000.00", inStock: true, isDiscounted: true },
-  kull_azraq_al_sama: { title: "كل أزرق السماء", price: "2,000.00" },
+  rasail_ila_milina: { title: "رسائل إلى ميلينا", price: "750.00", originalPrice: "900.00", inStock: false, isDiscounted: true },
+  pride_and_prejudice: { title: "كبرياء و هوى", price: "900.00", originalPrice: "1000.00", inStock: false, isDiscounted: true },
+  kull_azraq_al_sama: { title: "كل أزرق السماء", price: "2,000.00", inStock: false },
   hakadha_tata3afa: { title: "هكذا تتعافى", price: "1,200.00" },
   caraval: { title: "Caraval", price: "1,500.00" },
   
@@ -57,7 +57,7 @@ const books = {
   water_moon: { title: "Water Moon", price: "1,500.00" },
   
   majdouline: { title: "ماجدولين", price: "1200.00", inStock: false },
-  la_yumkinuka_iidhaayi: { title: "لا يمكنك إيذائي", price: "1,500.00" },
+  la_yumkinuka_iidhaayi: { title: "لا يمكنك إيذائي", price: "1,500.00", inStock: false },
   twisted_love: { title: "Twisted Love", price: "1,200.00" },
   ugly_love: { title: "Ugly Love", price: "1,200.00" },
   alsadis_ahmar: { title: "السادس احمر", price: "1,300.00" },
@@ -89,21 +89,21 @@ const books = {
   
   // Missing books from the images
   al_baron: { title: "البارون", price: "1,500.00" },
-  little_women: { title: "نساء صغيرات", price: "3,000.00" },
+  little_women: { title: "نساء صغيرات", price: "3,000.00", inStock: false },
   oliver_twist: { title: "Oliver Twist", price: "1,800.00" },
-  pride_and_prejudice: { title: "كبرياء و هوى", price: "900.00", originalPrice: "1000.00", inStock: true, isDiscounted: true },
+  pride_and_prejudice: { title: "كبرياء و هوى", price: "900.00", originalPrice: "1000.00", inStock: false, isDiscounted: true },
   anne_of_green_gables: { title: "Anne of Green Gables", price: "850.00" },
-  hasees: { title: "هسيس", price: "1,200.00" },
+  hasees: { title: "هسيس", price: "1,200.00", inStock: false },
   hatha_ma_hadath_maaha: { title: "هذا ما حدث معها", price: "1,400.00" },
   
   // Added: The Kite Runner (Arabic) and The Hunger Games
-  adaa_al_ta2ira_al_waraqiya: { title: "عداء الطائرة الورقية", price: "1,500.00" },
+  adaa_al_ta2ira_al_waraqiya: { title: "عداء الطائرة الورقية", price: "1,500.00", inStock: false },
   the_hunger_games: { title: "The Hunger Games", price: "1,600.00" },
   al_naqous_al_zujaji: { title: "الناقوس الزجاجي", price: "1,700.00", inStock: false },
   
   // New books with prices
   oscar_wilde: { title: "أوسكار وايلد", price: "1,650.00" },
-  sa_akun_hunak: { title: "سأكون هناك", price: "1,800.00" },
+  sa_akun_hunak: { title: "سأكون هناك", price: "1,800.00", inStock: false },
   al_sindbad_al_a3ma: { title: "السندباد الأعمى", price: "1,700.00" },
   // Dostoevsky books
   al_muqamir: { title: "المقامر", price: "1,300.00" },
@@ -115,7 +115,7 @@ const books = {
   fi_qabwi: { title: "في قبوي", price: "1,200.00", inStock: false },
   dhikrayat_min_manzil_al_amwat: { title: "ذكريات من منزل الأموات", price: "1,850.00", inStock: false },
   al_zawj_al_abadi: { title: "الزوج الأبدي", price: "1,300.00" },
-  dhikrayat_shita_fi_mashaer_al_sayf: { title: "ذكريات شتاء في مشاعر الصيف", price: "1,200.00" },
+  dhikrayat_shita_fi_mashaer_al_sayf: { title: "ذكريات شتاء في مشاعر الصيف", price: "1,200.00", inStock: false },
   al_jara_wa_al_qalb_al_daif: { title: "الجارة والقلب الضعيف", price: "1,300.00" },
   al_mithl_wa_qissa_aleima: { title: "المثل وقصة أليمة", price: "1,700.00" },
   qaryat_stibanchikogo: { title: "قرية ستيبانتشيكوفو", price: "1,700.00" },
@@ -128,19 +128,20 @@ const books = {
   kull_shay_an_al_hob: { title: "كل شيء عن الحب", price: "1,700.00" },
   al_masih_yuslab_min_jadid: { title: "المسيح يصلب من جديد", price: "1,500.00" },
   isti3dadat_li_3aqd_qiran: { title: "استعدادات لعقد قران", price: "900.00" },
-  tharthara_fawq_al_nil: { title: "ثرثرة فوق النيل", price: "1,300.00" },
+  tharthara_fawq_al_nil: { title: "ثرثرة فوق النيل", price: "1,300.00", inStock: false },
   al_maddah_al_sawda: { title: "المادة السوداء", price: "2,400.00" },
   al_gharib: { title: "الغريب", price: "1,000.00" },
   al_ta3oon: { title: "الطاعون", price: "1,350.00" },
   qawa3id_al_3ishq_al_arba3oon: { title: "قواعد العشق الأربعون", price: "3,000.00" },
-  malhamat_al_harafish: { title: "ملحمة الحرافيش", price: "3,000.00" },
+  malhamat_al_harafish: { title: "ملحمة الحرافيش", price: "3,000.00", inStock: false },
   al_mareedh: { title: "المريض", price: "3,000.00" },
   al_muslim_al_yahudi: { title: "المسلم اليهودي", price: "2,000 DA" },
   ayam_al_shatat: { title: "أيام الشتات", price: "2,200 DA" },
   ahlam_al_3awda: { title: "أحلام العودة", price: "1,800 DA" },
-  raaytu_yusuf: { title: "رأيت يوسف", price: "1,500 DA" },
-  hadith_al_sabah_wal_masa: { title: "حديث الصباح والمساء", price: "1,700 DA" },
-  amal_3azima: { title: "آمال عظيمة", price: "1,800.00" }
+  raaytu_yusuf: { title: "رأيت يوسف", price: "1,500 DA", inStock: false },
+  hadith_al_sabah_wal_masa: { title: "حديث الصباح والمساء", price: "1,700 DA", inStock: false },
+  amal_3azima: { title: "آمال عظيمة", price: "1,800.00" },
+  sariqat_al_kutub: { title: "سارقة الكتب", price: "2,800 DA" }
 };
 
 // Wilaya-Daira data structure
