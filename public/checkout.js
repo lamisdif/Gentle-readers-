@@ -109,7 +109,7 @@ const books = {
   al_naqous_al_zujaji: { title: "الناقوس الزجاجي", price: "1,700.00", inStock: false },
 
   // New books with prices
-  oscar_wilde: { title: "أوسكار وايلد", price: "1,650.00" },
+  oscar_wilde: { title: "أوسكار وايلد", price: "1,700.00" },
   sa_akun_hunak: { title: "سأكون هناك", price: "1,800.00", inStock: false },
   al_sindbad_al_a3ma: { title: "السندباد الأعمى", price: "1,700.00" },
   // Dostoevsky books
