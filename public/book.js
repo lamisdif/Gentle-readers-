@@ -120,7 +120,7 @@ const books = {
     price: "1,600.00",
     isbn: "9789776543219"
   },
-  
+
   // Keep some existing popular books
   el9adimon: {
     title: "القادمون",
@@ -231,7 +231,7 @@ const books = {
     price: "1,900.00",
     isbn: "9789776543236"
   },
-  
+
   // Additional books from search.html to prevent "book not found" errors
   ard_zikola: {
     title: "أرض زيكولا",
@@ -399,7 +399,7 @@ const books = {
     description: "A collection of the complete short stories by Oscar Wilde, one of the most celebrated writers of the Victorian era. This collection showcases Wilde's wit, satire, and unique storytelling style, featuring tales that blend humor, morality, and social commentary.",
     description_ar: "مجموعة من الأعمال القصصية الكاملة لأوسكار وايلد، أحد أشهر كتاب العصر الفيكتوري. تعرض هذه المجموعة براعة وايلد في السخرية والأسلوب القصصي الفريد، وتضم قصصاً تمزج بين الفكاهة والأخلاق والتعليق الاجتماعي.",
     cover: "imgs/اوسكار وايلد.jpg",
-    price: "1,650.00",
+    price: "1,700.00",
     isbn: "9789776543251"
   },
   sa_akun_hunak: {
@@ -735,20 +735,39 @@ const books = {
     price: "1,700.00",
     isbn: "9789776543286"
   }
+},
+  nineteen_eighty_four: {
+    title: "1984",
+    author: "جورج أورويل",
+    description: "Nineteen Eighty-Four is a dystopian social science fiction novel by George Orwell. It themes centre on the consequences of totalitarianism, mass surveillance, and repressive regimentation of persons and behaviours within society.",
+    description_ar: "1984 هي رواية ديستوبية لجورج أورويل. تدور موضوعاتها حول عواقب الشمولية والمراقبة الجماعية والقمع المنهجي للأفراد والسلوكيات داخل المجتمع.",
+    cover: "imgs/1984.png",
+    price: "1,400.00",
+    isbn: "9789776543310"
+  },
+  zorba_al_yunani: {
+    title: "زوربا اليوناني",
+    author: "نيكوس كازانتزاكيس",
+    description: "Zorba the Greek is a novel by Nikos Kazantzakis. It tells the story of a young Greek intellectual who ventures to escape his bookish life with the help of the boisterous and mysterious Alexis Zorba.",
+    description_ar: "زوربا اليوناني رواية لنيكوس كازانتزاكيس. تحكي قصة مفكر يوناني شاب يغامر للهروب من حياته الكتبية بمساعدة أليكسيس زوربا الصاخب والغامض.",
+    cover: "imgs/زوربا اليوناني.jpg",
+    price: "2,000.00",
+    isbn: "9789776543311"
+  }
 };
 
 function addToCart() {
   const urlParams = new URLSearchParams(window.location.search);
   const bookId = urlParams.get('id');
   if (!bookId) return;
-  
+
   // Check if book is out of stock
   if (books[bookId] && books[bookId].inStock === false) {
     const lang = localStorage.getItem('lang') || 'en';
     alert(lang === 'ar' ? 'هذا الكتاب نفدت الكمية حالياً' : 'This book is currently out of stock');
     return;
   }
-  
+
   const cart = JSON.parse(localStorage.getItem('cart')) || [];
   if (!cart.includes(bookId)) {
     cart.push(bookId);
@@ -764,7 +783,7 @@ function addToCart() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   const urlParams = new URLSearchParams(window.location.search);
   const bookId = urlParams.get('id');
   if (!bookId || !books[bookId]) return;
