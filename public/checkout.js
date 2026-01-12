@@ -6,6 +6,10 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 const books = {
   // New books from the latest images
+  hakatha_takalam_tabrizi_1: { title: "هكذا تكلم تبريزي 1", price: "1,200.00" },
+  hakatha_takalam_tabrizi_2: { title: "هكذا تكلم تبريزي 2", price: "1,200.00" },
+  hakatha_takalam_tabrizi_3: { title: "هكذا تكلم تبريزي 3", price: "1,200.00" },
+  hakatha_takalam_tabrizi_4: { title: "هكذا تكلم تبريزي 4", price: "900.00" },
   ayyam_al_hijran: { title: "أيام الهجران", price: "1,450.00", inStock: false },
   al_3adat_al_dharia: { title: "العادات الذرية", price: "1,600.00" },
   eva_luna: { title: "إيفا لونا", price: "2,100.00" },
@@ -15,7 +19,7 @@ const books = {
   masarrat_saghira: { title: "مسرات صغيرة", price: "1,400.00", inStock: false },
   hal_sata2kul_qatti: { title: "هل ستأكل قطتي مقلتي؟", price: "2,250.00" },
   maktabat_muntasaf_al_layl: { title: "مكتبة منتصف الليل", price: "1,600.00", inStock: false },
-  
+
   // Keep some existing popular books
   el9adimon: { title: "القادمون", price: "1,800.00" },
   ard_zikola: { title: "أرض زيكولا", price: "1,200.00" },
@@ -41,7 +45,7 @@ const books = {
   waha_yaqub: { title: "واحة يعقوب", price: "1,400.00" },
   the_witcher_sword_of_destiny: { title: "ذا ويتشر: سيف المصير", price: "1,600.00" },
   the_witcher_last_wish: { title: "ذا ويتشر: الأمنية الأخيرة", price: "1,500.00" },
-  
+
   // NEW BOOKS - First Half
   abi_alladhi_akraho: { title: "أبي الذي أكره", price: "1,000.00", inStock: false },
   ash3alni: { title: "أشعلني", price: "2,000.00" },
@@ -50,12 +54,12 @@ const books = {
   kull_azraq_al_sama: { title: "كل أزرق السماء", price: "2,000.00", inStock: false },
   hakadha_tata3afa: { title: "هكذا تتعافى", price: "1,200.00" },
   caraval: { title: "Caraval", price: "1,500.00" },
-  
+
   // NEW BOOKS - Second Half
   it_ends_with_us: { title: "It Ends With Us", price: "1,400.00" },
   it_starts_with_us: { title: "It Starts With Us", price: "1,200.00" },
   water_moon: { title: "Water Moon", price: "1,500.00" },
-  
+
   majdouline: { title: "ماجدولين", price: "1200.00", inStock: false },
   la_yumkinuka_iidhaayi: { title: "لا يمكنك إيذائي", price: "1,500.00", inStock: false },
   twisted_love: { title: "Twisted Love", price: "1,200.00" },
@@ -86,7 +90,7 @@ const books = {
   your_psychological_complexes: { title: "عقدك النفسية", price: "1,500.00" },
   cant_hurt_me: { title: "لا يمكنك إيذائي", price: "1,900.00" },
   success_in_your_morning: { title: "نجاحك في صباحك", price: "1,450.00" },
-  
+
   // Missing books from the images
   al_baron: { title: "البارون", price: "1,500.00" },
   little_women: { title: "نساء صغيرات", price: "3,000.00", inStock: false },
@@ -95,12 +99,12 @@ const books = {
   anne_of_green_gables: { title: "Anne of Green Gables", price: "850.00" },
   hasees: { title: "هسيس", price: "1,200.00", inStock: false },
   hatha_ma_hadath_maaha: { title: "هذا ما حدث معها", price: "1,400.00" },
-  
+
   // Added: The Kite Runner (Arabic) and The Hunger Games
   adaa_al_ta2ira_al_waraqiya: { title: "عداء الطائرة الورقية", price: "1,500.00", inStock: false },
   the_hunger_games: { title: "The Hunger Games", price: "1,600.00" },
   al_naqous_al_zujaji: { title: "الناقوس الزجاجي", price: "1,700.00", inStock: false },
-  
+
   // New books with prices
   oscar_wilde: { title: "أوسكار وايلد", price: "1,650.00" },
   sa_akun_hunak: { title: "سأكون هناك", price: "1,800.00", inStock: false },
@@ -231,19 +235,19 @@ function loadOrderSummary() {
   const cartItemsDiv = document.getElementById("cartItems");
   const orderDetailsDiv = document.getElementById("orderDetails");
   const totalPriceLabel = document.getElementById("totalPrice");
-  
-  
+
+
   // Check if required elements exist
   if (!cartItemsDiv || !orderDetailsDiv || !totalPriceLabel) {
     console.error("Required DOM elements not found");
     return;
   }
-  
+
   let subtotal = 0;
   cartItemsDiv.innerHTML = "";
   orderDetailsDiv.innerHTML = "";
   const lang = getCurrentLang();
-  
+
   // Check if cart is empty
   if (Object.keys(cart).length === 0) {
     cartItemsDiv.innerHTML = '<div class="book-item" style="text-align: center; color: #666; font-style: italic;">Your cart is empty. Please add some books to continue.</div>';
@@ -251,7 +255,7 @@ function loadOrderSummary() {
     totalPriceLabel.textContent = "0 DZD";
     return;
   }
-  
+
   Object.keys(cart).forEach(bookId => {
     const book = books[bookId];
     if (!book) {
@@ -293,7 +297,7 @@ function loadOrderSummary() {
   });
   totalPriceLabel.textContent = `${subtotal} DZD`;
 }
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   populateWilayas();
 
   const wilayaSelect = document.getElementById('checkout-wilaya-select');
@@ -304,7 +308,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if (wilayaSelect.value) {
       populateDairas(wilayaSelect.value);
     }
-    wilayaSelect.addEventListener('change', function() {
+    wilayaSelect.addEventListener('change', function () {
       populateDairas(this.value);
       if (dairaSelect) {
         dairaSelect.value = '';
@@ -318,7 +322,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   if (deliverySelect) {
     toggleAddressField(deliverySelect.value);
-    deliverySelect.addEventListener('change', function() {
+    deliverySelect.addEventListener('change', function () {
       toggleAddressField(this.value);
     });
   }
@@ -328,17 +332,17 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 // Quantity controls (event delegation)
-document.addEventListener('click', function(e) {
+document.addEventListener('click', function (e) {
   if (e.target && (e.target.classList.contains('qty-inc') || e.target.classList.contains('qty-dec'))) {
     const id = e.target.getAttribute('data-id');
-    
+
     // Check if book is out of stock
     const outOfStockBooks = ['la_yumkinuka_iidhaayi', 'the_hunger_games'];
     if (outOfStockBooks.includes(id) && e.target.classList.contains('qty-inc')) {
       alert('This book is currently out of stock / هذا الكتاب نفدت الكمية حالياً');
       return;
     }
-    
+
     const cart = getCartObject();
     const delta = e.target.classList.contains('qty-inc') ? 1 : -1;
     const next = (cart[id] || 0) + delta;
@@ -353,9 +357,9 @@ document.addEventListener('click', function(e) {
 });
 const checkoutForm = document.getElementById("checkoutForm");
 if (checkoutForm) {
-  checkoutForm.addEventListener("submit", async function(e) {
+  checkoutForm.addEventListener("submit", async function (e) {
     e.preventDefault();
-    
+
     // Collect form data
     const firstName = document.getElementById("checkout-name-input")?.value?.trim();
     const familyName = document.getElementById("checkout-family-input")?.value?.trim();
@@ -401,46 +405,46 @@ if (checkoutForm) {
       return;
     }
 
-  // Extract only book titles from cart items and calculate total price
-  let totalPrice = 0;
-  const items = Object.keys(cartItems).map(bookId => {
-    const book = books[bookId];
-    const qty = cartItems[bookId] || 1;
-    const title = book ? book.title : `Unknown Book (${bookId})`;
-    
-    // Calculate price for this book
-    let price = 0;
-    if (book && book.price) {
-      price = parseFloat(book.price.replace(/[^\d.]/g, ""));
-    }
-    totalPrice += price * qty;
-    
-    return `${title} × ${qty}`;
-  });
+    // Extract only book titles from cart items and calculate total price
+    let totalPrice = 0;
+    const items = Object.keys(cartItems).map(bookId => {
+      const book = books[bookId];
+      const qty = cartItems[bookId] || 1;
+      const title = book ? book.title : `Unknown Book (${bookId})`;
 
-  // Send to backend
-  console.log('Submitting order with total price:', totalPrice, 'DZD');
-  try {
-    const { data, error } = await supabase
-      .from('orders')
-      .insert([{ firstName, familyName, phoneNumber, instagramUsername, deliveryMethod, wilaya, daira, address, items, total_price: totalPrice }], { returning: 'representation' });
+      // Calculate price for this book
+      let price = 0;
+      if (book && book.price) {
+        price = parseFloat(book.price.replace(/[^\d.]/g, ""));
+      }
+      totalPrice += price * qty;
 
-    if (error) {
-      alert("ERROR " + error.message);
-      console.error(error);
-    } else if (data && data.length > 0) {
-      alert("Successfully submitted order! Order ID: " + data[0].id);
-      localStorage.removeItem("cart");
-      window.location.href = "index.html";
-    } else {
-      alert("successfully submitted order!");
-      localStorage.removeItem("cart");
-      window.location.href = "index.html";
+      return `${title} × ${qty}`;
+    });
+
+    // Send to backend
+    console.log('Submitting order with total price:', totalPrice, 'DZD');
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .insert([{ firstName, familyName, phoneNumber, instagramUsername, deliveryMethod, wilaya, daira, address, items, total_price: totalPrice }], { returning: 'representation' });
+
+      if (error) {
+        alert("ERROR " + error.message);
+        console.error(error);
+      } else if (data && data.length > 0) {
+        alert("Successfully submitted order! Order ID: " + data[0].id);
+        localStorage.removeItem("cart");
+        window.location.href = "index.html";
+      } else {
+        alert("successfully submitted order!");
+        localStorage.removeItem("cart");
+        window.location.href = "index.html";
+      }
+    } catch (err) {
+      alert("Network error. Please try again later.");
+      console.error(err);
     }
-  } catch (err) {
-    alert("Network error. Please try again later.");
-    console.error(err);
-  }
   });
 }
 

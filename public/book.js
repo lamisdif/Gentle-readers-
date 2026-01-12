@@ -1,6 +1,42 @@
 // JavaScript extracted from book.html
 const books = {
   // New books from the latest images
+  hakatha_takalam_tabrizi_1: {
+    title: "هكذا تكلم تبريزي 1",
+    author: "شمس الدين التبريزي",
+    description: "The conversations and spiritual teachings of Shams Tabrizi, the spiritual mentor of Rumi. Part 1 of the series.",
+    description_ar: "مقالات شمس الدين التبريزي وأحاديثه الصوفية التي تتناول الصحبة الروحية بينه وبين جلال الدين الرومي. الجزء الأول.",
+    cover: "imgs/هكذا تكلم تبريزي 1.png",
+    price: "1,200.00",
+    isbn: "9789776543301"
+  },
+  hakatha_takalam_tabrizi_2: {
+    title: "هكذا تكلم تبريزي 2",
+    author: "شمس الدين التبريزي",
+    description: "The conversations and spiritual teachings of Shams Tabrizi, the spiritual mentor of Rumi. Part 2 of the series.",
+    description_ar: "مقالات شمس الدين التبريزي وأحاديثه الصوفية التي تتناول الصحبة الروحية بينه وبين جلال الدين الرومي. الجزء الثاني.",
+    cover: "imgs/هكذا تكلم تبريزي 2.png",
+    price: "1,200.00",
+    isbn: "9789776543302"
+  },
+  hakatha_takalam_tabrizi_3: {
+    title: "هكذا تكلم تبريزي 3",
+    author: "شمس الدين التبريزي",
+    description: "The conversations and spiritual teachings of Shams Tabrizi, the spiritual mentor of Rumi. Part 3 of the series.",
+    description_ar: "مقالات شمس الدين التبريزي وأحاديثه الصوفية التي تتناول الصحبة الروحية بينه وبين جلال الدين الرومي. الجزء الثالث.",
+    cover: "imgs/هكذا تكلم تبريزي 3.png",
+    price: "1,200.00",
+    isbn: "9789776543303"
+  },
+  hakatha_takalam_tabrizi_4: {
+    title: "هكذا تكلم تبريزي 4",
+    author: "شمس الدين التبريزي",
+    description: "The conversations and spiritual teachings of Shams Tabrizi, the spiritual mentor of Rumi. Part 4 of the series.",
+    description_ar: "مقالات شمس الدين التبريزي وأحاديثه الصوفية التي تتناول الصحبة الروحية بينه وبين جلال الدين الرومي. الجزء الرابع.",
+    cover: "imgs/هكذا تكلم تبريزي  4.png",
+    price: "900.00",
+    isbn: "9789776543304"
+  },
   ayyam_al_hijran: {
     title: "أيام الهجران",
     author: "إيلينا فيرانتي",
