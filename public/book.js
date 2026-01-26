@@ -120,6 +120,33 @@ const books = {
     price: "1,600.00",
     isbn: "9789776543219"
   },
+  al_nabi_al_afriqi: {
+    title: "النبي الافريقي",
+    author: "فيصل الأحمر",
+    description: "A novel blending history and fiction, telling the story of a spiritual and human journey, exploring themes of identity and colonialism.",
+    description_ar: "رواية تمزج بين التاريخ والخيال، تحكي قصة رحلة روحية وإنسانية، وتستكشف مواضيع الهوية والاستعمار.",
+    cover: "imgs/النبي الافريقي.jpg",
+    price: "1,400.00",
+    isbn: "9789776543320"
+  },
+  al_wajh_al_hajari: {
+    title: "الوجه الحجري",
+    author: "وليام غاردنر سميث",
+    description: "The Stone Face explores the experiences of a black American in Paris, confronting racism and the Algerian War.",
+    description_ar: "الوجه الحجري تستكشف تجارب أمريكي أسود في باريس، يواجه العنصرية والحرب الجزائرية.",
+    cover: "imgs/الوجه الحجري.jpg",
+    price: "1,400.00",
+    isbn: "9789776543321"
+  },
+  qissat_mawt_mu3lan: {
+    title: "قصة موت معلن",
+    author: "غابرييل غارسيا ماركيز",
+    description: "Chronicle of a Death Foretold is a novella by Gabriel García Márquez, telling the story of a murder in a small Colombian town.",
+    description_ar: "قصة موت معلن هي رواية قصيرة لغابرييل غارسيا ماركيز، تحكي قصة جريمة قتل في بلدة كولومبية صغيرة.",
+    cover: "imgs/قصة موت معلن.jpg",
+    price: "1,000.00",
+    isbn: "9789776543322"
+  },
 
   // Keep some existing popular books
   el9adimon: {
@@ -734,8 +761,7 @@ const books = {
     cover: "imgs/حديث الصباح والمساء.jpg",
     price: "1,700.00",
     isbn: "9789776543286"
-  }
-},
+  },
   nineteen_eighty_four: {
     title: "1984",
     author: "جورج أورويل",
