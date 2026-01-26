@@ -1,6 +1,34 @@
 // JavaScript extracted from book.html
 const books = {
   // New books from the latest images
+  // New books added by request
+  al_nabi_al_afriqi: {
+    title: "النبي الافريقي",
+    author: "Unknown",
+    description: "رواية النبي الافريقي",
+    description_ar: "رواية النبي الافريقي",
+    cover: "imgs/النبي الافريقي.jpg",
+    price: "1,400.00",
+    isbn: "9789776543320"
+  },
+  al_wajh_al_hajari: {
+    title: "الوجه الحجري",
+    author: "Unknown",
+    description: "رواية الوجه الحجري",
+    description_ar: "رواية الوجه الحجري",
+    cover: "imgs/الوجه الحجري.jpg",
+    price: "1,400.00",
+    isbn: "9789776543321"
+  },
+  qissa_mawt_mu3lan: {
+    title: "قصة موت معلن",
+    author: "غابرييل غارسيا ماركيز",
+    description: "Chronicle of a Death Foretold",
+    description_ar: "قصة موت معلن",
+    cover: "imgs/قصة موت معلن.jpg",
+    price: "1,000.00",
+    isbn: "9789776543322"
+  },
   hakatha_takalam_tabrizi_1: {
     title: "هكذا تكلم تبريزي 1",
     author: "شمس الدين التبريزي",
