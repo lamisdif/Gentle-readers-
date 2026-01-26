@@ -148,10 +148,7 @@ const books = {
   raaytu_yusuf: { title: "رأيت يوسف", price: "1,500 DA", inStock: false },
   hadith_al_sabah_wal_masa: { title: "حديث الصباح والمساء", price: "1,700 DA", inStock: false },
   amal_3azima: { title: "آمال عظيمة", price: "1,800.00" },
-  sariqat_al_kutub: { title: "سارقة الكتب", price: "2,800 DA" },
-  al_nabi_al_afriqi: { title: "النبي الافريقي", price: "1,400.00" },
-  al_wajh_al_hajari: { title: "الوجه الحجري", price: "1,400.00" },
-  qissat_mawt_mu3lan: { title: "قصة موت معلن", price: "1,000.00" }
+  sariqat_al_kutub: { title: "سارقة الكتب", price: "2,800 DA" }
 };
 
 // Wilaya-Daira data structure
