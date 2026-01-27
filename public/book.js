@@ -29,6 +29,15 @@ const books = {
     price: "1,000.00",
     isbn: "9789776543322"
   },
+  akrahouka_la_tatrukni: {
+    title: "أكرهك لا تتركني",
+    author: "Unknown",
+    description: "أكرهك لا تتركني",
+    description_ar: "أكرهك لا تتركني",
+    cover: "imgs/أكرهك لا تتركني.jpg",
+    price: "3,000.00",
+    isbn: "9789776543323"
+  },
   hakatha_takalam_tabrizi_1: {
     title: "هكذا تكلم تبريزي 1",
     author: "شمس الدين التبريزي",

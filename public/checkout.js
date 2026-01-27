@@ -10,6 +10,7 @@ const books = {
   al_nabi_al_afriqi: { title: "النبي الافريقي", price: "1,400.00" },
   al_wajh_al_hajari: { title: "الوجه الحجري", price: "1,400.00" },
   qissa_mawt_mu3lan: { title: "قصة موت معلن", price: "1,000.00" },
+  akrahouka_la_tatrukni: { title: "أكرهك لا تتركني", price: "3,000.00" },
   hakatha_takalam_tabrizi_1: { title: "هكذا تكلم تبريزي 1", price: "1,200.00" },
   hakatha_takalam_tabrizi_2: { title: "هكذا تكلم تبريزي 2", price: "1,200.00" },
   hakatha_takalam_tabrizi_3: { title: "هكذا تكلم تبريزي 3", price: "1,200.00" },
