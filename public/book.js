@@ -2,6 +2,15 @@
 const books = {
   // New books from the latest images
   // New books added by request
+  akrahouka_la_tatrokni: {
+    title: "أكرهك لا تتركني",
+    author: "Unknown",
+    description: "رواية أكرهك لا تتركني",
+    description_ar: "رواية أكرهك لا تتركني",
+    cover: "imgs/أكرهك لا تتركني.jpg",
+    price: "3,000.00",
+    isbn: "9789776543323"
+  },
   al_nabi_al_afriqi: {
     title: "النبي الافريقي",
     author: "Unknown",
@@ -28,15 +37,6 @@ const books = {
     cover: "imgs/قصة موت معلن.jpg",
     price: "1,000.00",
     isbn: "9789776543322"
-  },
-  akrahouka_la_tatrukni: {
-    title: "أكرهك لا تتركني",
-    author: "Unknown",
-    description: "أكرهك لا تتركني",
-    description_ar: "أكرهك لا تتركني",
-    cover: "imgs/أكرهك لا تتركني.jpg",
-    price: "3,000.00",
-    isbn: "9789776543323"
   },
   hakatha_takalam_tabrizi_1: {
     title: "هكذا تكلم تبريزي 1",
