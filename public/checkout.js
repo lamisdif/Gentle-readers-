@@ -6,11 +6,6 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 const books = {
   // New books from the latest images
-  // New books added by request
-  akrahouka_la_tatrokni: { title: "أكرهك لا تتركني", price: "3,000.00" },
-  al_nabi_al_afriqi: { title: "النبي الافريقي", price: "1,400.00" },
-  al_wajh_al_hajari: { title: "الوجه الحجري", price: "1,400.00" },
-  qissa_mawt_mu3lan: { title: "قصة موت معلن", price: "1,000.00" },
   hakatha_takalam_tabrizi_1: { title: "هكذا تكلم تبريزي 1", price: "1,200.00" },
   hakatha_takalam_tabrizi_2: { title: "هكذا تكلم تبريزي 2", price: "1,200.00" },
   hakatha_takalam_tabrizi_3: { title: "هكذا تكلم تبريزي 3", price: "1,200.00" },
@@ -114,7 +109,7 @@ const books = {
   al_naqous_al_zujaji: { title: "الناقوس الزجاجي", price: "1,700.00", inStock: false },
 
   // New books with prices
-  oscar_wilde: { title: "أوسكار وايلد", price: "1,700.00" },
+
   sa_akun_hunak: { title: "سأكون هناك", price: "1,800.00", inStock: false },
   al_sindbad_al_a3ma: { title: "السندباد الأعمى", price: "1,700.00" },
   // Dostoevsky books
