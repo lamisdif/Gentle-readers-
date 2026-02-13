@@ -163,6 +163,24 @@ const books = {
   qasr_al_shawq: { title: "قصر الشوق", price: "2,300.00" },
   al_sukkariyya: { title: "السكرية", price: "2,000.00" }
 };
+
+// Fetch and add Strapi books to cart
+fetch("http://localhost:1337/api/books?populate=*")
+  .then(res => res.json())
+  .then(data => {
+    if (data.data && data.data.length > 0) {
+      data.data.forEach(book => {
+        const bookId = `strapi_${book.id}`;
+        books[bookId] = {
+          title: book.Title || 'Untitled',
+          price: book.Price ? `${book.Price}` : "0.00"
+        };
+      });
+    }
+  })
+  .catch(error => {
+    console.error('Error fetching Strapi books for cart:', error);
+  });
 function getCartObject() {
   const stored = JSON.parse(localStorage.getItem('cart')) || {};
   // Backward compatibility: if it's an array, convert to counts

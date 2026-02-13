@@ -244,8 +244,8 @@
     style="width:100vw; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;">
     <div class="search-card"
       style="background:#fffbe9;box-shadow:0 4px 32px rgba(60,30,10,0.10);border-radius:22px;padding:36px 32px 40px 32px;max-width:600px;width:95vw;margin:0 auto 32px auto;display:flex;flex-direction:column;align-items:center;">
-      <form id="searchForm" style="display:flex;gap:10px;width:100%;max-width:420px;margin-bottom:18px;">
-        <input id="searchInput" type="text" placeholder="Search books..."
+      <form id="searchForm" action="search.html" method="get" style="display:flex;gap:10px;width:100%;max-width:420px;margin-bottom:18px;">
+        <input id="searchInput" name="q" type="text" placeholder="Search books..." autocomplete="off"
           style="flex:1;padding:10px 14px;border-radius:8px;border:1px solid #e0d6b9;font-size:1.1rem;outline:none;" />
         <button type="submit"
           style="background:#5E2217;color:#fff;padding:0 22px;border:none;border-radius:8px;font-weight:600;font-size:1.1rem;cursor:pointer;transition:background 0.2s;">Search</button>
@@ -572,6 +572,8 @@
       awlad_haretna: { title: "أولاد حارتنا", author: "نجيب محفوظ", description: "Children of Our Alley is one of Naguib Mahfouz's most famous and controversial novels. It tells the story of generations living in an alley in Cairo, exploring themes of power, religion, and human nature through allegorical characters and events.", cover: "imgs/أولاد حارتنا.png", price: "3,000.00", isbn: "9789776543269", inStock: false },
       al_ayam: { title: "الأيام", author: "طه حسين", description: "The Days is the celebrated autobiographical trilogy of Taha Hussein, recounting his childhood in rural Egypt, his struggle with blindness, and his relentless pursuit of knowledge from the kuttab to Al-Azhar and the Sorbonne.", cover: "imgs/الايام HARDCOVER.jpg", price: "3,500 DA", isbn: "9789776543278" },
       al_ayam_illustrated: { title: "الأيام", author: "طه حسين", description: "The Days is the celebrated autobiographical trilogy of Taha Hussein in an illustrated graphic novel edition. This version brings the classic story to life through beautiful illustrations, making it accessible to a new generation of readers.", cover: "imgs/الأيام.jpg", price: "1,200.00", isbn: "9789776543282" },
+      
+      // Strapi books will be added here dynamically
       the_days: { title: "The Days", author: "Taha Hussein", description: "The Days is the celebrated autobiographical trilogy of Taha Hussein, translated into English. He recounts his childhood in rural Egypt, his struggle with blindness, and his relentless pursuit of knowledge from the village kuttab to Al-Azhar and the Sorbonne.", cover: "imgs/The days.jpg", price: "1,200.00", isbn: "9789776543283" },
       kull_shay_an_al_hob: { title: "كل شيء عن الحب", author: "بيل هوكس", description: "All About Love by bell hooks is a powerful exploration of love in all its forms. The book challenges conventional notions of love and offers a transformative vision of love as a practice of freedom, justice, and healing.", cover: "imgs/كل شيء عن الحب.png", price: "1,700.00", isbn: "9789776543284" },
       al_masih_yuslab_min_jadid: { title: "المسيح يصلب من جديد", author: "نيكوس كازانتزاكيس", description: "Christ Recrucified is a powerful novel by Nikos Kazantzakis that tells the story of a Greek village that decides to reenact the Passion of Christ during Easter. The novel explores themes of faith, sacrifice, and the conflict between spiritual ideals and human nature.", cover: "imgs/المسيح يصلب من جديد.png", price: "1,500.00", isbn: "9789776543270" },
@@ -617,31 +619,7 @@
       qasr_al_shawq: { title: "قصر الشوق", author: "نجيب محفوظ", description: "الجزء الثاني من ثلاثية القاهرة.", cover: "imgs/قصر الشوق.jpg", price: "2,300.00" },
       al_sukkariyya: { title: "السكرية", author: "نجيب محفوظ", description: "الجزء الثالث من ثلاثية القاهرة.", cover: "imgs/السكرية.png", price: "2,000.00" }
     };
-    const allBooks = Object.entries(books).map(([id, book]) => ({
-      id,
-      title: book.title,
-      author: book.author,
-      cover: book.cover,
-      summary: book.description || book.summary || '',
-      price: book.price || '',
-      isbn: book.isbn || '',
-      genre: book.genre || 'general' // Ensure genre is present
-    }));
-    // --- Search Bar Logic ---
-    const searchForm = document.getElementById('searchForm');
-    const searchInput = document.getElementById('searchInput');
-    // If a previous search exists, show it in the input
-    if (searchInput && localStorage.getItem('searchQuery')) {
-      searchInput.value = localStorage.getItem('searchQuery');
-    }
-    if (searchForm) {
-      searchForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-        const query = searchInput.value.trim();
-        localStorage.setItem('searchQuery', query);
-        window.location.reload();
-      });
-    }
+    
     // Get search query from localStorage
     function normalizeArabic(text) {
       return (text || '')
@@ -653,15 +631,32 @@
         .replace(/ئ/g, 'ي')
         .replace(/ة/g, 'ه');
     }
-    const rawQuery = (localStorage.getItem('searchQuery') || '').trim();
-    const query = normalizeArabic(rawQuery);
-    const resultsHeader = document.getElementById('resultsHeader');
-    const resultsList = document.getElementById('resultsList');
-    if (!query) {
-      resultsHeader.textContent = 'No search query provided.';
-      resultsList.innerHTML = '';
-    } else {
-      const filtered = allBooks.filter(book => {
+    // Define performSearch function (must be defined before it's called)
+    function performSearch() {
+      // Recreate allBooks array with updated books object (including Strapi books)
+      const allBooks = Object.entries(books).map(([id, book]) => ({
+        id,
+        title: book.title || '',
+        author: book.author || '',
+        genre: book.genre || '',
+        cover: book.cover || '',
+        price: book.price || '',
+        summary: book.description || book.description_ar || ''
+      }));
+      
+      console.log(`Performing search with ${allBooks.length} total books (including Strapi)`);
+      
+      const urlQ = (typeof URLSearchParams !== 'undefined' && window.location.search) ? new URLSearchParams(window.location.search).get('q') : null;
+      const rawQuery = (urlQ || localStorage.getItem('searchQuery') || '').trim();
+      const query = normalizeArabic(rawQuery);
+      const resultsHeader = document.getElementById('resultsHeader');
+      const resultsList = document.getElementById('resultsList');
+      if (!resultsHeader || !resultsList) return;
+      if (!query) {
+        resultsHeader.textContent = 'No search query provided.';
+        resultsList.innerHTML = '';
+      } else {
+        const filtered = allBooks.filter(book => {
         const t = normalizeArabic(book.title);
         const a = normalizeArabic(book.author);
         const g = normalizeArabic(book.genre);
@@ -717,6 +712,68 @@
         });
       }
     }
+    }
+
+    function initSearch() {
+      const searchForm = document.getElementById('searchForm');
+      const searchInput = document.getElementById('searchInput');
+      var q = (typeof URLSearchParams !== 'undefined' && window.location.search) ? new URLSearchParams(window.location.search).get('q') : null;
+      if (searchInput && (q || localStorage.getItem('searchQuery'))) {
+        searchInput.value = (q || localStorage.getItem('searchQuery') || '').trim();
+      }
+      if (searchForm && searchInput) {
+        searchForm.addEventListener('submit', function (e) {
+          var query = searchInput.value.trim();
+          if (query) {
+            localStorage.setItem('searchQuery', query);
+            window.location.href = 'search.html?q=' + encodeURIComponent(query);
+          }
+          e.preventDefault();
+          return false;
+        });
+      }
+      try {
+        performSearch();
+      } catch (err) {
+        console.error('Search error:', err);
+        var h = document.getElementById('resultsHeader');
+        var l = document.getElementById('resultsList');
+        if (h) h.textContent = 'Search error. Try again.';
+        if (l) l.innerHTML = '<p style="color:#b94a48;">Something went wrong. Check the console or try a different search.</p>';
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initSearch);
+    } else {
+      initSearch();
+    }
+
+    // Fetch and add Strapi books to search, then run search again to include them
+    fetch("http://localhost:1337/api/books?populate=*")
+      .then(res => res.json())
+      .then(data => {
+        if (data.data && data.data.length > 0) {
+          data.data.forEach(book => {
+            const bookId = `strapi_${book.id}`;
+            const imageUrl = book.Image?.url
+              ? `http://localhost:1337${book.Image.url}`
+              : 'https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable';
+            books[bookId] = {
+              title: book.Title || 'Untitled',
+              author: book.Author || 'Unknown Author',
+              description: book.Description || book.Summary || 'No description available.',
+              description_ar: book.Description || book.Summary || 'لا يوجد وصف متاح.',
+              cover: imageUrl,
+              price: book.Price ? `${book.Price}` : "0.00",
+              isbn: book.ISBN || ''
+            };
+          });
+        }
+        performSearch();
+      })
+      .catch(() => { performSearch(); });
+
     // Improved openBook function for navigation
     function openBook(id) {
       window.location.href = `book.html?id=${id}`;
