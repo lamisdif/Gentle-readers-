@@ -52,8 +52,8 @@ const books = {
   // NEW BOOKS - First Half
   abi_alladhi_akraho: { title: "أبي الذي أكره", price: "1,000.00", inStock: false },
   ash3alni: { title: "أشعلني", price: "2,000.00" },
-  rasail_ila_milina: { title: "رسائل إلى ميلينا", price: "750.00", originalPrice: "900.00", inStock: false, isDiscounted: true },
-  pride_and_prejudice: { title: "كبرياء و هوى", price: "900.00", originalPrice: "1000.00", inStock: false, isDiscounted: true },
+  rasail_ila_milina: { title: "رسائل إلى ميلينا", price: "4,100.00", inStock: false },
+  pride_and_prejudice: { title: "كبرياء وهوى", price: "2,000.00", inStock: false },
   kull_azraq_al_sama: { title: "كل أزرق السماء", price: "2,000.00", inStock: false },
   hakadha_tata3afa: { title: "هكذا تتعافى", price: "1,200.00" },
   caraval: { title: "Caraval", price: "1,500.00" },
@@ -98,7 +98,7 @@ const books = {
   al_baron: { title: "البارون", price: "1,500.00" },
   little_women: { title: "نساء صغيرات", price: "3,000.00", inStock: false },
   oliver_twist: { title: "Oliver Twist", price: "1,800.00" },
-  pride_and_prejudice: { title: "كبرياء و هوى", price: "900.00", originalPrice: "1000.00", inStock: false, isDiscounted: true },
+  pride_and_prejudice: { title: "كبرياء وهوى", price: "2,000.00", inStock: false },
   anne_of_green_gables: { title: "Anne of Green Gables", price: "850.00" },
   hasees: { title: "هسيس", price: "1,200.00", inStock: false },
   hatha_ma_hadath_maaha: { title: "هذا ما حدث معها", price: "1,400.00" },
@@ -116,7 +116,7 @@ const books = {
   al_muqamir: { title: "المقامر", price: "1,300.00" },
   al_shayatin: { title: "الشياطين", price: "4,000.00", inStock: false },
   al_ablah: { title: "الأبله", price: "4,800.00", inStock: false },
-  al_ikhwa_karamazov: { title: "الإخوة كارامازوف", price: "6,000.00", inStock: false },
+  al_ikhwa_karamazov: { title: "الإخوة كارامازوف - الجزء الأول", price: "4,500.00", inStock: false },
   al_layali_al_bayda: { title: "الليالي البيضاء", price: "900.00", inStock: false },
   al_fuqara: { title: "الفقراء", price: "1,250.00", inStock: false },
   fi_qabwi: { title: "في قبوي", price: "1,200.00", inStock: false },
@@ -148,7 +148,32 @@ const books = {
   raaytu_yusuf: { title: "رأيت يوسف", price: "1,500 DA", inStock: false },
   hadith_al_sabah_wal_masa: { title: "حديث الصباح والمساء", price: "1,700 DA", inStock: false },
   amal_3azima: { title: "آمال عظيمة", price: "1,800.00" },
-  sariqat_al_kutub: { title: "سارقة الكتب", price: "2,800 DA" }
+  sariqat_al_kutub: { title: "سارقة الكتب", price: "2,800 DA" },
+
+  // New literary/philosophy books
+  al_din_wa_karama: { title: "الدين والكرامة الإنسانية", price: "2,000.00" },
+  rasail_silvia_plath: { title: "رسائل سيلفيا بلاث", price: "2,800.00" },
+  jibril_wa_al_nabi: { title: "جبريل والنبي", price: "1,400.00" },
+  al_muhakama: { title: "المحاكمة", price: "2,000.00" },
+  hakatha_takalam_zarathustra: { title: "هكذا تكلم زرادشت", price: "2,500.00" },
+  dar_khawla: { title: "دار خولة", price: "1,300.00" },
+  dhahab_ma3a_al_rih: { title: "ذهب مع الريح", price: "1,200.00" },
+  yusuf_wa_ikhwatu_1: { title: "يوسف وإخوته 1/4", price: "9,500.00" },
+  wadi_al_farashat: { title: "وادي الفراشات", price: "1,500.00" },
+  ahdab_notredam: { title: "أحدب نوتردام", price: "2,300.00" },
+  anna_karenina: { title: "أنا كارنينا", price: "5,000.00" },
+  matjar_al_tuhaf_1: { title: "متجر التحف القديم 1/2", price: "3,200.00" },
+  al_mu3allim_wa_margarita: { title: "المعلم ومارغريتا", price: "2,000.00" },
+  haflat_al_tees: { title: "حفلة التيس", price: "2,000.00" },
+  pinocchio: { title: "بينوكيو", price: "1,800.00" },
+  bint_al_amir: { title: "ابنة الأمير", price: "1,100.00" },
+  saykolojyat_al_jamahir: { title: "سيكولوجية الجماهير", price: "1,600.00" },
+  kayf_tatafakkar_siyasiyan: { title: "كيف تفكر سياسياً - مدخل إلى 30 حكماً", price: "2,000.00" },
+  fan_al_lamabalaa: { title: "فن اللامبالاة", price: "1,600.00" },
+  muhadatha_layliya: { title: "محادثة ليلية", price: "1,400.00" },
+  bayn_al_qasrayn: { title: "بين القصرين", price: "2,500.00" },
+  qasr_al_shawq: { title: "قصر الشوق", price: "2,300.00" },
+  al_sukkariyya: { title: "السكرية", price: "2,000.00" }
 };
 
 // Wilaya-Daira data structure
