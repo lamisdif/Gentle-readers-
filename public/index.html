@@ -4233,11 +4233,13 @@ why<!DOCTYPE html>
         paginationInitDone = true;
         if (typeof initPagination === 'function') initPagination(0);
       }
-      // Fallback: show books even if Strapi is slow or fails (e.g. 2.5s)
-      var fallbackTimer = setTimeout(runPaginationOnce, 2500);
+      // Fallback: show books if Strapi is slow (Render cold start can take 30–60s)
+      var fallbackTimer = setTimeout(runPaginationOnce, 10000);
 
-      fetch(window.STRAPI_API_BASE + "/api/books?populate=*")
-        .then(res => res.json())
+      function tryFetchStrapi() {
+        var url = window.STRAPI_API_BASE + "/api/books?populate=*";
+        fetch(url, { method: 'GET', mode: 'cors' })
+          .then(function(res) { return res.json(); })
         .then(data => {
           // Find the existing book list container
           const slider = document.querySelector('.slider');
@@ -4356,11 +4358,17 @@ why<!DOCTYPE html>
           clearTimeout(fallbackTimer);
           initPagination(0);
         })
-        .catch(error => {
+        .catch(function(error) {
           console.error('Error fetching books from Strapi:', error);
           clearTimeout(fallbackTimer);
           runPaginationOnce();
+          // Retry once after 6s (helps when Render is cold-starting)
+          setTimeout(function() {
+            tryFetchStrapi();
+          }, 6000);
         });
+      }
+      tryFetchStrapi();
     });
   </script>
 
