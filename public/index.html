@@ -5,6 +5,7 @@ why<!DOCTYPE html>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ChapterOne Bookstore - Left Menu</title>
+  <script src="config.js"></script>
   <link rel="stylesheet" href="index.css" />
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -4220,13 +4221,9 @@ why<!DOCTYPE html>
 
   <!-- Strapi API Integration -->
   <script>
-    // Strapi base URL: on localhost use 1337; when deployed we use same origin so Strapi books load on mobile too.
-    // If your Strapi is on a different domain (e.g. https://api.yoursite.com), set window.STRAPI_API_BASE in a script before this one.
-    window.STRAPI_API_BASE = window.STRAPI_API_BASE || (
-      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-        ? 'http://localhost:1337'
-        : window.location.origin
-    );
+    if (!window.STRAPI_API_BASE) {
+      window.STRAPI_API_BASE = 'https://gentle-readers-5.onrender.com';
+    }
     // Fetch books from Strapi API and add them to pages 1, 2, or 3
     // Run pagination only after this fetch settles so page 1 includes Strapi on desktop and mobile
     document.addEventListener('DOMContentLoaded', function() {

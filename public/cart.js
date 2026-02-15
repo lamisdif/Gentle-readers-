@@ -164,16 +164,11 @@ const books = {
   al_sukkariyya: { title: "السكرية", price: "2,000.00" }
 };
 
-// Strapi base URL (use origin when not on localhost so mobile/deployed works)
-if (typeof window !== 'undefined') {
-  window.STRAPI_API_BASE = window.STRAPI_API_BASE || (
-    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-      ? 'http://localhost:1337'
-      : window.location.origin
-  );
+if (typeof window !== 'undefined' && !window.STRAPI_API_BASE) {
+  window.STRAPI_API_BASE = 'https://gentle-readers-5.onrender.com';
 }
 // Fetch and add Strapi books to cart
-fetch((window.STRAPI_API_BASE || 'http://localhost:1337') + "/api/books?populate=*")
+fetch((window.STRAPI_API_BASE || 'https://gentle-readers-5.onrender.com') + "/api/books?populate=*")
   .then(res => res.json())
   .then(data => {
     if (data.data && data.data.length > 0) {

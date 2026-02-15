@@ -5,6 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Search Results - GentleReaders</title>
+  <script src="config.js"></script>
   <link rel="stylesheet" href="index.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet" />
@@ -749,12 +750,9 @@
       initSearch();
     }
 
-    // Strapi base URL (same as index: use origin when not on localhost so mobile/deployed works)
-    window.STRAPI_API_BASE = window.STRAPI_API_BASE || (
-      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-        ? 'http://localhost:1337'
-        : window.location.origin
-    );
+    if (!window.STRAPI_API_BASE) {
+      window.STRAPI_API_BASE = 'https://gentle-readers-5.onrender.com';
+    }
     // Fetch and add Strapi books to search, then run search again to include them
     fetch(window.STRAPI_API_BASE + "/api/books?populate=*")
       .then(res => res.json())
