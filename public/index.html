@@ -4229,9 +4229,16 @@ why<!DOCTYPE html>
 
   <!-- Strapi API Integration -->
   <script>
+    // Strapi base URL: on localhost use 1337; when deployed we use same origin so Strapi books load on mobile too.
+    // If your Strapi is on a different domain (e.g. https://api.yoursite.com), set window.STRAPI_API_BASE in a script before this one.
+    window.STRAPI_API_BASE = window.STRAPI_API_BASE || (
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+        ? 'http://localhost:1337'
+        : window.location.origin
+    );
     // Fetch books from Strapi API and add them to pages 1, 2, or 3
     document.addEventListener('DOMContentLoaded', function() {
-      fetch("http://localhost:1337/api/books?populate=*")
+      fetch(window.STRAPI_API_BASE + "/api/books?populate=*")
         .then(res => res.json())
         .then(data => {
           // Find the existing book list container
@@ -4302,7 +4309,7 @@ why<!DOCTYPE html>
             
             // Get image URL safely using new API structure
             const imageUrl = book.Image?.url 
-              ? `http://localhost:1337${book.Image.url}`
+              ? (book.Image.url.startsWith('http') ? book.Image.url : window.STRAPI_API_BASE + book.Image.url)
               : 'https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable';
             
             // Create book card HTML matching the existing design
