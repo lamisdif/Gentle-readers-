@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+why<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -4017,26 +4017,6 @@
         console.log('No Strapi positions found to add to pages');
       }
       
-      // On mobile: 30 books per page, index-based (so all Strapi books appear across page 1, 2, 3...)
-      const isMobile = window.innerWidth <= 768;
-      let sortedItems = items;
-      if (isMobile && items.length > 0) {
-        sortedItems = [...items].sort((a, b) => {
-          const posA = parseInt(a.style.getPropertyValue('--position')) || 0;
-          const posB = parseInt(b.style.getPropertyValue('--position')) || 0;
-          return posA - posB;
-        });
-        const MOBILE_BOOKS_PER_PAGE = 30;
-        pageRanges.length = 0;
-        for (let i = 0; i < sortedItems.length; i += MOBILE_BOOKS_PER_PAGE) {
-          pageRanges.push({
-            startIndex: i,
-            endIndex: Math.min(i + MOBILE_BOOKS_PER_PAGE - 1, sortedItems.length - 1)
-          });
-        }
-        console.log('Mobile pagination: ' + pageRanges.length + ' pages, 30 books per page. Total books:', sortedItems.length);
-      }
-      
       const totalPages = pageRanges.length;
       
       // Get current page from URL parameter, default to 1
@@ -4061,27 +4041,16 @@
           item.classList.add('hidden');
         });
         
+        // Show only books in the current page range (same logic on desktop and mobile)
         let booksShown = 0;
-        // Mobile: index-based (30 books per page)
-        if (range.startIndex !== undefined && range.endIndex !== undefined) {
-          for (let i = range.startIndex; i <= range.endIndex; i++) {
-            if (sortedItems[i]) {
-              sortedItems[i].classList.remove('hidden');
-              booksShown++;
-            }
+        items.forEach((item) => {
+          const position = parseInt(item.style.getPropertyValue('--position')) || 0;
+          if (position >= range.start && position <= range.end) {
+            item.classList.remove('hidden');
+            booksShown++;
           }
-          console.log(`Page ${page} (mobile): Showing ${booksShown} books (indices ${range.startIndex}-${range.endIndex})`);
-        } else {
-          // Desktop: position-based range
-          items.forEach((item) => {
-            const position = parseInt(item.style.getPropertyValue('--position')) || 0;
-            if (position >= range.start && position <= range.end) {
-              item.classList.remove('hidden');
-              booksShown++;
-            }
-          });
-          console.log(`Page ${page}: Showing ${booksShown} books in range [${range.start}-${range.end}]`);
-        }
+        });
+        console.log(`Page ${page}: Showing ${booksShown} books in range [${range.start}-${range.end}]`);
         
         currentPage = page;
         renderPagination();
