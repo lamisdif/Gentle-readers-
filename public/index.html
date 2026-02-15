@@ -4132,22 +4132,13 @@ why<!DOCTYPE html>
       }
     }
     
-    // Initialize pagination when DOM is ready
+    // Pagination is now initialized only after Strapi fetch settles (see Strapi script below)
+    // so that page 1 includes Strapi books on both desktop and mobile.
     document.addEventListener('DOMContentLoaded', function() {
       updateHeroAndGenreVisibility();
-      // Small delay to ensure all elements are rendered
-      setTimeout(function() {
-        // Initialize pagination for first section (main book listing)
-        initPagination(0); // First section
-      }, 100);
     });
-    
-    // Also run on window load as a backup
     window.addEventListener('load', function() {
       updateHeroAndGenreVisibility();
-      setTimeout(function() {
-        initPagination(0);
-      }, 200);
     });
   </script>
   <script>
@@ -4237,26 +4228,40 @@ why<!DOCTYPE html>
         : window.location.origin
     );
     // Fetch books from Strapi API and add them to pages 1, 2, or 3
+    // Run pagination only after this fetch settles so page 1 includes Strapi on desktop and mobile
     document.addEventListener('DOMContentLoaded', function() {
+      var paginationInitDone = false;
+      function runPaginationOnce() {
+        if (paginationInitDone) return;
+        paginationInitDone = true;
+        if (typeof initPagination === 'function') initPagination(0);
+      }
+      // Fallback: show books even if Strapi is slow or fails (e.g. 2.5s)
+      var fallbackTimer = setTimeout(runPaginationOnce, 2500);
+
       fetch(window.STRAPI_API_BASE + "/api/books?populate=*")
         .then(res => res.json())
         .then(data => {
           // Find the existing book list container
           const slider = document.querySelector('.slider');
           if (!slider) {
-            console.error('Slider container not found');
+            clearTimeout(fallbackTimer);
+            runPaginationOnce();
             return;
           }
           
           const listContainer = slider.querySelector('.list');
           if (!listContainer) {
-            console.error('List container not found');
+            clearTimeout(fallbackTimer);
+            runPaginationOnce();
             return;
           }
           
           // Check if data exists
           if (!data.data || data.data.length === 0) {
             console.log('No books found in Strapi.');
+            clearTimeout(fallbackTimer);
+            runPaginationOnce();
             return;
           }
           
@@ -4351,18 +4356,13 @@ why<!DOCTYPE html>
             listContainer.appendChild(bookItem);
           });
           
-          // Reinitialize pagination so Strapi books show (desktop and mobile)
-          function reinitPagination() {
-            console.log('Reinitializing pagination with', data.data.length, 'Strapi books...');
-            initPagination(0);
-          }
-          reinitPagination();
-          requestAnimationFrame(reinitPagination);
-          setTimeout(reinitPagination, 100);
-          setTimeout(reinitPagination, 500);
+          clearTimeout(fallbackTimer);
+          initPagination(0);
         })
         .catch(error => {
           console.error('Error fetching books from Strapi:', error);
+          clearTimeout(fallbackTimer);
+          runPaginationOnce();
         });
     });
   </script>
