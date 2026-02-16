@@ -4233,8 +4233,8 @@ why<!DOCTYPE html>
         paginationInitDone = true;
         if (typeof initPagination === 'function') initPagination(0);
       }
-      // Fallback: show books if Strapi is slow (Render cold start can take 30–60s)
-      var fallbackTimer = setTimeout(runPaginationOnce, 10000);
+      // Show static books quickly (0.5s); Strapi books add when API responds
+      var fallbackTimer = setTimeout(runPaginationOnce, 500);
 
       function tryFetchStrapi() {
         var url = window.STRAPI_API_BASE + "/api/books?populate=*";
