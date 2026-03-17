@@ -4117,6 +4117,14 @@ why<!DOCTYPE html>
       // Initial render - show current page from URL
       showPage(currentPage);
     }
+
+    // Initialize pagination for hardcoded books on load
+    document.addEventListener('DOMContentLoaded', function () {
+      // Small delay to ensure DOM is ready
+      setTimeout(function () {
+        initPagination(0);
+      }, 0);
+    });
     
     // Hide hero and genre sections on pages 2, 3, 4, 5... (show only on page 1)
     function updateHeroAndGenreVisibility() {
@@ -4219,17 +4227,26 @@ why<!DOCTYPE html>
     });
   </script>
 
-  <!-- Load extra books from Decap CMS JSON (src/data/books/index.json) and merge with existing cards -->
+  <!-- Load extra books from Decap CMS (compiled to public/cms-books.json) and merge with existing cards -->
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      fetch('src/data/books/index.json')
+      function escapeHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      fetch('cms-books.json')
         .then(function (res) {
           if (!res.ok) return null;
           return res.json();
         })
         .then(function (data) {
-          // Support both: { books: [...] } and bare [...] arrays
-          var cmsBooks = data && Array.isArray(data.books) ? data.books : data;
+          // cms-books.json is an array of books
+          var cmsBooks = data;
           if (!cmsBooks || !Array.isArray(cmsBooks)) return;
 
           const slider = document.querySelector('.slider');
@@ -4257,6 +4274,8 @@ why<!DOCTYPE html>
 
             const imageUrl = book.image || 'https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable';
             const safeId = 'cms_' + (book.slug || String(position));
+            const title = escapeHtml(book.title);
+            const description = escapeHtml(book.description);
 
             item.innerHTML = `
               <div class="card" onclick="openBook('${safeId}')" style="cursor: pointer; position: relative; z-index: 100;">
@@ -4268,7 +4287,7 @@ why<!DOCTYPE html>
                           onerror="this.onerror=null; this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
                         <span>Cover Image Unavailable</span>
                       </div>
-                      <p class="book-title">${book.title || ''}</p>
+                      <p class="book-title">${title}</p>
                       <p class="book-author"></p>
                       <p class="book-price">${book.price ? 'Price: ' + book.price : ''}</p>
                       <p class="new-tag" style="color:${statusColor}; font-weight:bold; font-size:12px; margin:5px 0; text-align:center; background:${statusBg}; padding:2px 8px; border-radius:12px; display:inline-block;">
@@ -4278,7 +4297,7 @@ why<!DOCTYPE html>
                     <div class="flip-book-card-back">
                       <div class="flip-book-card-back-content">
                         <h4 class="text-lg font-bold mb-2">Book Summary</h4>
-                        <p class="summary-text">${book.description || ''}</p>
+                        <p class="summary-text" style="white-space: pre-line;">${description}</p>
                       </div>
                     </div>
                   </div>
@@ -4289,9 +4308,7 @@ why<!DOCTYPE html>
           });
 
           // Re-run pagination so CMS books are included
-          if (typeof initPagination === 'function') {
-            initPagination(0);
-          }
+          if (typeof initPagination === 'function') initPagination(0);
         })
         .catch(function (err) {
           console.error('Error loading CMS books JSON:', err);
