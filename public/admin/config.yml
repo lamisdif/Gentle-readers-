@@ -9,22 +9,25 @@ public_folder: "/images/uploads"        # Public URL for images
 collections:
   - name: "books"
     label: "Books"
-    folder: "src/data/books"            # Each book as a JSON file
-    create: true
-    format: "json"
-    extension: "json"
-    slug: "{{slug}}"
-    fields:
-      - { label: "Title", name: "title", widget: "string" }
-      - { label: "Price", name: "price", widget: "number", valueType: "int" }
-      - label: "Status / الحالة"
-        name: "status"
-        widget: "select"
-        options:
-          - { label: "Available / متوفر", value: "available" }
-          - { label: "Out of Stock / نفدت الكمية", value: "out of stock" }
-        default: "available"
-      - { label: "Description", name: "description", widget: "text" }
-      - { label: "Image", name: "image", widget: "image", required: false }
-      - { label: "Draft", name: "draft", widget: "boolean", default: false }
+    files:
+      - file: "src/data/books/index.json"     # Single JSON file containing a list of books
+        label: "Books"
+        name: "index"
+        fields:
+          - label: "Books"
+            name: "books"
+            widget: "list"
+            fields:
+              - { label: "Title", name: "title", widget: "string" }
+              - { label: "Price", name: "price", widget: "number", valueType: "int" }
+              - label: "Status / الحالة"
+                name: "status"
+                widget: "select"
+                options:
+                  - { label: "Available / متوفر", value: "available" }
+                  - { label: "Out of Stock / نفدت الكمية", value: "out of stock" }
+                default: "available"
+              - { label: "Description", name: "description", widget: "text" }
+              - { label: "Image", name: "image", widget: "image", required: false }
+              - { label: "Draft", name: "draft", widget: "boolean", default: false }
 
