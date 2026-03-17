@@ -1683,24 +1683,30 @@
           const priceEl = document.getElementById("book-price");
           const descEl = document.getElementById("book-description");
           const button = document.querySelector('.button');
+          const isCmsId = id && id.startsWith('cms_');
 
           if (titleEl) titleEl.textContent = "Book Not Found";
           if (authorEl) authorEl.textContent = "";
           if (priceEl) priceEl.textContent = "";
           if (descEl) descEl.textContent = "Sorry, the book you're looking for could not be found. Please return to the homepage and try again.";
-          if (button) {
+
+          // For CMS IDs, keep the Add to Cart button as-is so it doesn't redirect.
+          // For non-CMS invalid IDs, turn the button into a 'Go to Homepage' button.
+          if (button && !isCmsId) {
             button.innerHTML = '<span>Go to Homepage</span>';
             button.onclick = function () { window.location.href = 'index.html'; };
           }
 
-          // Add a link to go back
-          const backLink = document.createElement('a');
-          backLink.href = 'index.html';
-          backLink.textContent = '← Back to Homepage';
-          backLink.className = 'text-blue-600 hover:text-blue-800 underline text-center block mt-4';
-          const container = document.querySelector('.max-w-md');
-          if (container) {
-            container.appendChild(backLink);
+          // Add a link to go back only for non-CMS invalid IDs
+          if (!isCmsId) {
+            const backLink = document.createElement('a');
+            backLink.href = 'index.html';
+            backLink.textContent = '← Back to Homepage';
+            backLink.className = 'text-blue-600 hover:text-blue-800 underline text-center block mt-4';
+            const container = document.querySelector('.max-w-md');
+            if (container) {
+              container.appendChild(backLink);
+            }
           }
         }
 
