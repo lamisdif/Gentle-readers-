@@ -176,6 +176,29 @@ const books = {
   al_sukkariyya: { title: "السكرية", price: "2,000.00" }
 };
 
+// Merge CMS books into the checkout books map
+function mergeCmsBooksIntoCheckout() {
+  return fetch('cms-books.json')
+    .then(function (res) {
+      if (!res.ok) return null;
+      return res.json();
+    })
+    .then(function (cmsBooks) {
+      if (!Array.isArray(cmsBooks)) return;
+      cmsBooks.forEach(function (b) {
+        const id = 'cms_' + (b.slug || b.title || '');
+        if (!id.trim()) return;
+        books[id] = {
+          title: b.title || '',
+          price: b.price ? String(b.price) : ''
+        };
+      });
+    })
+    .catch(function (err) {
+      console.error('Error loading CMS books for checkout:', err);
+    });
+}
+
 // Wilaya-Daira data structure
 const wilayaDairaData = {
   'Adrar': ['Adrar', 'Aougrout', 'Aoulef', 'Bordj Badji Mokhtar', 'Charouine', 'Fenoughil', 'Reggane', 'Tamentit', 'Timimoun', 'Zaouiet Kounta'],
@@ -355,8 +378,11 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Add a small delay to ensure everything is loaded
-  setTimeout(loadOrderSummary, 100);
+  // Merge CMS books, then load order summary
+  mergeCmsBooksIntoCheckout()
+    .finally(function () {
+      setTimeout(loadOrderSummary, 100);
+    });
 });
 
 // Quantity controls (event delegation)

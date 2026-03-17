@@ -733,15 +733,42 @@
           return false;
         });
       }
-      try {
-        performSearch();
-      } catch (err) {
-        console.error('Search error:', err);
-        var h = document.getElementById('resultsHeader');
-        var l = document.getElementById('resultsList');
-        if (h) h.textContent = 'Search error. Try again.';
-        if (l) l.innerHTML = '<p style="color:#b94a48;">Something went wrong. Check the console or try a different search.</p>';
-      }
+      // Load CMS books, merge into books map, then search
+      fetch('cms-books.json')
+        .then(function (res) {
+          if (!res.ok) return null;
+          return res.json();
+        })
+        .then(function (cmsBooks) {
+          if (Array.isArray(cmsBooks)) {
+            cmsBooks.forEach(function (b) {
+              const id = 'cms_' + (b.slug || b.title || '');
+              if (!id.trim()) return;
+              books[id] = {
+                title: b.title || '',
+                author: b.author || '',
+                description: b.description || '',
+                description_ar: b.description || '',
+                cover: b.image || '',
+                price: b.price ? String(b.price) : ''
+              };
+            });
+          }
+        })
+        .catch(function (err) {
+          console.error('Error loading CMS books for search:', err);
+        })
+        .finally(function () {
+          try {
+            performSearch();
+          } catch (err) {
+            console.error('Search error:', err);
+            var h = document.getElementById('resultsHeader');
+            var l = document.getElementById('resultsList');
+            if (h) h.textContent = 'Search error. Try again.';
+            if (l) l.innerHTML = '<p style="color:#b94a48;">Something went wrong. Check the console or try a different search.</p>';
+          }
+        });
     }
 
     if (document.readyState === 'loading') {

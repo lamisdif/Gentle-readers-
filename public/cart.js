@@ -163,6 +163,29 @@ const books = {
   qasr_al_shawq: { title: "قصر الشوق", price: "2,300.00" },
   al_sukkariyya: { title: "السكرية", price: "2,000.00" }
 };
+
+// Merge CMS books into the cart's title/price map
+function mergeCmsBooksIntoCart() {
+  return fetch('cms-books.json')
+    .then(function (res) {
+      if (!res.ok) return null;
+      return res.json();
+    })
+    .then(function (cmsBooks) {
+      if (!Array.isArray(cmsBooks)) return;
+      cmsBooks.forEach(function (b) {
+        const id = 'cms_' + (b.slug || b.title || '');
+        if (!id.trim()) return;
+        books[id] = {
+          title: b.title || '',
+          price: b.price ? String(b.price) : ''
+        };
+      });
+    })
+    .catch(function (err) {
+      console.error('Error loading CMS books for cart:', err);
+    });
+}
 function getCartObject() {
   const stored = JSON.parse(localStorage.getItem('cart')) || {};
   // Backward compatibility: if it's an array, convert to counts
@@ -239,4 +262,6 @@ function proceedToCheckout() {
   window.location.href = 'checkout.html';
 }
 
-window.onload = loadCart; 
+window.onload = function () {
+  mergeCmsBooksIntoCart().finally(loadCart);
+}; 

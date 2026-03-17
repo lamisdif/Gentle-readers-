@@ -1556,8 +1556,37 @@
           }
         };
 
-        // After static books are loaded, process the book page
-        processBookPage();
+        // Merge CMS books from cms-books.json, then process the book page
+        fetch('cms-books.json')
+          .then(function (res) {
+            if (!res.ok) return null;
+            return res.json();
+          })
+          .then(function (cmsBooks) {
+            if (Array.isArray(cmsBooks)) {
+              cmsBooks.forEach(function (b) {
+                const id = 'cms_' + (b.slug || b.title || '');
+                if (!id.trim()) return;
+                // Normalize into the same shape as hardcoded books
+                books[id] = {
+                  title: b.title || '',
+                  author: b.author || '',
+                  description: b.description || '',
+                  description_ar: b.description || '',
+                  cover: b.image || '',
+                  price: b.price ? String(b.price) : '',
+                  isbn: b.isbn || '',
+                  inStock: (b.status || 'available').toLowerCase() !== 'out of stock'
+                };
+              });
+            }
+          })
+          .catch(function (err) {
+            console.error('Error loading CMS books for book page:', err);
+          })
+          .finally(function () {
+            processBookPage();
+          });
         
         function processBookPage() {
         const params = new URLSearchParams(window.location.search);
