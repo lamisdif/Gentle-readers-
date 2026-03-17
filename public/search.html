@@ -437,7 +437,7 @@
         price: "1,200.00",
         isbn: "9789776543235"
       },
-
+      
       // NEW BOOKS - First Half
       abi_alladhi_akraho: {
         title: "أبي الذي أكره",
@@ -500,7 +500,7 @@
         price: "1,500.00",
         isbn: "9789776543241"
       },
-
+      
       // NEW BOOKS - Second Half
       it_ends_with_us: {
         title: "It Ends With Us",
@@ -526,7 +526,7 @@
         price: "1,500.00",
         isbn: "9789776543244"
       },
-
+      
       majdouline: {
         title: "ماجدولين",
         author: "مصطفى لطفى المنفلوطي",
@@ -549,7 +549,7 @@
       adaa_al_ta2ira_al_waraqiya: { title: "عداء الطائرة الورقية", author: "خالد حسيني", description: "رواية مؤثرة تتناول الصداقة والخيانه والفداء تدور أحداثها في أفغانستان والولايات المتحدة. رحلة إنسانية تبحث عن الغفران ومعنى الوفاء.", cover: "imgs/عداء الطائرة الورقية.jpg", price: "1,500.00", isbn: "9789776543248", inStock: false },
       the_hunger_games: { title: "The Hunger Games", author: "Suzanne Collins", description: "In a dystopian future, Katniss Everdeen volunteers to take her sister's place in a deadly televised competition. A gripping story of survival, rebellion, and sacrifice.", cover: "imgs/the-hunger-games.jpg", price: "1,600.00", isbn: "9789776543249" },
       al_naqous_al_zujaji: { title: "الناقوس الزجاجي", author: "سيلفيا بلاث", description: "رواية 'الناقوس الزجاجي' هي العمل الروائي الوحيد للشاعرة الأمريكية سيلفيا بلاث. تدور أحداث الرواية حول إيستر غرينوود، شابة موهوبة تفوز بفرصة للعمل في مجلة موضة بنيويورك. رغم النجاح الظاهري، تعاني من شعور متزايد بالعزلة والاضطراب النفسي، مما يؤدي بها إلى محاولة انتحار ودخولها مصحة نفسية. تُسلط الرواية الضوء على الصراعات الداخلية للبطلة، خاصة فيما يتعلق بتوقعات المجتمع من النساء والقيود المفروضة عليهن. يُستخدم 'الناقوس الزجاجي' كاستعارة لتمثيل الشعور بالاختناق والعزلة التي تعاني منها. تُعتبر هذه الرواية من الأعمال الأدبية الكلاسيكية التي تناولت موضوعات الصحة النفسية والهوية النسائية بعمق وصدق.", cover: "imgs/الناقوس الزجاجي.jpg", price: "1,700.00", isbn: "9789776543250", inStock: false },
-
+      
       // New books with prices
       oscar_wilde: { title: "أوسكار وايلد", author: "أوسكار وايلد", description: "A collection of the complete short stories by Oscar Wilde, one of the most celebrated writers of the Victorian era. This collection showcases Wilde's wit, satire, and unique storytelling style, featuring tales that blend humor, morality, and social commentary.", cover: "imgs/اوسكار وايلد.jpg", price: "1,700.00", isbn: "9789776543251" },
       sa_akun_hunak: { title: "سأكون هناك", author: "كيونج سوك شين", description: "A powerful novel by Kyung-Sook Shin, winner of the Man Asian Booker Prize 2011. The story explores themes of loss, memory, and the enduring bonds of love and family. Set in contemporary Korea, it follows characters navigating through life's challenges and finding strength in connection.", cover: "imgs/سأكون هناك.jpg", price: "1,800.00", isbn: "9789776543252", inStock: false },
@@ -649,15 +649,15 @@
       
       const urlQ = (typeof URLSearchParams !== 'undefined' && window.location.search) ? new URLSearchParams(window.location.search).get('q') : null;
       const rawQuery = (urlQ || localStorage.getItem('searchQuery') || '').trim();
-      const query = normalizeArabic(rawQuery);
-      const resultsHeader = document.getElementById('resultsHeader');
-      const resultsList = document.getElementById('resultsList');
+    const query = normalizeArabic(rawQuery);
+    const resultsHeader = document.getElementById('resultsHeader');
+    const resultsList = document.getElementById('resultsList');
       if (!resultsHeader || !resultsList) return;
-      if (!query) {
-        resultsHeader.textContent = 'No search query provided.';
-        resultsList.innerHTML = '';
-      } else {
-        const filtered = allBooks.filter(book => {
+    if (!query) {
+      resultsHeader.textContent = 'No search query provided.';
+      resultsList.innerHTML = '';
+    } else {
+      const filtered = allBooks.filter(book => {
         const t = normalizeArabic(book.title);
         const a = normalizeArabic(book.author);
         const g = normalizeArabic(book.genre);
@@ -672,12 +672,12 @@
         filtered.forEach(book => {
           const outOfStockBooks = ['la_yumkinuka_iidhaayi', 'the_hunger_games'];
           const isOutOfStock = outOfStockBooks.includes(book.id);
-          const buttonStyle = isOutOfStock
+          const buttonStyle = isOutOfStock 
             ? "position: absolute; top: 8px; right: 8px; background: rgba(220,38,38,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: not-allowed; display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0.7;"
             : "position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;";
           const buttonTitle = isOutOfStock ? 'title="Out of Stock / نفدت الكمية"' : '';
           const buttonDisabled = isOutOfStock ? 'disabled' : '';
-
+          
           resultsList.innerHTML += `
             <div class="item" style="--position: 1">
               <div class="card" onclick="openBook('${book.id}')" style="cursor: pointer; position: relative; z-index: 100;">
@@ -784,14 +784,14 @@
     // Add the addToCartFromCard function from index.html for full functionality
     function addToCartFromCard(bookId, event) {
       event.stopPropagation();
-
+      
       // Check if book is out of stock
       const outOfStockBooks = ['la_yumkinuka_iidhaayi', 'the_hunger_games'];
       if (outOfStockBooks.includes(bookId)) {
         alert('This book is currently out of stock / هذا الكتاب نفدت الكمية حالياً');
         return;
       }
-
+      
       const stored = JSON.parse(localStorage.getItem('cart')) || {};
       if (Array.isArray(stored)) {
         const obj = {};
@@ -827,4 +827,4 @@
   </script>
 </body>
 
-</html>
+</html> 
