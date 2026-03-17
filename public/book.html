@@ -1560,7 +1560,7 @@
         console.log('Total books loaded:', Object.keys(books).length);
 
         if (!window.STRAPI_API_BASE) {
-          window.STRAPI_API_BASE = 'https://gentle-readers-5.onrender.com';
+          window.STRAPI_API_BASE = 'https://gentle-readers-production.up.railway.app';
         }
         // Fetch and add Strapi books before processing
         fetch(window.STRAPI_API_BASE + "/api/books?populate=*")

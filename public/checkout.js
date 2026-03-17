@@ -177,10 +177,10 @@ const books = {
 };
 
 if (typeof window !== 'undefined' && !window.STRAPI_API_BASE) {
-  window.STRAPI_API_BASE = 'https://gentle-readers-5.onrender.com';
+  window.STRAPI_API_BASE = 'https://gentle-readers-production.up.railway.app';
 }
 // Fetch and add Strapi books
-fetch((window.STRAPI_API_BASE || 'https://gentle-readers-5.onrender.com') + "/api/books?populate=*")
+fetch((window.STRAPI_API_BASE || 'https://gentle-readers-production.up.railway.app') + "/api/books?populate=*")
   .then(res => res.json())
   .then(data => {
     if (data.data && data.data.length > 0) {

@@ -751,7 +751,7 @@
     }
 
     if (!window.STRAPI_API_BASE) {
-      window.STRAPI_API_BASE = 'https://gentle-readers-5.onrender.com';
+      window.STRAPI_API_BASE = 'https://gentle-readers-production.up.railway.app';
     }
     // Fetch and add Strapi books to search, then run search again to include them
     fetch(window.STRAPI_API_BASE + "/api/books?populate=*")
