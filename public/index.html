@@ -4275,6 +4275,7 @@ why<!DOCTYPE html>
             const imageUrl = book.image || 'https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable';
             const safeId = 'cms_' + (book.slug || String(position));
             const title = escapeHtml(book.title);
+            const author = escapeHtml(book.author || 'Unknown Author');
             const description = escapeHtml(book.description);
 
             item.innerHTML = `
@@ -4288,7 +4289,7 @@ why<!DOCTYPE html>
                         <span>Cover Image Unavailable</span>
                       </div>
                       <p class="book-title">${title}</p>
-                      <p class="book-author"></p>
+                      <p class="book-author">${author}</p>
                       <p class="book-price">${book.price ? 'Price: ' + book.price : ''}</p>
                       <p class="new-tag" style="color:${statusColor}; font-weight:bold; font-size:12px; margin:5px 0; text-align:center; background:${statusBg}; padding:2px 8px; border-radius:12px; display:inline-block;">
                         ${statusLabel}

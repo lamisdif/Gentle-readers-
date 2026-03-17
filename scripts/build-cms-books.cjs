@@ -36,6 +36,7 @@ function main() {
     books.push({
       slug,
       title: data.title || '',
+      author: data.author || 'Unknown Author',
       price: data.price ?? '',
       status: data.status || 'available',
       description: data.description || '',

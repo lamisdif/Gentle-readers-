@@ -178,6 +178,7 @@ function mergeCmsBooksIntoCart() {
         if (!id.trim()) return;
         books[id] = {
           title: b.title || '',
+          author: b.author || 'Unknown Author',
           price: b.price ? String(b.price) : ''
         };
       });
@@ -235,9 +236,11 @@ function loadCart() {
     li.style.display = 'flex';
     li.style.alignItems = 'center';
     li.style.justifyContent = 'space-between';
-    const title = books[id] ? books[id].title : id;
+    const book = books[id];
+    const title = book ? book.title : id;
+    const author = book && book.author ? ' — ' + book.author : '';
     li.innerHTML = `
-      <span>${title}</span>
+      <span>${title}${author}</span>
       <div style="display:flex; gap:8px; align-items:center;">
         <button aria-label="Decrease" onclick="updateQty('${id}', -1)" class="bg-gray-200 px-2 rounded">-</button>
         <span>${quantity}</span>

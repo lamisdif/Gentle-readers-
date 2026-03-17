@@ -190,6 +190,7 @@ function mergeCmsBooksIntoCheckout() {
         if (!id.trim()) return;
         books[id] = {
           title: b.title || '',
+          author: b.author || 'Unknown Author',
           price: b.price ? String(b.price) : ''
         };
       });
@@ -267,7 +268,10 @@ function getCurrentLang() {
 
 function getBookTitle(book, lang) {
   // If you want to support English/Arabic titles, add both to the books object and select here
-  return book.title;
+  if (!book) return '';
+  const base = book.title || '';
+  const auth = book.author || '';
+  return auth ? `${base} — ${auth}` : base;
 }
 
 function getCartObject() {
