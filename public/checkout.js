@@ -176,27 +176,6 @@ const books = {
   al_sukkariyya: { title: "السكرية", price: "2,000.00" }
 };
 
-if (typeof window !== 'undefined' && !window.STRAPI_API_BASE) {
-  window.STRAPI_API_BASE = 'https://gentle-readers-production.up.railway.app';
-}
-// Fetch and add Strapi books
-fetch((window.STRAPI_API_BASE || 'https://gentle-readers-production.up.railway.app') + "/api/books?populate=*")
-  .then(res => res.json())
-  .then(data => {
-    if (data.data && data.data.length > 0) {
-      data.data.forEach(book => {
-        const bookId = `strapi_${book.id}`;
-        books[bookId] = {
-          title: book.Title || 'Untitled',
-          price: book.Price ? `${book.Price}` : "0.00"
-        };
-      });
-    }
-  })
-  .catch(error => {
-    console.error('Error fetching Strapi books for checkout:', error);
-  });
-
 // Wilaya-Daira data structure
 const wilayaDairaData = {
   'Adrar': ['Adrar', 'Aougrout', 'Aoulef', 'Bordj Badji Mokhtar', 'Charouine', 'Fenoughil', 'Reggane', 'Tamentit', 'Timimoun', 'Zaouiet Kounta'],

@@ -1,4 +1,2 @@
-/**
- * Strapi API URL – used so all users (including mobile) can see books.
- */
-window.STRAPI_API_BASE = 'https://gentle-readers-production.up.railway.app';
+// Decap CMS / Netlify CMS can use this config file later if needed.
+// Currently no global JS config is required for the bookstore.

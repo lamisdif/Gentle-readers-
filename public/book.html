@@ -1556,43 +1556,8 @@
           }
         };
 
-        // Debug: Log total books count
-        console.log('Total books loaded:', Object.keys(books).length);
-
-        if (!window.STRAPI_API_BASE) {
-          window.STRAPI_API_BASE = 'https://gentle-readers-production.up.railway.app';
-        }
-        // Fetch and add Strapi books before processing
-        fetch(window.STRAPI_API_BASE + "/api/books?populate=*")
-          .then(res => res.json())
-          .then(data => {
-            if (data.data && data.data.length > 0) {
-              data.data.forEach(book => {
-                const bookId = `strapi_${book.id}`;
-                const imageUrl = book.Image?.url 
-                  ? (book.Image.url.startsWith('http') ? book.Image.url : window.STRAPI_API_BASE + book.Image.url)
-                  : 'https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable';
-                
-                books[bookId] = {
-                  title: book.Title || 'Untitled',
-                  author: book.Author || 'Unknown Author',
-                  description: book.Description || book.Summary || 'No description available.',
-                  description_ar: book.Description || book.Summary || 'لا يوجد وصف متاح.',
-                  cover: imageUrl,
-                  price: book.Price ? `${book.Price}` : "0.00",
-                  isbn: book.ISBN || '',
-                  inStock: book.Statu !== 'Out of Stock'
-                };
-              });
-            }
-            // After Strapi books are loaded, process the book page
-            processBookPage();
-          })
-          .catch(error => {
-            console.error('Error fetching Strapi books for book page:', error);
-            // Still process page even if Strapi fails
-            processBookPage();
-          });
+        // After static books are loaded, process the book page
+        processBookPage();
         
         function processBookPage() {
         const params = new URLSearchParams(window.location.search);
