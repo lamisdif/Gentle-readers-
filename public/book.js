@@ -772,7 +772,7 @@ const books = {
     price: "1,700.00",
     isbn: "9789776543286"
   }
-},
+,
   nineteen_eighty_four: {
     title: "1984",
     author: "جورج أورويل",
@@ -792,6 +792,7 @@ const books = {
     isbn: "9789776543311"
   }
 };
+
 
 function addToCart() {
   const urlParams = new URLSearchParams(window.location.search);
