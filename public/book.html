@@ -1766,7 +1766,16 @@
               return;
             }
 
-            const stored = JSON.parse(localStorage.getItem('cart') || '{}');
+            // Safely parse cart (it might be corrupted / old format)
+            const raw = localStorage.getItem('cart');
+            let stored;
+            try {
+              stored = raw ? JSON.parse(raw) : {};
+            } catch (e) {
+              console.warn('Invalid cart in localStorage, resetting.', e);
+              stored = {};
+            }
+
             if (Array.isArray(stored)) {
               // migrate old array cart -> object with quantities
               const obj = {};
@@ -1774,10 +1783,14 @@
               obj[bookId] = (obj[bookId] || 0) + 1;
               localStorage.setItem('cart', JSON.stringify(obj));
             } else {
+              if (!stored || typeof stored !== 'object') stored = {};
               stored[bookId] = (stored[bookId] || 0) + 1;
               localStorage.setItem('cart', JSON.stringify(stored));
             }
-            updateCartCounter();
+
+            if (typeof updateCartCounter === 'function') {
+              updateCartCounter();
+            }
 
             const lang = localStorage.getItem('lang') || 'en';
             alert(lang === 'ar' ? 'تم إضافة الكتاب إلى السلة بنجاح!' : 'Book added to cart successfully!');
