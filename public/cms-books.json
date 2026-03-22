@@ -2,11 +2,1621 @@
   {
     "slug": "الحكاية-الثالثة-عشر",
     "title": "الحكاية الثالثة عشر",
-    "author": "Unknown Author",
+    "author": "دايان ساتلفيد",
     "price": 3000,
     "status": "available",
     "description": "عرف أن ذلك الشعور في مؤخر العنق شائع إلى حد ما؛ لكن هذه أول مرة أختبره. مثل الكثير من الوحيدين، حواسي معتادة على وجود الآخرين، فأنا معتادة على أن أكون المتجسِسة الخفية في الغرفة أكثر من كوني المتجسَس عليها. والآن أحدهم يراقبني، وليس هذا فقط، بل وكان يراقبني لبعض الوقت. لكم من الوقت ظل هذا الشعور غير القابل للشك يدغدغني؟ تأملت الدقائق الأخيرة محاولة تتبع ذاكرة جسدي مع أحداث الكتاب. أكنت أراقَب منذ أن بدأت الراهبة الحديث إلى الشاب؟ منذ أن أُرشدت إلى داخل المنزل؟ أم قبل ذلك؟ حاولت أن أتذكر من دون تحريك عضلة واحدة، كنت منكبة على الصفحة كأن شيئًا لم يحد",
     "image": "/images/uploads/image_2026-03-17_234728824.png",
+    "draft": false
+  },
+  {
+    "slug": "zorba-al-yunani",
+    "title": "زوربا اليوناني",
+    "author": "نيكوس كازانتزاكيس",
+    "price": 2000,
+    "status": "available",
+    "description": "زوربا اليوناني رواية لنيكوس كازانتزاكيس. تحكي قصة مفكر يوناني شاب يغامر للهروب من حياته الكتبية بمساعدة أليكسيس زوربا الصاخب والغامض.",
+    "image": "imgs/زوربا اليوناني.jpg",
+    "draft": false
+  },
+  {
+    "slug": "yusuf-wa-ikhwatu-1",
+    "title": "يوسف وإخوته 1/4",
+    "author": "توماس مان",
+    "price": 9500,
+    "status": "available",
+    "description": "الجزء الأول من رباعية \\\"يوسف وإخوته\\\".",
+    "image": "imgs/4بوسف و اخوته اجزاء .jpg",
+    "draft": false
+  },
+  {
+    "slug": "your-psychological-complexes",
+    "title": "عقدك النفسية",
+    "author": "د.يوسف الحسني",
+    "price": 1500,
+    "status": "available",
+    "description": "A psychological exploration of human behavior and the complex mental patterns that shape our lives and relationships.",
+    "image": "imgs/عقدك النفسية.jpg",
+    "draft": false
+  },
+  {
+    "slug": "yohdoth-laylan",
+    "title": "يحدث ليلاً في الغرفة المغلقة",
+    "author": "مروى جوهر",
+    "price": 1500,
+    "status": "available",
+    "description": "Terrifying and mysterious events take place in a locked room, inspired by true events.",
+    "image": "imgs/يحدث ليلا.jpg",
+    "draft": false
+  },
+  {
+    "slug": "yasma3un-hasisaha",
+    "title": "يسمعون حسيسها",
+    "author": "أحمد خالد توفيق",
+    "price": 2000,
+    "status": "available",
+    "description": "A psychological thriller that explores the depths of human consciousness and the thin line between reality and imagination, where characters hear whispers that may or may not be real.",
+    "image": "imgs/يسمعون حسيسها.jpg",
+    "draft": false
+  },
+  {
+    "slug": "yaj3al-lak-makhraja",
+    "title": "يجعلك الله لك مخرجا",
+    "author": "أحمد الصابوني",
+    "price": 1400,
+    "status": "available",
+    "description": "This book offers hope and reassurance, focusing on how Allah provides relief and solutions in times of hardship, and encourages trust in divine wisdom.",
+    "image": "imgs/يجعل الله لك مخرجا.jpg",
+    "draft": false
+  },
+  {
+    "slug": "when-the-body-says-no",
+    "title": "عندما يقول الجسد لا",
+    "author": "جابور ماتيه",
+    "price": 1500,
+    "status": "available",
+    "description": "The hidden cost of stress and the mind-body connection. How emotional stress can manifest as physical illness.",
+    "image": "imgs/عندما يقول الجسد لا.jpg",
+    "draft": false
+  },
+  {
+    "slug": "what-women-want-men-to-know",
+    "title": "ما تريد النساء ان يعلمه الرجال",
+    "author": "ديباراة دي أنجليس",
+    "price": 1500,
+    "status": "available",
+    "description": "Insights into what women wish men understood about relationships, communication, and emotional needs.",
+    "image": "imgs/ما تريد النساء ان يعلمه الرجال.jpg",
+    "draft": false
+  },
+  {
+    "slug": "water-moon",
+    "title": "Water Moon",
+    "author": "Samantha Sotto Yambao",
+    "price": 1500,
+    "status": "available",
+    "description": "A magical realism novel about a young woman who discovers she can travel through time using a mysterious moon. As she navigates different eras and encounters various versions of herself, she must confront the choices that have shaped her life and find the courage to change her destiny.",
+    "image": "imgs/Water Moon.jpg",
+    "draft": false
+  },
+  {
+    "slug": "warandpeace",
+    "title": "الشيطان يحكي",
+    "author": "أحمد خالد مصطفى",
+    "price": 1500,
+    "status": "available",
+    "description": "A dark and compelling narrative where the devil himself tells stories, revealing the hidden truths and moral complexities of human nature.",
+    "image": "imgs/الشيطان يحكي.jpg",
+    "draft": false
+  },
+  {
+    "slug": "wadi-al-farashat",
+    "title": "وادي الفراشات",
+    "author": "أزهر جرجيس",
+    "price": 1500,
+    "status": "available",
+    "description": "رواية \\\"وادي الفراشات\\\".",
+    "image": "imgs/وادي الفراشات.jpg",
+    "draft": false
+  },
+  {
+    "slug": "vagus-nerve-reset",
+    "title": "إعادة برمجة جهازك العصبي",
+    "author": "آنا فيرجسون",
+    "price": 1300,
+    "status": "available",
+    "description": "A practical guide to training your body to recover from stress, anxiety, and trauma through nervous system exercises.",
+    "image": "imgs/اعادة برمجة.jpg",
+    "draft": false
+  },
+  {
+    "slug": "ugly-love",
+    "title": "Ugly Love",
+    "author": "Colleen Hoover",
+    "price": 1200,
+    "status": "available",
+    "description": "A passionate romance about Tate Collins and Miles Archer, exploring themes of love, loss, and healing from past trauma.",
+    "image": "imgs/ugly love.jpg",
+    "draft": false
+  },
+  {
+    "slug": "twisted-love",
+    "title": "Twisted Love",
+    "author": "Ana Huang",
+    "price": 1200,
+    "status": "available",
+    "description": "A steamy romance about Alex Volkov, a ruthless businessman, and Ava Chen, who becomes entangled in his dangerous world.",
+    "image": "imgs/twisted love.jpg",
+    "draft": false
+  },
+  {
+    "slug": "the-witcher-sword-of-destiny",
+    "title": "ذا ويتشر: سيف المصير",
+    "author": "أندجي سابكوفيسكي",
+    "price": 1600,
+    "status": "available",
+    "description": "The Witcher: Sword of Destiny is a collection of short stories following Geralt of Rivia as he faces monsters, moral dilemmas, and the destiny that binds him to Ciri.",
+    "image": "imgs/الوي.jpg",
+    "draft": false
+  },
+  {
+    "slug": "the-witcher-last-wish",
+    "title": "ذا ويتشر: الأمنية الأخيرة",
+    "author": "أندجي سابكوفيسكي",
+    "price": 1500,
+    "status": "available",
+    "description": "The Witcher: The Last Wish introduces Geralt of Rivia, a monster hunter whose adventures blend dark fantasy, folklore, and moral complexity.",
+    "image": "imgs/الويتشر .jpg",
+    "draft": false
+  },
+  {
+    "slug": "the-mountain-is-you",
+    "title": "الجبل هو أنت",
+    "author": "بريانـا ويست",
+    "price": 1400,
+    "status": "available",
+    "description": "A book about turning self-sabotage into self-mastery and how to face internal obstacles to achieve success.",
+    "image": "imgs/الجبل هو انت.jpg",
+    "draft": false
+  },
+  {
+    "slug": "the-monster-within",
+    "title": "الوحش الذي يسكنك",
+    "author": "إيناس سمير",
+    "price": 1300,
+    "status": "available",
+    "description": "A book about facing personal fears and dealing with the darker sides of human nature.",
+    "image": "imgs/الوحش الذي.jpg",
+    "draft": false
+  },
+  {
+    "slug": "the-idiot-brain",
+    "title": "المخ الأبله",
+    "author": "دين برنيت",
+    "price": 1900,
+    "status": "available",
+    "description": "A popular science book that explains how the human brain works and why it sometimes behaves irrationally or strangely.",
+    "image": "imgs/المخ الابله.jpg",
+    "draft": false
+  },
+  {
+    "slug": "the-hunger-games",
+    "title": "The Hunger Games",
+    "author": "Suzanne Collins",
+    "price": 1600,
+    "status": "available",
+    "description": "In a dystopian future, Katniss Everdeen volunteers to take her sister's place in a deadly televised competition. A gripping story of survival, rebellion, and sacrifice.",
+    "image": "imgs/the-hunger-games.jpg",
+    "draft": false
+  },
+  {
+    "slug": "the-days",
+    "title": "The Days",
+    "author": "Taha Hussein",
+    "price": 1200,
+    "status": "available",
+    "description": "The Days is the celebrated autobiographical trilogy of Taha Hussein, translated into English. He recounts his childhood in rural Egypt, his struggle with blindness, and his relentless pursuit of knowledge from the village kuttab to Al-Azhar and the Sorbonne.",
+    "image": "imgs/The days.jpg",
+    "draft": false
+  },
+  {
+    "slug": "tharthara-fawq-al-nil",
+    "title": "ثرثرة فوق النيل",
+    "author": "نجيب محفوظ",
+    "price": 1300,
+    "status": "out of stock",
+    "description": "ثرثرة فوق النيل رواية ساخرة لنجيب محفوظ تتبع مجموعة من المثقفين يجتمعون على مركب في النيل لمناقشة السياسة والمجتمع والحياة. تنتقد الرواية المجتمع المصري وتستكشف مواضيع خيبة الأمل والهروب والفجوة بين المثل الفكرية والواقع.",
+    "image": "imgs/ثرثرة فوق النيل.png",
+    "draft": false
+  },
+  {
+    "slug": "thani-ithnayn",
+    "title": "ثاني اثنين",
+    "author": "أدهم شرقاوي",
+    "price": 1200,
+    "status": "available",
+    "description": "A novel inspired by the story of the Prophet's migration, exploring themes of faith, companionship, and trust in Allah during life's most challenging journeys.",
+    "image": "imgs/ثاني اثنين.jpg",
+    "draft": false
+  },
+  {
+    "slug": "tariq-jahannam",
+    "title": "طريق جهنم",
+    "author": "أيمن العتوم",
+    "price": 1900,
+    "status": "available",
+    "description": "A political novel that delves into the life and rule of Muammar Gaddafi, exploring the brutality, oppression, and psychological manipulation of his regime in Libya.",
+    "image": "imgs/طريق جهنم.jpg",
+    "draft": false
+  },
+  {
+    "slug": "success-in-your-morning",
+    "title": "نجاحك في صباحك",
+    "author": "بنيامين سبول ومايكل زاندر",
+    "price": 1450,
+    "status": "available",
+    "description": "A book about the importance of morning habits and how to use your mornings to achieve success and productivity throughout the day.",
+    "image": "imgs/نجاحك في صباحك.jpg",
+    "draft": false
+  },
+  {
+    "slug": "stop-stress-before-it-stops-you",
+    "title": "ضعي حدا للتوتر",
+    "author": "كيفن ليمان",
+    "price": 1300,
+    "status": "available",
+    "description": "A book offering practical solutions for mothers to manage daily stress and achieve psychological balance.",
+    "image": "imgs/ضعي حدا للتوتر.jpg",
+    "draft": false
+  },
+  {
+    "slug": "saykolojyat-al-jamahir",
+    "title": "سيكولوجية الجماهير",
+    "author": "غوستاف لو بون",
+    "price": 1600,
+    "status": "available",
+    "description": "كتاب كلاسيكي في علم اجتماع الجماهير.",
+    "image": "imgs/سيكولوجية الجماهير.jpg",
+    "draft": false
+  },
+  {
+    "slug": "sariqat-al-kutub",
+    "title": "سارقة الكتب",
+    "author": "ماركوس زوساك",
+    "price": 2800,
+    "status": "available",
+    "description": "سارقة الكتب رواية قوية ومؤثرة تدور أحداثها في ألمانيا النازية، يرويها الموت نفسه. تحكي قصة ليسل ميمينجر، فتاة صغيرة تسرق الكتب وتشاركها مع الآخرين خلال الحرب العالمية الثانية. من خلال حبها للكلمات والقصص، تجد الأمل والإنسانية في أحلك الأوقات.",
+    "image": "imgs/سارقة الكتب.png",
+    "draft": false
+  },
+  {
+    "slug": "sapiens",
+    "title": "واحة يعقوب",
+    "author": "عمرو عبد الحميد",
+    "price": 1400,
+    "status": "available",
+    "description": "A tale of refuge and renewal, where an oasis becomes a symbol of hope and transformation in the midst of life's challenges.",
+    "image": "imgs/واحة يعقوب.jpg",
+    "draft": false
+  },
+  {
+    "slug": "sa-akun-hunak",
+    "title": "سأكون هناك",
+    "author": "كيونج سوك شين",
+    "price": 1800,
+    "status": "out of stock",
+    "description": "رواية قوية من تأليف كيونج سوك شين، الفائزة بجائزة المان بوكر الآسيوية 2011. تستكشف القصة مواضيع الفقدان والذاكرة والروابط الدائمة للحب والعائلة. تدور أحداثها في كوريا المعاصرة، وتتبع شخصيات تتنقل عبر تحديات الحياة وتجد القوة في الارتباط.",
+    "image": "imgs/سأكون هناك.jpg",
+    "draft": false
+  },
+  {
+    "slug": "rasail-silvia-plath",
+    "title": "رسائل سيلفيا بلاث",
+    "author": "سيلفيا بلاث",
+    "price": 2800,
+    "status": "available",
+    "description": "مختارات من رسائل سيلفيا بلاث.",
+    "image": "imgs/رسائل سيلفيا بلاث.jpg",
+    "draft": false
+  },
+  {
+    "slug": "rasail-ila-milina",
+    "title": "رسائل إلى ميلينا",
+    "author": "فرانز كافكا",
+    "price": 4100,
+    "status": "out of stock",
+    "description": "مجموعة من الرسائل الحميمة من فرانز كافكا إلى ميلينا ييسينسكا، تكشف عن الصلة العاطفية والفكرية العميقة بين عقلين استثنائيين.",
+    "image": "imgs/رسائل الى ميلينا.jpg",
+    "draft": false
+  },
+  {
+    "slug": "raaytu-yusuf",
+    "title": "رأيت يوسف",
+    "author": "مروة عبد الجواد",
+    "price": 1500,
+    "status": "out of stock",
+    "description": "رأيت يوسف رواية لمروة عبد الجواد تستكشف مواضيع الهوية والذاكرة والرحلة الشخصية من خلال أسلوب سردي غني مستوحى من تقاليد السرد العربية الكلاسيكية.",
+    "image": "imgs/رايت يوسف.jpg",
+    "draft": false
+  },
+  {
+    "slug": "qissa-mawt-mu3lan",
+    "title": "قصة موت معلن",
+    "author": "غابرييل غارسيا ماركيز",
+    "price": 1000,
+    "status": "available",
+    "description": "قصة موت معلن",
+    "image": "imgs/قصة موت معلن.jpg",
+    "draft": false
+  },
+  {
+    "slug": "qawaed",
+    "title": "قواعد",
+    "author": "Unknown",
+    "price": 1350,
+    "status": "available",
+    "description": "A fiction book with unique rules and a mysterious plot.",
+    "image": "imgs/قواعد.jpg",
+    "draft": false
+  },
+  {
+    "slug": "qawa3id-al-3ishq-al-arba3oon",
+    "title": "قواعد العشق الأربعون",
+    "author": "أليف شافاك",
+    "price": 3000,
+    "status": "available",
+    "description": "قواعد العشق الأربعون رواية جميلة لأليف شافاك تنسج معاً قصتين متوازيتين: رحلة امرأة أمريكية معاصرة لاكتشاف الذات وقصة القرن الثالث عشر لجلال الدين الرومي وشمس التبريزي. تستكشف الرواية مواضيع الحب والروحانية والتحول من خلال القواعد الأربعين للحب.",
+    "image": "imgs/قواعد العشق الاربعون.jpg",
+    "draft": false
+  },
+  {
+    "slug": "qasr-al-shawq",
+    "title": "قصر الشوق",
+    "author": "نجيب محفوظ",
+    "price": 2300,
+    "status": "available",
+    "description": "الجزء الثاني من ثلاثية القاهرة.",
+    "image": "imgs/قصر الشوق.jpg",
+    "draft": false
+  },
+  {
+    "slug": "qaryat-stibanchikogo",
+    "title": "قرية ستيبانتشيكوفو",
+    "author": "فيودور دوستويفسكي",
+    "price": 1700,
+    "status": "available",
+    "description": "قرية ستيبانتشيكوفو وسكانها رواية ساخرة عن قرية روسية صغيرة وسكانها المثيرين. تستكشف القصة بشكل فكاهي ديناميكيات اجتماعية والنفاق وعبثيات الحياة الريفية الروسية.",
+    "image": "imgs/غلاف-قرية-ستيبانتشيكوفو.jpg",
+    "draft": false
+  },
+  {
+    "slug": "qadaya-sherlock",
+    "title": "قضايا شيرلوك هولمز",
+    "author": "أرثر كونان دويل",
+    "price": 1200,
+    "status": "available",
+    "description": "A collection of detective stories featuring the brilliant Sherlock Holmes and his loyal companion Dr. Watson, solving complex mysteries through deductive reasoning.",
+    "image": "imgs/قضايا شيرلوك هولمز.jpg",
+    "draft": false
+  },
+  {
+    "slug": "pride-and-prejudice",
+    "title": "كبرياء وهوى",
+    "author": "جين أوستن",
+    "price": 2000,
+    "status": "out of stock",
+    "description": "رواية كلاسيكية عن الأخلاق والحب والطبقة الاجتماعية في إنجلترا في القرن التاسع عشر. تتبع التطور العاطفي لإليزابيث بينيت، التي تتعلم خطأ إصدار الأحكام المتسرعة وتدرك الفرق بين الخير السطحي والأساسي.",
+    "image": "imgs/كبرياء و هوى.png",
+    "draft": false
+  },
+  {
+    "slug": "pinocchio",
+    "title": "بينوكيو",
+    "author": "كارلو كولودي",
+    "price": 1800,
+    "status": "available",
+    "description": "قصة الدمية الخشبية بينوكيو.",
+    "image": "imgs/بينوكيو.png",
+    "draft": false
+  },
+  {
+    "slug": "oscar-wilde",
+    "title": "أوسكار وايلد",
+    "author": "أوسكار وايلد",
+    "price": 1700,
+    "status": "available",
+    "description": "مجموعة من الأعمال القصصية الكاملة لأوسكار وايلد، أحد أشهر كتاب العصر الفيكتوري. تعرض هذه المجموعة براعة وايلد في السخرية والأسلوب القصصي الفريد، وتضم قصصاً تمزج بين الفكاهة والأخلاق والتعليق الاجتماعي.",
+    "image": "imgs/اوسكار وايلد.jpg",
+    "draft": false
+  },
+  {
+    "slug": "oliver-twist",
+    "title": "Oliver Twist",
+    "author": "Charles Dickens",
+    "price": 1800,
+    "status": "available",
+    "description": "A classic Dickens novel following the adventures of Oliver Twist, an orphan who escapes from a workhouse and falls in with a gang of pickpockets led by the cunning Fagin. This timeless tale explores themes of poverty, crime, and redemption in Victorian London.",
+    "image": "imgs/Oliver Twist.jpg",
+    "draft": false
+  },
+  {
+    "slug": "odyssey",
+    "title": "المخ الابله",
+    "author": "دين برنيت",
+    "price": 1900,
+    "status": "available",
+    "description": "An exploration of the insatiable mind and its endless quest for knowledge, understanding, and meaning in life.",
+    "image": "imgs/المخ الابله.jpg",
+    "draft": false
+  },
+  {
+    "slug": "nobowat-sultan",
+    "title": "نبوءة قصر السلطان",
+    "author": "مروى جوهر",
+    "price": 1500,
+    "status": "available",
+    "description": "A horror novel about a mysterious palace and a terrifying prophecy, inspired by true events.",
+    "image": "imgs/نبوءة قصر السلطان.jpg",
+    "draft": false
+  },
+  {
+    "slug": "nineteen-eighty-four-orwell",
+    "title": "1984",
+    "author": "جورج أورويل",
+    "price": 1400,
+    "status": "available",
+    "description": "1984 هي رواية ديستوبية لجورج أورويل. تدور موضوعاتها حول عواقب الشمولية والمراقبة الجماعية والقمع المنهجي للأفراد والسلوكيات داخل المجتمع.",
+    "image": "imgs/1984.png",
+    "draft": false
+  },
+  {
+    "slug": "nafar-min-al-jinn",
+    "title": "نفر من الجن",
+    "author": "أيمن العتوم",
+    "price": 2000,
+    "status": "available",
+    "description": "A gripping horror novel that explores the mysterious world of jinn and the supernatural. The story blends reality with myth, following characters as they confront their deepest fears and the unknown. Through psychological and spiritual struggles, the novel delves into the boundaries between the seen and unseen worlds, challenging the characters' perceptions of reality and faith.",
+    "image": "imgs/نفر من الجن.jpg",
+    "draft": false
+  },
+  {
+    "slug": "muhadatha-layliya",
+    "title": "محادثة ليلية",
+    "author": "ساشا ناسبيني",
+    "price": 1400,
+    "status": "available",
+    "description": "رواية \\\"محادثة ليلية\\\".",
+    "image": "imgs/محادثة ليلية.jpg",
+    "draft": false
+  },
+  {
+    "slug": "mockingbird",
+    "title": "المستذلون المهانون",
+    "author": "فيودور دوستويفسكي",
+    "price": 1600,
+    "status": "available",
+    "description": "A compelling narrative about the marginalized and oppressed, exploring themes of social justice and human dignity.",
+    "image": "imgs/المستذلون المهانون.jpg",
+    "draft": false
+  },
+  {
+    "slug": "mobydick",
+    "title": "وادي الذئاب",
+    "author": "عمرو عبد الحميد",
+    "price": 1400,
+    "status": "available",
+    "description": "A thrilling adventure set in a mysterious valley where danger and discovery await, exploring themes of survival and primal instincts.",
+    "image": "imgs/وادي الذئاب.jpg",
+    "draft": false
+  },
+  {
+    "slug": "matjar-daljot",
+    "title": "متجر دالجوت للأحلام",
+    "author": "لي مي بيه",
+    "price": 1400,
+    "status": "available",
+    "description": "A fantasy novel that explores the concept of dreams as a commodity, where people can buy and sell their dreams in a mysterious shop, blending reality with imagination.",
+    "image": "imgs/متجر دالجوت للأحلام.jpg",
+    "draft": false
+  },
+  {
+    "slug": "matjar-al-tuhaf-1",
+    "title": "متجر التحف القديم 1/2",
+    "author": "تشارلز ديكنز",
+    "price": 3200,
+    "status": "available",
+    "description": "الجزء الأول من \\\"متجر التحف القديم\\\".",
+    "image": "imgs/متجر التحف القديم.png",
+    "draft": false
+  },
+  {
+    "slug": "masarrat-saghira",
+    "title": "مسرات صغيرة",
+    "author": "آلان دو بوتون",
+    "price": 1400,
+    "status": "out of stock",
+    "description": "جزء آخر من سلسلة مدرسة الحياة، يركز على إيجاد الفرح في اللحظات اليومية وتقدير المسرات الصغيرة التي تجعل الحياة جميلة. يعلم القراء الاستمتاع باللحظات البسيطة وإيجاد السعادة في العادي.",
+    "image": "imgs/مسرات صغيرة.jpg",
+    "draft": false
+  },
+  {
+    "slug": "marriage-life-guide",
+    "title": "دليل الحياة الزوجية",
+    "author": "كيفن ليمان",
+    "price": 1500,
+    "status": "available",
+    "description": "A comprehensive guide to a successful married life, covering the foundations of a healthy relationship and effective communication between spouses.",
+    "image": "imgs/دليل الحياة الزوجية.jpg",
+    "draft": false
+  },
+  {
+    "slug": "manhajiyat-al-seer",
+    "title": "منهجية السير إلى الله",
+    "author": "د. كفاح أبو هنود",
+    "price": 1500,
+    "status": "available",
+    "description": "A spiritual guidebook that outlines the methodology and steps for drawing closer to Allah, offering practical advice and inspiration for seekers on the path of faith.",
+    "image": "imgs/منهجية السير الى الله.jpg",
+    "draft": false
+  },
+  {
+    "slug": "malhamat-al-harafish",
+    "title": "ملحمة الحرافيش",
+    "author": "نجيب محفوظ",
+    "price": 3000,
+    "status": "out of stock",
+    "description": "ملحمة الحرافيش من أشهر أعمال نجيب محفوظ، تحكي قصة أجيال من الناس يعيشون في حارة بالقاهرة. تستكشف الرواية مواضيع القوة والعدالة الاجتماعية والطبيعة البشرية من خلال نسيج غني من الشخصيات والأحداث تمتد عبر أجيال متعددة.",
+    "image": "imgs/ملحمة الحرافيش.png",
+    "draft": false
+  },
+  {
+    "slug": "maktabat-muntasaf-al-layl",
+    "title": "مكتبة منتصف الليل",
+    "author": "مات هيغ",
+    "price": 1600,
+    "status": "out of stock",
+    "description": "A Sunday Times bestselling novel about infinite possibilities and second chances. Between life and death, there's a library where each book represents a different life you could have lived.",
+    "image": "imgs/مكتبة منتصف الليل.jpg",
+    "draft": false
+  },
+  {
+    "slug": "majdouline",
+    "title": "ماجدولين",
+    "author": "مصطفى لطفى المنفلوطي",
+    "price": 1200,
+    "status": "out of stock",
+    "description": "رواية كلاسيكية عربية رائعة من المنفلوطي تروي قصة ماجدولين، فتاة جميلة تعيش في قرية صغيرة. قصة مؤثرة عن الحب والجمال والطبيعة، تعكس براعة المنفلوطي في الوصف والأسلوب الأدبي الراقي. تحفة أدبية تبقى خالدة في الأدب العربي.",
+    "image": "imgs/ماجدولين.jpg",
+    "draft": false
+  },
+  {
+    "slug": "madhlun-mahzun",
+    "title": "مذلون مهانون",
+    "author": "فيودور دوستويفسكي",
+    "price": 2500,
+    "status": "available",
+    "description": "مذلون مهانون رواية عن كاتب شاب ينخرط مع عائلة ممزقة بسبب الظلم الاجتماعي. تستكشف القصة مواضيع الحب والتضحية ومعاناة الأبرياء في مجتمع فاسد.",
+    "image": "imgs/مذلون-مهانون-.jpg",
+    "draft": false
+  },
+  {
+    "slug": "lotr",
+    "title": "دليل الحياة الزوجية",
+    "author": "كيفن ليمان",
+    "price": 1500,
+    "status": "available",
+    "description": "A comprehensive guide to a successful married life, covering the foundations of a healthy relationship and effective communication between spouses.",
+    "image": "imgs/دليل الحياة الزوجية.jpg",
+    "draft": false
+  },
+  {
+    "slug": "little-women",
+    "title": "نساء صغيرات",
+    "author": "لويزا ماي ألكوت",
+    "price": 3000,
+    "status": "out of stock",
+    "description": "A classic coming-of-age story following the four March sisters - Meg, Jo, Beth, and Amy - as they navigate life, love, and personal growth during the Civil War era. This timeless tale explores themes of family, independence, and the challenges of growing up.",
+    "image": "imgs/نساء صغيرات.jpg",
+    "draft": false
+  },
+  {
+    "slug": "la-yumkinuka-iidhaayi",
+    "title": "لا يمكنك إيذائي",
+    "author": "ديفيد جوجينز",
+    "price": 1500,
+    "status": "out of stock",
+    "description": "An inspiring autobiography about overcoming adversity and pushing the limits of personal endurance to achieve success.",
+    "image": "imgs/لا يمكنك ايذائي.jpg",
+    "draft": false
+  },
+  {
+    "slug": "kull-shay-an-al-hob",
+    "title": "كل شيء عن الحب",
+    "author": "بيل هوكس",
+    "price": 1700,
+    "status": "available",
+    "description": "\"كل شيء عن الحب\" لبيل هوكس هو استكشاف قوي للحب بجميع أشكاله. يتحدى الكتاب المفاهيم التقليدية للحب ويقدم رؤية تحويلية للحب كممارسة للحرية والعدالة والشفاء.",
+    "image": "imgs/كل شيء عن الحب.png",
+    "draft": false
+  },
+  {
+    "slug": "kull-azraq-al-sama",
+    "title": "كل أزرق السماء",
+    "author": "ميليسا را كوستا",
+    "price": 2000,
+    "status": "out of stock",
+    "description": "رواية مؤثرة عن رحلة شفاء واكتشاف الذات. تتبع قصة شخصية تبدأ رحلة في فان قديم عبر المناظر الطبيعية الخلابة، بحثاً عن معنى الحياة والحرية. قصة جميلة عن المغامرة والتحرر من الماضي.",
+    "image": "imgs/كل أزرق السماء.jpg",
+    "draft": false
+  },
+  {
+    "slug": "know-your-other-face",
+    "title": "اعرف وجهك الآخر",
+    "author": "د. يوسف الحسني",
+    "price": 1500,
+    "status": "available",
+    "description": "A book that sheds light on the hidden aspects of personality and how to discover and develop your true self.",
+    "image": "imgs/اعرف وجهك.jpg",
+    "draft": false
+  },
+  {
+    "slug": "kayf-tatafakkar-siyasiyan",
+    "title": "كيف تفكر سياسياً - مدخل إلى 30 حكماً",
+    "author": "غراييم غارارد وجيمس برنارد ميرفي",
+    "price": 2000,
+    "status": "available",
+    "description": "مدخل إلى 30 حكيماً وباحثاً وسياسياً شكلت أفكارهم العالم.",
+    "image": "imgs/كيف تفكر سياسيا.png",
+    "draft": false
+  },
+  {
+    "slug": "kayf-tajid-al-hob",
+    "title": "كيف تجد الحب",
+    "author": "آلان دو بوتون",
+    "price": 1000,
+    "status": "out of stock",
+    "description": "جزء من سلسلة مدرسة الحياة، يستكشف هذا الكتاب فلسفة وعلم نفس الحب. يقدم رؤى حول كيفية العثور على العلاقات الهادفة والحفاظ عليها، ويفحص تعقيدات الحب الحديث والتعلق.",
+    "image": "imgs/كيف تجد الحب.jpg",
+    "draft": false
+  },
+  {
+    "slug": "jibril-wa-al-nabi",
+    "title": "جبريل والنبي",
+    "author": "فاضل الربيعي",
+    "price": 1400,
+    "status": "available",
+    "description": "كتاب تاريخي يتناول علاقة جبريل بالنبي.",
+    "image": "imgs/جبريل و النبي.jpg",
+    "draft": false
+  },
+  {
+    "slug": "it-starts-with-us",
+    "title": "It Starts With Us",
+    "author": "Colleen Hoover",
+    "price": 1200,
+    "status": "available",
+    "description": "The sequel to 'It Ends With Us' follows Lily as she navigates her new life with Atlas. When Ryle starts to show signs of change, Lily must decide if she can trust him again. This emotional journey explores themes of forgiveness, second chances, and the complex nature of love and family.",
+    "image": "imgs/It Starts With Us.jpeg",
+    "draft": false
+  },
+  {
+    "slug": "it-ends-with-us",
+    "title": "It Ends With Us",
+    "author": "Colleen Hoover",
+    "price": 1400,
+    "status": "available",
+    "description": "A powerful and emotionally raw story about Lily Bloom, a young woman who falls in love with a neurosurgeon named Ryle. When her first love, Atlas, reappears, everything Lily has built with Ryle is threatened. This novel explores the strength it takes to break cycles of abuse and the courage to choose yourself.",
+    "image": "imgs/It Ends With Us.jpg",
+    "draft": false
+  },
+  {
+    "slug": "isti3dadat-li-3aqd-qiran",
+    "title": "استعدادات لعقد قران",
+    "author": "فرانتس كافكا",
+    "price": 900,
+    "status": "available",
+    "description": "استعدادات لعقد قران مجموعة قصص قصيرة لفرانتس كافكا، تتضمن القصة التي تحمل العنوان وأعمال أخرى. تعرض هذه القصص أسلوب كافكا الفريد، مستكشفة مواضيع الاغتراب والبيروقراطية وعبثية الحياة الحديثة من خلال سرديات سريالية ورمزية.",
+    "image": "imgs/استعدادات لعقد قران.png",
+    "draft": false
+  },
+  {
+    "slug": "inna-rabbi-latif",
+    "title": "إن ربي لطيف",
+    "author": "عبدالرحمن مسعد",
+    "price": 900,
+    "status": "available",
+    "description": "A book that reflects on the subtle kindness and mercy of Allah in our lives, reminding readers of divine gentleness even in moments they may not notice.",
+    "image": "imgs/ان ربي لطيف.jpg",
+    "draft": false
+  },
+  {
+    "slug": "in-the-realm-of-hungry-ghosts",
+    "title": "في عالم الأشباح الجائعة",
+    "author": "جابور ماتيه",
+    "price": 1500,
+    "status": "available",
+    "description": "مواجهات مباشرة مع كل أنواع الإدمان. A direct confrontation with all types of addiction, exploring the roots and realities of dependency.",
+    "image": "imgs/في عالم الأشباح الجائعة.jpg",
+    "draft": false
+  },
+  {
+    "slug": "hobbit",
+    "title": "القلق الاستباقي",
+    "author": "د.سالي م.وينستون د.مارتن ن.سيف",
+    "price": 1300,
+    "status": "available",
+    "description": "An insightful exploration of anticipatory anxiety and how to manage the psychological challenges of modern life.",
+    "image": "imgs/القلق الاستباقي.jpg",
+    "draft": false
+  },
+  {
+    "slug": "hitchhikers",
+    "title": "اعادة برمجة",
+    "author": "انا فيرجسون",
+    "price": 1300,
+    "status": "available",
+    "description": "A comprehensive guide to self-development and reprogramming the mind to achieve success and happiness in life.",
+    "image": "imgs/اعادة برمجة.jpg",
+    "draft": false
+  },
+  {
+    "slug": "hatha-ma-hadath-maaha",
+    "title": "هذا ما حدث معها",
+    "author": "أسامة المسلم",
+    "price": 1200,
+    "status": "available",
+    "description": "An impactful novel that tells the story of a young girl in a desert village dealing with challenges and difficult circumstances. The story follows her journey in facing hardships and finding inner strength to overcome obstacles and achieve her dreams.",
+    "image": "imgs/هذا ما حدث معها.jpg",
+    "draft": false
+  },
+  {
+    "slug": "hasees",
+    "title": "هسيس",
+    "author": "عبدالله بوموزة",
+    "price": 1400,
+    "status": "out of stock",
+    "description": "A deep psychological horror novel dealing with human inner fears and existential terror. The story follows a character facing their real nightmares in a world where fear becomes a tangible reality. A fascinating exploration of the human mind and its limits.",
+    "image": "imgs/هسيس.jpg",
+    "draft": false
+  },
+  {
+    "slug": "hal-sata2kul-qatti",
+    "title": "هل ستأكل قطتي مقلتي",
+    "author": "أحمد خالد توفيق",
+    "price": 2250,
+    "status": "available",
+    "description": "A humorous and satirical novel that explores the absurdities of modern life through the lens of a cat's perspective, blending comedy with social commentary.",
+    "image": "imgs/هل ستأكل قطتي مقلتي.jpg",
+    "draft": false
+  },
+  {
+    "slug": "hakatha-takalam-zarathustra",
+    "title": "هكذا تكلم زرادشت",
+    "author": "فريدريش نيتشه",
+    "price": 2500,
+    "status": "available",
+    "description": "كتاب فلسفي شهير لنيتشه.",
+    "image": "imgs/هكذا تكلم زرادشت.jpg",
+    "draft": false
+  },
+  {
+    "slug": "hakatha-takalam-tabrizi-4",
+    "title": "هكذا تكلم تبريزي 4",
+    "author": "شمس الدين التبريزي",
+    "price": 900,
+    "status": "available",
+    "description": "The conversations and spiritual teachings of Shams Tabrizi. Part 4.",
+    "image": "imgs/هكذا تكلم تبريزي  4.png",
+    "draft": false
+  },
+  {
+    "slug": "hakatha-takalam-tabrizi-3",
+    "title": "هكذا تكلم تبريزي 3",
+    "author": "شمس الدين التبريزي",
+    "price": 1200,
+    "status": "available",
+    "description": "The conversations and spiritual teachings of Shams Tabrizi. Part 3.",
+    "image": "imgs/هكذا تكلم تبريزي 3.png",
+    "draft": false
+  },
+  {
+    "slug": "hakatha-takalam-tabrizi-2",
+    "title": "هكذا تكلم تبريزي 2",
+    "author": "شمس الدين التبريزي",
+    "price": 1200,
+    "status": "available",
+    "description": "The conversations and spiritual teachings of Shams Tabrizi. Part 2.",
+    "image": "imgs/هكذا تكلم تبريزي 2.png",
+    "draft": false
+  },
+  {
+    "slug": "hakatha-takalam-tabrizi-1",
+    "title": "هكذا تكلم تبريزي 1",
+    "author": "شمس الدين التبريزي",
+    "price": 1200,
+    "status": "available",
+    "description": "The conversations and spiritual teachings of Shams Tabrizi. Part 1.",
+    "image": "imgs/هكذا تكلم تبريزي 1.png",
+    "draft": false
+  },
+  {
+    "slug": "hakadha-tata3afa",
+    "title": "هكذا تتعافى",
+    "author": "بريانا ويست",
+    "price": 1200,
+    "status": "available",
+    "description": "كتاب تحفيزي عميق يقدم دليل شامل للشفاء والتحول الشخصي. يقدم بريانا ويست نصائح عملية وقوية لمساعدتك على التعافي من الصدمات، بناء الثقة بالنفس، وإيجاد طريقك نحو حياة أكثر إشباعاً وهدفاً.",
+    "image": "imgs/هكذا تتعافى.jpg",
+    "draft": false
+  },
+  {
+    "slug": "haflat-al-tees",
+    "title": "حفلة التيس",
+    "author": "ماريو بارغاس يوسا",
+    "price": 2000,
+    "status": "available",
+    "description": "رواية \\\"حفلة التيس\\\".",
+    "image": "imgs/حفلة التيس.jpg",
+    "draft": false
+  },
+  {
+    "slug": "hadith-al-sabah-wal-masa",
+    "title": "حديث الصباح والمساء",
+    "author": "نجيب محفوظ",
+    "price": 1700,
+    "status": "out of stock",
+    "description": "حديث الصباح والمساء رواية لنجيب محفوظ تنسج معاً قصص شخصيات متعددة عبر أجيال مختلفة، مستكشفة مواضيع الزمن والذاكرة وترابط حيوات البشر من خلال محادثات وسرديات تمتد من الصباح إلى المساء.",
+    "image": "imgs/حديث الصباح والمساء.jpg",
+    "draft": false
+  },
+  {
+    "slug": "greatgatsby",
+    "title": "مرتفعات ويذرنج",
+    "author": "إيميلي برونتي",
+    "price": 1500,
+    "status": "available",
+    "description": "A passionate and tumultuous love story set on the Yorkshire moors, exploring themes of revenge, obsession, and the destructive power of love.",
+    "image": "imgs/مرتفعات ويذرنج.jpg",
+    "draft": false
+  },
+  {
+    "slug": "fi-sohbat-al-habib",
+    "title": "في صحبة الحبيب",
+    "author": "د. كفاح أبو هنود",
+    "price": 1600,
+    "status": "available",
+    "description": "This book presents the biography of Prophet Muhammad (peace be upon him) in a contemporary style, highlighting inspiring moments and values from his blessed life in a simple and engaging way.",
+    "image": "imgs/في صحبة الحبيب.jpg",
+    "draft": false
+  },
+  {
+    "slug": "fi-qabwi",
+    "title": "في قبوي",
+    "author": "فيودور دوستويفسكي",
+    "price": 1200,
+    "status": "out of stock",
+    "description": "مذكرات من تحت الأرض (المعروف أيضاً باسم في قبوي) هي رواية فلسفية تقدم اعتراف راوٍ معزول ومرير. تستكشف مواضيع الإرادة الحرة والحتمية وطبيعة الوعي الإنساني.",
+    "image": "imgs/في-قبوي.jpg",
+    "draft": false
+  },
+  {
+    "slug": "fatat-al-yaka",
+    "title": "فتاة الياقة",
+    "author": "عمرو عبد الحميد",
+    "price": 1400,
+    "status": "available",
+    "description": "A story about a girl with a distinctive collar, exploring themes of uniqueness, social expectations, and the courage to be different in a conformist world.",
+    "image": "imgs/فتاة الياقة الزرقاء.jpg",
+    "draft": false
+  },
+  {
+    "slug": "fan-al-lamabalaa",
+    "title": "فن اللامبالاة",
+    "author": "مارك مانسون",
+    "price": 1600,
+    "status": "available",
+    "description": "الكتاب الشهير \\\"فن اللامبالاة\\\".",
+    "image": "imgs/فن اللامبالاة.jpg",
+    "draft": false
+  },
+  {
+    "slug": "eva-luna",
+    "title": "إيفا لونا",
+    "author": "إيزابيل الليندي",
+    "price": 2100,
+    "status": "available",
+    "description": "سيرة تخييلية لراوية موهوبة تنشأ في أمريكا اللاتينية وسط اضطرابات سياسية واجتماعية. عبر واقعية سحرية، تنسج إيفا حكايات تصوغ هويتها وعلاقاتها—لا سيما مع رولف كارليه—وتكشف قوة السرد في مقاومة القهر وصناعة المصير.",
+    "image": "imgs/ايفا لونا.jpg",
+    "draft": false
+  },
+  {
+    "slug": "el9adimon",
+    "title": "القادمون",
+    "author": "أحمد خالد مصطفى",
+    "price": 1800,
+    "status": "available",
+    "description": "A timeless tale of love, class, and societal expectations. Elizabeth Bennet navigates the complexities of Regency-era England.",
+    "image": "imgs/el9adimon.jpg",
+    "draft": false
+  },
+  {
+    "slug": "dhikrayat-shita-fi-mashaer-al-sayf",
+    "title": "ذكريات شتاء في مشاعر الصيف",
+    "author": "فيودور دوستويفسكي",
+    "price": 1200,
+    "status": "out of stock",
+    "description": "ذكريات شتاء في مشاعر الصيف مجموعة من أعمال دوستويفسكي تستكشف التباين بين الفصول والعواطف. تغوص القصص في علم النفس البشري وتعقيد المشاعر عبر الأوقات المختلفة.",
+    "image": "imgs/ذكريات-شتاء-.jpg",
+    "draft": false
+  },
+  {
+    "slug": "dhikrayat-min-manzil-al-amwat",
+    "title": "ذكريات من منزل الأموات",
+    "author": "فيودور دوستويفسكي",
+    "price": 1850,
+    "status": "out of stock",
+    "description": "منزل الأموات رواية شبه سيرة ذاتية مبنية على تجارب دوستويفسكي في معسكر سجون سيبيريا. تقدم وصفاً مفصلاً لحياة السجن وتستكشف مواضيع الطبيعة البشرية والمعاناة والفداء.",
+    "image": "imgs/ذكريات من منزل الأموات.jpg",
+    "draft": false
+  },
+  {
+    "slug": "dhahab-ma3a-al-rih",
+    "title": "ذهب مع الريح",
+    "author": "مارغريت ميتشل",
+    "price": 1200,
+    "status": "available",
+    "description": "الرواية الكلاسيكية الشهيرة \\\"Gone With The Wind\\\".",
+    "image": "imgs/ذهب مع الريح.jpg",
+    "draft": false
+  },
+  {
+    "slug": "dar-khawla",
+    "title": "دار خولة",
+    "author": "بثينة العيسى",
+    "price": 1300,
+    "status": "available",
+    "description": "رواية \\\"دار خولة\\\" لبثينة العيسى.",
+    "image": "imgs/دار خولة.png",
+    "draft": false
+  },
+  {
+    "slug": "crimeandpunishment",
+    "title": "عناق برائحة الورق",
+    "author": "منى سلامة",
+    "price": 1400,
+    "status": "available",
+    "description": "A sensual and evocative tale exploring the power of scent and touch in human relationships, where memories are intertwined with fragrance.",
+    "image": "imgs/عناق برائحة الورق.jpg",
+    "draft": false
+  },
+  {
+    "slug": "conversations-on-love",
+    "title": "محادثات في الحب",
+    "author": "ناتاشا لين",
+    "price": 1500,
+    "status": "available",
+    "description": "Conversations and reflections on love, relationships, and the human experience of connection.",
+    "image": "imgs/محادثات في الحب.jpg",
+    "draft": false
+  },
+  {
+    "slug": "catcher",
+    "title": "اعرف وجهك الاخر",
+    "author": "د.يوسف الحسني",
+    "price": 1500,
+    "status": "available",
+    "description": "A journey of self-discovery and identity exploration, where the protagonist learns to recognize and accept their true self.",
+    "image": "imgs/اعرف وجهك.jpg",
+    "draft": false
+  },
+  {
+    "slug": "caraval",
+    "title": "Caraval",
+    "author": "Stephanie Garber",
+    "price": 1500,
+    "status": "available",
+    "description": "A magical fantasy adventure where nothing is quite what it seems. Scarlett Dragna has never left her tiny island, but when she receives an invitation to Caraval, a once-a-year performance where the audience participates in the show, she enters a world of magic, mystery, and danger where she must find her sister before the five nights of Caraval are over.",
+    "image": "imgs/Caraval.jpg",
+    "draft": false
+  },
+  {
+    "slug": "cant-hurt-me",
+    "title": "لا يمكنك إيذائي",
+    "author": "ديفيد جوجينز",
+    "price": 1900,
+    "status": "available",
+    "description": "An inspiring autobiography about overcoming adversity and pushing the limits of personal endurance to achieve success.",
+    "image": "imgs/لا يمكنك ايذائي.jpg",
+    "draft": false
+  },
+  {
+    "slug": "bouncing-back-from-rejection",
+    "title": "التعافي من الرفض",
+    "author": "د. ليزلي بيكر فيلبس",
+    "price": 1500,
+    "status": "available",
+    "description": "A book that helps you build psychological resilience, overcome feelings of rejection and frustration, and regain self-confidence.",
+    "image": "imgs/التعافي من الرفض.jpg",
+    "draft": false
+  },
+  {
+    "slug": "bint-al-amir",
+    "title": "ابنة الأمير",
+    "author": "ألكسندر بوشكين",
+    "price": 1100,
+    "status": "available",
+    "description": "\\\"ابنة الأمر\\\" لألكسندر بوشكين.",
+    "image": "imgs/ابنة الامر.png",
+    "draft": false
+  },
+  {
+    "slug": "beit-khalati",
+    "title": "بيت خالتي",
+    "author": "أحمد خيري العمري",
+    "price": 1600,
+    "status": "available",
+    "description": "A nostalgic journey back to an aunt's house, filled with memories, family bonds, and the warmth of childhood experiences that shape who we become.",
+    "image": "imgs/بيت خالتي.jpg",
+    "draft": false
+  },
+  {
+    "slug": "be-the-person-who-makes-you-happy",
+    "title": "كن الشخص الذي يجعلك سعيدا",
+    "author": "غير معروف",
+    "price": 1200,
+    "status": "available",
+    "description": "A motivational book about self-love, happiness, and becoming the person who brings joy to your own life.",
+    "image": "imgs/كن الشخص الذي يجعلك سعيدا.jpg",
+    "draft": false
+  },
+  {
+    "slug": "bayn-al-qasrayn",
+    "title": "بين القصرين",
+    "author": "نجيب محفوظ",
+    "price": 2500,
+    "status": "available",
+    "description": "الجزء الأول من ثلاثية القاهرة.",
+    "image": "imgs/بين القصرين.jpg",
+    "draft": false
+  },
+  {
+    "slug": "ayyam-al-hijran",
+    "title": "أيام الهجران",
+    "author": "إيلينا فيرانتي",
+    "price": 1450,
+    "status": "out of stock",
+    "description": "رواية عن أولغا التي تنهار نفسيًا بعد ترك زوجها لها فجأة، فتغمرها الغيرة والغضب وفقدان المعنى. في نابولي، ومن خلال صوت اعترافي حاد، تتتبع محاولتها لاستعادة هويتها كأم وامرأة وكاتبة، مستكشفة حدود الحب والكرامة ولغة الألم.",
+    "image": "imgs/أيام الهجران.jpg",
+    "draft": false
+  },
+  {
+    "slug": "ayam-al-shatat",
+    "title": "أيام الشتات",
+    "author": "كمال رحيم",
+    "price": 2200,
+    "status": "available",
+    "description": "الجزء الثاني من ثلاثية اليهود لكمال رحيم. تتبع الرواية شخصيات تتنقل في الحياة في الشتات، مستكشفة مواضيع التشرد والذاكرة والبحث عن الوطن. تدور أحداثها في خلفية المدن الأوروبية، وتحكي قصة الحنين والانتماء.",
+    "image": "imgs/أيام الشتات.jpg",
+    "draft": false
+  },
+  {
+    "slug": "awlad-haretna",
+    "title": "أولاد حارتنا",
+    "author": "نجيب محفوظ",
+    "price": 3000,
+    "status": "out of stock",
+    "description": "أولاد حارتنا من أشهر وأكثر روايات نجيب محفوظ إثارة للجدل. تحكي قصة أجيال تعيش في حارة بالقاهرة، مستكشفة مواضيع القوة والدين والطبيعة البشرية من خلال شخصيات وأحداث رمزية.",
+    "image": "imgs/أولاد حارتنا.png",
+    "draft": false
+  },
+  {
+    "slug": "ask-and-it-is-given",
+    "title": "اسأل تعط",
+    "author": "إستر وجيري هيكس",
+    "price": 1700,
+    "status": "available",
+    "description": "A self-development book explaining the Law of Attraction and how to achieve your desires through positive thinking and changing beliefs.",
+    "image": "imgs/اسأل تعط.jpg",
+    "draft": false
+  },
+  {
+    "slug": "ash3alni",
+    "title": "أشعلني",
+    "author": "طاهرة مافي",
+    "price": 2000,
+    "status": "available",
+    "description": "رواية خيالية قوية من سلسلة 'Shatter Me' تتبع قصة جولييت فيرز، فتاة تمتلك قوة مدمرة في لمسها. بعد سنوات من السجن، تكتشف أن قوتها قد تكون المفتاح لإنقاذ عالم محطم. رواية عن القوة الداخلية والتحرر من الخوف.",
+    "image": "imgs/أشعلني.jpeg",
+    "draft": false
+  },
+  {
+    "slug": "ard-zikola",
+    "title": "أرض زيكولا",
+    "author": "عمرو عبد الحميد",
+    "price": 1200,
+    "status": "available",
+    "description": "A compelling narrative about a mysterious land and its inhabitants, exploring themes of identity, belonging, and the search for meaning in an unfamiliar world.",
+    "image": "imgs/ارض زيكولا.jpg",
+    "draft": false
+  },
+  {
+    "slug": "anne-of-green-gables",
+    "title": "Anne of Green Gables",
+    "author": "Lucy Maud Montgomery",
+    "price": 850,
+    "status": "out of stock",
+    "description": "The heartwarming story of Anne Shirley, an imaginative and talkative orphan who is mistakenly sent to live with Marilla and Matthew Cuthbert on Prince Edward Island. This beloved classic follows Anne's adventures and growth as she transforms the lives of everyone around her.",
+    "image": "imgs/Anne of green gables.jpg",
+    "draft": false
+  },
+  {
+    "slug": "anna-karenina",
+    "title": "أنا كارنينا",
+    "author": "ليف تولستوي",
+    "price": 5000,
+    "status": "available",
+    "description": "الرواية الروسية الشهيرة \\\"أنا كارنينا\\\".",
+    "image": "imgs/انا كارنينا -الجزئين.jpg",
+    "draft": false
+  },
+  {
+    "slug": "amwaj-akma",
+    "title": "امواج اكما",
+    "author": "عمرو عبد الحميد",
+    "price": 1450,
+    "status": "available",
+    "description": "A story of resilience and hope, where characters navigate through life's unpredictable waves.",
+    "image": "imgs/امواج اكما.jpg",
+    "draft": false
+  },
+  {
+    "slug": "amarita",
+    "title": "اماريتا",
+    "author": "عمرو عبد الحميد",
+    "price": 1200,
+    "status": "available",
+    "description": "A fascinating tale of adventure and discovery, set in a world where ancient secrets come to life.",
+    "image": "imgs/اماريتا.jpg",
+    "draft": false
+  },
+  {
+    "slug": "amal-3azima",
+    "title": "آمال عظيمة",
+    "author": "تشارلز ديكنز",
+    "price": 1800,
+    "status": "available",
+    "description": "Great Expectations is one of Charles Dickens's most celebrated novels. It tells the story of Pip, an orphan who dreams of becoming a gentleman. Through his journey, the novel explores themes of social class, ambition, love, and the consequences of one's choices in Victorian England.",
+    "image": "imgs/امال عظيمة.png",
+    "draft": false
+  },
+  {
+    "slug": "alsadis-ahmar",
+    "title": "السادس احمر",
+    "author": "أحمد خيري العمري",
+    "price": 1300,
+    "status": "available",
+    "description": "A coming-of-age novel that explores the memories and experiences of a young boy during his school years, focusing on the symbolism of the color red and its impact on his life and identity.",
+    "image": "imgs/السادس احمر.jpg",
+    "draft": false
+  },
+  {
+    "slug": "alchemist",
+    "title": "الهلكوت",
+    "author": "أحمد خالد مصطفى",
+    "price": 1300,
+    "status": "available",
+    "description": "A philosophical exploration of destruction and renewal, examining the cycles of life and the inevitability of change.",
+    "image": "imgs/الهلكوت.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-zawj-al-abadi",
+    "title": "الزوج الأبدي",
+    "author": "فيودور دوستويفسكي",
+    "price": 1300,
+    "status": "available",
+    "description": "الزوج الأبدي رواية نفسية عن رجل يكتشف أن زوجته المتوفاة كان لها عاشق. تستكشف القصة مواضيع الغيرة والانتقام والعلاقات المعقدة بين الرجال، في إطار سانت بطرسبرغ.",
+    "image": "imgs/الزوج-الأبدي.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-wajh-al-hajari",
+    "title": "الوجه الحجري",
+    "author": "Unknown",
+    "price": 1400,
+    "status": "available",
+    "description": "رواية الوجه الحجري",
+    "image": "imgs/الوجه الحجري.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-ta3oon",
+    "title": "الطاعون",
+    "author": "ألبير كامو",
+    "price": 1350,
+    "status": "available",
+    "description": "الطاعون رواية رمزية قوية لألبير كامو عن وباء يضرب مدينة وهران الجزائرية. من خلال قصة الدكتور ريوك وشخصيات أخرى، يستكشف كامو مواضيع التضامن الإنساني ومقاومة المعاناة وعبثية الوجود في مواجهة كون غير مبال.",
+    "image": "imgs/الطاعون.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-sukkariyya",
+    "title": "السكرية",
+    "author": "نجيب محفوظ",
+    "price": 2000,
+    "status": "available",
+    "description": "الجزء الثالث من ثلاثية القاهرة.",
+    "image": "imgs/السكرية.png",
+    "draft": false
+  },
+  {
+    "slug": "al-sindbad-al-a3ma",
+    "title": "السندباد الأعمى",
+    "author": "بثينة العيسى",
+    "price": 1700,
+    "status": "available",
+    "description": "رواية سريالية آسرة من تأليف بثينة العيسى. تتبع القصة 'السندباد الأعمى' في رحلة عبر البحر والحرب، مستكشفة مواضيع الذاكرة والفقدان والبحث عن المعنى في عالم مجزأ. تمزج الرواية بين الواقع والخيال، مخلقة نسيجاً غنياً من التجربة الإنسانية.",
+    "image": "imgs/السندباد الاعمى.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-shayatin",
+    "title": "الشياطين",
+    "author": "فيودور دوستويفسكي",
+    "price": 4000,
+    "status": "out of stock",
+    "description": "الشياطين (المعروف أيضاً باسم الممسوسون) هي واحدة من أكثر روايات دوستويفسكي تعقيداً، تستكشف الراديكالية السياسية والعدمية والانحلال الأخلاقي للمجتمع الروسي.",
+    "image": "imgs/الشياطين.png",
+    "draft": false
+  },
+  {
+    "slug": "al-naqous-al-zujaji",
+    "title": "الناقوس الزجاجي",
+    "author": "سيلفيا بلاث",
+    "price": 1700,
+    "status": "out of stock",
+    "description": "رواية 'الناقوس الزجاجي' هي العمل الروائي الوحيد للشاعرة الأمريكية سيلفيا بلاث. تدور أحداث الرواية حول إيستر غرينوود، شابة موهوبة تفوز بفرصة للعمل في مجلة موضة بنيويورك. رغم النجاح الظاهري، تعاني من شعور متزايد بالعزلة والاضطراب النفسي، مما يؤدي بها إلى محاولة انتحار ودخولها مصحة نفسية. تُسلط الرواية الضوء على الصراعات الداخلية للبطلة، خاصة فيما يتعلق بتوقعات المجتمع من النساء والقيود المفروضة عليهن. يُستخدم 'الناقوس الزجاجي' كاستعارة لتمثيل الشعور بالاختناق والعزلة التي تعاني منها. تُعتبر هذه الرواية من الأعمال الأدبية الكلاسيكية التي تناولت موضوعات الصحة النفسية والهوية النسائية بعمق وصدق.",
+    "image": "imgs/الناقوس الزجاجي.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-nabi-al-afriqi",
+    "title": "النبي الافريقي",
+    "author": "Unknown",
+    "price": 1400,
+    "status": "available",
+    "description": "رواية النبي الافريقي",
+    "image": "imgs/النبي الافريقي.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-muslim-al-yahudi",
+    "title": "المسلم اليهودي",
+    "author": "كمال رحيم",
+    "price": 2000,
+    "status": "available",
+    "description": "رواية قوية لكمال رحيم تستكشف الهوية والانتماء وتقاطعات التراث الديني والثقافي المعقدة. تتبع القصة بطل الرواية وهو يتنقل في الهوية المزدوجة لكونه يهودياً ومسلماً في المجتمع المعاصر.",
+    "image": "imgs/المسلم اليهودي.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-muqamir",
+    "title": "المقامر",
+    "author": "فيودور دوستويفسكي",
+    "price": 1300,
+    "status": "available",
+    "description": "المقامر رواية لفيودور دوستويفسكي عن مدرس شاب يصبح مهووساً بالمقامرة. تستكشف القصة مواضيع الإدمان والعاطفة والقوة المدمرة للهوس، في إطار منتجع ألماني للمقامرة.",
+    "image": "imgs/المقامر.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-muhakama",
+    "title": "المحاكمة",
+    "author": "فرانز كافكا",
+    "price": 2000,
+    "status": "available",
+    "description": "رواية كافكا الشهيرة عن يوزف ك. والسلطة الغامضة.",
+    "image": "imgs/المحاكمة.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-mu3allim-wa-margarita",
+    "title": "المعلم ومارغريتا",
+    "author": "ميخائيل بولغاكوف",
+    "price": 2000,
+    "status": "available",
+    "description": "الرواية الشهيرة \\\"المعلم ومارغريتا\\\".",
+    "image": "imgs/المعلم و مارغريتا.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-mithl-wa-qissa-aleima",
+    "title": "المثل وقصة أليمة",
+    "author": "فيودور دوستويفسكي",
+    "price": 1700,
+    "status": "available",
+    "description": "المثل وقصة أليمة يجمع بين عملين لدوستويفسكي، يستكشفان مواضيع البراءة والمعاناة والحالة الإنسانية. تفحص القصص كيف تتنقل القلوب النقية في عالم مليء بالألم والتعقيد.",
+    "image": "imgs/غلاف-المثل.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-masih-yuslab-min-jadid",
+    "title": "المسيح يصلب من جديد",
+    "author": "نيكوس كازانتزاكيس",
+    "price": 1500,
+    "status": "available",
+    "description": "المسيح يصلب من جديد رواية قوية لنيكوس كازانتزاكيس تحكي قصة قرية يونانية تقرر إعادة تمثيل آلام المسيح خلال عيد الفصح. تستكشف الرواية مواضيع الإيمان والتضحية والصراع بين المثل الروحية والطبيعة البشرية.",
+    "image": "imgs/المسيح يصلب من جديد.png",
+    "draft": false
+  },
+  {
+    "slug": "al-mareedh",
+    "title": "المريض",
+    "author": "خوان جوميز خورادو",
+    "price": 3000,
+    "status": "available",
+    "description": "المريض (EL PACIENTE) رواية طبية مثيرة من خوان جوميز خورادو. قصة مروعة ومكثفة تؤكد على مواضيع الخطر والغموض وربما طبيب منحرف. رواية تثير الأدرينالين وتسابق الزمن.",
+    "image": "imgs/المريض.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-maddah-al-sawda",
+    "title": "المادة السوداء",
+    "author": "نيك كراوتش",
+    "price": 2400,
+    "status": "available",
+    "description": "المادة السوداء رواية أمريكية معاصرة لنيك كراوتش تستكشف مواضيع مظلمة من خلال أسلوب سردي مجزأ. تتعمق الرواية في قضايا نفسية واجتماعية معقدة، مقدمة فحصاً مثيراً للتفكير في الحياة الحديثة والطبيعة البشرية.",
+    "image": "imgs/المادة السوداء.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-layali-al-bayda",
+    "title": "الليالي البيضاء",
+    "author": "فيودور دوستويفسكي",
+    "price": 900,
+    "status": "out of stock",
+    "description": "White Nights is a sentimental story from the diary of a dreamer, set in St. Petersburg. It tells the story of a lonely young man who falls in love with a young woman he meets during the white nights of summer. A beautiful tale of unrequited love and fleeting moments of connection.",
+    "image": "imgs/الليالي-البيضاء.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-jara-wa-al-qalb-al-daif",
+    "title": "الجارة والقلب الضعيف",
+    "author": "فيودور دوستويفسكي",
+    "price": 1300,
+    "status": "available",
+    "description": "الجارة والقلب الضعيف مجموعة من قصتين لدوستويفسكي. تستكشف القصص مواضيع العلاقات الإنسانية والهشاشة العاطفية والطبيعة الحساسة للقلب البشري في التفاعلات الاجتماعية.",
+    "image": "imgs/الجارة قلب ضعيف.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-ikhwa-karamazov",
+    "title": "الإخوة كارامازوف - الجزء الأول",
+    "author": "فيودور دوستويفسكي",
+    "price": 4500,
+    "status": "out of stock",
+    "description": "The Brothers Karamazov is Dostoevsky's final and greatest novel, exploring themes of faith, doubt, free will, and morality through the story of three brothers and their relationship with their father. A profound philosophical and psychological masterpiece.",
+    "image": "imgs/الاخوة كارامازوف الرافدين.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-houl",
+    "title": "الهول",
+    "author": "أحمد خالد توفيق",
+    "price": 1000,
+    "status": "available",
+    "description": "A horror novel about mysterious and terrifying events in a suspenseful psychological atmosphere.",
+    "image": "imgs/الهول.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-gharib",
+    "title": "الغريب",
+    "author": "ألبير كامو",
+    "price": 1000,
+    "status": "available",
+    "description": "الغريب تحفة ألبير كامو الوجودية التي تحكي قصة مورسو، فرنسي جزائري يرتكب جريمة قتل بلا معنى على شاطئ. تستكشف الرواية مواضيع العبث والاغتراب وعدم معنى الحياة من خلال فلسفة كامو في العبثية.",
+    "image": "imgs/الغريب.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-fuqara",
+    "title": "الفقراء",
+    "author": "فيودور دوستويفسكي",
+    "price": 1250,
+    "status": "out of stock",
+    "description": "الفقراء هي أول رواية لدوستويفسكي، عمل رسائلي يروي قصة مراسلين فقيرين. تستكشف الرواية مواضيع الفقر والحب والكرامة الإنسانية من خلال رسائلهما.",
+    "image": "imgs/الفقراء.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-din-wa-karama",
+    "title": "الدين والكرامة الإنسانية",
+    "author": "د. عبد الجبار الرفاعي",
+    "price": 2000,
+    "status": "available",
+    "description": "كتاب في فلسفة الدين والكرامة الإنسانية.",
+    "image": "imgs/الدين و الكرامة الانسانية.png",
+    "draft": false
+  },
+  {
+    "slug": "al-dawood",
+    "title": "عمارة آل داوود",
+    "author": "مروى جوهر",
+    "price": 1500,
+    "status": "available",
+    "description": "A novel inspired by true events, revolving around a mysterious building and terrifying incidents in an Egyptian city.",
+    "image": "imgs/ال داوود.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-batal-al-saghir",
+    "title": "البطل الصغير",
+    "author": "فيودور دوستويفسكي",
+    "price": 1200,
+    "status": "available",
+    "description": "البطل الصغير قصة قصيرة لدوستويفسكي تستكشف مواضيع الطفولة والبراءة والبطولة في عالم صغير.",
+    "image": "imgs/البطل الصغير.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-baron",
+    "title": "البارون",
+    "author": "شهد قربان",
+    "price": 1500,
+    "status": "available",
+    "description": "A mysterious and thrilling novel revolving around the enigmatic character of the Baron who appears in a world full of secrets and symbols. The story follows a journey of discovering the truth behind this mysterious character in a world full of deception and illusion.",
+    "image": "imgs/البارون.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-ayam-illustrated",
+    "title": "الأيام",
+    "author": "طه حسين",
+    "price": 1200,
+    "status": "available",
+    "description": "السيرة الذاتية الملهمة لطه حسين، ترصد طفولته في صعيد مصر، ومعركته مع فقدان البصر، ورحلته من الكُتّاب إلى الأزهر ثم السوربون بحثاً عن العلم والحرية الفكرية.",
+    "image": "imgs/الايام HARDCOVER.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-ayam",
+    "title": "الأيام",
+    "author": "طه حسين",
+    "price": 3500,
+    "status": "available",
+    "description": "السيرة الذاتية الملهمة لطه حسين، ترصد طفولته في صعيد مصر، ومعركته مع فقدان البصر، ورحلته من الكُتّاب إلى الأزهر ثم السوربون بحثاً عن العلم والحرية الفكرية.",
+    "image": "imgs/الايام HARDCOVER.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-ablah-en",
+    "title": "The Idiot",
+    "author": "Fyodor Dostoevsky",
+    "price": 4800,
+    "status": "available",
+    "description": "A psychological masterpiece exploring the depths of human nature, morality, and the consequences of our actions.",
+    "image": "imgs/الابلة 1.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-ablah-ar",
+    "title": "الابلة",
+    "author": "فيودور دوستويفسكي",
+    "price": 4800,
+    "status": "available",
+    "description": "رواية روسية كلاسيكية تتناول قصة حب معقدة بين الأمير ميشكين وناستاسيا فيليبوفنا، مع عناصر من الحب والجنون.",
+    "image": "imgs/الابلة 1.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-ablah",
+    "title": "الأبله",
+    "author": "فيودور دوستويفسكي",
+    "price": 4800,
+    "status": "out of stock",
+    "description": "الأبله رواية عن الأمير ميشكين، رجل ذو قلب نقي وبراءة يعود إلى روسيا بعد علاج من الصرع. تتصادم خيرته وسذاجته مع المجتمع الفاسد من حوله، مما يؤدي إلى المأساة.",
+    "image": "imgs/الأبله.jpg",
+    "draft": false
+  },
+  {
+    "slug": "al-3adat-al-dharia",
+    "title": "العادات الذرية",
+    "author": "جيمس كلير",
+    "price": 1600,
+    "status": "available",
+    "description": "دليل عملي لبناء عادات جيدة وكسر السيئة عبر تغييرات صغيرة تراكمية. يعرض نموذج الإشارة/الرغبة/الاستجابة/المكافأة، وقوانين أربعة: اجعلها واضحة وجذابة وسهلة ومُرضية، مع تركيز على الهوية بحيث تصبح العادة جزءًا ممن تكون.",
+    "image": "imgs/العادات الذرية.jpg",
+    "draft": false
+  },
+  {
+    "slug": "akrahouka-la-tatrokni",
+    "title": "أكرهك لا تتركني",
+    "author": "Unknown",
+    "price": 3000,
+    "status": "available",
+    "description": "رواية أكرهك لا تتركني",
+    "image": "imgs/أكرهك لا تتركني.jpg",
+    "draft": false
+  },
+  {
+    "slug": "ahlam-al-3awda",
+    "title": "أحلام العودة",
+    "author": "كمال رحيم",
+    "price": 1800,
+    "status": "available",
+    "description": "الجزء الثالث من ثلاثية اليهود لكمال رحيم. تستكشف الرواية أحلام وتطلعات شخصيات تتوق للعودة إلى الوطن، متفحصة مواضيع الحنين والهوية والعلاقة المعقدة بين الذاكرة والواقع.",
+    "image": "imgs/أحلام العودة.jpg",
+    "draft": false
+  },
+  {
+    "slug": "ahdab-notredam",
+    "title": "أحدب نوتردام",
+    "author": "فيكتور هوغو",
+    "price": 2300,
+    "status": "available",
+    "description": "الرواية الكلاسيكية عن كاتدرائية نوتردام.",
+    "image": "imgs/أحدب نوتردام.png",
+    "draft": false
+  },
+  {
+    "slug": "ahbabt-wghadan",
+    "title": "أحببت وغدا",
+    "author": "د. عماد رشاد عثمان",
+    "price": 1700,
+    "status": "available",
+    "description": "A book about healing from toxic relationships, offering practical advice for self-understanding, overcoming emotional pain, and building healthy connections.",
+    "image": "imgs/احببت وغدا.jpg",
+    "draft": false
+  },
+  {
+    "slug": "adaa-al-ta2ira-al-waraqiya",
+    "title": "عداء الطائرة الورقية",
+    "author": "خالد حسيني",
+    "price": 1500,
+    "status": "out of stock",
+    "description": "رواية مؤثرة تتناول الصداقة والخيانه والفداء تدور أحداثها في أفغانستان والولايات المتحدة. رحلة إنسانية تبحث عن الغفران ومعنى الوفاء.",
+    "image": "imgs/عداء الطائرة الورقية.jpg",
+    "draft": false
+  },
+  {
+    "slug": "about-things",
+    "title": "عن اشياء",
+    "author": "أحمد عبد اللطيف",
+    "price": 1500,
+    "status": "available",
+    "description": "Reflections on life, loss, and the search for meaning between love and sadness.",
+    "image": "imgs/عن اشياء.jpg",
+    "draft": false
+  },
+  {
+    "slug": "abi-alladhi-akraho",
+    "title": "أبي الذي أكره",
+    "author": "د.عماد رشاد عثمان",
+    "price": 1000,
+    "status": "out of stock",
+    "description": "كتاب عميق يتناول موضوع التعافي من الإساءات الأبوية وصدمات الطفولة. يقدم د.عماد رشاد عثمان رؤية نفسية واجتماعية شاملة لفهم الآثار السلبية للتربية القاسية والعلاقات الأسرية السامة، مع تقديم استراتيجيات عملية للشفاء والنمو الشخصي.",
+    "image": "imgs/أبي الذي أكره.png",
+    "draft": false
+  },
+  {
+    "slug": "3inaq-bara2i7a",
+    "title": "عناق برائحة الورق",
+    "author": "منى سلامة",
+    "price": 1400,
+    "status": "available",
+    "description": "A sensual and evocative tale exploring the power of scent and touch in human relationships, where memories are intertwined with fragrance.",
+    "image": "imgs/عناق برائحة الورق.jpg",
+    "draft": false
+  },
+  {
+    "slug": "1984-psych",
+    "title": "عقدك النفسية",
+    "author": "د.يوسف الحسني",
+    "price": 1500,
+    "status": "available",
+    "description": "A psychological exploration of human behavior and the complex mental patterns that shape our lives and relationships.",
+    "image": "imgs/عقدك النفسية.jpg",
     "draft": false
   }
 ]

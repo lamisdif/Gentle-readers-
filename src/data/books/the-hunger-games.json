@@ -1,0 +1,9 @@
+{
+  "title": "The Hunger Games",
+  "author": "Suzanne Collins",
+  "price": 1600,
+  "status": "available",
+  "description": "In a dystopian future, Katniss Everdeen volunteers to take her sister's place in a deadly televised competition. A gripping story of survival, rebellion, and sacrifice.",
+  "image": "imgs/the-hunger-games.jpg",
+  "draft": false
+}

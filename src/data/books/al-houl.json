@@ -1,0 +1,9 @@
+{
+  "title": "الهول",
+  "author": "أحمد خالد توفيق",
+  "price": 1000,
+  "status": "available",
+  "description": "A horror novel about mysterious and terrifying events in a suspenseful psychological atmosphere.",
+  "image": "imgs/الهول.jpg",
+  "draft": false
+}
