@@ -345,10 +345,8 @@
         updateCartCounter();
         }
         
-        // Call processBookPage initially (will be called again after Strapi loads if needed)
-        if (!window.location.search.includes('strapi_')) {
-          processBookPage();
-        }
+        // Always run processBookPage — all books are now CMS-based
+        processBookPage();
 
         function addToCart() {
           try {

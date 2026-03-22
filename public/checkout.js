@@ -1,16 +1,4 @@
-import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js';
-
-const supabaseUrl = "https://fsximdllrhglabxbqvay.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzeGltZGxscmhnbGFieGJxdmF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3NTg0NzgsImV4cCI6MjA3MjMzNDQ3OH0.KiRJdFoW4DtDAPMLqH9Im3-37GhIFmD269iDsY7ih2Q"; // حطي هنا المفتاح العام من Supabase
-const supabase = createClient(supabaseUrl, supabaseKey);
-
 let books = {};
-      });
-    })
-    .catch(function (err) {
-      console.error('Error loading CMS books for checkout:', err);
-    });
-}
 
 // Wilaya-Daira data structure
 const wilayaDairaData = {
