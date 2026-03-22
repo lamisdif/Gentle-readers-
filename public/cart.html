@@ -1,23 +1,117 @@
-<!-- cart.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shopping Cart</title>
-  <script src="config.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Shopping Cart — Gentle Readers</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #FCF8D5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 32px 12px 60px;
+    }
+    .cart-wrapper {
+      width: 100%;
+      max-width: 680px;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #5e2217;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      transition: opacity 0.2s;
+    }
+    .back-link:hover { opacity: 0.7; }
+    .cart-card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 4px 32px rgba(94, 34, 23, 0.12);
+      padding: 32px 28px;
+    }
+    .cart-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #5e2217;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #cart-items {
+      list-style: none;
+      margin-bottom: 24px;
+    }
+    #cart-total {
+      font-size: 1.1rem;
+      color: #5e2217;
+      padding: 14px 0;
+      border-top: 2px solid #f0e8d0;
+      margin-bottom: 24px;
+      text-align: right;
+    }
+    .cart-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .btn-checkout {
+      flex: 1;
+      background: #5e2217;
+      color: #FCF8D5;
+      border: none;
+      border-radius: 10px;
+      padding: 13px 24px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-checkout:hover { background: #7a2d1e; }
+    .btn-checkout:active { transform: scale(0.98); }
+    .btn-clear {
+      background: #f0e8d0;
+      color: #5e2217;
+      border: none;
+      border-radius: 10px;
+      padding: 13px 20px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-clear:hover { background: #e5d8b8; }
+    @media (max-width: 480px) {
+      .cart-card { padding: 20px 14px; }
+      .cart-title { font-size: 1.3rem; }
+    }
+  </style>
 </head>
-<body class="bg-gray-100 p-6">
-  <div class="max-w-xl mx-auto bg-white shadow-md rounded-lg p-6">
-    <h1 class="text-2xl font-bold mb-4">Your Cart</h1>
-    <ul id="cart-items" class="list-disc list-inside space-y-2 text-gray-700"></ul>
-    <div class="mt-6 space-y-3">
-      <button onclick="clearCart()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Clear Cart</button>
-      <button onclick="proceedToCheckout()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 ml-2">Proceed to Checkout</button>
+<body>
+  <div class="cart-wrapper">
+    <a href="index.html" class="back-link">&#8592; Continue Shopping</a>
+    <div class="cart-card">
+      <h1 class="cart-title">🛒 Your Cart</h1>
+      <ul id="cart-items"></ul>
+      <div id="cart-total"></div>
+      <div class="cart-actions">
+        <button class="btn-checkout" onclick="proceedToCheckout()">Proceed to Checkout</button>
+        <button class="btn-clear" onclick="clearCart()">Clear Cart</button>
+      </div>
     </div>
   </div>
-  <!-- Load cart logic that maps IDs to human-readable titles -->
+
   <script src="cart.js"></script>
 </body>
 </html>
