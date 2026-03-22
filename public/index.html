@@ -801,7 +801,7 @@
                         </div>
                         <p class="book-title">${b.title || ''}</p>
                         <p class="book-author">${b.author || ''}</p>
-                        ${isOutOfStock ? '<p class="out-of-stock-notice" style="color: #dc2626; font-weight: bold; font-size: 12px; margin: 5px 0; text-align: center; background: rgba(220, 38, 38, 0.1); padding: 2px 8px; border-radius: 12px; display: inline-block;">Out of Stock / نفدت الكمية</p>' : ''}
+                        <p class="book-status-badge" style="color: ${isOutOfStock ? '#dc2626' : '#10b981'}; font-weight: bold; font-size: 12px; margin: 5px 0; text-align: center; background: ${isOutOfStock ? 'rgba(220,38,38,0.1)' : 'rgba(16,185,129,0.1)'}; padding: 2px 8px; border-radius: 12px; display: inline-block;">${isOutOfStock ? 'Out of Stock / نفدت الكمية' : 'Available / متوفر'}</p>
                         ${price ? '<p class="book-price">Price: ' + price + ' DZD</p>' : '<p class="book-price"></p>'}
                       </div>
                       <div class="flip-book-card-back">
