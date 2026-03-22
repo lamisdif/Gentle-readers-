@@ -341,6 +341,22 @@
       font-size: 14px;
       line-height: 1.4;
     }
+    .validation-error {
+      color: #dc2626;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 12px;
+      text-align: center;
+      display: none;
+      padding: 8px;
+      background: rgba(220, 38, 38, 0.05);
+      border-radius: 6px;
+    }
+    .cta:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      filter: grayscale(1);
+    }
   </style>
 </head>
 <body>
@@ -388,8 +404,8 @@
               <span id="checkout-delivery-label">DELIVERY METHOD / طريقة التوصيل</span>
               <select name="delivery" class="input_field" id="checkout-delivery-select" required>
                 <option value="" id="checkout-delivery-placeholder">Select delivery method / اختر طريقة التوصيل</option>
-                <option value="home" id="checkout-delivery-home">Home Delivery / التوصيل للمنزل (price: TBD)</option>
-                <option value="desk" id="checkout-delivery-desk">Desk Pickup / الاستلام من المكتب (price: TBD)</option>
+                <option value="home" id="checkout-delivery-home">Home Delivery / التوصيل للمنزل</option>
+                <option value="desk" id="checkout-delivery-desk">Desk Pickup / الاستلام من المكتب</option>
               </select>
             </div>
             <div>
@@ -404,6 +420,12 @@
                 <option value="" id="checkout-daira-placeholder">Select daira / اختر الدائرة</option>
               </select>
             </div>
+            <div id="desk-field" style="display: none;">
+              <span id="checkout-desk-label">DESK/AGENCY / المكتب</span>
+              <select name="desk" class="input_field" id="checkout-desk-select">
+                <option value="">Select agency / اختر المكتب</option>
+              </select>
+            </div>
             <div id="address-field" style="display: none;">
               <span id="checkout-address-label">ADDRESS / العنوان</span>
               <textarea name="address" class="input_field" id="checkout-address-input" placeholder="Enter your full address for home delivery / أدخل عنوانك الكامل للتوصيل للمنزل" rows="3" style="resize: vertical; min-height: 60px;"></textarea>
@@ -412,21 +434,25 @@
         </div>
       </div>
       <div class="card checkout animate-fade-in">
-        <div class="footer">
-          <label class="price" id="totalPrice">0 DZD</label>
-          <button type="submit" class="cta">
-            <span id="checkout-submit-btn">Submit Order / إرسال الطلب</span>
-            <svg width="15px" height="10px" viewBox="0 0 13 10">
-              <path d="M1,5 L11,5"></path>
-              <polyline points="8 1 12 5 8 9"></polyline>
-            </svg>
-          </button>
+        <div class="footer" style="flex-direction: column; align-items: stretch; gap: 8px; padding: 15px 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <label class="price" id="totalPrice">0 DZD</label>
+            <button type="submit" class="cta" id="checkout-submit-button" disabled>
+              <span id="checkout-submit-btn">Submit Order / إرسال الطلب</span>
+              <svg width="15px" height="10px" viewBox="0 0 13 10">
+                <path d="M1,5 L11,5"></path>
+                <polyline points="8 1 12 5 8 9"></polyline>
+              </svg>
+            </button>
+          </div>
+          <div id="validation-message" class="validation-error">
+            Please fill all required fields / الرجاء تعبئة جميع الحقول المطلوبة
+          </div>
         </div>
       </div>
     </form>
   </div>
-  <script src="lang.js"></script>
- 
+  <script src="js/shipping-data.js"></script>
   <script type="module" src="checkout.js"></script>
   
   <!-- Fallback script to ensure page is visible even if main scripts fail -->
