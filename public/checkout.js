@@ -121,9 +121,15 @@ function loadOrderSummary() {
 
   // Add shipping to summary
   const shippingTitle = document.createElement("span");
-  shippingTitle.textContent = lang === 'ar' ? 'التوصيل' : 'Shipping';
+  shippingTitle.textContent = "Shipping / التوصيل";
+  shippingTitle.style.fontWeight = "bold";
+  shippingTitle.style.fontSize = "14px";
+  
   const shippingPriceSpan = document.createElement("span");
   shippingPriceSpan.textContent = `${shippingCost.toLocaleString()} DZD`;
+  shippingPriceSpan.style.fontWeight = "bold";
+  shippingPriceSpan.style.fontSize = "14px";
+  
   orderDetailsDiv.appendChild(shippingTitle);
   orderDetailsDiv.appendChild(shippingPriceSpan);
 
