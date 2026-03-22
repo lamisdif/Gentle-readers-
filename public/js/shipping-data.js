@@ -12,7 +12,7 @@ const shippingPrices = {
 };
 
 const wilayasData = [
-  // Zone 1
+  // Zone 1 — 550 DZD
   { name: "Batna", zone: 1 },
   { name: "Béjaia", zone: 1 },
   { name: "Alger", zone: 1 },
@@ -20,8 +20,9 @@ const wilayasData = [
   { name: "M'Sila", zone: 1 },
   { name: "Bordj Bou Arreridj", zone: 1 },
   { name: "Mila", zone: 1 },
+  { name: "Sétif", zone: 1 },
 
-  // Zone 2
+  // Zone 2 — 650 DZD
   { name: "Chlef", zone: 2 },
   { name: "Oum El Bouaghi", zone: 2 },
   { name: "Blida", zone: 2 },
@@ -49,7 +50,7 @@ const wilayasData = [
   { name: "Ain Defla", zone: 2 },
   { name: "Ain Témouchent", zone: 2 },
 
-  // Zone 3
+  // Zone 3 — 750 DZD
   { name: "Relizane", zone: 3 },
   { name: "Laghouat", zone: 3 },
   { name: "Biskra", zone: 3 },
@@ -62,7 +63,7 @@ const wilayasData = [
   { name: "El M'Ghair", zone: 3 },
   { name: "Al Menia", zone: 3 },
 
-  // Zone 4
+  // Zone 4 — 850 DZD
   { name: "Adrar", zone: 4 },
   { name: "Béchar", zone: 4 },
   { name: "El Bayadh", zone: 4 },
@@ -70,12 +71,14 @@ const wilayasData = [
   { name: "Timimoun", zone: 4 },
   { name: "Bordj Badji Mokhtar", zone: 4 },
 
-  // Zone 5
+  // Zone 5 — 1400 DZD
   { name: "Béni Abbès", zone: 5 },
   { name: "Tamanrasset", zone: 5 },
   { name: "Illizi", zone: 5 },
   { name: "Tindouf", zone: 5 },
-  { name: "In Salah", zone: 5 }
+  { name: "In Salah", zone: 5 },
+  { name: "Djanet", zone: 5 },
+  { name: "In Guezzam", zone: 5 }
 ];
 
 /**
@@ -344,6 +347,26 @@ const desksData = {
       { name: "Agence de Taher [Guepex]", address: "Immeuble Des Bailleurs, Section 58, Groupement De Propriete N°111, Quartier Zemouch", code: "180501" }
     ]
   },
+  "Sétif": {
+    "Aïn Arnat": [
+      { name: "Agence Ain Arnat [EasyAndSpeed]", address: "Quartier 400 logements, commune d'Aïn Arnat, site n°01, acte n°12, immeuble n°10, daïra d'Aïn Arnat, wilaya de Sétif", code: "190202" }
+    ],
+    "Aïn Oulmene": [
+      { name: "Agence de Aïn Oulmene [Guepex]", address: "Cite 113, Immeuble Residentiel 63, Batiment 1 Rez-De-Chaussee, Entree 3", code: "190701" }
+    ],
+    "Bougaa": [
+      { name: "Agence de Bougaa [Guepex]", address: "Rue Mohamed Chinoune", code: "192601" }
+    ],
+    "El Eulma": [
+      { name: "Desk El Eulma [Yalidine]", address: "Rue Abdelaziz Khaled, n°119 (à côté du hôtel El Bez)", code: "193202" },
+      { name: "Agence El Eulma (Cité Sonatrach Smara S) [EasyAndSpeed]", address: "Smara Sud, Section 14, Bloc N° 82+, Logement Participatif N° 06, El Eulma, Sétif", code: "193203" }
+    ],
+    "Sétif": [
+      { name: "Agence Maabouda [Yalidine]", address: "Cite D'Al-Ma'Bouda, Escalier 1 Du Batiment B Section 203 Groupe 77 Parcelle 5", code: "195501" },
+      { name: "Agence El Hidhab [Guepex]", address: "Cité El Hidhab, 110 Logements Participatifs, Bâtiment B, Classe 71", code: "195502" },
+      { name: "Agence Centre ville [Guepex]", address: "Cité des Frères Mezouache, Section 240, Ilot 67, Rez-de-chaussée, Commune de Sétif", code: "195504" }
+    ]
+  },
   "Saïda": {
     "Saïda": [
       { name: "Agence de Saïda [Yalidine]", address: "cité Riadh (à coté de la mosquée Riadh)", code: "201101" }
@@ -526,7 +549,116 @@ const desksData = {
   },
   "Khenchela": {
     "Khenchela": [
-      { name: "Agence de Khenchela [Yalidine]", address: "Cité 01 Novembre, route Batna (à côté de la clinique)", code: "400101" }
+      { name: "Agence Route de Meskiana [Yalidine]", address: "Route de Meskiana N°30 lot 66, Khenchela", code: "401302" }
+    ]
+  },
+  "Souk Ahras": {
+    "Souk Ahras": [
+      { name: "Agence de Souk Ahras [Yalidine]", address: "Cité El Louz Lot 64 (les amandiers)", code: "410101" }
+    ]
+  },
+  "Tipaza": {
+    "Cherchell": [
+      { name: "Agence Cherchell [Guepex]", address: "N°05 Rue MELHANI ABDERRAHMAN", code: "422201" }
+    ],
+    "Hadjout": [
+      { name: "Agence Hadjout (Rue de stade) [EasyAndSpeed]", address: "Rue de stade RDC Hadjout, Tipaza", code: "421201" }
+    ],
+    "Koléa": [
+      { name: "Agence Koléa [Guepex]", address: "Koléa , Lotissement Amara N°1 Route de Fouka (En Face CEM Noureddine Bouguera)", code: "423501" }
+    ],
+    "Tipaza": [
+      { name: "Agence Tipaza [Yalidine]", address: "24 cite M'hamed Bougara (El Garari)", code: "420101" }
+    ]
+  },
+  "Mila": {
+    "Chelghoum Laid": [
+      { name: "Agence de Chelghoum Laid [Yalidine]", address: "Rue 01 Novembre, A Côté D'Hôtel El Rhumel", code: "430801" }
+    ],
+    "Ferdjioua": [
+      { name: "Agence Ferdjioua [Guepex]", address: "المحل 01الحصة 04 رقم04 تجزئة التعاونية العقارية الوفاق بلدية فرجيوة", code: "431302" }
+    ],
+    "Mila": [
+      { name: "Centre de tri Mila [Yalidine]", address: "Rue De Zerghia (A Coté Du Point De Vente Iris Et Gam Assurance)", code: "431601" },
+      { name: "Agence de Mila [Yalidine]", address: "الطابق الأرضي شارع بن قارة النوار بلدية ميلة", code: "431602" }
+    ]
+  },
+  "Aïn Defla": {
+    "Aïn Defla": [
+      { name: "Agence de Aïn Defla [Guepex]", address: "Cite Khyat Mohammed (L’Arret De La Zone Industrielle En Face La Pompe d'essence)", code: "440101" }
+    ],
+    "Khemis Miliana": [
+      { name: "Agence de Khemis Miliana [Guepex]", address: "Le Cote Ouest Du Quartier La Cadette Route Nationale", code: "442601" }
+    ]
+  },
+  "Naâma": {
+    "Mecheria": [
+      { name: "Agence de Mecheria [Guepex]", address: "Rue Abdellaoui Mohammed Cité Iben Badis (Connue Hadj Taleb, Près De Pharmacie Abbad Amina Et École Primaire)", code: "450201" }
+    ]
+  },
+  "Aïn Témouchent": {
+    "Aïn Témouchent": [
+      { name: "Agence de Aïn Témouchent [Yalidine]", address: "Sonne n5/ n 605/ d 228 logements, Hai Zitoun (à coté de la nouvelle agence de transport)", code: "460401" }
+    ],
+    "Beni Saf": [
+      { name: "Agence de Beni Saf [Guepex]", address: "Cité Sohbi, zone urbaine (en face de la pompe d'essence)", code: "460701" }
+    ]
+  },
+  "Ghardaïa": {
+    "Bounoura": [
+      { name: "Agence Bounoura (Ghardaia) [SpeedMail]", address: "Cité Bahman local 07 Route d’el Atteuf", code: "470201" }
+    ],
+    "Ghardaïa": [
+      { name: "Agence de Thenia (Ghardaïa) [Guepex]", address: "Ghardaïa Thenia a coté de lycé mofdi zakaria", code: "470701" },
+      { name: "Agence de Bouhraoua [Yalidine]", address: "Bouhraoua (En face centre d'exposition)", code: "470702" }
+    ]
+  },
+  "Relizane": {
+    "Relizane": [
+      { name: "Agence de Relizane [Yalidine]", address: "Boulevard 69 Zaghloul (en face la banque d'Algérie)", code: "483001" }
+    ]
+  },
+  "Timimoun": {
+    "Timimoun": [
+      { name: "Agence de Timimoun [Yalidine]", address: "Rue Mohamed El Hashemi", code: "490901" }
+    ]
+  },
+  "Ouled Djellal": {
+    "Ouled Djellal": [
+      { name: "Agence de Ouled Djellal [Yalidine]", address: "Rue Gasmi Ibrahim (En Face Ecole Mazen School)", code: "512601" }
+    ]
+  },
+  "Béni Abbès": {
+    "Béni Abbès": [
+      { name: "Agence de Béni Abbès [Yalidine]", address: "Route Nationale N° 06, Béni Abbès", code: "520101" }
+    ]
+  },
+  "In Salah": {
+    "In Salah": [
+      { name: "Agence de In Salah [Yalidine]", address: "Centre ville (à coté de la poste et la maison de jeune)", code: "530801" }
+    ]
+  },
+  "Touggourt": {
+    "Touggourt": [
+      { name: "Agence de Touggourt [Yalidine]", address: "Cite Rimal 01 (A Cote De La Pharmacie Harkati Route Nationale N°03)", code: "552001" }
+    ]
+  },
+  "Djanet": {
+    "Djanet": [
+      { name: "Agence de Djanet [Guepex]", address: "Tin Khatma", code: "560201" }
+    ]
+  },
+  "El M'Ghair": {
+    "Djamaa": [
+      { name: "Agence de Djamaa [Guepex]", address: "Cite Essalam (A Cote Du Clinique Douaa)", code: "572801" }
+    ],
+    "El M'Ghair": [
+      { name: "Agence de El M'Ghair [Yalidine]", address: "Lotissement 360 Logements Nouvelle Zone Urbaine", code: "572701" }
+    ]
+  },
+  "El Menia": {
+    "El Menia": [
+      { name: "Agence de El Menia [Yalidine]", address: "Route Unite Africaine", code: "580601" }
     ]
   }
 };
