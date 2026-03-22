@@ -1,9 +1,0 @@
-{
-  "title": "Anne of Green Gables",
-  "author": "Lucy Maud Montgomery",
-  "price": 850,
-  "status": "out of stock",
-  "description": "The heartwarming story of Anne Shirley, an imaginative and talkative orphan who is mistakenly sent to live with Marilla and Matthew Cuthbert on Prince Edward Island. This beloved classic follows Anne's adventures and growth as she transforms the lives of everyone around her.",
-  "image": "imgs/Anne of green gables.jpg",
-  "draft": false
-}
