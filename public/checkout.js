@@ -1,4 +1,33 @@
+import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js';
+
+const supabaseUrl = "https://fsximdllrhglabxbqvay.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzeGltZGxscmhnbGFieGJxdmF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3NTg0NzgsImV4cCI6MjA3MjMzNDQ3OH0.KiRJdFoW4DtDAPMLqH9Im3-37GhIFmD269iDsY7ih2Q"; // حطي هنا المفتاح العام من Supabase
+const supabase = createClient(supabaseUrl, supabaseKey);
+
 let books = {};
+
+// Load CMS books into checkout
+async function mergeCmsBooksIntoCheckout() {
+  try {
+    const response = await fetch('cms-books.json');
+    if (!response.ok) throw new Error('Failed to load books');
+    const data = await response.json();
+    
+    if (Array.isArray(data)) {
+      data.forEach(b => {
+        const id = 'cms_' + (b.slug || b.title || '');
+        books[id] = {
+          title: b.title || '',
+          author: b.author || '',
+          price: b.price ? String(b.price) : '',
+          inStock: (b.status || 'available').toLowerCase() !== 'out of stock'
+        };
+      });
+    }
+  } catch (err) {
+    console.error('Error loading CMS books for checkout:', err);
+  }
+}
 
 // Wilaya-Daira data structure
 const wilayaDairaData = {
@@ -91,8 +120,6 @@ function loadOrderSummary() {
   const orderDetailsDiv = document.getElementById("orderDetails");
   const totalPriceLabel = document.getElementById("totalPrice");
 
-
-  // Check if required elements exist
   if (!cartItemsDiv || !orderDetailsDiv || !totalPriceLabel) {
     console.error("Required DOM elements not found");
     return;
@@ -103,54 +130,47 @@ function loadOrderSummary() {
   orderDetailsDiv.innerHTML = "";
   const lang = getCurrentLang();
 
-  // Check if cart is empty
-  if (Object.keys(cart).length === 0) {
-    cartItemsDiv.innerHTML = '<div class="book-item" style="text-align: center; color: #666; font-style: italic;">Your cart is empty. Please add some books to continue.</div>';
+  const ids = Object.keys(cart);
+  if (ids.length === 0) {
+    cartItemsDiv.innerHTML = '<div style="text-align: center; color: #666; font-style: italic; padding: 20px;">Your cart is empty / السلة فارغة</div>';
     orderDetailsDiv.innerHTML = '<span>No items</span><span>0 DZD</span>';
     totalPriceLabel.textContent = "0 DZD";
     return;
   }
 
-  Object.keys(cart).forEach(bookId => {
-    const book = books[bookId];
-    if (!book) {
-      const itemDiv = document.createElement("div");
-      itemDiv.className = "book-item";
-      itemDiv.innerHTML = `<span>Book not found</span><span>0 DZD</span>`;
-      cartItemsDiv.appendChild(itemDiv);
-      const detailDiv = document.createElement("span");
-      detailDiv.innerHTML = `Book not found`;
-      const priceDiv = document.createElement("span");
-      priceDiv.innerHTML = `0 DZD`;
-      orderDetailsDiv.appendChild(detailDiv);
-      orderDetailsDiv.appendChild(priceDiv);
-      return;
-    }
+  ids.forEach(bookId => {
+    const book = books[bookId] || { title: 'Unknown Book', price: '0' };
     const qty = cart[bookId] || 1;
     let price = 0;
+    
     if (book.price) {
-      price = parseFloat(book.price.replace(/[^\d.]/g, ""));
+      price = parseFloat(String(book.price).replace(/[^\d.]/g, ""));
     }
-    subtotal += price * qty;
+    const lineTotal = price * qty;
+    subtotal += lineTotal;
+
     const itemDiv = document.createElement("div");
     itemDiv.className = "book-item";
     itemDiv.innerHTML = `
       <span>${getBookTitle(book, lang)}</span>
-      <div style="display:flex; gap:8px; align-items:center;">
-        <button aria-label="Decrease" data-id="${bookId}" class="qty-dec" style="background:#e5e7eb; padding:2px 8px; border-radius:6px;">-</button>
-        <span class="qty" data-id="${bookId}">${qty}</span>
-        <button aria-label="Increase" data-id="${bookId}" class="qty-inc" style="background:#e5e7eb; padding:2px 8px; border-radius:6px;">+</button>
-        <span style="min-width:80px; text-align:right;">${price * qty} DZD</span>
-      </div>`;
+      <div class="qty-controls">
+        <button type="button" class="qty-btn qty-dec" data-id="${bookId}">−</button>
+        <span class="qty">${qty}</span>
+        <button type="button" class="qty-btn qty-inc" data-id="${bookId}">+</button>
+      </div>
+      <span class="book-price-line">${lineTotal.toLocaleString()} DZD</span>`;
     cartItemsDiv.appendChild(itemDiv);
-    const detailDiv = document.createElement("span");
-    detailDiv.innerHTML = `${getBookTitle(book, lang)} × ${qty}`;
-    const priceDiv = document.createElement("span");
-    priceDiv.innerHTML = `${price * qty} DZD`;
-    orderDetailsDiv.appendChild(detailDiv);
-    orderDetailsDiv.appendChild(priceDiv);
+
+    // Sidebar summary details
+    const detailTitle = document.createElement("span");
+    detailTitle.textContent = `${book.title} × ${qty}`;
+    const detailPrice = document.createElement("span");
+    detailPrice.textContent = `${lineTotal.toLocaleString()} DZD`;
+    orderDetailsDiv.appendChild(detailTitle);
+    orderDetailsDiv.appendChild(detailPrice);
   });
-  totalPriceLabel.textContent = `${subtotal} DZD`;
+  
+  totalPriceLabel.textContent = `${subtotal.toLocaleString()} DZD`;
 }
 document.addEventListener("DOMContentLoaded", function () {
   populateWilayas();
@@ -265,18 +285,16 @@ if (checkoutForm) {
     // Extract only book titles from cart items and calculate total price
     let totalPrice = 0;
     const items = Object.keys(cartItems).map(bookId => {
-      const book = books[bookId];
+      const book = books[bookId] || { title: `Unknown Book (${bookId})`, price: '0' };
       const qty = cartItems[bookId] || 1;
-      const title = book ? book.title : `Unknown Book (${bookId})`;
-
-      // Calculate price for this book
+      
       let price = 0;
-      if (book && book.price) {
-        price = parseFloat(book.price.replace(/[^\d.]/g, ""));
+      if (book.price) {
+        price = parseFloat(String(book.price).replace(/[^\d.]/g, ""));
       }
       totalPrice += price * qty;
 
-      return `${title} × ${qty}`;
+      return `${book.title} × ${qty}`;
     });
 
     // Send to backend
@@ -284,23 +302,29 @@ if (checkoutForm) {
     try {
       const { data, error } = await supabase
         .from('orders')
-        .insert([{ firstName, familyName, phoneNumber, instagramUsername, deliveryMethod, wilaya, daira, address, items, total_price: totalPrice }], { returning: 'representation' });
+        .insert([{ 
+          firstName, 
+          familyName, 
+          phoneNumber, 
+          instagramUsername, 
+          deliveryMethod, 
+          wilaya, 
+          daira, 
+          address, 
+          items, 
+          total_price: totalPrice 
+        }]);
 
       if (error) {
-        alert("ERROR " + error.message);
-        console.error(error);
-      } else if (data && data.length > 0) {
-        alert("Successfully submitted order! Order ID: " + data[0].id);
-        localStorage.removeItem("cart");
-        window.location.href = "index.html";
-      } else {
-        alert("successfully submitted order!");
-        localStorage.removeItem("cart");
-        window.location.href = "index.html";
+        throw error;
       }
+      
+      alert(getCurrentLang() === 'ar' ? "تم إرسال الطلب بنجاح!" : "Successfully submitted order!");
+      localStorage.removeItem("cart");
+      window.location.href = "index.html";
     } catch (err) {
-      alert("Network error. Please try again later.");
-      console.error(err);
+      console.error('Checkout error:', err);
+      alert(getCurrentLang() === 'ar' ? "حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى." : "Error submitting order. Please try again.");
     }
   });
 }
