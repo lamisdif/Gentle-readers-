@@ -116,7 +116,7 @@ function loadOrderSummary() {
   const wilaya = document.getElementById("checkout-wilaya-select")?.value;
 
   if (deliveryMethod && wilaya) {
-    shippingCost = getShippingPrice(wilaya);
+    shippingCost = getShippingPrice(wilaya, deliveryMethod);
   }
 
   // Add shipping to summary
@@ -323,7 +323,7 @@ if (checkoutForm) {
       return `${book.title} × ${qty}`;
     });
 
-    const shippingPrice = getShippingPrice(wilaya);
+    const shippingPrice = getShippingPrice(wilaya, deliveryMethod);
     const finalTotal = subtotal + shippingPrice;
 
     // Final safety check before submission
@@ -522,7 +522,7 @@ function validateForm() {
     if (!submitBtn || !validationMsg) return;
 
     // Check shipping price is calculated
-    const shippingPrice = getShippingPrice(wilaya);
+    const shippingPrice = getShippingPrice(wilaya, deliveryMethod);
     
     let isValid = true;
     let missingFields = [];

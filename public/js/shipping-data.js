@@ -3,83 +3,69 @@
  * Zones and Prices based on Wilaya
  */
 
-const shippingPrices = {
-  1: 550,
-  2: 650,
-  3: 750,
-  4: 850,
-  5: 1400
+const wilayaShippingPrices = {
+  "Sétif": { home: 590, desk: 450 },
+  "Batna": { home: 700, desk: 550 },
+  "Béjaïa": { home: 700, desk: 550 },
+  "Alger": { home: 700, desk: 550 },
+  "Jijel": { home: 700, desk: 550 },
+  "M'Sila": { home: 700, desk: 550 },
+  "Bordj Bou Arreridj": { home: 700, desk: 550 },
+  "Mila": { home: 700, desk: 550 },
+  "Chlef": { home: 900, desk: 650 },
+  "Oum El Bouaghi": { home: 900, desk: 650 },
+  "Blida": { home: 900, desk: 650 },
+  "Bouira": { home: 900, desk: 650 },
+  "Tébessa": { home: 900, desk: 650 },
+  "Tlemcen": { home: 900, desk: 650 },
+  "Tiaret": { home: 900, desk: 650 },
+  "Tizi Ouzou": { home: 900, desk: 650 },
+  "Saida": { home: 900, desk: 650 },
+  "Skikda": { home: 900, desk: 650 },
+  "Sidi Bel Abbès": { home: 900, desk: 650 },
+  "Annaba": { home: 900, desk: 650 },
+  "Guelma": { home: 900, desk: 650 },
+  "Constantine": { home: 900, desk: 650 },
+  "Médéa": { home: 900, desk: 650 },
+  "Mostaganem": { home: 900, desk: 650 },
+  "Mascara": { home: 900, desk: 650 },
+  "Oran": { home: 900, desk: 650 },
+  "Boumerdès": { home: 900, desk: 650 },
+  "El Tarf": { home: 900, desk: 650 },
+  "Tissemsilt": { home: 900, desk: 650 },
+  "Khenchela": { home: 900, desk: 650 },
+  "Souk Ahras": { home: 900, desk: 650 },
+  "Tipaza": { home: 900, desk: 650 },
+  "Ain Defla": { home: 900, desk: 650 },
+  "Ain Témouchent": { home: 900, desk: 650 },
+  "Relizane": { home: 900, desk: 650 },
+  "Laghouat": { home: 950, desk: 750 },
+  "Biskra": { home: 950, desk: 750 },
+  "Djelfa": { home: 950, desk: 750 },
+  "Ouargla": { home: 950, desk: 750 },
+  "El Oued": { home: 950, desk: 750 },
+  "Ghardaïa": { home: 950, desk: 750 },
+  "Ouled Djellal": { home: 950, desk: 750 },
+  "Touggourt": { home: 950, desk: 750 },
+  "El M'Ghair": { home: 950, desk: 750 },
+  "El Menia": { home: 950, desk: 750 },
+  "Adrar": { home: 1050, desk: 850 },
+  "Béchar": { home: 1050, desk: 850 },
+  "El Bayadh": { home: 1050, desk: 850 },
+  "Naama": { home: 1050, desk: 850 },
+  "Timimoun": { home: 1050, desk: 850 },
+  "Bordj Badji Mokhtar": { home: 1050, desk: 850 },
+  "Béni Abbès": { home: 1050, desk: 850 },
+  "Tamanrasset": { home: 1600, desk: 1400 },
+  "Illizi": { home: 1600, desk: 1400 },
+  "Tindouf": { home: 1600, desk: 1400 },
+  "In Salah": { home: 1600, desk: 1400 },
+  "Djanet": { home: 1600, desk: 1400 },
+  "In Guezzam": { home: 1600, desk: 1400 }
 };
 
-const wilayasData = [
-  // Zone 1 — 550 DZD
-  { name: "Batna", zone: 1 },
-  { name: "Béjaia", zone: 1 },
-  { name: "Alger", zone: 1 },
-  { name: "Jijel", zone: 1 },
-  { name: "M'Sila", zone: 1 },
-  { name: "Bordj Bou Arreridj", zone: 1 },
-  { name: "Mila", zone: 1 },
-  { name: "Sétif", zone: 1 },
+const wilayasData = Object.keys(wilayaShippingPrices).map(name => ({ name }));
 
-  // Zone 2 — 650 DZD
-  { name: "Chlef", zone: 2 },
-  { name: "Oum El Bouaghi", zone: 2 },
-  { name: "Blida", zone: 2 },
-  { name: "Bouira", zone: 2 },
-  { name: "Tébessa", zone: 2 },
-  { name: "Tlémcen", zone: 2 },
-  { name: "Tiaret", zone: 2 },
-  { name: "Tizi Ouzou", zone: 2 },
-  { name: "Saida", zone: 2 },
-  { name: "Skikda", zone: 2 },
-  { name: "Sidi Bel Abbès", zone: 2 },
-  { name: "Annaba", zone: 2 },
-  { name: "Guelma", zone: 2 },
-  { name: "Constantine", zone: 2 },
-  { name: "Médéa", zone: 2 },
-  { name: "Mostaganem", zone: 2 },
-  { name: "Mascara", zone: 2 },
-  { name: "Oran", zone: 2 },
-  { name: "Boumerdès", zone: 2 },
-  { name: "El Tarf", zone: 2 },
-  { name: "Tissemsilt", zone: 2 },
-  { name: "Khenchela", zone: 2 },
-  { name: "Souk Ahras", zone: 2 },
-  { name: "Tipaza", zone: 2 },
-  { name: "Ain Defla", zone: 2 },
-  { name: "Ain Témouchent", zone: 2 },
-
-  // Zone 3 — 750 DZD
-  { name: "Relizane", zone: 3 },
-  { name: "Laghouat", zone: 3 },
-  { name: "Biskra", zone: 3 },
-  { name: "Djelfa", zone: 3 },
-  { name: "Ouargla", zone: 3 },
-  { name: "El Oued", zone: 3 },
-  { name: "Ghardaïa", zone: 3 },
-  { name: "Ouled Djellal", zone: 3 },
-  { name: "Touggourt", zone: 3 },
-  { name: "El M'Ghair", zone: 3 },
-  { name: "Al Menia", zone: 3 },
-
-  // Zone 4 — 850 DZD
-  { name: "Adrar", zone: 4 },
-  { name: "Béchar", zone: 4 },
-  { name: "El Bayadh", zone: 4 },
-  { name: "Naama", zone: 4 },
-  { name: "Timimoun", zone: 4 },
-  { name: "Bordj Badji Mokhtar", zone: 4 },
-
-  // Zone 5 — 1400 DZD
-  { name: "Béni Abbès", zone: 5 },
-  { name: "Tamanrasset", zone: 5 },
-  { name: "Illizi", zone: 5 },
-  { name: "Tindouf", zone: 5 },
-  { name: "In Salah", zone: 5 },
-  { name: "Djanet", zone: 5 },
-  { name: "In Guezzam", zone: 5 }
-];
 
 /**
  * COMPLETE DESKS/AGENCIES DATA
@@ -665,16 +651,16 @@ const desksData = {
 
 // Internal map for fuzzy matching wilaya names
 const wilayaNameMap = {
-  "bejaia": "Béjaia",
-  "béjaïa": "Béjaia",
+  "bejaia": "Béjaïa",
+  "béjaïa": "Béjaïa",
   "algiers": "Alger",
   "alger": "Alger",
   "bordj bou arreridj": "Bordj Bou Arreridj",
   "bordj bou arréridj": "Bordj Bou Arreridj",
   "sidi bel abbes": "Sidi Bel Abbès",
   "sidi bel abbès": "Sidi Bel Abbès",
-  "tlemcen": "Tlémcen",
-  "tlémcen": "Tlémcen",
+  "tlemcen": "Tlemcen",
+  "tlémcen": "Tlemcen",
   "medea": "Médéa",
   "médéa": "Médéa",
   "oum el bouaghi": "Oum El Bouaghi",
@@ -702,11 +688,11 @@ function normalizeWilayaName(name) {
 
 // Helper Functions
 
-function getShippingPrice(wilayaName) {
+function getShippingPrice(wilayaName, method = 'home') {
   const normName = normalizeWilayaName(wilayaName);
-  const wilaya = wilayasData.find(w => w.name.toLowerCase() === normName.toLowerCase());
-  if (wilaya && shippingPrices[wilaya.zone]) {
-    return shippingPrices[wilaya.zone];
+  const prices = wilayaShippingPrices[normName];
+  if (prices) {
+    return (method === 'desk') ? prices.desk : prices.home;
   }
   return 0;
 }
