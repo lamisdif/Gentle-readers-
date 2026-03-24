@@ -3,7 +3,7 @@
  * Zones and Prices based on Wilaya
  */
 
-const wilayaShippingPrices = {
+var wilayaShippingPrices = {
   "Sétif": { home: 590, desk: 450 },
   "Batna": { home: 700, desk: 550 },
   "Béjaïa": { home: 700, desk: 550 },
@@ -64,7 +64,16 @@ const wilayaShippingPrices = {
   "In Guezzam": { home: 1600, desk: 1400 }
 };
 
-const wilayasData = Object.keys(wilayaShippingPrices).map(name => ({ name }));
+var wilayasData = [
+  "Adrar", "Chlef", "Laghouat", "Oum El Bouaghi", "Batna", "Béjaïa", "Biskra", "Béchar", "Blida", "Bouira", 
+  "Tamanrasset", "Tébessa", "Tlemcen", "Tiaret", "Tizi Ouzou", "Alger", "Djelfa", "Jijel", "Sétif", "Saida", 
+  "Skikda", "Sidi Bel Abbès", "Annaba", "Guelma", "Constantine", "Médéa", "Mostaganem", "M'Sila", "Mascara", 
+  "Ouargla", "Oran", "El Bayadh", "Illizi", "Bordj Bou Arreridj", "Boumerdès", "El Tarf", "Tindouf", 
+  "Tissemsilt", "El Oued", "Khenchela", "Souk Ahras", "Tipaza", "Mila", "Ain Defla", "Naama", 
+  "Ain Témouchent", "Ghardaïa", "Relizane", "Timimoun", "Bordj Badji Mokhtar", "Ouled Djellal", 
+  "Béni Abbès", "In Salah", "In Guezzam", "Touggourt", "Djanet", "El M'Ghair", "El Menia"
+].map(name => ({ name }));
+
 
 
 /**
@@ -73,7 +82,7 @@ const wilayasData = Object.keys(wilayaShippingPrices).map(name => ({ name }));
  * Currently using Wilaya -> Array of Dairas from previous version
  * and will need specific desk names to be added.
  */
-const desksData = {
+var desksData = {
   "Adrar": {
     "Adrar": [
       { name: "Agence de Adrar [Yalidine]", address: "Rue Benhachem Maamar", code: "10102" },
@@ -650,7 +659,7 @@ const desksData = {
 };
 
 // Internal map for fuzzy matching wilaya names
-const wilayaNameMap = {
+var wilayaNameMap = {
   "bejaia": "Béjaïa",
   "béjaïa": "Béjaïa",
   "algiers": "Alger",
