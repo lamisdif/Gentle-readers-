@@ -1,9 +1,9 @@
-{
+﻿{
   "title": "بين القصرين",
   "author": "نجيب محفوظ",
   "price": 2500,
   "status": "out of stock",
   "description": "الجزء الأول من ثلاثية القاهرة.",
-  "image": "imgs/بين القصرين.jpg",
+  "image": "img/بين القصرين.jpg",
   "draft": false
 }

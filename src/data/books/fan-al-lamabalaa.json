@@ -1,9 +1,9 @@
-{
+﻿{
   "title": "فن اللامبالاة",
   "author": "مارك مانسون",
   "price": 1600,
   "status": "available",
   "description": "الكتاب الشهير \\\"فن اللامبالاة\\\".",
-  "image": "imgs/فن اللامبالاة.jpg",
+  "image": "img/فن اللامبالاة.jpg",
   "draft": false
 }

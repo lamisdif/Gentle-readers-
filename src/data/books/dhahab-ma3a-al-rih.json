@@ -1,9 +1,9 @@
-{
+﻿{
   "title": "ذهب مع الريح",
   "author": "مارغريت ميتشل",
   "price": 1200,
   "status": "available",
   "description": "الرواية الكلاسيكية الشهيرة \\\"Gone With The Wind\\\".",
-  "image": "imgs/ذهب مع الريح.jpg",
+  "image": "img/ذهب مع الريح.jpg",
   "draft": false
 }

@@ -1,9 +1,9 @@
-{
+﻿{
   "title": "المحاكمة",
   "author": "فرانز كافكا",
   "price": 2000,
   "status": "out of stock",
   "description": "رواية كافكا الشهيرة عن يوزف ك. والسلطة الغامضة.",
-  "image": "imgs/المحاكمة.jpg",
+  "image": "img/المحاكمة.jpg",
   "draft": false
 }

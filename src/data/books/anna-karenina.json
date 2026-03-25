@@ -1,9 +1,9 @@
-{
+﻿{
   "title": "أنا كارنينا",
   "author": "ليف تولستوي",
   "price": 5000,
   "status": "out of stock",
   "description": "الرواية الروسية الشهيرة \\\"أنا كارنينا\\\".",
-  "image": "imgs/انا كارنينا -الجزئين.jpg",
+  "image": "img/انا كارنينا -الجزئين.jpg",
   "draft": false
 }

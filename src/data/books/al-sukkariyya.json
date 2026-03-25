@@ -1,9 +1,9 @@
-{
+﻿{
   "title": "السكرية",
   "author": "نجيب محفوظ",
   "price": 2000,
   "status": "out of stock",
   "description": "الجزء الثالث من ثلاثية القاهرة.",
-  "image": "imgs/السكرية.png",
+  "image": "img/السكرية.png",
   "draft": false
 }

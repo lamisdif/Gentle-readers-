@@ -1,9 +1,9 @@
-{
+﻿{
   "title": "حفلة التيس",
   "author": "ماريو بارغاس يوسا",
   "price": 2000,
   "status": "available",
   "description": "رواية \\\"حفلة التيس\\\".",
-  "image": "imgs/حفلة التيس.jpg",
+  "image": "img/حفلة التيس.jpg",
   "draft": false
 }

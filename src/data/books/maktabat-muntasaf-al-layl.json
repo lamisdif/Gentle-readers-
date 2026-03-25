@@ -1,9 +1,9 @@
-{
+﻿{
   "title": "مكتبة منتصف الليل",
   "author": "مات هيغ",
   "price": 1600,
   "status": "out of stock",
   "description": "A Sunday Times bestselling novel about infinite possibilities and second chances. Between life and death, there's a library where each book represents a different life you could have lived.",
-  "image": "imgs/مكتبة منتصف الليل.jpg",
+  "image": "img/مكتبة منتصف الليل.jpg",
   "draft": false
 }

@@ -1,9 +1,9 @@
-{
+﻿{
   "title": "الإخوة كارامازوف ",
   "author": "فيودور دوستويفسكي",
   "price": 4500,
   "status": "available",
   "description": "The Brothers Karamazov is Dostoevsky's final and greatest novel, exploring themes of faith, doubt, free will, and morality through the story of three brothers and their relationship with their father. A profound philosophical and psychological masterpiece.",
-  "image": "imgs/الاخوة كارامازوف الرافدين.jpg",
+  "image": "img/الاخوة كارامازوف الرافدين.jpg",
   "draft": false
 }

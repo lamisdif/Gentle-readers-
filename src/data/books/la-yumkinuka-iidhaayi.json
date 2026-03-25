@@ -1,9 +1,9 @@
-{
+﻿{
   "title": "لا يمكنك إيذائي",
   "author": "ديفيد جوجينز",
   "price": 1500,
   "status": "out of stock",
   "description": "An inspiring autobiography about overcoming adversity and pushing the limits of personal endurance to achieve success.",
-  "image": "imgs/لا يمكنك ايذائي.jpg",
+  "image": "img/لا يمكنك ايذائي.jpg",
   "draft": false
 }

@@ -1,9 +1,9 @@
-{
+﻿{
   "title": "Water Moon",
   "author": "Samantha Sotto Yambao",
   "price": 1500,
   "status": "out of stock",
   "description": "A magical realism novel about a young woman who discovers she can travel through time using a mysterious moon. As she navigates different eras and encounters various versions of herself, she must confront the choices that have shaped her life and find the courage to change her destiny.",
-  "image": "imgs/Water Moon.jpg",
+  "image": "img/Water Moon.jpg",
   "draft": false
 }

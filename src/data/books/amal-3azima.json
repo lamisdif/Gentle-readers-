@@ -1,9 +1,9 @@
-{
+﻿{
   "title": "آمال عظيمة",
   "author": "تشارلز ديكنز",
   "price": 1800,
   "status": "out of stock",
   "description": "Great Expectations is one of Charles Dickens's most celebrated novels. It tells the story of Pip, an orphan who dreams of becoming a gentleman. Through his journey, the novel explores themes of social class, ambition, love, and the consequences of one's choices in Victorian England.",
-  "image": "imgs/امال عظيمة.png",
+  "image": "img/امال عظيمة.png",
   "draft": false
 }

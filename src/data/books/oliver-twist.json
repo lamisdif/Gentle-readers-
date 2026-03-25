@@ -1,9 +1,9 @@
-{
+﻿{
   "title": "Oliver Twist",
   "author": "Charles Dickens",
   "price": 1800,
   "status": "available",
   "description": "A classic Dickens novel following the adventures of Oliver Twist, an orphan who escapes from a workhouse and falls in with a gang of pickpockets led by the cunning Fagin. This timeless tale explores themes of poverty, crime, and redemption in Victorian London.",
-  "image": "imgs/Oliver Twist.jpg",
+  "image": "img/Oliver Twist.jpg",
   "draft": false
 }

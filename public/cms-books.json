@@ -1,4 +1,4 @@
-[
+﻿[
   {
     "slug": "الحكاية-الثالثة-عشر",
     "title": "الحكاية الثالثة عشر",
@@ -16,7 +16,7 @@
     "price": 2000,
     "status": "available",
     "description": "زوربا اليوناني رواية لنيكوس كازانتزاكيس. تحكي قصة مفكر يوناني شاب يغامر للهروب من حياته الكتبية بمساعدة أليكسيس زوربا الصاخب والغامض.",
-    "image": "imgs/زوربا اليوناني.jpg",
+    "image": "img/زوربا اليوناني.jpg",
     "draft": false
   },
   {
@@ -26,7 +26,7 @@
     "price": 9500,
     "status": "available",
     "description": "الجزء الأول من رباعية \\\"يوسف وإخوته\\\".",
-    "image": "imgs/4بوسف و اخوته اجزاء .jpg",
+    "image": "img/4بوسف و اخوته اجزاء .jpg",
     "draft": false
   },
   {
@@ -36,7 +36,7 @@
     "price": 1500,
     "status": "available",
     "description": "A psychological exploration of human behavior and the complex mental patterns that shape our lives and relationships.",
-    "image": "imgs/عقدك النفسية.jpg",
+    "image": "img/عقدك النفسية.jpg",
     "draft": false
   },
   {
@@ -46,7 +46,7 @@
     "price": 1500,
     "status": "available",
     "description": "Terrifying and mysterious events take place in a locked room, inspired by true events.",
-    "image": "imgs/يحدث ليلا.jpg",
+    "image": "img/يحدث ليلا.jpg",
     "draft": false
   },
   {
@@ -56,7 +56,7 @@
     "price": 2000,
     "status": "available",
     "description": "A psychological thriller that explores the depths of human consciousness and the thin line between reality and imagination, where characters hear whispers that may or may not be real.",
-    "image": "imgs/يسمعون حسيسها.jpg",
+    "image": "img/يسمعون حسيسها.jpg",
     "draft": false
   },
   {
@@ -66,7 +66,7 @@
     "price": 1400,
     "status": "available",
     "description": "This book offers hope and reassurance, focusing on how Allah provides relief and solutions in times of hardship, and encourages trust in divine wisdom.",
-    "image": "imgs/يجعل الله لك مخرجا.jpg",
+    "image": "img/يجعل الله لك مخرجا.jpg",
     "draft": false
   },
   {
@@ -76,7 +76,7 @@
     "price": 1500,
     "status": "available",
     "description": "The hidden cost of stress and the mind-body connection. How emotional stress can manifest as physical illness.",
-    "image": "imgs/عندما يقول الجسد لا.jpg",
+    "image": "img/عندما يقول الجسد لا.jpg",
     "draft": false
   },
   {
@@ -86,7 +86,7 @@
     "price": 1500,
     "status": "available",
     "description": "Insights into what women wish men understood about relationships, communication, and emotional needs.",
-    "image": "imgs/ما تريد النساء ان يعلمه الرجال.jpg",
+    "image": "img/ما تريد النساء ان يعلمه الرجال.jpg",
     "draft": false
   },
   {
@@ -96,7 +96,7 @@
     "price": 1500,
     "status": "available",
     "description": "A magical realism novel about a young woman who discovers she can travel through time using a mysterious moon. As she navigates different eras and encounters various versions of herself, she must confront the choices that have shaped her life and find the courage to change her destiny.",
-    "image": "imgs/Water Moon.jpg",
+    "image": "img/Water Moon.jpg",
     "draft": false
   },
   {
@@ -106,7 +106,7 @@
     "price": 1500,
     "status": "available",
     "description": "A dark and compelling narrative where the devil himself tells stories, revealing the hidden truths and moral complexities of human nature.",
-    "image": "imgs/الشيطان يحكي.jpg",
+    "image": "img/الشيطان يحكي.jpg",
     "draft": false
   },
   {
@@ -116,7 +116,7 @@
     "price": 1500,
     "status": "available",
     "description": "رواية \\\"وادي الفراشات\\\".",
-    "image": "imgs/وادي الفراشات.jpg",
+    "image": "img/وادي الفراشات.jpg",
     "draft": false
   },
   {
@@ -126,7 +126,7 @@
     "price": 1300,
     "status": "available",
     "description": "A practical guide to training your body to recover from stress, anxiety, and trauma through nervous system exercises.",
-    "image": "imgs/اعادة برمجة.jpg",
+    "image": "img/اعادة برمجة.jpg",
     "draft": false
   },
   {
@@ -136,7 +136,7 @@
     "price": 1200,
     "status": "available",
     "description": "A passionate romance about Tate Collins and Miles Archer, exploring themes of love, loss, and healing from past trauma.",
-    "image": "imgs/ugly love.jpg",
+    "image": "img/ugly love.jpg",
     "draft": false
   },
   {
@@ -146,7 +146,7 @@
     "price": 1200,
     "status": "available",
     "description": "A steamy romance about Alex Volkov, a ruthless businessman, and Ava Chen, who becomes entangled in his dangerous world.",
-    "image": "imgs/twisted love.jpg",
+    "image": "img/twisted love.jpg",
     "draft": false
   },
   {
@@ -156,7 +156,7 @@
     "price": 1600,
     "status": "available",
     "description": "The Witcher: Sword of Destiny is a collection of short stories following Geralt of Rivia as he faces monsters, moral dilemmas, and the destiny that binds him to Ciri.",
-    "image": "imgs/الوي.jpg",
+    "image": "img/الوي.jpg",
     "draft": false
   },
   {
@@ -166,7 +166,7 @@
     "price": 1500,
     "status": "available",
     "description": "The Witcher: The Last Wish introduces Geralt of Rivia, a monster hunter whose adventures blend dark fantasy, folklore, and moral complexity.",
-    "image": "imgs/الويتشر .jpg",
+    "image": "img/الويتشر .jpg",
     "draft": false
   },
   {
@@ -176,7 +176,7 @@
     "price": 1400,
     "status": "available",
     "description": "A book about turning self-sabotage into self-mastery and how to face internal obstacles to achieve success.",
-    "image": "imgs/الجبل هو انت.jpg",
+    "image": "img/الجبل هو انت.jpg",
     "draft": false
   },
   {
@@ -186,7 +186,7 @@
     "price": 1300,
     "status": "available",
     "description": "A book about facing personal fears and dealing with the darker sides of human nature.",
-    "image": "imgs/الوحش الذي.jpg",
+    "image": "img/الوحش الذي.jpg",
     "draft": false
   },
   {
@@ -196,7 +196,7 @@
     "price": 1900,
     "status": "available",
     "description": "A popular science book that explains how the human brain works and why it sometimes behaves irrationally or strangely.",
-    "image": "imgs/المخ الابله.jpg",
+    "image": "img/المخ الابله.jpg",
     "draft": false
   },
   {
@@ -206,7 +206,7 @@
     "price": 1600,
     "status": "available",
     "description": "In a dystopian future, Katniss Everdeen volunteers to take her sister's place in a deadly televised competition. A gripping story of survival, rebellion, and sacrifice.",
-    "image": "imgs/the-hunger-games.jpg",
+    "image": "img/the-hunger-games.jpg",
     "draft": false
   },
   {
@@ -216,7 +216,7 @@
     "price": 1200,
     "status": "available",
     "description": "The Days is the celebrated autobiographical trilogy of Taha Hussein, translated into English. He recounts his childhood in rural Egypt, his struggle with blindness, and his relentless pursuit of knowledge from the village kuttab to Al-Azhar and the Sorbonne.",
-    "image": "imgs/The days.jpg",
+    "image": "img/The days.jpg",
     "draft": false
   },
   {
@@ -226,7 +226,7 @@
     "price": 1300,
     "status": "out of stock",
     "description": "ثرثرة فوق النيل رواية ساخرة لنجيب محفوظ تتبع مجموعة من المثقفين يجتمعون على مركب في النيل لمناقشة السياسة والمجتمع والحياة. تنتقد الرواية المجتمع المصري وتستكشف مواضيع خيبة الأمل والهروب والفجوة بين المثل الفكرية والواقع.",
-    "image": "imgs/ثرثرة فوق النيل.png",
+    "image": "img/ثرثرة فوق النيل.png",
     "draft": false
   },
   {
@@ -236,7 +236,7 @@
     "price": 1200,
     "status": "available",
     "description": "A novel inspired by the story of the Prophet's migration, exploring themes of faith, companionship, and trust in Allah during life's most challenging journeys.",
-    "image": "imgs/ثاني اثنين.jpg",
+    "image": "img/ثاني اثنين.jpg",
     "draft": false
   },
   {
@@ -246,7 +246,7 @@
     "price": 1900,
     "status": "available",
     "description": "A political novel that delves into the life and rule of Muammar Gaddafi, exploring the brutality, oppression, and psychological manipulation of his regime in Libya.",
-    "image": "imgs/طريق جهنم.jpg",
+    "image": "img/طريق جهنم.jpg",
     "draft": false
   },
   {
@@ -256,7 +256,7 @@
     "price": 1450,
     "status": "available",
     "description": "A book about the importance of morning habits and how to use your mornings to achieve success and productivity throughout the day.",
-    "image": "imgs/نجاحك في صباحك.jpg",
+    "image": "img/نجاحك في صباحك.jpg",
     "draft": false
   },
   {
@@ -266,7 +266,7 @@
     "price": 1300,
     "status": "available",
     "description": "A book offering practical solutions for mothers to manage daily stress and achieve psychological balance.",
-    "image": "imgs/ضعي حدا للتوتر.jpg",
+    "image": "img/ضعي حدا للتوتر.jpg",
     "draft": false
   },
   {
@@ -276,7 +276,7 @@
     "price": 1600,
     "status": "available",
     "description": "كتاب كلاسيكي في علم اجتماع الجماهير.",
-    "image": "imgs/سيكولوجية الجماهير.jpg",
+    "image": "img/سيكولوجية الجماهير.jpg",
     "draft": false
   },
   {
@@ -286,7 +286,7 @@
     "price": 2800,
     "status": "available",
     "description": "سارقة الكتب رواية قوية ومؤثرة تدور أحداثها في ألمانيا النازية، يرويها الموت نفسه. تحكي قصة ليسل ميمينجر، فتاة صغيرة تسرق الكتب وتشاركها مع الآخرين خلال الحرب العالمية الثانية. من خلال حبها للكلمات والقصص، تجد الأمل والإنسانية في أحلك الأوقات.",
-    "image": "imgs/سارقة الكتب.png",
+    "image": "img/سارقة الكتب.png",
     "draft": false
   },
   {
@@ -296,7 +296,7 @@
     "price": 1400,
     "status": "available",
     "description": "A tale of refuge and renewal, where an oasis becomes a symbol of hope and transformation in the midst of life's challenges.",
-    "image": "imgs/واحة يعقوب.jpg",
+    "image": "img/واحة يعقوب.jpg",
     "draft": false
   },
   {
@@ -306,7 +306,7 @@
     "price": 1800,
     "status": "out of stock",
     "description": "رواية قوية من تأليف كيونج سوك شين، الفائزة بجائزة المان بوكر الآسيوية 2011. تستكشف القصة مواضيع الفقدان والذاكرة والروابط الدائمة للحب والعائلة. تدور أحداثها في كوريا المعاصرة، وتتبع شخصيات تتنقل عبر تحديات الحياة وتجد القوة في الارتباط.",
-    "image": "imgs/سأكون هناك.jpg",
+    "image": "img/سأكون هناك.jpg",
     "draft": false
   },
   {
@@ -316,7 +316,7 @@
     "price": 2800,
     "status": "available",
     "description": "مختارات من رسائل سيلفيا بلاث.",
-    "image": "imgs/رسائل سيلفيا بلاث.jpg",
+    "image": "img/رسائل سيلفيا بلاث.jpg",
     "draft": false
   },
   {
@@ -326,7 +326,7 @@
     "price": 4100,
     "status": "out of stock",
     "description": "مجموعة من الرسائل الحميمة من فرانز كافكا إلى ميلينا ييسينسكا، تكشف عن الصلة العاطفية والفكرية العميقة بين عقلين استثنائيين.",
-    "image": "imgs/رسائل الى ميلينا.jpg",
+    "image": "img/رسائل الى ميلينا.jpg",
     "draft": false
   },
   {
@@ -336,7 +336,7 @@
     "price": 1500,
     "status": "out of stock",
     "description": "رأيت يوسف رواية لمروة عبد الجواد تستكشف مواضيع الهوية والذاكرة والرحلة الشخصية من خلال أسلوب سردي غني مستوحى من تقاليد السرد العربية الكلاسيكية.",
-    "image": "imgs/رايت يوسف.jpg",
+    "image": "img/رايت يوسف.jpg",
     "draft": false
   },
   {
@@ -346,7 +346,7 @@
     "price": 1000,
     "status": "available",
     "description": "قصة موت معلن",
-    "image": "imgs/قصة موت معلن.jpg",
+    "image": "img/قصة موت معلن.jpg",
     "draft": false
   },
   {
@@ -356,7 +356,7 @@
     "price": 1350,
     "status": "available",
     "description": "A fiction book with unique rules and a mysterious plot.",
-    "image": "imgs/قواعد.jpg",
+    "image": "img/قواعد.jpg",
     "draft": false
   },
   {
@@ -366,7 +366,7 @@
     "price": 3000,
     "status": "available",
     "description": "قواعد العشق الأربعون رواية جميلة لأليف شافاك تنسج معاً قصتين متوازيتين: رحلة امرأة أمريكية معاصرة لاكتشاف الذات وقصة القرن الثالث عشر لجلال الدين الرومي وشمس التبريزي. تستكشف الرواية مواضيع الحب والروحانية والتحول من خلال القواعد الأربعين للحب.",
-    "image": "imgs/قواعد العشق الاربعون.jpg",
+    "image": "img/قواعد العشق الاربعون.jpg",
     "draft": false
   },
   {
@@ -376,7 +376,7 @@
     "price": 2300,
     "status": "available",
     "description": "الجزء الثاني من ثلاثية القاهرة.",
-    "image": "imgs/قصر الشوق.jpg",
+    "image": "img/قصر الشوق.jpg",
     "draft": false
   },
   {
@@ -386,7 +386,7 @@
     "price": 1700,
     "status": "available",
     "description": "قرية ستيبانتشيكوفو وسكانها رواية ساخرة عن قرية روسية صغيرة وسكانها المثيرين. تستكشف القصة بشكل فكاهي ديناميكيات اجتماعية والنفاق وعبثيات الحياة الريفية الروسية.",
-    "image": "imgs/غلاف-قرية-ستيبانتشيكوفو.jpg",
+    "image": "img/غلاف-قرية-ستيبانتشيكوفو.jpg",
     "draft": false
   },
   {
@@ -396,7 +396,7 @@
     "price": 1200,
     "status": "available",
     "description": "A collection of detective stories featuring the brilliant Sherlock Holmes and his loyal companion Dr. Watson, solving complex mysteries through deductive reasoning.",
-    "image": "imgs/قضايا شيرلوك هولمز.jpg",
+    "image": "img/قضايا شيرلوك هولمز.jpg",
     "draft": false
   },
   {
@@ -406,7 +406,7 @@
     "price": 2000,
     "status": "out of stock",
     "description": "رواية كلاسيكية عن الأخلاق والحب والطبقة الاجتماعية في إنجلترا في القرن التاسع عشر. تتبع التطور العاطفي لإليزابيث بينيت، التي تتعلم خطأ إصدار الأحكام المتسرعة وتدرك الفرق بين الخير السطحي والأساسي.",
-    "image": "imgs/كبرياء و هوى.png",
+    "image": "img/كبرياء و هوى.png",
     "draft": false
   },
   {
@@ -416,7 +416,7 @@
     "price": 1800,
     "status": "available",
     "description": "قصة الدمية الخشبية بينوكيو.",
-    "image": "imgs/بينوكيو.png",
+    "image": "img/بينوكيو.png",
     "draft": false
   },
   {
@@ -426,7 +426,7 @@
     "price": 1700,
     "status": "available",
     "description": "مجموعة من الأعمال القصصية الكاملة لأوسكار وايلد، أحد أشهر كتاب العصر الفيكتوري. تعرض هذه المجموعة براعة وايلد في السخرية والأسلوب القصصي الفريد، وتضم قصصاً تمزج بين الفكاهة والأخلاق والتعليق الاجتماعي.",
-    "image": "imgs/اوسكار وايلد.jpg",
+    "image": "img/اوسكار وايلد.jpg",
     "draft": false
   },
   {
@@ -436,7 +436,7 @@
     "price": 1800,
     "status": "available",
     "description": "A classic Dickens novel following the adventures of Oliver Twist, an orphan who escapes from a workhouse and falls in with a gang of pickpockets led by the cunning Fagin. This timeless tale explores themes of poverty, crime, and redemption in Victorian London.",
-    "image": "imgs/Oliver Twist.jpg",
+    "image": "img/Oliver Twist.jpg",
     "draft": false
   },
   {
@@ -446,7 +446,7 @@
     "price": 1900,
     "status": "available",
     "description": "An exploration of the insatiable mind and its endless quest for knowledge, understanding, and meaning in life.",
-    "image": "imgs/المخ الابله.jpg",
+    "image": "img/المخ الابله.jpg",
     "draft": false
   },
   {
@@ -456,7 +456,7 @@
     "price": 1500,
     "status": "available",
     "description": "A horror novel about a mysterious palace and a terrifying prophecy, inspired by true events.",
-    "image": "imgs/نبوءة قصر السلطان.jpg",
+    "image": "img/نبوءة قصر السلطان.jpg",
     "draft": false
   },
   {
@@ -466,7 +466,7 @@
     "price": 1400,
     "status": "available",
     "description": "1984 هي رواية ديستوبية لجورج أورويل. تدور موضوعاتها حول عواقب الشمولية والمراقبة الجماعية والقمع المنهجي للأفراد والسلوكيات داخل المجتمع.",
-    "image": "imgs/1984.png",
+    "image": "img/1984.png",
     "draft": false
   },
   {
@@ -476,7 +476,7 @@
     "price": 2000,
     "status": "available",
     "description": "A gripping horror novel that explores the mysterious world of jinn and the supernatural. The story blends reality with myth, following characters as they confront their deepest fears and the unknown. Through psychological and spiritual struggles, the novel delves into the boundaries between the seen and unseen worlds, challenging the characters' perceptions of reality and faith.",
-    "image": "imgs/نفر من الجن.jpg",
+    "image": "img/نفر من الجن.jpg",
     "draft": false
   },
   {
@@ -486,7 +486,7 @@
     "price": 1400,
     "status": "available",
     "description": "رواية \\\"محادثة ليلية\\\".",
-    "image": "imgs/محادثة ليلية.jpg",
+    "image": "img/محادثة ليلية.jpg",
     "draft": false
   },
   {
@@ -496,7 +496,7 @@
     "price": 1600,
     "status": "available",
     "description": "A compelling narrative about the marginalized and oppressed, exploring themes of social justice and human dignity.",
-    "image": "imgs/المستذلون المهانون.jpg",
+    "image": "img/المستذلون المهانون.jpg",
     "draft": false
   },
   {
@@ -506,7 +506,7 @@
     "price": 1400,
     "status": "available",
     "description": "A thrilling adventure set in a mysterious valley where danger and discovery await, exploring themes of survival and primal instincts.",
-    "image": "imgs/وادي الذئاب.jpg",
+    "image": "img/وادي الذئاب.jpg",
     "draft": false
   },
   {
@@ -516,7 +516,7 @@
     "price": 1400,
     "status": "available",
     "description": "A fantasy novel that explores the concept of dreams as a commodity, where people can buy and sell their dreams in a mysterious shop, blending reality with imagination.",
-    "image": "imgs/متجر دالجوت للأحلام.jpg",
+    "image": "img/متجر دالجوت للأحلام.jpg",
     "draft": false
   },
   {
@@ -526,7 +526,7 @@
     "price": 3200,
     "status": "available",
     "description": "الجزء الأول من \\\"متجر التحف القديم\\\".",
-    "image": "imgs/متجر التحف القديم.png",
+    "image": "img/متجر التحف القديم.png",
     "draft": false
   },
   {
@@ -536,7 +536,7 @@
     "price": 1400,
     "status": "out of stock",
     "description": "جزء آخر من سلسلة مدرسة الحياة، يركز على إيجاد الفرح في اللحظات اليومية وتقدير المسرات الصغيرة التي تجعل الحياة جميلة. يعلم القراء الاستمتاع باللحظات البسيطة وإيجاد السعادة في العادي.",
-    "image": "imgs/مسرات صغيرة.jpg",
+    "image": "img/مسرات صغيرة.jpg",
     "draft": false
   },
   {
@@ -546,7 +546,7 @@
     "price": 1500,
     "status": "available",
     "description": "A comprehensive guide to a successful married life, covering the foundations of a healthy relationship and effective communication between spouses.",
-    "image": "imgs/دليل الحياة الزوجية.jpg",
+    "image": "img/دليل الحياة الزوجية.jpg",
     "draft": false
   },
   {
@@ -556,7 +556,7 @@
     "price": 1500,
     "status": "available",
     "description": "A spiritual guidebook that outlines the methodology and steps for drawing closer to Allah, offering practical advice and inspiration for seekers on the path of faith.",
-    "image": "imgs/منهجية السير الى الله.jpg",
+    "image": "img/منهجية السير الى الله.jpg",
     "draft": false
   },
   {
@@ -566,7 +566,7 @@
     "price": 3000,
     "status": "out of stock",
     "description": "ملحمة الحرافيش من أشهر أعمال نجيب محفوظ، تحكي قصة أجيال من الناس يعيشون في حارة بالقاهرة. تستكشف الرواية مواضيع القوة والعدالة الاجتماعية والطبيعة البشرية من خلال نسيج غني من الشخصيات والأحداث تمتد عبر أجيال متعددة.",
-    "image": "imgs/ملحمة الحرافيش.png",
+    "image": "img/ملحمة الحرافيش.png",
     "draft": false
   },
   {
@@ -576,7 +576,7 @@
     "price": 1600,
     "status": "out of stock",
     "description": "A Sunday Times bestselling novel about infinite possibilities and second chances. Between life and death, there's a library where each book represents a different life you could have lived.",
-    "image": "imgs/مكتبة منتصف الليل.jpg",
+    "image": "img/مكتبة منتصف الليل.jpg",
     "draft": false
   },
   {
@@ -586,7 +586,7 @@
     "price": 1200,
     "status": "out of stock",
     "description": "رواية كلاسيكية عربية رائعة من المنفلوطي تروي قصة ماجدولين، فتاة جميلة تعيش في قرية صغيرة. قصة مؤثرة عن الحب والجمال والطبيعة، تعكس براعة المنفلوطي في الوصف والأسلوب الأدبي الراقي. تحفة أدبية تبقى خالدة في الأدب العربي.",
-    "image": "imgs/ماجدولين.jpg",
+    "image": "img/ماجدولين.jpg",
     "draft": false
   },
   {
@@ -596,7 +596,7 @@
     "price": 2500,
     "status": "available",
     "description": "مذلون مهانون رواية عن كاتب شاب ينخرط مع عائلة ممزقة بسبب الظلم الاجتماعي. تستكشف القصة مواضيع الحب والتضحية ومعاناة الأبرياء في مجتمع فاسد.",
-    "image": "imgs/مذلون-مهانون-.jpg",
+    "image": "img/مذلون-مهانون-.jpg",
     "draft": false
   },
   {
@@ -606,7 +606,7 @@
     "price": 1500,
     "status": "available",
     "description": "A comprehensive guide to a successful married life, covering the foundations of a healthy relationship and effective communication between spouses.",
-    "image": "imgs/دليل الحياة الزوجية.jpg",
+    "image": "img/دليل الحياة الزوجية.jpg",
     "draft": false
   },
   {
@@ -616,7 +616,7 @@
     "price": 3000,
     "status": "out of stock",
     "description": "A classic coming-of-age story following the four March sisters - Meg, Jo, Beth, and Amy - as they navigate life, love, and personal growth during the Civil War era. This timeless tale explores themes of family, independence, and the challenges of growing up.",
-    "image": "imgs/نساء صغيرات.jpg",
+    "image": "img/نساء صغيرات.jpg",
     "draft": false
   },
   {
@@ -626,7 +626,7 @@
     "price": 1500,
     "status": "out of stock",
     "description": "An inspiring autobiography about overcoming adversity and pushing the limits of personal endurance to achieve success.",
-    "image": "imgs/لا يمكنك ايذائي.jpg",
+    "image": "img/لا يمكنك ايذائي.jpg",
     "draft": false
   },
   {
@@ -636,7 +636,7 @@
     "price": 1700,
     "status": "available",
     "description": "\"كل شيء عن الحب\" لبيل هوكس هو استكشاف قوي للحب بجميع أشكاله. يتحدى الكتاب المفاهيم التقليدية للحب ويقدم رؤية تحويلية للحب كممارسة للحرية والعدالة والشفاء.",
-    "image": "imgs/كل شيء عن الحب.png",
+    "image": "img/كل شيء عن الحب.png",
     "draft": false
   },
   {
@@ -646,7 +646,7 @@
     "price": 2000,
     "status": "out of stock",
     "description": "رواية مؤثرة عن رحلة شفاء واكتشاف الذات. تتبع قصة شخصية تبدأ رحلة في فان قديم عبر المناظر الطبيعية الخلابة، بحثاً عن معنى الحياة والحرية. قصة جميلة عن المغامرة والتحرر من الماضي.",
-    "image": "imgs/كل أزرق السماء.jpg",
+    "image": "img/كل أزرق السماء.jpg",
     "draft": false
   },
   {
@@ -656,7 +656,7 @@
     "price": 1500,
     "status": "available",
     "description": "A book that sheds light on the hidden aspects of personality and how to discover and develop your true self.",
-    "image": "imgs/اعرف وجهك.jpg",
+    "image": "img/اعرف وجهك.jpg",
     "draft": false
   },
   {
@@ -666,7 +666,7 @@
     "price": 2000,
     "status": "available",
     "description": "مدخل إلى 30 حكيماً وباحثاً وسياسياً شكلت أفكارهم العالم.",
-    "image": "imgs/كيف تفكر سياسيا.png",
+    "image": "img/كيف تفكر سياسيا.png",
     "draft": false
   },
   {
@@ -676,7 +676,7 @@
     "price": 1000,
     "status": "out of stock",
     "description": "جزء من سلسلة مدرسة الحياة، يستكشف هذا الكتاب فلسفة وعلم نفس الحب. يقدم رؤى حول كيفية العثور على العلاقات الهادفة والحفاظ عليها، ويفحص تعقيدات الحب الحديث والتعلق.",
-    "image": "imgs/كيف تجد الحب.jpg",
+    "image": "img/كيف تجد الحب.jpg",
     "draft": false
   },
   {
@@ -686,7 +686,7 @@
     "price": 1400,
     "status": "available",
     "description": "كتاب تاريخي يتناول علاقة جبريل بالنبي.",
-    "image": "imgs/جبريل و النبي.jpg",
+    "image": "img/جبريل و النبي.jpg",
     "draft": false
   },
   {
@@ -696,7 +696,7 @@
     "price": 1200,
     "status": "available",
     "description": "The sequel to 'It Ends With Us' follows Lily as she navigates her new life with Atlas. When Ryle starts to show signs of change, Lily must decide if she can trust him again. This emotional journey explores themes of forgiveness, second chances, and the complex nature of love and family.",
-    "image": "imgs/It Starts With Us.jpeg",
+    "image": "img/It Starts With Us.jpeg",
     "draft": false
   },
   {
@@ -706,7 +706,7 @@
     "price": 1400,
     "status": "available",
     "description": "A powerful and emotionally raw story about Lily Bloom, a young woman who falls in love with a neurosurgeon named Ryle. When her first love, Atlas, reappears, everything Lily has built with Ryle is threatened. This novel explores the strength it takes to break cycles of abuse and the courage to choose yourself.",
-    "image": "imgs/It Ends With Us.jpg",
+    "image": "img/It Ends With Us.jpg",
     "draft": false
   },
   {
@@ -716,7 +716,7 @@
     "price": 900,
     "status": "available",
     "description": "استعدادات لعقد قران مجموعة قصص قصيرة لفرانتس كافكا، تتضمن القصة التي تحمل العنوان وأعمال أخرى. تعرض هذه القصص أسلوب كافكا الفريد، مستكشفة مواضيع الاغتراب والبيروقراطية وعبثية الحياة الحديثة من خلال سرديات سريالية ورمزية.",
-    "image": "imgs/استعدادات لعقد قران.png",
+    "image": "img/استعدادات لعقد قران.png",
     "draft": false
   },
   {
@@ -726,7 +726,7 @@
     "price": 900,
     "status": "available",
     "description": "A book that reflects on the subtle kindness and mercy of Allah in our lives, reminding readers of divine gentleness even in moments they may not notice.",
-    "image": "imgs/ان ربي لطيف.jpg",
+    "image": "img/ان ربي لطيف.jpg",
     "draft": false
   },
   {
@@ -736,7 +736,7 @@
     "price": 1500,
     "status": "available",
     "description": "مواجهات مباشرة مع كل أنواع الإدمان. A direct confrontation with all types of addiction, exploring the roots and realities of dependency.",
-    "image": "imgs/في عالم الأشباح الجائعة.jpg",
+    "image": "img/في عالم الأشباح الجائعة.jpg",
     "draft": false
   },
   {
@@ -746,7 +746,7 @@
     "price": 1300,
     "status": "available",
     "description": "An insightful exploration of anticipatory anxiety and how to manage the psychological challenges of modern life.",
-    "image": "imgs/القلق الاستباقي.jpg",
+    "image": "img/القلق الاستباقي.jpg",
     "draft": false
   },
   {
@@ -756,7 +756,7 @@
     "price": 1300,
     "status": "available",
     "description": "A comprehensive guide to self-development and reprogramming the mind to achieve success and happiness in life.",
-    "image": "imgs/اعادة برمجة.jpg",
+    "image": "img/اعادة برمجة.jpg",
     "draft": false
   },
   {
@@ -766,7 +766,7 @@
     "price": 1200,
     "status": "available",
     "description": "An impactful novel that tells the story of a young girl in a desert village dealing with challenges and difficult circumstances. The story follows her journey in facing hardships and finding inner strength to overcome obstacles and achieve her dreams.",
-    "image": "imgs/هذا ما حدث معها.jpg",
+    "image": "img/هذا ما حدث معها.jpg",
     "draft": false
   },
   {
@@ -776,7 +776,7 @@
     "price": 1400,
     "status": "out of stock",
     "description": "A deep psychological horror novel dealing with human inner fears and existential terror. The story follows a character facing their real nightmares in a world where fear becomes a tangible reality. A fascinating exploration of the human mind and its limits.",
-    "image": "imgs/هسيس.jpg",
+    "image": "img/هسيس.jpg",
     "draft": false
   },
   {
@@ -786,7 +786,7 @@
     "price": 2250,
     "status": "available",
     "description": "A humorous and satirical novel that explores the absurdities of modern life through the lens of a cat's perspective, blending comedy with social commentary.",
-    "image": "imgs/هل ستأكل قطتي مقلتي.jpg",
+    "image": "img/هل ستأكل قطتي مقلتي.jpg",
     "draft": false
   },
   {
@@ -796,7 +796,7 @@
     "price": 2500,
     "status": "available",
     "description": "كتاب فلسفي شهير لنيتشه.",
-    "image": "imgs/هكذا تكلم زرادشت.jpg",
+    "image": "img/هكذا تكلم زرادشت.jpg",
     "draft": false
   },
   {
@@ -806,7 +806,7 @@
     "price": 900,
     "status": "available",
     "description": "The conversations and spiritual teachings of Shams Tabrizi. Part 4.",
-    "image": "imgs/هكذا تكلم تبريزي  4.png",
+    "image": "img/هكذا تكلم تبريزي  4.png",
     "draft": false
   },
   {
@@ -816,7 +816,7 @@
     "price": 1200,
     "status": "available",
     "description": "The conversations and spiritual teachings of Shams Tabrizi. Part 3.",
-    "image": "imgs/هكذا تكلم تبريزي 3.png",
+    "image": "img/هكذا تكلم تبريزي 3.png",
     "draft": false
   },
   {
@@ -826,7 +826,7 @@
     "price": 1200,
     "status": "available",
     "description": "The conversations and spiritual teachings of Shams Tabrizi. Part 2.",
-    "image": "imgs/هكذا تكلم تبريزي 2.png",
+    "image": "img/هكذا تكلم تبريزي 2.png",
     "draft": false
   },
   {
@@ -836,7 +836,7 @@
     "price": 1200,
     "status": "available",
     "description": "The conversations and spiritual teachings of Shams Tabrizi. Part 1.",
-    "image": "imgs/هكذا تكلم تبريزي 1.png",
+    "image": "img/هكذا تكلم تبريزي 1.png",
     "draft": false
   },
   {
@@ -846,7 +846,7 @@
     "price": 1200,
     "status": "available",
     "description": "كتاب تحفيزي عميق يقدم دليل شامل للشفاء والتحول الشخصي. يقدم بريانا ويست نصائح عملية وقوية لمساعدتك على التعافي من الصدمات، بناء الثقة بالنفس، وإيجاد طريقك نحو حياة أكثر إشباعاً وهدفاً.",
-    "image": "imgs/هكذا تتعافى.jpg",
+    "image": "img/هكذا تتعافى.jpg",
     "draft": false
   },
   {
@@ -856,7 +856,7 @@
     "price": 2000,
     "status": "available",
     "description": "رواية \\\"حفلة التيس\\\".",
-    "image": "imgs/حفلة التيس.jpg",
+    "image": "img/حفلة التيس.jpg",
     "draft": false
   },
   {
@@ -866,7 +866,7 @@
     "price": 1700,
     "status": "out of stock",
     "description": "حديث الصباح والمساء رواية لنجيب محفوظ تنسج معاً قصص شخصيات متعددة عبر أجيال مختلفة، مستكشفة مواضيع الزمن والذاكرة وترابط حيوات البشر من خلال محادثات وسرديات تمتد من الصباح إلى المساء.",
-    "image": "imgs/حديث الصباح والمساء.jpg",
+    "image": "img/حديث الصباح والمساء.jpg",
     "draft": false
   },
   {
@@ -876,7 +876,7 @@
     "price": 1500,
     "status": "available",
     "description": "A passionate and tumultuous love story set on the Yorkshire moors, exploring themes of revenge, obsession, and the destructive power of love.",
-    "image": "imgs/مرتفعات ويذرنج.jpg",
+    "image": "img/مرتفعات ويذرنج.jpg",
     "draft": false
   },
   {
@@ -886,7 +886,7 @@
     "price": 1600,
     "status": "available",
     "description": "This book presents the biography of Prophet Muhammad (peace be upon him) in a contemporary style, highlighting inspiring moments and values from his blessed life in a simple and engaging way.",
-    "image": "imgs/في صحبة الحبيب.jpg",
+    "image": "img/في صحبة الحبيب.jpg",
     "draft": false
   },
   {
@@ -896,7 +896,7 @@
     "price": 1200,
     "status": "out of stock",
     "description": "مذكرات من تحت الأرض (المعروف أيضاً باسم في قبوي) هي رواية فلسفية تقدم اعتراف راوٍ معزول ومرير. تستكشف مواضيع الإرادة الحرة والحتمية وطبيعة الوعي الإنساني.",
-    "image": "imgs/في-قبوي.jpg",
+    "image": "img/في-قبوي.jpg",
     "draft": false
   },
   {
@@ -906,7 +906,7 @@
     "price": 1400,
     "status": "available",
     "description": "A story about a girl with a distinctive collar, exploring themes of uniqueness, social expectations, and the courage to be different in a conformist world.",
-    "image": "imgs/فتاة الياقة الزرقاء.jpg",
+    "image": "img/فتاة الياقة الزرقاء.jpg",
     "draft": false
   },
   {
@@ -916,7 +916,7 @@
     "price": 1600,
     "status": "available",
     "description": "الكتاب الشهير \\\"فن اللامبالاة\\\".",
-    "image": "imgs/فن اللامبالاة.jpg",
+    "image": "img/فن اللامبالاة.jpg",
     "draft": false
   },
   {
@@ -926,7 +926,7 @@
     "price": 2100,
     "status": "available",
     "description": "سيرة تخييلية لراوية موهوبة تنشأ في أمريكا اللاتينية وسط اضطرابات سياسية واجتماعية. عبر واقعية سحرية، تنسج إيفا حكايات تصوغ هويتها وعلاقاتها—لا سيما مع رولف كارليه—وتكشف قوة السرد في مقاومة القهر وصناعة المصير.",
-    "image": "imgs/ايفا لونا.jpg",
+    "image": "img/ايفا لونا.jpg",
     "draft": false
   },
   {
@@ -936,7 +936,7 @@
     "price": 1800,
     "status": "available",
     "description": "A timeless tale of love, class, and societal expectations. Elizabeth Bennet navigates the complexities of Regency-era England.",
-    "image": "imgs/el9adimon.jpg",
+    "image": "img/el9adimon.jpg",
     "draft": false
   },
   {
@@ -946,7 +946,7 @@
     "price": 1200,
     "status": "out of stock",
     "description": "ذكريات شتاء في مشاعر الصيف مجموعة من أعمال دوستويفسكي تستكشف التباين بين الفصول والعواطف. تغوص القصص في علم النفس البشري وتعقيد المشاعر عبر الأوقات المختلفة.",
-    "image": "imgs/ذكريات-شتاء-.jpg",
+    "image": "img/ذكريات-شتاء-.jpg",
     "draft": false
   },
   {
@@ -956,7 +956,7 @@
     "price": 1850,
     "status": "out of stock",
     "description": "منزل الأموات رواية شبه سيرة ذاتية مبنية على تجارب دوستويفسكي في معسكر سجون سيبيريا. تقدم وصفاً مفصلاً لحياة السجن وتستكشف مواضيع الطبيعة البشرية والمعاناة والفداء.",
-    "image": "imgs/ذكريات من منزل الأموات.jpg",
+    "image": "img/ذكريات من منزل الأموات.jpg",
     "draft": false
   },
   {
@@ -966,7 +966,7 @@
     "price": 1200,
     "status": "available",
     "description": "الرواية الكلاسيكية الشهيرة \\\"Gone With The Wind\\\".",
-    "image": "imgs/ذهب مع الريح.jpg",
+    "image": "img/ذهب مع الريح.jpg",
     "draft": false
   },
   {
@@ -976,7 +976,7 @@
     "price": 1300,
     "status": "available",
     "description": "رواية \\\"دار خولة\\\" لبثينة العيسى.",
-    "image": "imgs/دار خولة.png",
+    "image": "img/دار خولة.png",
     "draft": false
   },
   {
@@ -986,7 +986,7 @@
     "price": 1400,
     "status": "available",
     "description": "A sensual and evocative tale exploring the power of scent and touch in human relationships, where memories are intertwined with fragrance.",
-    "image": "imgs/عناق برائحة الورق.jpg",
+    "image": "img/عناق برائحة الورق.jpg",
     "draft": false
   },
   {
@@ -996,7 +996,7 @@
     "price": 1500,
     "status": "available",
     "description": "Conversations and reflections on love, relationships, and the human experience of connection.",
-    "image": "imgs/محادثات في الحب.jpg",
+    "image": "img/محادثات في الحب.jpg",
     "draft": false
   },
   {
@@ -1006,7 +1006,7 @@
     "price": 1500,
     "status": "available",
     "description": "A journey of self-discovery and identity exploration, where the protagonist learns to recognize and accept their true self.",
-    "image": "imgs/اعرف وجهك.jpg",
+    "image": "img/اعرف وجهك.jpg",
     "draft": false
   },
   {
@@ -1016,7 +1016,7 @@
     "price": 1500,
     "status": "available",
     "description": "A magical fantasy adventure where nothing is quite what it seems. Scarlett Dragna has never left her tiny island, but when she receives an invitation to Caraval, a once-a-year performance where the audience participates in the show, she enters a world of magic, mystery, and danger where she must find her sister before the five nights of Caraval are over.",
-    "image": "imgs/Caraval.jpg",
+    "image": "img/Caraval.jpg",
     "draft": false
   },
   {
@@ -1026,7 +1026,7 @@
     "price": 1900,
     "status": "available",
     "description": "An inspiring autobiography about overcoming adversity and pushing the limits of personal endurance to achieve success.",
-    "image": "imgs/لا يمكنك ايذائي.jpg",
+    "image": "img/لا يمكنك ايذائي.jpg",
     "draft": false
   },
   {
@@ -1036,7 +1036,7 @@
     "price": 1500,
     "status": "available",
     "description": "A book that helps you build psychological resilience, overcome feelings of rejection and frustration, and regain self-confidence.",
-    "image": "imgs/التعافي من الرفض.jpg",
+    "image": "img/التعافي من الرفض.jpg",
     "draft": false
   },
   {
@@ -1046,7 +1046,7 @@
     "price": 1100,
     "status": "available",
     "description": "\\\"ابنة الأمر\\\" لألكسندر بوشكين.",
-    "image": "imgs/ابنة الامر.png",
+    "image": "img/ابنة الامر.png",
     "draft": false
   },
   {
@@ -1056,7 +1056,7 @@
     "price": 1600,
     "status": "available",
     "description": "A nostalgic journey back to an aunt's house, filled with memories, family bonds, and the warmth of childhood experiences that shape who we become.",
-    "image": "imgs/بيت خالتي.jpg",
+    "image": "img/بيت خالتي.jpg",
     "draft": false
   },
   {
@@ -1066,7 +1066,7 @@
     "price": 1200,
     "status": "available",
     "description": "A motivational book about self-love, happiness, and becoming the person who brings joy to your own life.",
-    "image": "imgs/كن الشخص الذي يجعلك سعيدا.jpg",
+    "image": "img/كن الشخص الذي يجعلك سعيدا.jpg",
     "draft": false
   },
   {
@@ -1076,7 +1076,7 @@
     "price": 2500,
     "status": "available",
     "description": "الجزء الأول من ثلاثية القاهرة.",
-    "image": "imgs/بين القصرين.jpg",
+    "image": "img/بين القصرين.jpg",
     "draft": false
   },
   {
@@ -1086,7 +1086,7 @@
     "price": 1450,
     "status": "out of stock",
     "description": "رواية عن أولغا التي تنهار نفسيًا بعد ترك زوجها لها فجأة، فتغمرها الغيرة والغضب وفقدان المعنى. في نابولي، ومن خلال صوت اعترافي حاد، تتتبع محاولتها لاستعادة هويتها كأم وامرأة وكاتبة، مستكشفة حدود الحب والكرامة ولغة الألم.",
-    "image": "imgs/أيام الهجران.jpg",
+    "image": "img/أيام الهجران.jpg",
     "draft": false
   },
   {
@@ -1096,7 +1096,7 @@
     "price": 2200,
     "status": "available",
     "description": "الجزء الثاني من ثلاثية اليهود لكمال رحيم. تتبع الرواية شخصيات تتنقل في الحياة في الشتات، مستكشفة مواضيع التشرد والذاكرة والبحث عن الوطن. تدور أحداثها في خلفية المدن الأوروبية، وتحكي قصة الحنين والانتماء.",
-    "image": "imgs/أيام الشتات.jpg",
+    "image": "img/أيام الشتات.jpg",
     "draft": false
   },
   {
@@ -1106,7 +1106,7 @@
     "price": 3000,
     "status": "out of stock",
     "description": "أولاد حارتنا من أشهر وأكثر روايات نجيب محفوظ إثارة للجدل. تحكي قصة أجيال تعيش في حارة بالقاهرة، مستكشفة مواضيع القوة والدين والطبيعة البشرية من خلال شخصيات وأحداث رمزية.",
-    "image": "imgs/أولاد حارتنا.png",
+    "image": "img/أولاد حارتنا.png",
     "draft": false
   },
   {
@@ -1116,7 +1116,7 @@
     "price": 1700,
     "status": "available",
     "description": "A self-development book explaining the Law of Attraction and how to achieve your desires through positive thinking and changing beliefs.",
-    "image": "imgs/اسأل تعط.jpg",
+    "image": "img/اسأل تعط.jpg",
     "draft": false
   },
   {
@@ -1126,7 +1126,7 @@
     "price": 2000,
     "status": "available",
     "description": "رواية خيالية قوية من سلسلة 'Shatter Me' تتبع قصة جولييت فيرز، فتاة تمتلك قوة مدمرة في لمسها. بعد سنوات من السجن، تكتشف أن قوتها قد تكون المفتاح لإنقاذ عالم محطم. رواية عن القوة الداخلية والتحرر من الخوف.",
-    "image": "imgs/أشعلني.jpeg",
+    "image": "img/أشعلني.jpeg",
     "draft": false
   },
   {
@@ -1136,7 +1136,7 @@
     "price": 1200,
     "status": "available",
     "description": "A compelling narrative about a mysterious land and its inhabitants, exploring themes of identity, belonging, and the search for meaning in an unfamiliar world.",
-    "image": "imgs/ارض زيكولا.jpg",
+    "image": "img/ارض زيكولا.jpg",
     "draft": false
   },
   {
@@ -1146,7 +1146,7 @@
     "price": 850,
     "status": "out of stock",
     "description": "The heartwarming story of Anne Shirley, an imaginative and talkative orphan who is mistakenly sent to live with Marilla and Matthew Cuthbert on Prince Edward Island. This beloved classic follows Anne's adventures and growth as she transforms the lives of everyone around her.",
-    "image": "imgs/Anne of green gables.jpg",
+    "image": "img/Anne of green gables.jpg",
     "draft": false
   },
   {
@@ -1156,7 +1156,7 @@
     "price": 5000,
     "status": "available",
     "description": "الرواية الروسية الشهيرة \\\"أنا كارنينا\\\".",
-    "image": "imgs/انا كارنينا -الجزئين.jpg",
+    "image": "img/انا كارنينا -الجزئين.jpg",
     "draft": false
   },
   {
@@ -1166,7 +1166,7 @@
     "price": 1450,
     "status": "available",
     "description": "A story of resilience and hope, where characters navigate through life's unpredictable waves.",
-    "image": "imgs/امواج اكما.jpg",
+    "image": "img/امواج اكما.jpg",
     "draft": false
   },
   {
@@ -1176,7 +1176,7 @@
     "price": 1200,
     "status": "available",
     "description": "A fascinating tale of adventure and discovery, set in a world where ancient secrets come to life.",
-    "image": "imgs/اماريتا.jpg",
+    "image": "img/اماريتا.jpg",
     "draft": false
   },
   {
@@ -1186,7 +1186,7 @@
     "price": 1800,
     "status": "available",
     "description": "Great Expectations is one of Charles Dickens's most celebrated novels. It tells the story of Pip, an orphan who dreams of becoming a gentleman. Through his journey, the novel explores themes of social class, ambition, love, and the consequences of one's choices in Victorian England.",
-    "image": "imgs/امال عظيمة.png",
+    "image": "img/امال عظيمة.png",
     "draft": false
   },
   {
@@ -1196,7 +1196,7 @@
     "price": 1300,
     "status": "available",
     "description": "A coming-of-age novel that explores the memories and experiences of a young boy during his school years, focusing on the symbolism of the color red and its impact on his life and identity.",
-    "image": "imgs/السادس احمر.jpg",
+    "image": "img/السادس احمر.jpg",
     "draft": false
   },
   {
@@ -1206,7 +1206,7 @@
     "price": 1300,
     "status": "available",
     "description": "A philosophical exploration of destruction and renewal, examining the cycles of life and the inevitability of change.",
-    "image": "imgs/الهلكوت.jpg",
+    "image": "img/الهلكوت.jpg",
     "draft": false
   },
   {
@@ -1216,7 +1216,7 @@
     "price": 1300,
     "status": "available",
     "description": "الزوج الأبدي رواية نفسية عن رجل يكتشف أن زوجته المتوفاة كان لها عاشق. تستكشف القصة مواضيع الغيرة والانتقام والعلاقات المعقدة بين الرجال، في إطار سانت بطرسبرغ.",
-    "image": "imgs/الزوج-الأبدي.jpg",
+    "image": "img/الزوج-الأبدي.jpg",
     "draft": false
   },
   {
@@ -1226,7 +1226,7 @@
     "price": 1400,
     "status": "available",
     "description": "رواية الوجه الحجري",
-    "image": "imgs/الوجه الحجري.jpg",
+    "image": "img/الوجه الحجري.jpg",
     "draft": false
   },
   {
@@ -1236,7 +1236,7 @@
     "price": 1350,
     "status": "available",
     "description": "الطاعون رواية رمزية قوية لألبير كامو عن وباء يضرب مدينة وهران الجزائرية. من خلال قصة الدكتور ريوك وشخصيات أخرى، يستكشف كامو مواضيع التضامن الإنساني ومقاومة المعاناة وعبثية الوجود في مواجهة كون غير مبال.",
-    "image": "imgs/الطاعون.jpg",
+    "image": "img/الطاعون.jpg",
     "draft": false
   },
   {
@@ -1246,7 +1246,7 @@
     "price": 2000,
     "status": "available",
     "description": "الجزء الثالث من ثلاثية القاهرة.",
-    "image": "imgs/السكرية.png",
+    "image": "img/السكرية.png",
     "draft": false
   },
   {
@@ -1256,7 +1256,7 @@
     "price": 1700,
     "status": "available",
     "description": "رواية سريالية آسرة من تأليف بثينة العيسى. تتبع القصة 'السندباد الأعمى' في رحلة عبر البحر والحرب، مستكشفة مواضيع الذاكرة والفقدان والبحث عن المعنى في عالم مجزأ. تمزج الرواية بين الواقع والخيال، مخلقة نسيجاً غنياً من التجربة الإنسانية.",
-    "image": "imgs/السندباد الاعمى.jpg",
+    "image": "img/السندباد الاعمى.jpg",
     "draft": false
   },
   {
@@ -1266,7 +1266,7 @@
     "price": 4000,
     "status": "out of stock",
     "description": "الشياطين (المعروف أيضاً باسم الممسوسون) هي واحدة من أكثر روايات دوستويفسكي تعقيداً، تستكشف الراديكالية السياسية والعدمية والانحلال الأخلاقي للمجتمع الروسي.",
-    "image": "imgs/الشياطين.png",
+    "image": "img/الشياطين.png",
     "draft": false
   },
   {
@@ -1276,7 +1276,7 @@
     "price": 1700,
     "status": "out of stock",
     "description": "رواية 'الناقوس الزجاجي' هي العمل الروائي الوحيد للشاعرة الأمريكية سيلفيا بلاث. تدور أحداث الرواية حول إيستر غرينوود، شابة موهوبة تفوز بفرصة للعمل في مجلة موضة بنيويورك. رغم النجاح الظاهري، تعاني من شعور متزايد بالعزلة والاضطراب النفسي، مما يؤدي بها إلى محاولة انتحار ودخولها مصحة نفسية. تُسلط الرواية الضوء على الصراعات الداخلية للبطلة، خاصة فيما يتعلق بتوقعات المجتمع من النساء والقيود المفروضة عليهن. يُستخدم 'الناقوس الزجاجي' كاستعارة لتمثيل الشعور بالاختناق والعزلة التي تعاني منها. تُعتبر هذه الرواية من الأعمال الأدبية الكلاسيكية التي تناولت موضوعات الصحة النفسية والهوية النسائية بعمق وصدق.",
-    "image": "imgs/الناقوس الزجاجي.jpg",
+    "image": "img/الناقوس الزجاجي.jpg",
     "draft": false
   },
   {
@@ -1286,7 +1286,7 @@
     "price": 1400,
     "status": "available",
     "description": "رواية النبي الافريقي",
-    "image": "imgs/النبي الافريقي.jpg",
+    "image": "img/النبي الافريقي.jpg",
     "draft": false
   },
   {
@@ -1296,7 +1296,7 @@
     "price": 2000,
     "status": "available",
     "description": "رواية قوية لكمال رحيم تستكشف الهوية والانتماء وتقاطعات التراث الديني والثقافي المعقدة. تتبع القصة بطل الرواية وهو يتنقل في الهوية المزدوجة لكونه يهودياً ومسلماً في المجتمع المعاصر.",
-    "image": "imgs/المسلم اليهودي.jpg",
+    "image": "img/المسلم اليهودي.jpg",
     "draft": false
   },
   {
@@ -1306,7 +1306,7 @@
     "price": 1300,
     "status": "available",
     "description": "المقامر رواية لفيودور دوستويفسكي عن مدرس شاب يصبح مهووساً بالمقامرة. تستكشف القصة مواضيع الإدمان والعاطفة والقوة المدمرة للهوس، في إطار منتجع ألماني للمقامرة.",
-    "image": "imgs/المقامر.jpg",
+    "image": "img/المقامر.jpg",
     "draft": false
   },
   {
@@ -1316,7 +1316,7 @@
     "price": 2000,
     "status": "available",
     "description": "رواية كافكا الشهيرة عن يوزف ك. والسلطة الغامضة.",
-    "image": "imgs/المحاكمة.jpg",
+    "image": "img/المحاكمة.jpg",
     "draft": false
   },
   {
@@ -1326,7 +1326,7 @@
     "price": 2000,
     "status": "available",
     "description": "الرواية الشهيرة \\\"المعلم ومارغريتا\\\".",
-    "image": "imgs/المعلم و مارغريتا.jpg",
+    "image": "img/المعلم و مارغريتا.jpg",
     "draft": false
   },
   {
@@ -1336,7 +1336,7 @@
     "price": 1700,
     "status": "available",
     "description": "المثل وقصة أليمة يجمع بين عملين لدوستويفسكي، يستكشفان مواضيع البراءة والمعاناة والحالة الإنسانية. تفحص القصص كيف تتنقل القلوب النقية في عالم مليء بالألم والتعقيد.",
-    "image": "imgs/غلاف-المثل.jpg",
+    "image": "img/غلاف-المثل.jpg",
     "draft": false
   },
   {
@@ -1346,7 +1346,7 @@
     "price": 1500,
     "status": "available",
     "description": "المسيح يصلب من جديد رواية قوية لنيكوس كازانتزاكيس تحكي قصة قرية يونانية تقرر إعادة تمثيل آلام المسيح خلال عيد الفصح. تستكشف الرواية مواضيع الإيمان والتضحية والصراع بين المثل الروحية والطبيعة البشرية.",
-    "image": "imgs/المسيح يصلب من جديد.png",
+    "image": "img/المسيح يصلب من جديد.png",
     "draft": false
   },
   {
@@ -1356,7 +1356,7 @@
     "price": 3000,
     "status": "available",
     "description": "المريض (EL PACIENTE) رواية طبية مثيرة من خوان جوميز خورادو. قصة مروعة ومكثفة تؤكد على مواضيع الخطر والغموض وربما طبيب منحرف. رواية تثير الأدرينالين وتسابق الزمن.",
-    "image": "imgs/المريض.jpg",
+    "image": "img/المريض.jpg",
     "draft": false
   },
   {
@@ -1366,7 +1366,7 @@
     "price": 2400,
     "status": "available",
     "description": "المادة السوداء رواية أمريكية معاصرة لنيك كراوتش تستكشف مواضيع مظلمة من خلال أسلوب سردي مجزأ. تتعمق الرواية في قضايا نفسية واجتماعية معقدة، مقدمة فحصاً مثيراً للتفكير في الحياة الحديثة والطبيعة البشرية.",
-    "image": "imgs/المادة السوداء.jpg",
+    "image": "img/المادة السوداء.jpg",
     "draft": false
   },
   {
@@ -1376,7 +1376,7 @@
     "price": 900,
     "status": "out of stock",
     "description": "White Nights is a sentimental story from the diary of a dreamer, set in St. Petersburg. It tells the story of a lonely young man who falls in love with a young woman he meets during the white nights of summer. A beautiful tale of unrequited love and fleeting moments of connection.",
-    "image": "imgs/الليالي-البيضاء.jpg",
+    "image": "img/الليالي-البيضاء.jpg",
     "draft": false
   },
   {
@@ -1386,7 +1386,7 @@
     "price": 1300,
     "status": "available",
     "description": "الجارة والقلب الضعيف مجموعة من قصتين لدوستويفسكي. تستكشف القصص مواضيع العلاقات الإنسانية والهشاشة العاطفية والطبيعة الحساسة للقلب البشري في التفاعلات الاجتماعية.",
-    "image": "imgs/الجارة قلب ضعيف.jpg",
+    "image": "img/الجارة قلب ضعيف.jpg",
     "draft": false
   },
   {
@@ -1396,7 +1396,7 @@
     "price": 4500,
     "status": "out of stock",
     "description": "The Brothers Karamazov is Dostoevsky's final and greatest novel, exploring themes of faith, doubt, free will, and morality through the story of three brothers and their relationship with their father. A profound philosophical and psychological masterpiece.",
-    "image": "imgs/الاخوة كارامازوف الرافدين.jpg",
+    "image": "img/الاخوة كارامازوف الرافدين.jpg",
     "draft": false
   },
   {
@@ -1406,7 +1406,7 @@
     "price": 1000,
     "status": "available",
     "description": "A horror novel about mysterious and terrifying events in a suspenseful psychological atmosphere.",
-    "image": "imgs/الهول.jpg",
+    "image": "img/الهول.jpg",
     "draft": false
   },
   {
@@ -1416,7 +1416,7 @@
     "price": 1000,
     "status": "available",
     "description": "الغريب تحفة ألبير كامو الوجودية التي تحكي قصة مورسو، فرنسي جزائري يرتكب جريمة قتل بلا معنى على شاطئ. تستكشف الرواية مواضيع العبث والاغتراب وعدم معنى الحياة من خلال فلسفة كامو في العبثية.",
-    "image": "imgs/الغريب.jpg",
+    "image": "img/الغريب.jpg",
     "draft": false
   },
   {
@@ -1426,7 +1426,7 @@
     "price": 1250,
     "status": "out of stock",
     "description": "الفقراء هي أول رواية لدوستويفسكي، عمل رسائلي يروي قصة مراسلين فقيرين. تستكشف الرواية مواضيع الفقر والحب والكرامة الإنسانية من خلال رسائلهما.",
-    "image": "imgs/الفقراء.jpg",
+    "image": "img/الفقراء.jpg",
     "draft": false
   },
   {
@@ -1436,7 +1436,7 @@
     "price": 2000,
     "status": "available",
     "description": "كتاب في فلسفة الدين والكرامة الإنسانية.",
-    "image": "imgs/الدين و الكرامة الانسانية.png",
+    "image": "img/الدين و الكرامة الانسانية.png",
     "draft": false
   },
   {
@@ -1446,7 +1446,7 @@
     "price": 1500,
     "status": "available",
     "description": "A novel inspired by true events, revolving around a mysterious building and terrifying incidents in an Egyptian city.",
-    "image": "imgs/ال داوود.jpg",
+    "image": "img/ال داوود.jpg",
     "draft": false
   },
   {
@@ -1456,7 +1456,7 @@
     "price": 1200,
     "status": "available",
     "description": "البطل الصغير قصة قصيرة لدوستويفسكي تستكشف مواضيع الطفولة والبراءة والبطولة في عالم صغير.",
-    "image": "imgs/البطل الصغير.jpg",
+    "image": "img/البطل الصغير.jpg",
     "draft": false
   },
   {
@@ -1466,7 +1466,7 @@
     "price": 1500,
     "status": "available",
     "description": "A mysterious and thrilling novel revolving around the enigmatic character of the Baron who appears in a world full of secrets and symbols. The story follows a journey of discovering the truth behind this mysterious character in a world full of deception and illusion.",
-    "image": "imgs/البارون.jpg",
+    "image": "img/البارون.jpg",
     "draft": false
   },
   {
@@ -1476,7 +1476,7 @@
     "price": 1200,
     "status": "available",
     "description": "السيرة الذاتية الملهمة لطه حسين، ترصد طفولته في صعيد مصر، ومعركته مع فقدان البصر، ورحلته من الكُتّاب إلى الأزهر ثم السوربون بحثاً عن العلم والحرية الفكرية.",
-    "image": "imgs/الايام HARDCOVER.jpg",
+    "image": "img/الايام HARDCOVER.jpg",
     "draft": false
   },
   {
@@ -1486,7 +1486,7 @@
     "price": 3500,
     "status": "available",
     "description": "السيرة الذاتية الملهمة لطه حسين، ترصد طفولته في صعيد مصر، ومعركته مع فقدان البصر، ورحلته من الكُتّاب إلى الأزهر ثم السوربون بحثاً عن العلم والحرية الفكرية.",
-    "image": "imgs/الايام HARDCOVER.jpg",
+    "image": "img/الايام HARDCOVER.jpg",
     "draft": false
   },
   {
@@ -1496,7 +1496,7 @@
     "price": 4800,
     "status": "available",
     "description": "A psychological masterpiece exploring the depths of human nature, morality, and the consequences of our actions.",
-    "image": "imgs/الابلة 1.jpg",
+    "image": "img/الابلة 1.jpg",
     "draft": false
   },
   {
@@ -1506,7 +1506,7 @@
     "price": 4800,
     "status": "available",
     "description": "رواية روسية كلاسيكية تتناول قصة حب معقدة بين الأمير ميشكين وناستاسيا فيليبوفنا، مع عناصر من الحب والجنون.",
-    "image": "imgs/الابلة 1.jpg",
+    "image": "img/الابلة 1.jpg",
     "draft": false
   },
   {
@@ -1516,7 +1516,7 @@
     "price": 4800,
     "status": "out of stock",
     "description": "الأبله رواية عن الأمير ميشكين، رجل ذو قلب نقي وبراءة يعود إلى روسيا بعد علاج من الصرع. تتصادم خيرته وسذاجته مع المجتمع الفاسد من حوله، مما يؤدي إلى المأساة.",
-    "image": "imgs/الأبله.jpg",
+    "image": "img/الأبله.jpg",
     "draft": false
   },
   {
@@ -1526,7 +1526,7 @@
     "price": 1600,
     "status": "available",
     "description": "دليل عملي لبناء عادات جيدة وكسر السيئة عبر تغييرات صغيرة تراكمية. يعرض نموذج الإشارة/الرغبة/الاستجابة/المكافأة، وقوانين أربعة: اجعلها واضحة وجذابة وسهلة ومُرضية، مع تركيز على الهوية بحيث تصبح العادة جزءًا ممن تكون.",
-    "image": "imgs/العادات الذرية.jpg",
+    "image": "img/العادات الذرية.jpg",
     "draft": false
   },
   {
@@ -1536,7 +1536,7 @@
     "price": 3000,
     "status": "available",
     "description": "رواية أكرهك لا تتركني",
-    "image": "imgs/أكرهك لا تتركني.jpg",
+    "image": "img/أكرهك لا تتركني.jpg",
     "draft": false
   },
   {
@@ -1546,7 +1546,7 @@
     "price": 1800,
     "status": "available",
     "description": "الجزء الثالث من ثلاثية اليهود لكمال رحيم. تستكشف الرواية أحلام وتطلعات شخصيات تتوق للعودة إلى الوطن، متفحصة مواضيع الحنين والهوية والعلاقة المعقدة بين الذاكرة والواقع.",
-    "image": "imgs/أحلام العودة.jpg",
+    "image": "img/أحلام العودة.jpg",
     "draft": false
   },
   {
@@ -1556,7 +1556,7 @@
     "price": 2300,
     "status": "available",
     "description": "الرواية الكلاسيكية عن كاتدرائية نوتردام.",
-    "image": "imgs/أحدب نوتردام.png",
+    "image": "img/أحدب نوتردام.png",
     "draft": false
   },
   {
@@ -1566,7 +1566,7 @@
     "price": 1700,
     "status": "available",
     "description": "A book about healing from toxic relationships, offering practical advice for self-understanding, overcoming emotional pain, and building healthy connections.",
-    "image": "imgs/احببت وغدا.jpg",
+    "image": "img/احببت وغدا.jpg",
     "draft": false
   },
   {
@@ -1576,7 +1576,7 @@
     "price": 1500,
     "status": "out of stock",
     "description": "رواية مؤثرة تتناول الصداقة والخيانه والفداء تدور أحداثها في أفغانستان والولايات المتحدة. رحلة إنسانية تبحث عن الغفران ومعنى الوفاء.",
-    "image": "imgs/عداء الطائرة الورقية.jpg",
+    "image": "img/عداء الطائرة الورقية.jpg",
     "draft": false
   },
   {
@@ -1586,7 +1586,7 @@
     "price": 1500,
     "status": "available",
     "description": "Reflections on life, loss, and the search for meaning between love and sadness.",
-    "image": "imgs/عن اشياء.jpg",
+    "image": "img/عن اشياء.jpg",
     "draft": false
   },
   {
@@ -1596,7 +1596,7 @@
     "price": 1000,
     "status": "out of stock",
     "description": "كتاب عميق يتناول موضوع التعافي من الإساءات الأبوية وصدمات الطفولة. يقدم د.عماد رشاد عثمان رؤية نفسية واجتماعية شاملة لفهم الآثار السلبية للتربية القاسية والعلاقات الأسرية السامة، مع تقديم استراتيجيات عملية للشفاء والنمو الشخصي.",
-    "image": "imgs/أبي الذي أكره.png",
+    "image": "img/أبي الذي أكره.png",
     "draft": false
   },
   {
@@ -1606,7 +1606,7 @@
     "price": 1400,
     "status": "available",
     "description": "A sensual and evocative tale exploring the power of scent and touch in human relationships, where memories are intertwined with fragrance.",
-    "image": "imgs/عناق برائحة الورق.jpg",
+    "image": "img/عناق برائحة الورق.jpg",
     "draft": false
   },
   {
@@ -1616,7 +1616,7 @@
     "price": 1500,
     "status": "available",
     "description": "A psychological exploration of human behavior and the complex mental patterns that shape our lives and relationships.",
-    "image": "imgs/عقدك النفسية.jpg",
+    "image": "img/عقدك النفسية.jpg",
     "draft": false
   }
 ]
