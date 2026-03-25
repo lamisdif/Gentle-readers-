@@ -1,4 +1,4 @@
- /* Font face declarations for Dalton White font - Multiple paths for hosting compatibility */
+﻿ /* Font face declarations for Dalton White font - Multiple paths for hosting compatibility */
 @font-face {
   font-family: 'Dalton White';
   src: url('./Dalton White.otf') format('opentype');
@@ -339,7 +339,7 @@ html,
         overflow: hidden;
         border-bottom: 1px solid #eee;
         /* Added background image properties */
-        background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('imgs/zach-plank-o-cpCRdEgxs-unsplash.jpg');
+        background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('img/zach-plank-o-cpCRdEgxs-unsplash.jpg');
         background-size: cover;
         background-position: center;
         color: #fff; /* Ensure text is visible over background */
@@ -1545,7 +1545,7 @@ body[lang="en"] {
     padding: 6rem 2rem 10rem 2rem; /* Match desktop padding */
     min-height: 80vh; /* Match desktop height proportions */
     /* Ensure background image and text styling matches desktop */
-    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('imgs/zach-plank-o-cpCRdEgxs-unsplash.jpg');
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('img/zach-plank-o-cpCRdEgxs-unsplash.jpg');
     background-size: cover;
     background-position: center;
     color: #fff;
@@ -1558,7 +1558,7 @@ body[lang="en"] {
     padding-top: 0 !important; /* Start from the very top */
     min-height: 70vh; /* Increased height for better centering */
     height: 70vh; /* Fixed height for consistent centering */
-    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('imgs/zach-plank-o-cpCRdEgxs-unsplash.jpg');
+    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('img/zach-plank-o-cpCRdEgxs-unsplash.jpg');
     position: relative;
     top: 0;
     display: flex;
