@@ -166,31 +166,31 @@ function loadOrderSummary() {
       orderDetailsDiv.appendChild(addressText);
     }
   }
-  
+
   // Calculate Packaging
   let packagingPrice = 0;
-  const packagingInput = document.querySelector('input[name="packaging"]:checked');
-  const packagingType = packagingInput ? packagingInput.value : 'none';
-  if (packagingType !== 'none') {
+  const packagingOption = document.querySelector('input[name="packaging"]:checked');
+  const packagingType = packagingOption ? packagingOption.value : 'none';
+  
+  if (packagingType === 'papier_craft' || packagingType === 'surprise') {
     packagingPrice = 500;
   }
 
   // Add packaging to summary
-  const packagingTitle = document.createElement("span");
-  packagingTitle.textContent = lang === 'ar' ? "التغليف" : "Packaging";
-  packagingTitle.style.fontWeight = "bold";
-  packagingTitle.style.fontSize = "14px";
+  if (packagingType !== 'none') {
+    const packagingTitle = document.createElement("span");
+    const packagingLabel = packagingType === 'papier_craft' ? 'Papier Craft / ورق كرافت' : 'Surprise / مفاجأة';
+    packagingTitle.textContent = `Packaging / التغليف (${packagingLabel})`;
+    packagingTitle.style.fontSize = '0.9rem';
+    
+    const packagingPriceSpan = document.createElement("span");
+    packagingPriceSpan.textContent = `${packagingPrice.toLocaleString()} DZD`;
+    packagingPriceSpan.style.fontSize = '0.9rem';
+    
+    orderDetailsDiv.appendChild(packagingTitle);
+    orderDetailsDiv.appendChild(packagingPriceSpan);
+  }
   
-  const packagingPriceSpan = document.createElement("span");
-  packagingPriceSpan.textContent = packagingType === 'none' 
-    ? (lang === 'ar' ? "بدون" : "None")
-    : `${packagingPrice.toLocaleString()} DZD`;
-  packagingPriceSpan.style.fontWeight = "bold";
-  packagingPriceSpan.style.fontSize = "14px";
-  
-  orderDetailsDiv.appendChild(packagingTitle);
-  orderDetailsDiv.appendChild(packagingPriceSpan);
-
   const finalTotal = subtotal + shippingCost + packagingPrice;
   totalPriceLabel.textContent = `${finalTotal.toLocaleString()} DZD`;
 
@@ -238,12 +238,9 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Packaging selection changes
-  document.querySelectorAll('input[name="packaging"]').forEach(input => {
-    input.addEventListener('change', function() {
-      loadOrderSummary();
-      validateForm();
-    });
+  // Packaging selection change
+  document.querySelectorAll('input[name="packaging"]').forEach(radio => {
+    radio.addEventListener('change', loadOrderSummary);
   });
 
   // Merge CMS books, then load order summary
@@ -291,9 +288,8 @@ if (checkoutForm) {
     const daira = document.getElementById("checkout-daira-select")?.value;
     const address = document.getElementById("checkout-address-input")?.value?.trim() || "";
     const desk = document.getElementById("checkout-desk-select")?.value || "";
-    const packagingInput = document.querySelector('input[name="packaging"]:checked');
-    const packagingType = packagingInput ? packagingInput.value : 'none';
-    const packagingPrice = packagingType === 'none' ? 0 : 500;
+    const packagingOption = document.querySelector('input[name="packaging"]:checked');
+    const packagingType = packagingOption ? packagingOption.value : "none";
     const cartItems = getCartObject();
 
     // Form validation
@@ -359,6 +355,7 @@ if (checkoutForm) {
     });
 
     const shippingPrice = getShippingPrice(wilaya, deliveryMethod);
+    const packagingPrice = (packagingType === 'none') ? 0 : 500;
     const finalTotal = subtotal + shippingPrice + packagingPrice;
 
     // Final safety check before submission
@@ -538,9 +535,8 @@ window.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Add radio button listeners for validation
-    document.querySelectorAll('input[name="packaging"]').forEach(input => {
-        input.addEventListener('change', validateForm);
+    document.querySelectorAll('input[name="packaging"]').forEach(radio => {
+        radio.addEventListener('change', validateForm);
     });
 
     // Initial validation
@@ -557,8 +553,6 @@ function validateForm() {
     const daira = document.getElementById("checkout-daira-select")?.value;
     const address = document.getElementById("checkout-address-input")?.value?.trim();
     const desk = document.getElementById("checkout-desk-select")?.value;
-    const packagingInput = document.querySelector('input[name="packaging"]:checked');
-    const packagingType = packagingInput ? packagingInput.value : null;
     
     const submitBtn = document.getElementById("checkout-submit-button");
     const validationMsg = document.getElementById("validation-message");
@@ -581,10 +575,13 @@ function validateForm() {
     
     if (deliveryMethod === 'home' && !address) isValid = false;
     if (deliveryMethod === 'desk' && !desk) isValid = false;
-    if (!packagingType) isValid = false;
     
     // Shipping price must be > 0 (all zones have prices now)
     if (wilaya && shippingPrice <= 0) isValid = false;
+
+    // Packaging must be selected (it has a default 'none', but being safe)
+    const packagingOption = document.querySelector('input[name="packaging"]:checked');
+    if (!packagingOption) isValid = false;
 
     if (isValid) {
         submitBtn.disabled = false;
