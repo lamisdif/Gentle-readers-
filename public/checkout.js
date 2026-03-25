@@ -167,7 +167,31 @@ function loadOrderSummary() {
     }
   }
   
-  const finalTotal = subtotal + shippingCost;
+  // Calculate Packaging
+  let packagingPrice = 0;
+  const packagingInput = document.querySelector('input[name="packaging"]:checked');
+  const packagingType = packagingInput ? packagingInput.value : 'none';
+  if (packagingType !== 'none') {
+    packagingPrice = 500;
+  }
+
+  // Add packaging to summary
+  const packagingTitle = document.createElement("span");
+  packagingTitle.textContent = lang === 'ar' ? "التغليف" : "Packaging";
+  packagingTitle.style.fontWeight = "bold";
+  packagingTitle.style.fontSize = "14px";
+  
+  const packagingPriceSpan = document.createElement("span");
+  packagingPriceSpan.textContent = packagingType === 'none' 
+    ? (lang === 'ar' ? "بدون" : "None")
+    : `${packagingPrice.toLocaleString()} DZD`;
+  packagingPriceSpan.style.fontWeight = "bold";
+  packagingPriceSpan.style.fontSize = "14px";
+  
+  orderDetailsDiv.appendChild(packagingTitle);
+  orderDetailsDiv.appendChild(packagingPriceSpan);
+
+  const finalTotal = subtotal + shippingCost + packagingPrice;
   totalPriceLabel.textContent = `${finalTotal.toLocaleString()} DZD`;
 
   // Trigger validation after summary (and shipping price) is updated
@@ -214,6 +238,14 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  // Packaging selection changes
+  document.querySelectorAll('input[name="packaging"]').forEach(input => {
+    input.addEventListener('change', function() {
+      loadOrderSummary();
+      validateForm();
+    });
+  });
+
   // Merge CMS books, then load order summary
   mergeCmsBooksIntoCheckout()
     .finally(function () {
@@ -259,6 +291,9 @@ if (checkoutForm) {
     const daira = document.getElementById("checkout-daira-select")?.value;
     const address = document.getElementById("checkout-address-input")?.value?.trim() || "";
     const desk = document.getElementById("checkout-desk-select")?.value || "";
+    const packagingInput = document.querySelector('input[name="packaging"]:checked');
+    const packagingType = packagingInput ? packagingInput.value : 'none';
+    const packagingPrice = packagingType === 'none' ? 0 : 500;
     const cartItems = getCartObject();
 
     // Form validation
@@ -324,7 +359,7 @@ if (checkoutForm) {
     });
 
     const shippingPrice = getShippingPrice(wilaya, deliveryMethod);
-    const finalTotal = subtotal + shippingPrice;
+    const finalTotal = subtotal + shippingPrice + packagingPrice;
 
     // Final safety check before submission
     if (shippingPrice <= 0 && wilaya) {
@@ -350,6 +385,8 @@ if (checkoutForm) {
           desk,
           items, 
           shipping_price: shippingPrice,
+          packaging_type: packagingType,
+          packaging_price: packagingPrice,
           total_price: finalTotal 
         }]);
 
@@ -501,6 +538,11 @@ window.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Add radio button listeners for validation
+    document.querySelectorAll('input[name="packaging"]').forEach(input => {
+        input.addEventListener('change', validateForm);
+    });
+
     // Initial validation
     validateForm();
 });
@@ -515,6 +557,8 @@ function validateForm() {
     const daira = document.getElementById("checkout-daira-select")?.value;
     const address = document.getElementById("checkout-address-input")?.value?.trim();
     const desk = document.getElementById("checkout-desk-select")?.value;
+    const packagingInput = document.querySelector('input[name="packaging"]:checked');
+    const packagingType = packagingInput ? packagingInput.value : null;
     
     const submitBtn = document.getElementById("checkout-submit-button");
     const validationMsg = document.getElementById("validation-message");
@@ -537,6 +581,7 @@ function validateForm() {
     
     if (deliveryMethod === 'home' && !address) isValid = false;
     if (deliveryMethod === 'desk' && !desk) isValid = false;
+    if (!packagingType) isValid = false;
     
     // Shipping price must be > 0 (all zones have prices now)
     if (wilaya && shippingPrice <= 0) isValid = false;
