@@ -357,6 +357,30 @@
       cursor: not-allowed;
       filter: grayscale(1);
     }
+    .packaging-options {
+      display: grid;
+      gap: 16px;
+    }
+    .packaging-option {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 12px 16px;
+      background: #fdfaf2;
+      border: 1px solid rgba(16, 86, 82, 0.2);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .packaging-option:hover {
+      box-shadow: 0 4px 12px rgba(16, 86, 82, 0.15);
+      border-color: rgba(16, 86, 82, 0.4);
+      transform: translateY(-2px);
+    }
+    .packaging-option img {
+      border-radius: 6px;
+      object-fit: cover;
+    }
   </style>
 </head>
 <body>
@@ -432,25 +456,25 @@
             </div>
             <div style="margin-top: 15px;">
               <span id="checkout-packaging-label" style="display: block; font-size: 13px; font-weight: 600; color: #000000; margin-bottom: 12px;">PACKAGING / التغليف</span>
-              <div class="packaging-options" style="display: grid; gap: 10px;">
-                <label class="packaging-option" style="display: flex; align-items: center; gap: 10px; padding: 10px; background: #fdfaf2; border: 1px solid rgba(16, 86, 82, 0.15); border-radius: 8px; cursor: pointer;">
+              <div class="packaging-options">
+                <label class="packaging-option">
                   <input type="radio" name="packaging" value="none" checked style="accent-color: #105652;">
                   <div style="flex: 1;">
                     <div style="font-size: 14px; font-weight: 600;">No packaging / بدون تغليف</div>
                     <div style="font-size: 12px; color: #666;">0 DA</div>
                   </div>
                 </label>
-                <label class="packaging-option" style="display: flex; align-items: center; gap: 10px; padding: 10px; background: #fdfaf2; border: 1px solid rgba(16, 86, 82, 0.15); border-radius: 8px; cursor: pointer;">
+                <label class="packaging-option">
                   <input type="radio" name="packaging" value="papier_craft" style="accent-color: #105652;">
-                  <img src="/img/papier-craft.PNG" alt="Papier Craft" width="60">
+                  <img src="/img/papier-craft.PNG" alt="Papier Craft" width="80">
                   <div style="flex: 1;">
                     <div style="font-size: 14px; font-weight: 600;">Papier Craft / ورق كرافت</div>
                     <div style="font-size: 12px; color: #666;">500 DA</div>
                   </div>
                 </label>
-                <label class="packaging-option" style="display: flex; align-items: center; gap: 10px; padding: 10px; background: #fdfaf2; border: 1px solid rgba(16, 86, 82, 0.15); border-radius: 8px; cursor: pointer;">
+                <label class="packaging-option">
                   <input type="radio" name="packaging" value="surprise" style="accent-color: #105652;">
-                  <img src="/img/surprise.PNG" alt="Surprise" width="60">
+                  <img src="/img/surprise.PNG" alt="Surprise" width="80">
                   <div style="flex: 1;">
                     <div style="font-size: 14px; font-weight: 600;">Surprise / مفاجأة</div>
                     <div style="font-size: 11px; color: #666;">500 DA — see samples on Instagram / شاهد نماذج على إنستغرام</div>
