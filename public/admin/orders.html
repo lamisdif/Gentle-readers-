@@ -1,17 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Orders</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .table-spacing { border-spacing: 0 12px; }
+        ::-webkit-scrollbar { height: 8px; width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
     <script type="module">
         import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js';
-        
+
         // Password protection
         const pswd = prompt("Enter Admin Password:");
         if (pswd !== "gentleadmin") {
-            document.body.innerHTML = "<div class='flex items-center justify-center min-h-screen bg-gray-100'><div class='bg-white p-8 rounded shadow-md text-center'><h1 class='text-red-600 text-3xl font-bold mb-4'>Access Denied</h1><p class='text-gray-600'>Incorrect password. Please refresh to try again.</p></div></div>";
+            document.body.innerHTML = "<div class='flex items-center justify-center min-h-screen bg-slate-50'><div class='bg-white p-8 rounded-xl shadow-lg text-center border border-slate-100'><h1 class='text-rose-600 text-3xl font-extrabold mb-4'>Access Denied</h1><p class='text-slate-500'>Incorrect password. Please refresh to try again.</p></div></div>";
             throw new Error("Access Denied");
         }
 
@@ -24,33 +34,46 @@
         function formatDate(dateStr) {
             if (!dateStr) return "-";
             const d = new Date(dateStr);
-            return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            return d.toLocaleDateString('en-GB') + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
 
         function formatItems(itemsJson) {
             try {
-                if (!itemsJson) return "-";
-                let items;
-                if (typeof itemsJson === 'string') {
-                    items = JSON.parse(itemsJson);
+                if (!itemsJson) return '<span class="text-slate-400">-</span>';
+                let items = typeof itemsJson === 'string' ? JSON.parse(itemsJson) : itemsJson;
+
+                let itemList = [];
+                // If it's an array, it might be an array of objects
+                if (Array.isArray(items)) {
+                    itemList = items.map(i => {
+                        let title = i.title || i.id || JSON.stringify(i);
+                        // Clean "1 × " or similar strings that might have leaked into titles or keys
+                        title = String(title).replace(/ \d+ ×$/, '').replace(/ \d+x$/, '').replace(/^cms_/, '');
+                        let qty = i.quantity || 1;
+                        return `${title} <span class="text-indigo-600 font-semibold ml-1">(${qty} ${qty > 1 ? 'copies' : 'copy'})</span>`;
+                    });
+                } 
+                // Or maybe an object { "Book Name": 2 }
+                else if (typeof items === 'object') {
+                    itemList = Object.entries(items).map(([key, value]) => {
+                        let title = String(key).replace(/ \d+ ×$/, '').replace(/ \d+x$/, '').replace(/^cms_/, '');
+                        let qty = parseInt(value, 10) || 1;
+                        return `${title} <span class="text-indigo-600 font-semibold ml-1">(${qty} ${qty > 1 ? 'copies' : 'copy'})</span>`;
+                    });
                 } else {
-                    items = itemsJson;
+                    return `<span class="text-slate-700">${itemsJson}</span>`;
                 }
 
-                if (Array.isArray(items)) {
-                    return Object.entries(items).map(([id, qty]) => `${id} (x${qty})`).join('<br>');
-                } else if (typeof items === 'object') {
-                    return Object.entries(items).map(([id, qty]) => `${id} <span class="text-blue-600 font-bold">(x${qty})</span>`).join('<br>');
-                }
-                return String(itemsJson);
+                if (itemList.length === 0) return '<span class="text-slate-400">0 items</span>';
+                return `<ul class="list-disc pl-5 space-y-1 my-1 text-slate-700 marker:text-slate-400">${itemList.map(li => `<li>${li}</li>`).join('')}</ul>`;
             } catch (e) {
-                return String(itemsJson);
+                return `<span class="text-slate-600">${itemsJson}</span>`;
             }
         }
 
         async function loadOrders() {
             const tbody = document.getElementById("orders-tbody");
-            tbody.innerHTML = "<tr><td colspan='17' class='p-8 text-center text-gray-500 font-medium'>Loading orders securely from database...</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='17' class='py-12 text-center text-slate-500 font-medium bg-transparent'><div class='flex justify-center items-center'><svg class='animate-spin -ml-1 mr-3 h-5 w-5 text-indigo-500' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'><circle class='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' stroke-width='4'></circle><path class='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path></svg> Fetching orders securely...</div></td></tr>";
 
             const { data, error } = await supabase
                 .from('orders')
@@ -59,7 +82,7 @@
 
             if (error) {
                 console.error("Error fetching orders:", error);
-                tbody.innerHTML = `<tr><td colspan='17' class='p-8 text-center text-red-500 font-bold'>Error loading orders: ${error.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan='17' class='p-8 text-center text-rose-500 font-bold bg-white rounded-xl shadow-sm'>Error loading orders: ${error.message}</td></tr>`;
                 return;
             }
 
@@ -70,54 +93,59 @@
         function renderTable(orders) {
             const tbody = document.getElementById("orders-tbody");
             if (orders.length === 0) {
-                tbody.innerHTML = "<tr><td colspan='17' class='p-8 text-center text-gray-500 font-medium'>No orders found matching your criteria.</td></tr>";
+                tbody.innerHTML = "<tr><td colspan='17' class='py-12 text-center text-slate-500 font-medium bg-white rounded-xl shadow-sm'>No orders found matching your criteria.</td></tr>";
                 return;
             }
 
-            tbody.innerHTML = orders.map((o, idx) => `
-                <tr class="border-b transition duration-150 ease-in-out hover:bg-yellow-50 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}">
-                    <td class="p-3 text-xs font-mono text-gray-500">${o.id}</td>
-                    <td class="p-3 text-sm whitespace-nowrap text-gray-700">${formatDate(o.created_at)}</td>
-                    <td class="p-3 text-sm font-semibold capitalize">${o.firstName || '-'}</td>
-                    <td class="p-3 text-sm font-semibold uppercase">${o.familyName || '-'}</td>
-                    <td class="p-3 text-sm font-mono tracking-wider">${o.phoneNumber || '-'}</td>
-                    <td class="p-3 text-sm text-pink-600 font-medium">@${o.instagramUsername || '-'}</td>
-                    <td class="p-3 text-xs leading-relaxed max-w-xs overflow-auto bg-gray-50">${formatItems(o.items)}</td>
-                    <td class="p-3 text-sm font-medium text-gray-700">${o.subtotal ? o.subtotal + ' DA' : '-'}</td>
-                    <td class="p-3 text-sm text-gray-600">${o.shipping_price ? o.shipping_price + ' DA' : '-'}</td>
-                    <td class="p-3 text-sm font-bold text-green-700">${o.total_price ? o.total_price + ' DA' : '-'}</td>
-                    <td class="p-3 text-sm font-medium text-gray-800">${o.wilaya || '-'}</td>
-                    <td class="p-3 text-sm text-gray-700">${o.daira || '-'}</td>
-                    <td class="p-3 text-sm max-w-[200px] truncate text-gray-600" title="${o.address || ''}">${o.address || '-'}</td>
-                    <td class="p-3 text-sm">
-                        <span class="px-2 py-1 rounded text-xs font-bold ${o.deliveryMethod === 'desk' ? 'bg-blue-100 text-blue-800' : 'bg-indigo-100 text-indigo-800'}">
+            // Create beautiful cards out of rows
+            tbody.innerHTML = orders.map(o => {
+                const isHome = (o.deliveryMethod || '').toLowerCase() === 'home';
+                const hasPkg = o.packaging_type && o.packaging_type !== 'none';
+                
+                return `
+                <tr class="bg-white hover:bg-slate-50 transition-colors duration-200 shadow-sm border border-slate-200/60 group">
+                    <td class="p-4 text-xs font-mono font-semibold text-slate-500 rounded-l-xl whitespace-nowrap">${o.id}</td>
+                    <td class="p-4 text-sm text-slate-600 whitespace-nowrap">${formatDate(o.created_at)}</td>
+                    <td class="p-4 text-sm font-semibold capitalize text-slate-800">${o.firstName || '-'}</td>
+                    <td class="p-4 text-sm font-semibold uppercase text-slate-800">${o.familyName || '-'}</td>
+                    <td class="p-4 text-sm font-mono tracking-wider text-slate-600 whitespace-nowrap">${o.phoneNumber || '-'}</td>
+                    <td class="p-4 text-sm text-pink-600 font-semibold whitespace-nowrap">${o.instagramUsername ? '@' + o.instagramUsername : '<span class="text-slate-300">-</span>'}</td>
+                    <td class="p-4 text-sm leading-relaxed max-w-sm">${formatItems(o.items)}</td>
+                    <td class="p-4 text-sm font-medium text-slate-600 whitespace-nowrap">${o.subtotal ? o.subtotal + ' DA' : '-'}</td>
+                    <td class="p-4 text-sm text-slate-500 whitespace-nowrap">${o.shipping_price ? o.shipping_price + ' DA' : '-'}</td>
+                    <td class="p-4 text-base font-bold text-emerald-600 whitespace-nowrap bg-emerald-50/30">${o.total_price ? o.total_price + ' DA' : '-'}</td>
+                    <td class="p-4 text-sm font-semibold text-slate-700 whitespace-nowrap">${o.wilaya || '-'}</td>
+                    <td class="p-4 text-sm text-slate-600 whitespace-nowrap">${o.daira || '-'}</td>
+                    <td class="p-4 text-sm max-w-[220px] truncate text-slate-600" title="${o.address || ''}">${o.address || '-'}</td>
+                    <td class="p-4 text-sm whitespace-nowrap">
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold tracking-wide ${isHome ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-blue-100 text-blue-800 border border-blue-200'}">
                             ${(o.deliveryMethod || '-').toUpperCase()}
                         </span>
                     </td>
-                    <td class="p-3 text-sm ${o.desk ? 'font-medium text-blue-800' : 'text-gray-400'}">${o.desk || '-'}</td>
-                    <td class="p-3 text-sm">
-                        <span class="px-2 py-1 rounded text-xs font-semibold ${!o.packaging_type || o.packaging_type === 'none' ? 'bg-gray-100 text-gray-600' : 'bg-orange-100 text-orange-800'}">
-                            ${o.packaging_type === 'none' ? 'NONE' : (o.packaging_type || 'NONE').toUpperCase()}
+                    <td class="p-4 text-sm ${o.desk ? 'font-semibold text-blue-800' : 'text-slate-400'} whitespace-nowrap">${o.desk || '-'}</td>
+                    <td class="p-4 text-sm whitespace-nowrap">
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wide uppercase ${!hasPkg ? 'bg-slate-100 text-slate-500' : 'bg-amber-100 text-amber-800 border border-amber-200'}">
+                            ${!hasPkg ? 'NONE' : o.packaging_type.replace('_', ' ')}
                         </span>
                     </td>
-                    <td class="p-3 text-sm text-gray-600">${o.packaging_price ? o.packaging_price + ' DA' : '0 DA'}</td>
+                    <td class="p-4 text-sm font-medium text-slate-600 rounded-r-xl whitespace-nowrap">${o.packaging_price ? o.packaging_price + ' DA' : '-'}</td>
                 </tr>
-            `).join('');
-            
-            document.getElementById("order-count").innerHTML = `<span class="font-bold text-blue-600">${orders.length}</span> orders total`;
+            `}).join('');
+
+            document.getElementById("order-count").innerHTML = `<span class="font-bold text-indigo-600">${orders.length}</span> total orders`;
         }
 
-        window.filterOrders = function() {
+        window.filterOrders = function () {
             const query = document.getElementById("search-input").value.toLowerCase();
             const filtered = allOrders.filter(o => {
                 const searchStr = [
-                    o.id, 
-                    o.firstName, 
-                    o.familyName, 
-                    o.phoneNumber, 
+                    o.id,
+                    o.firstName,
+                    o.familyName,
+                    o.phoneNumber,
                     o.instagramUsername
                 ].join(" ").toLowerCase();
-                
+
                 return searchStr.includes(query);
             });
             renderTable(filtered);
@@ -127,56 +155,67 @@
         document.addEventListener('DOMContentLoaded', loadOrders);
     </script>
 </head>
-<body class="bg-gray-100 min-h-screen font-sans">
-    
-    <div class="max-w-full mx-auto p-4 sm:p-6 lg:p-8">
-        <div class="sm:flex sm:items-center sm:justify-between mb-6 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <div>
-                <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Orders Dashboard</h1>
-                <p class="mt-2 text-sm text-gray-500" id="order-count">Loading orders...</p>
-            </div>
-            <div class="mt-4 sm:mt-0 relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-                    </svg>
-                </div>
-                <input type="text" id="search-input" onkeyup="filterOrders()" placeholder="Search name, phone, or ID..." 
-                    class="block w-full sm:text-sm text-gray-900 border-gray-300 rounded-lg shadow-sm pl-10 p-3 border focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[300px] bg-gray-50" autocomplete="off">
-            </div>
-        </div>
 
-        <div class="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-200">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 table-auto">
-                    <thead class="bg-slate-800 text-white">
-                        <tr>
-                            <th scope="col" class="p-4 text-left text-xs font-bold uppercase tracking-wider">ID</th>
-                            <th scope="col" class="p-4 text-left text-xs font-bold uppercase tracking-wider">Date</th>
-                            <th scope="col" class="p-4 text-left text-xs font-bold uppercase tracking-wider">First Name</th>
-                            <th scope="col" class="p-4 text-left text-xs font-bold uppercase tracking-wider">Last Name</th>
-                            <th scope="col" class="p-4 text-left text-xs font-bold uppercase tracking-wider">Phone</th>
-                            <th scope="col" class="p-4 text-left text-xs font-bold uppercase tracking-wider">Insta</th>
-                            <th scope="col" class="p-4 text-left text-xs font-bold uppercase tracking-wider">Items summary</th>
-                            <th scope="col" class="p-4 text-left text-xs font-bold uppercase tracking-wider">Subtotal</th>
-                            <th scope="col" class="p-4 text-left text-xs font-bold uppercase tracking-wider">Shipping</th>
-                            <th scope="col" class="p-4 text-left text-xs font-bold uppercase tracking-wider">Total</th>
-                            <th scope="col" class="p-4 text-left text-xs font-bold uppercase tracking-wider">Wilaya</th>
-                            <th scope="col" class="p-4 text-left text-xs font-bold uppercase tracking-wider">Daira</th>
-                            <th scope="col" class="p-4 text-left text-xs font-bold uppercase tracking-wider">Address</th>
-                            <th scope="col" class="p-4 text-left text-xs font-bold uppercase tracking-wider">Method</th>
-                            <th scope="col" class="p-4 text-left text-xs font-bold uppercase tracking-wider">Desk</th>
-                            <th scope="col" class="p-4 text-left text-xs font-bold uppercase tracking-wider">Pkg Type</th>
-                            <th scope="col" class="p-4 text-left text-xs font-bold uppercase tracking-wider">Pkg Price</th>
-                        </tr>
-                    </thead>
-                    <tbody id="orders-tbody" class="bg-white divide-y divide-gray-200">
-                        <!-- Rows -->
-                    </tbody>
-                </table>
+<body class="bg-slate-50 min-h-screen">
+
+    <!-- Header Section -->
+    <header class="bg-white shadow border-b border-slate-200 sticky top-0 z-10">
+        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="py-5 flex items-center justify-between flex-wrap gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="bg-indigo-600 text-white p-2 rounded-lg shadow-sm">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Orders Dashboard</h1>
+                        <p class="text-sm font-medium text-slate-500" id="order-count">Loading...</p>
+                    </div>
+                </div>
+                <div class="relative w-full sm:w-auto">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <input type="text" id="search-input" onkeyup="filterOrders()" placeholder="Search names, phones, IDs..."
+                        class="block w-full sm:w-[360px] pl-10 pr-4 py-2.5 text-sm text-slate-900 bg-slate-100 border-transparent rounded-full focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 shadow-sm transition-all duration-300 outline-none" autocomplete="off">
+                </div>
             </div>
         </div>
-    </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-full mx-auto p-4 sm:p-6 lg:p-8">
+        <div class="overflow-x-auto pb-6">
+            <table class="w-full text-left table-spacing border-separate min-w-max">
+                <thead>
+                    <tr>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">ID</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Date</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">First Name</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Last Name</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Phone</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Insta</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Items Summary</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Subtotal</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Shipping</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Total</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Wilaya</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Daira</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Address</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Method</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Desk</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Pkg Type</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Pkg Price</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-tbody">
+                    <!-- Rows dynamically generated -->
+                </tbody>
+            </table>
+        </div>
+    </main>
 
 </body>
+
 </html>
