@@ -20,7 +20,7 @@ var wilayaShippingPrices = {
   "Tlemcen": { home: 900, desk: 650 },
   "Tiaret": { home: 900, desk: 650 },
   "Tizi Ouzou": { home: 900, desk: 650 },
-  "Saida": { home: 900, desk: 650 },
+  "Saïda": { home: 900, desk: 650 },
   "Skikda": { home: 900, desk: 650 },
   "Sidi Bel Abbès": { home: 900, desk: 650 },
   "Annaba": { home: 900, desk: 650 },
@@ -36,8 +36,8 @@ var wilayaShippingPrices = {
   "Khenchela": { home: 900, desk: 650 },
   "Souk Ahras": { home: 900, desk: 650 },
   "Tipaza": { home: 900, desk: 650 },
-  "Ain Defla": { home: 900, desk: 650 },
-  "Ain Témouchent": { home: 900, desk: 650 },
+  "Aïn Defla": { home: 900, desk: 650 },
+  "Aïn Témouchent": { home: 900, desk: 650 },
   "Relizane": { home: 900, desk: 650 },
   "Laghouat": { home: 950, desk: 750 },
   "Biskra": { home: 950, desk: 750 },
@@ -52,7 +52,7 @@ var wilayaShippingPrices = {
   "Adrar": { home: 1050, desk: 850 },
   "Béchar": { home: 1050, desk: 850 },
   "El Bayadh": { home: 1050, desk: 850 },
-  "Naama": { home: 1050, desk: 850 },
+  "Naâma": { home: 1050, desk: 850 },
   "Timimoun": { home: 1050, desk: 850 },
   "Bordj Badji Mokhtar": { home: 1050, desk: 850 },
   "Béni Abbès": { home: 1050, desk: 850 },
@@ -66,11 +66,11 @@ var wilayaShippingPrices = {
 
 var wilayasData = [
   "Adrar", "Chlef", "Laghouat", "Oum El Bouaghi", "Batna", "Béjaïa", "Biskra", "Béchar", "Blida", "Bouira", 
-  "Tamanrasset", "Tébessa", "Tlemcen", "Tiaret", "Tizi Ouzou", "Alger", "Djelfa", "Jijel", "Sétif", "Saida", 
+  "Tamanrasset", "Tébessa", "Tlemcen", "Tiaret", "Tizi Ouzou", "Alger", "Djelfa", "Jijel", "Sétif", "Saïda", 
   "Skikda", "Sidi Bel Abbès", "Annaba", "Guelma", "Constantine", "Médéa", "Mostaganem", "M'Sila", "Mascara", 
   "Ouargla", "Oran", "El Bayadh", "Illizi", "Bordj Bou Arreridj", "Boumerdès", "El Tarf", "Tindouf", 
-  "Tissemsilt", "El Oued", "Khenchela", "Souk Ahras", "Tipaza", "Mila", "Ain Defla", "Naama", 
-  "Ain Témouchent", "Ghardaïa", "Relizane", "Timimoun", "Bordj Badji Mokhtar", "Ouled Djellal", 
+  "Tissemsilt", "El Oued", "Khenchela", "Souk Ahras", "Tipaza", "Mila", "Aïn Defla", "Naâma", 
+  "Aïn Témouchent", "Ghardaïa", "Relizane", "Timimoun", "Bordj Badji Mokhtar", "Ouled Djellal", 
   "Béni Abbès", "In Salah", "In Guezzam", "Touggourt", "Djanet", "El M'Ghair", "El Menia"
 ].map(name => ({ name }));
 
@@ -365,7 +365,11 @@ var desksData = {
   "Saïda": {
     "Saïda": [
       { name: "Agence de Saïda [Yalidine]", address: "cité Riadh (à coté de la mosquée Riadh)", code: "201101" }
-    ]
+    ],
+    "Aïn El Hadjar": [],
+    "Ouled Brahim": [],
+    "Sidi Boubekeur": [],
+    "Youb": []
   },
   "Skikda": {
     "Azzaba": [
@@ -655,7 +659,9 @@ var desksData = {
     "El Menia": [
       { name: "Agence de El Menia [Yalidine]", address: "Route Unite Africaine", code: "580601" }
     ]
-  }
+  },
+  "Bordj Badji Mokhtar": {},
+  "In Guezzam": {}
 };
 
 // Internal map for fuzzy matching wilaya names
@@ -676,10 +682,14 @@ var wilayaNameMap = {
   "oum elbouaghi": "Oum El Bouaghi",
   "khenchela": "Khenchela",
   "tipaza": "Tipaza",
-  "ain defla": "Ain Defla",
-  "aïn defla": "Ain Defla",
-  "ain temouchent": "Ain Témouchent",
-  "aïn témouchent": "Ain Témouchent"
+  "ain defla": "Aïn Defla",
+  "aïn defla": "Aïn Defla",
+  "ain temouchent": "Aïn Témouchent",
+  "aïn témouchent": "Aïn Témouchent",
+  "saida": "Saïda",
+  "saïda": "Saïda",
+  "naama": "Naâma",
+  "naàma": "Naâma"
 };
 
 function normalizeWilayaName(name) {
