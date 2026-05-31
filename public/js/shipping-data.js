@@ -119,13 +119,18 @@ var desksData = {
     ]
   },
   "Batna": {
-    "Barika": [
-      { name: "Agence de Barika [Guepex]", address: "Boulevard Azil Abdul Rahman, Rue Les Freres Debache, Route De Batna", code: "54201" }
-    ],
     "Batna": [
       { name: "Agence des 500 Logements [Yalidine]", address: "Lotissement Meddour (En Face Lycee 500 Logements)", code: "50101" },
       { name: "Agence du CHU Route de Tazoult [Guepex]", address: "Cité frères Lombarkia, ex parc à fourrage", code: "50103" }
-    ]
+    ],
+    "Barika": [
+      { name: "Agence de Barika [Guepex]", address: "Boulevard Azil Abdul Rahman, Rue Les Freres Debache, Route De Batna", code: "54201" }
+    ],
+    "Menaa": [],
+    "N'Gaous": [],
+    "T'Kout": [],
+    "Aïn Touta": [],
+    "Ouled Si Slimane": []
   },
   "Béjaïa": {
     "Akbou": [

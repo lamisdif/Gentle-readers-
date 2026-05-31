@@ -462,18 +462,38 @@ function populateDesks(selectedWilaya, selectedDaira) {
 
   const lang = getCurrentLang();
   deskSelect.innerHTML = '';
+
+  const desks = getDesks(selectedWilaya, selectedDaira);
+
+  // Check if the daira exists in our data at all (to distinguish "no daira selected" vs "no desks")
+  const deskField = document.getElementById('desk-field');
+  const deliveryMethod = document.getElementById('checkout-delivery-select')?.value;
+
+  if (!selectedDaira) {
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = lang === 'ar' ? 'اختر المكتب' : 'Select agency';
+    deskSelect.appendChild(placeholder);
+    deskSelect.disabled = true;
+    return;
+  }
+
+  if (desks.length === 0) {
+    // Daira is selected but has no desks
+    const noDesksOption = document.createElement('option');
+    noDesksOption.value = '';
+    noDesksOption.textContent = lang === 'ar' ? 'لا توجد مكاتب متاحة في هذه الدائرة' : 'No desks available in this daira';
+    deskSelect.appendChild(noDesksOption);
+    deskSelect.disabled = true;
+    return;
+  }
+
   const placeholder = document.createElement('option');
   placeholder.value = '';
   placeholder.textContent = lang === 'ar' ? 'اختر المكتب' : 'Select agency';
   deskSelect.appendChild(placeholder);
 
-  const desks = getDesks(selectedWilaya, selectedDaira);
-  if (desks.length === 0) {
-    deskSelect.disabled = true;
-    return;
-  }
-
-  desks.forEach((desk, index) => {
+  desks.forEach((desk) => {
     const option = document.createElement('option');
     option.value = desk.name;
     option.setAttribute('data-address', desk.address);
