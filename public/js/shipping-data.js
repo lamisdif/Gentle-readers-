@@ -526,7 +526,13 @@ var desksData = {
     ],
     "Hammedi": [
       { name: "Agence Hammedi [WeCanServices]", address: "hammedi centre ville", code: "353601" }
-    ]
+    ],
+    "Baghlia": [],
+    "Dellys": [],
+    "Isser": [],
+    "Khemis El Khechna": [],
+    "Ouled Moussa": [],
+    "Thenia": []
   },
   "El Tarf": {
     "Dréan": [
