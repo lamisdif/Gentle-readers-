@@ -48,8 +48,13 @@ function main() {
   // Remove drafts
   const published = books.filter((b) => !b.draft);
 
-  // Sort: newest first (best effort by filename), otherwise by title
+  // Sort: available books first, then out of stock
+  // Within each group: newest first (reverse slug/filename order)
   published.sort((a, b) => {
+    const aAvailable = (a.status || 'available').toLowerCase() !== 'out of stock' ? 0 : 1;
+    const bAvailable = (b.status || 'available').toLowerCase() !== 'out of stock' ? 0 : 1;
+    if (aAvailable !== bAvailable) return aAvailable - bAvailable;
+    // Within same status group: reverse slug order (newest files last in alphabet = first here)
     const aKey = String(a.slug || '');
     const bKey = String(b.slug || '');
     if (aKey !== bKey) return bKey.localeCompare(aKey);
