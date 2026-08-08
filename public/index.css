@@ -2413,3 +2413,202 @@ body[lang="en"] {
 }
 
 /* END OF PREMIUM GSAP UPGRADE BLOCK */
+
+/* ============================================================
+   ? EXTRA PREMIUM LEVEL 2 UPGRADE -- GentleReaders Bookstore
+   ============================================================ */
+
+/* 0. Top Reading Scroll Progress Bar */
+#gsap-scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #d4af37 0%, #e74c3c 50%, #5e2217 100%);
+  z-index: 10005;
+  transform-origin: left center;
+  transform: scaleX(0);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.8);
+}
+
+/* Hero Ambient Orbs */
+.hero-ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.35;
+}
+.hero-ambient-orb.orb-1 {
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.6), transparent 70%);
+  top: 15%;
+  left: 10%;
+}
+.hero-ambient-orb.orb-2 {
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(231, 76, 60, 0.5), transparent 70%);
+  bottom: 10%;
+  right: 15%;
+}
+
+/* Hero Badge */
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 18px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-radius: 99px;
+  color: #fcf4cc;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  margin-bottom: 1.2rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+.hero-badge .star {
+  color: #d4af37;
+  font-size: 0.9rem;
+}
+
+/* Hero Action CTA Button */
+.hero-actions {
+  margin-top: 1.5rem;
+}
+.hero-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+  color: #3b140d !important;
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 0.1em;
+  padding: 0.95rem 2.4rem;
+  border-radius: 99px;
+  text-decoration: none;
+  box-shadow: 0 6px 25px rgba(212, 175, 55, 0.4);
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  border: 1px solid rgba(255,255,255,0.4);
+}
+.hero-cta-btn:hover {
+  background: linear-gradient(135deg, #f3d068 0%, #d4af37 100%);
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 10px 35px rgba(212, 175, 55, 0.6);
+  color: #260a04 !important;
+}
+
+/* Luxury Marquee Ticker */
+.luxury-marquee-container {
+  width: 100%;
+  background: linear-gradient(90deg, #3b140d, #5e2217, #3b140d);
+  color: #fcf4cc;
+  overflow: hidden;
+  padding: 0.75rem 0;
+  border-y: 1px solid rgba(212, 175, 55, 0.3);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  position: relative;
+  z-index: 10;
+}
+.luxury-marquee-track {
+  display: flex;
+  white-space: nowrap;
+  gap: 3rem;
+  animation: marqueeContinuous 30s linear infinite;
+  will-change: transform;
+}
+.luxury-marquee-track span {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: #fcf4cc;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@keyframes marqueeContinuous {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Social Buttons Hover Physics */
+.social-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(94, 34, 23, 0.08);
+  border: 1px solid rgba(94, 34, 23, 0.2);
+  color: #5e2217;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  text-decoration: none;
+}
+.social-btn:hover {
+  background: #5e2217;
+  color: #fcf4cc;
+  transform: translateY(-3px) scale(1.1);
+  box-shadow: 0 4px 12px rgba(94, 34, 23, 0.3);
+}
+
+/* Newsletter styling */
+.newsletter-input:focus {
+  border-color: #5e2217 !important;
+  box-shadow: 0 0 0 3px rgba(94, 34, 23, 0.12);
+}
+
+/* Floating Mobile Quick Action Bar (Mobile Only) */
+.floating-mobile-bar {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 400px;
+  background: rgba(245, 245, 220, 0.92);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(196, 164, 132, 0.5);
+  border-radius: 99px;
+  padding: 8px 16px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 1000;
+  box-shadow: 0 8px 32px rgba(94, 34, 23, 0.25);
+}
+.mobile-bar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: #5e2217;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+.mobile-bar-item i {
+  font-size: 1.15rem;
+}
+.mobile-bar-item.active,
+.mobile-bar-item:hover {
+  color: #e74c3c;
+  transform: translateY(-2px);
+}
+
+/* END OF EXTRA PREMIUM LEVEL 2 UPGRADE BLOCK */

@@ -454,6 +454,8 @@
 <body>
   <!-- Add this at the very top of the body -->
   <script>document.body.classList.add('loading');</script>
+  <!-- Top Reading Scroll Progress Bar -->
+  <div id="gsap-scroll-progress"></div>
   <!-- Page transition overlay (GSAP) -->
   <div id="page-transition-overlay"></div>
   <!-- Loader Overlay (Uiverse.io loader) -->
@@ -632,15 +634,43 @@
   <div class="main-content flex flex-col">
     <!-- Hero Section (hidden on pages 2+) -->
     <section class="hero-new animate-fade-in" id="hero-section">
-      <!-- Removed existing background-image tag. Background image now set via CSS. -->
+      <!-- Ambient Glowing Orbs in Hero -->
+      <div class="hero-ambient-orb orb-1"></div>
+      <div class="hero-ambient-orb orb-2"></div>
+      
       <div class="content">
-        <p class="subtitle stagger-animate stagger-1" id="hero-welcome">Welcome to GentleReaders</p>
+        <div class="hero-badge stagger-animate stagger-1">
+          <span class="star">✦</span> GENTLE READERS 2026 COLLECTION <span class="star">✦</span>
+        </div>
+        <p class="subtitle stagger-animate stagger-1" id="hero-welcome">Welcome to GentleReaders Sanctuary</p>
         <h1 class="title stagger-animate stagger-2" id="hero-title">Your Next Great Read Awaits</h1>
         <p class="description stagger-animate stagger-3" id="hero-desc">
-          Inkwooven For GentleReaders
+          Inkwoven stories, timeless classics & rare discoveries crafted for gentle souls.
         </p>
+        <div class="hero-actions stagger-animate stagger-4">
+          <a href="#genre-cards-section" class="hero-cta-btn magnetic-btn">
+            <span>EXPLORE CATALOG</span>
+            <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
       </div>
     </section>
+
+    <!-- Luxury Infinite Moving Marquee Ticker -->
+    <div class="luxury-marquee-container">
+      <div class="luxury-marquee-track">
+        <span>✦ FAST HOME & STOP-DESK SHIPPING IN ALGERIA</span>
+        <span>✦ HANDPICKED BESTSELLERS</span>
+        <span>✦ DISCOVER RARE & POPULAR EDITIONS</span>
+        <span>✦ GENTLE READERS CLUB</span>
+        <span>✦ EXPRESS DELIVERY</span>
+        <span>✦ FAST HOME & STOP-DESK SHIPPING IN ALGERIA</span>
+        <span>✦ HANDPICKED BESTSELLERS</span>
+        <span>✦ DISCOVER RARE & POPULAR EDITIONS</span>
+        <span>✦ GENTLE READERS CLUB</span>
+        <span>✦ EXPRESS DELIVERY</span>
+      </div>
+    </div>
 
     <!-- Multi-Strip Genre Cards Section (hidden on pages 2+) -->
     <div class="flex flex-col md:flex-row gap-4 md:gap-8 justify-center my-8 px-4" id="genre-cards-section">
@@ -835,28 +865,100 @@
       <div class="pagination-container" id="pagination-1"></div>
     </section>
 
-    <!-- Footer -->
+    <!-- Complete Premium 4-Column Footer -->
     <footer class="site-footer">
-      <div></div>
-      <div></div>
-      <div class="max-w-7xl mx-auto flex justify-center">
-        <div class="footer-column stagger-animate stagger-1">
-          <div class="logo-container mb-4 stagger-animate stagger-2">
-            <img src="img/Perfectly made ones right.svg" alt="Your Company Logo" />
-            <span class="text-xl font-bold ml-2" style="color: #5e2217" id="footer-brand">GentleReaders</span>
+      <div class="max-w-7xl mx-auto px-6 py-14">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+          
+          <!-- Column 1: Brand & Story -->
+          <div class="footer-column">
+            <div class="logo-container mb-4 flex items-center">
+              <img src="img/Perfectly made ones right.svg" alt="GentleReaders Logo" class="h-16 w-auto" />
+              <span class="text-2xl font-extrabold ml-3" style="color: #5e2217; font-family: 'Great Vibes', cursive;" id="footer-brand">GentleReaders</span>
+            </div>
+            <p class="mb-4 text-sm leading-relaxed" style="color: #5a4c4a;" id="footer-desc">
+              Your premier sanctuary for handpicked books, timeless classics, and modern bestsellers delivered straight to your doorstep across Algeria.
+            </p>
+            <div class="social-icons flex space-x-3 mb-4">
+              <a href="#" aria-label="Instagram" class="social-btn magnetic-btn"><i class="fab fa-instagram"></i></a>
+              <a href="#" aria-label="Facebook" class="social-btn magnetic-btn"><i class="fab fa-facebook-f"></i></a>
+              <a href="#" aria-label="TikTok" class="social-btn magnetic-btn"><i class="fab fa-tiktok"></i></a>
+            </div>
           </div>
-          <p class="mb-4" id="footer-desc">
-            Stay in touch with GentleReaders, follow us on social media and
-            learn about new promotions!
-          </p>
-          <div class="social-icons flex space-x-4">
-            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+
+          <!-- Column 2: Quick Links -->
+          <div class="footer-column">
+            <h4 class="text-base font-bold mb-4 uppercase tracking-wider border-b pb-2" style="color: #5e2217; border-color: rgba(94,34,23,0.2);">Quick Links</h4>
+            <ul class="space-y-2.5 text-sm">
+              <li><a href="#" class="footer-link hover:text-red-700 transition-colors flex items-center"><i class="fas fa-chevron-right text-xs mr-2 text-red-600"></i>Home</a></li>
+              <li><a href="cart.html" class="footer-link hover:text-red-700 transition-colors flex items-center"><i class="fas fa-chevron-right text-xs mr-2 text-red-600"></i>Shopping Cart</a></li>
+              <li><a href="search.html" class="footer-link hover:text-red-700 transition-colors flex items-center"><i class="fas fa-chevron-right text-xs mr-2 text-red-600"></i>Search Books</a></li>
+              <li><a href="#genre-cards-section" class="footer-link hover:text-red-700 transition-colors flex items-center"><i class="fas fa-chevron-right text-xs mr-2 text-red-600"></i>Explore Genres</a></li>
+            </ul>
+          </div>
+
+          <!-- Column 3: Genres -->
+          <div class="footer-column">
+            <h4 class="text-base font-bold mb-4 uppercase tracking-wider border-b pb-2" style="color: #5e2217; border-color: rgba(94,34,23,0.2);">Popular Genres</h4>
+            <ul class="space-y-2.5 text-sm">
+              <li><a href="religious.html" class="footer-link flex items-center"><i class="fas fa-book-open text-xs mr-2 text-amber-700"></i>Religious / ديني</a></li>
+              <li><a href="romance.html" class="footer-link flex items-center"><i class="fas fa-heart text-xs mr-2 text-rose-600"></i>Romance / رومانسي</a></li>
+              <li><a href="fiction.html" class="footer-link flex items-center"><i class="fas fa-feather-alt text-xs mr-2 text-indigo-700"></i>Fiction / خيال</a></li>
+              <li><a href="development.html" class="footer-link flex items-center"><i class="fas fa-brain text-xs mr-2 text-emerald-700"></i>Development / تطوير الذات</a></li>
+              <li><a href="horror.html" class="footer-link flex items-center"><i class="fas fa-ghost text-xs mr-2 text-purple-700"></i>Horror / رعب</a></li>
+              <li><a href="novels.html" class="footer-link flex items-center"><i class="fas fa-bookmark text-xs mr-2 text-amber-800"></i>Novels / روايات</a></li>
+            </ul>
+          </div>
+
+          <!-- Column 4: Contact & Newsletter -->
+          <div class="footer-column">
+            <h4 class="text-base font-bold mb-4 uppercase tracking-wider border-b pb-2" style="color: #5e2217; border-color: rgba(94,34,23,0.2);">Contact Us</h4>
+            <p class="text-sm mb-2.5 flex items-center"><i class="fas fa-phone-alt text-red-700 mr-3"></i> Phone: +213 659 74 52 85</p>
+            <p class="text-sm mb-2.5 flex items-center"><i class="fas fa-envelope text-red-700 mr-3"></i> GentleReaders@gmail.com</p>
+            <p class="text-sm mb-4 flex items-center"><i class="fas fa-truck text-red-700 mr-3"></i> Fast Shipping in 58 Wilayas 🇩🇿</p>
+            
+            <div class="newsletter-box mt-4">
+              <p class="text-xs font-semibold mb-2 uppercase text-amber-900">Newsletter Subscription</p>
+              <form class="flex" onsubmit="event.preventDefault(); alert('Thank you for subscribing to GentleReaders!');">
+                <input type="email" placeholder="Your email address..." class="newsletter-input px-3 py-2 text-sm rounded-l-lg border border-amber-900/30 outline-none w-full bg-white/80" required />
+                <button type="submit" class="newsletter-btn bg-amber-900 hover:bg-amber-800 text-white px-4 py-2 rounded-r-lg text-sm transition-colors shadow-md"><i class="fas fa-paper-plane"></i></button>
+              </form>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Footer Bottom Bar -->
+        <div class="footer-bottom border-t pt-6 flex flex-col md:flex-row justify-between items-center text-xs text-amber-950/70" style="border-color: rgba(94,34,23,0.15);">
+          <p>© 2026 GentleReaders Bookstore. All rights reserved.</p>
+          <div class="flex space-x-4 mt-3 md:mt-0 items-center font-medium">
+            <span><i class="fas fa-shield-alt text-emerald-700 mr-1"></i> Verified Express Delivery</span>
+            <span>•</span>
+            <span><i class="fas fa-hand-holding-usd text-amber-700 mr-1"></i> Cash on Delivery / الدفع عند الاستلام</span>
           </div>
         </div>
-        <div></div>
       </div>
     </footer>
+
+    <!-- Floating Mobile Bottom Quick Action Bar (Mobile Only) -->
+    <div class="floating-mobile-bar lg:hidden">
+      <a href="#" class="mobile-bar-item active">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </a>
+      <a href="#genre-cards-section" class="mobile-bar-item">
+        <i class="fas fa-shapes"></i>
+        <span>Genres</span>
+      </a>
+      <a href="cart.html" class="mobile-bar-item relative">
+        <i class="fas fa-shopping-bag"></i>
+        <span>Cart</span>
+      </a>
+      <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="mobile-bar-item">
+        <i class="fas fa-arrow-up"></i>
+        <span>Top</span>
+      </button>
+    </div>
 
 
   </div>
@@ -1345,9 +1447,21 @@
       gsap.registerPlugin(ScrollTrigger);
 
       /* ─────────────────────────────────────────────────────
+         0. Top Scroll Progress Bar
+         ───────────────────────────────────────────────────── */
+      function initScrollProgressBar() {
+        var bar = document.getElementById('gsap-scroll-progress');
+        if (!bar) return;
+        window.addEventListener('scroll', function () {
+          var winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+          var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+          var scrolled = (winScroll / height);
+          gsap.to(bar, { scaleX: scrolled, duration: 0.1, ease: 'none' });
+        }, { passive: true });
+      }
+
+      /* ─────────────────────────────────────────────────────
          A. Inject shimmer layer into every book card wrapper
-         (we use a JS-injected div so we don't conflict with
-          the existing ::before pseudo-element on .flip-book-card-back)
          ───────────────────────────────────────────────────── */
       function injectShimmerLayers() {
         document.querySelectorAll('.flip-book-card-wrapper').forEach(function (wrapper) {
@@ -1359,23 +1473,115 @@
       }
 
       /* ─────────────────────────────────────────────────────
-         B. HERO entrance — staggered reveal
+         B. HERO entrance — staggered reveal & floating particles
          ───────────────────────────────────────────────────── */
       function animateHero() {
-        var els = document.querySelectorAll('.hero-new .subtitle, .hero-new .title, .hero-new .description');
+        var els = document.querySelectorAll('.hero-new .hero-badge, .hero-new .subtitle, .hero-new .title, .hero-new .description, .hero-new .hero-actions');
         if (!els.length) return;
+        
+        gsap.set(els, { opacity: 0, y: 35 });
+        
         gsap.to(els, {
           opacity: 1,
           y: 0,
-          duration: 1.1,
+          duration: 1.15,
           ease: 'power3.out',
-          stagger: 0.18,
-          delay: 0.25
+          stagger: 0.15,
+          delay: 0.2
+        });
+
+        // Floating ambient orbs animation
+        gsap.to('.hero-ambient-orb.orb-1', {
+          y: -25,
+          x: 15,
+          duration: 4.5,
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut'
+        });
+        gsap.to('.hero-ambient-orb.orb-2', {
+          y: 20,
+          x: -20,
+          duration: 6,
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut'
         });
       }
 
       /* ─────────────────────────────────────────────────────
-         C. Mobile header — shrink on scroll
+         C. Interactive 3D Tilt for Book Cards
+         ───────────────────────────────────────────────────── */
+      function init3DCardTilt() {
+        // Tilt effect for cards on desktop
+        if (window.innerWidth < 1024) return;
+
+        document.addEventListener('mousemove', function (e) {
+          var cards = document.querySelectorAll('.flip-book-card-wrapper');
+          cards.forEach(function (card) {
+            var rect = card.getBoundingClientRect();
+            var isHovered = e.clientX >= rect.left && e.clientX <= rect.right &&
+                            e.clientY >= rect.top && e.clientY <= rect.bottom;
+            if (isHovered) {
+              var x = e.clientX - rect.left;
+              var y = e.clientY - rect.top;
+              var centerX = rect.width / 2;
+              var centerY = rect.height / 2;
+              var rotateX = (centerY - y) / 12;
+              var rotateY = (x - centerX) / 12;
+
+              gsap.to(card, {
+                rotateX: rotateX,
+                rotateY: rotateY,
+                transformPerspective: 1000,
+                duration: 0.3,
+                ease: 'power1.out'
+              });
+            } else {
+              gsap.to(card, {
+                rotateX: 0,
+                rotateY: 0,
+                duration: 0.5,
+                ease: 'power2.out'
+              });
+            }
+          });
+        });
+      }
+
+      /* ─────────────────────────────────────────────────────
+         D. Magnetic Button Physics
+         ───────────────────────────────────────────────────── */
+      function initMagneticButtons() {
+        if (window.innerWidth < 1024) return;
+
+        var btns = document.querySelectorAll('.magnetic-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('mousemove', function (e) {
+            var rect = btn.getBoundingClientRect();
+            var x = e.clientX - rect.left - rect.width / 2;
+            var y = e.clientY - rect.top - rect.height / 2;
+            gsap.to(btn, {
+              x: x * 0.25,
+              y: y * 0.25,
+              duration: 0.3,
+              ease: 'power2.out'
+            });
+          });
+
+          btn.addEventListener('mouseleave', function () {
+            gsap.to(btn, {
+              x: 0,
+              y: 0,
+              duration: 0.6,
+              ease: 'elastic.out(1, 0.4)'
+            });
+          });
+        });
+      }
+
+      /* ─────────────────────────────────────────────────────
+         E. Mobile Header — Shrink on scroll
          ───────────────────────────────────────────────────── */
       function initMobileHeaderScroll() {
         var header = document.querySelector('.mobile-header');
@@ -1398,18 +1604,19 @@
       }
 
       /* ─────────────────────────────────────────────────────
-         D. Genre cards — ScrollTrigger stagger
+         F. Genre cards — ScrollTrigger stagger & 3D entrance
          ───────────────────────────────────────────────────── */
       function animateGenreCards() {
         var cards = document.querySelectorAll('#genre-cards-section .multi-strip-card');
         if (!cards.length) return;
+        gsap.set(cards, { opacity: 0, y: 45, scale: 0.94 });
         gsap.to(cards, {
           opacity: 1,
           y: 0,
           scale: 1,
-          duration: 0.85,
-          ease: 'back.out(1.5)',
-          stagger: 0.14,
+          duration: 0.9,
+          ease: 'back.out(1.4)',
+          stagger: 0.16,
           scrollTrigger: {
             trigger: '#genre-cards-section',
             start: 'top 85%',
@@ -1419,10 +1626,11 @@
       }
 
       /* ─────────────────────────────────────────────────────
-         E. Section header reveal
+         G. Section header reveal
          ───────────────────────────────────────────────────── */
       function animateSectionHeaders() {
         document.querySelectorAll('.latest-books-online .section-header').forEach(function (header) {
+          gsap.set(header, { opacity: 0, y: 25 });
           gsap.to(header, {
             opacity: 1,
             y: 0,
@@ -1438,23 +1646,21 @@
       }
 
       /* ─────────────────────────────────────────────────────
-         F. Book cards — stagger in batches when visible
-         (re-runs whenever pagination changes the DOM)
+         H. Book cards — stagger in batches when visible
          ───────────────────────────────────────────────────── */
       function animateVisibleBookCards() {
         var visibleItems = document.querySelectorAll('.slider .list .item:not(.hidden)');
         if (!visibleItems.length) return;
 
-        // Reset opacity so they can re-animate on page change
-        gsap.set(visibleItems, { opacity: 0, y: 28, scale: 0.97 });
+        gsap.set(visibleItems, { opacity: 0, y: 30, scale: 0.96 });
 
         gsap.to(visibleItems, {
           opacity: 1,
           y: 0,
           scale: 1,
-          duration: 0.7,
+          duration: 0.75,
           ease: 'power2.out',
-          stagger: 0.055,
+          stagger: 0.06,
           delay: 0.05,
           onComplete: function () {
             injectShimmerLayers();
@@ -1463,17 +1669,18 @@
       }
 
       /* ─────────────────────────────────────────────────────
-         G. Footer reveal
+         I. Footer reveal
          ───────────────────────────────────────────────────── */
       function animateFooter() {
         var cols = document.querySelectorAll('.site-footer .footer-column');
         if (!cols.length) return;
+        gsap.set(cols, { opacity: 0, y: 35 });
         gsap.to(cols, {
           opacity: 1,
           y: 0,
-          duration: 0.9,
+          duration: 0.95,
           ease: 'power3.out',
-          stagger: 0.12,
+          stagger: 0.14,
           scrollTrigger: {
             trigger: '.site-footer',
             start: 'top 90%',
@@ -1483,13 +1690,12 @@
       }
 
       /* ─────────────────────────────────────────────────────
-         H. Mobile sidebar — staggered nav items
+         J. Mobile sidebar — staggered nav items
          ───────────────────────────────────────────────────── */
       function initSidebarAnimation() {
         var sidebar = document.getElementById('leftSidebar');
         if (!sidebar) return;
 
-        // Observe class changes to detect open/close
         var observer = new MutationObserver(function (mutations) {
           mutations.forEach(function (mutation) {
             if (mutation.attributeName === 'class') {
@@ -1497,17 +1703,17 @@
               var navItems = sidebar.querySelectorAll('.nav-list li');
               if (isOpen) {
                 gsap.fromTo(navItems,
-                  { opacity: 0, x: -22 },
+                  { opacity: 0, x: -25 },
                   {
                     opacity: 1, x: 0,
-                    duration: 0.45,
+                    duration: 0.5,
                     ease: 'power2.out',
-                    stagger: 0.07,
+                    stagger: 0.08,
                     delay: 0.05
                   }
                 );
               } else {
-                gsap.to(navItems, { opacity: 0, x: -14, duration: 0.25, ease: 'power2.in' });
+                gsap.to(navItems, { opacity: 0, x: -15, duration: 0.25, ease: 'power2.in' });
               }
             }
           });
@@ -1516,19 +1722,17 @@
       }
 
       /* ─────────────────────────────────────────────────────
-         I. Smooth page transitions
+         K. Smooth page transitions
          ───────────────────────────────────────────────────── */
       function initPageTransitions() {
         var overlay = document.getElementById('page-transition-overlay');
         if (!overlay) return;
 
-        // Animate in (page just loaded)
         gsap.fromTo(overlay,
           { opacity: 1 },
-          { opacity: 0, duration: 0.6, ease: 'power2.out', delay: 0.05 }
+          { opacity: 0, duration: 0.65, ease: 'power2.out', delay: 0.05 }
         );
 
-        // Intercept navigation links for exit animation
         document.addEventListener('click', function (e) {
           var link = e.target.closest('a[href]');
           if (!link) return;
@@ -1544,7 +1748,7 @@
             { opacity: 0 },
             {
               opacity: 1,
-              duration: 0.38,
+              duration: 0.4,
               ease: 'power2.in',
               onComplete: function () {
                 window.location.href = dest;
@@ -1555,10 +1759,10 @@
       }
 
       /* ─────────────────────────────────────────────────────
-         J. Hero GSAP parallax on scroll (desktop only)
+         L. Hero GSAP Parallax
          ───────────────────────────────────────────────────── */
       function initHeroParallax() {
-        if (window.innerWidth < 1024) return; // skip on mobile (CSS fixed attachment disabled)
+        if (window.innerWidth < 1024) return;
         var hero = document.querySelector('.hero-new');
         if (!hero) return;
         gsap.to(hero, {
@@ -1574,14 +1778,13 @@
       }
 
       /* ─────────────────────────────────────────────────────
-         K. Watch pagination DOM changes → re-animate book cards
+         M. Watch pagination DOM changes
          ───────────────────────────────────────────────────── */
       function watchPaginationChanges() {
         var list = document.querySelector('.slider .list');
         if (!list) return;
 
         var paginationObserver = new MutationObserver(function () {
-          // Small delay to let DOM settle after pagination click
           setTimeout(function () {
             animateVisibleBookCards();
             injectShimmerLayers();
@@ -1597,10 +1800,13 @@
       }
 
       /* ─────────────────────────────────────────────────────
-         INIT — Run everything after DOM is ready
+         INIT — Run everything
          ───────────────────────────────────────────────────── */
       function init() {
+        initScrollProgressBar();
         animateHero();
+        init3DCardTilt();
+        initMagneticButtons();
         initMobileHeaderScroll();
         animateGenreCards();
         animateSectionHeaders();
@@ -1610,8 +1816,6 @@
         initHeroParallax();
         watchPaginationChanges();
 
-        // Book cards animate once CMS fetch is done
-        // We watch the list for when items are added
         var list = document.querySelector('.slider .list');
         if (list) {
           var initialObserver = new MutationObserver(function (mutations, obs) {
