@@ -2125,3 +2125,291 @@ body[lang="en"] {
   }
 }
 
+
+/* ============================================================
+   PREMIUM GSAP UPGRADE -- GentleReaders Bookstore
+   All rules below are additive. Nothing above is deleted.
+   ============================================================ */
+
+/* 1. MOBILE HEADER -- Glassmorphism */
+@media (max-width: 1023px) {
+  .mobile-header {
+    background: rgba(245, 245, 220, 0.82) !important;
+    backdrop-filter: blur(18px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
+    border-bottom: 2px solid rgba(196,164,132,0.6) !important;
+    height: 160px !important;
+    box-shadow: 0 4px 24px rgba(94, 34, 23, 0.18) !important;
+    transition: height 0.4s ease, background 0.4s ease, box-shadow 0.4s ease !important;
+  }
+  .mobile-header.scrolled {
+    height: 68px !important;
+    background: rgba(245, 245, 220, 0.97) !important;
+    box-shadow: 0 6px 32px rgba(94, 34, 23, 0.22) !important;
+  }
+  .mobile-header.scrolled img { height: 48px !important; }
+  .main-content { padding-top: 160px !important; }
+}
+
+/* 2. DESKTOP SIDEBAR */
+@media (min-width: 1024px) {
+  .left-sidebar {
+    background: linear-gradient(175deg, #f5f5dc 0%, #fdf8e8 40%, #f5f5dc 100%) !important;
+    box-shadow: 4px 0 28px rgba(94, 34, 23, 0.10) !important;
+    border-right: 1px solid rgba(196, 164, 132, 0.35) !important;
+  }
+}
+@media (max-width: 1023px) {
+  .left-sidebar {
+    background: rgba(245, 245, 220, 0.97) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    box-shadow: 6px 0 36px rgba(94, 34, 23, 0.25) !important;
+    border-right: 1px solid rgba(196, 164, 132, 0.5) !important;
+  }
+}
+
+/* 3. HERO SECTION -- Richer overlay */
+.hero-new {
+  background-image:
+    linear-gradient(165deg, rgba(94,34,23,0.72) 0%, rgba(0,0,0,0.48) 45%, rgba(74,26,20,0.80) 100%),
+    url('img/zach-plank-o-cpCRdEgxs-unsplash.jpg') !important;
+  background-attachment: fixed !important;
+  background-size: cover !important;
+  background-position: center !important;
+  min-height: 88vh !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+@media (max-width: 768px) {
+  .hero-new { background-attachment: scroll !important; min-height: 75vh !important; }
+}
+@media (min-width: 1024px) {
+  .hero-new .title { font-size: 5rem !important; letter-spacing: 0.02em !important; }
+  .hero-new .description { font-size: 1.5rem !important; }
+}
+
+/* Hero shimmer bar */
+.hero-new .subtitle::after {
+  content: '';
+  display: block;
+  width: 60px; height: 2px;
+  background: linear-gradient(90deg, transparent, #fcf8d5, transparent);
+  margin: 8px auto 0;
+  animation: shimmerBar 2.5s ease-in-out infinite;
+}
+@keyframes shimmerBar {
+  0%, 100% { opacity: 0.4; width: 40px; }
+  50%       { opacity: 1;   width: 90px; }
+}
+
+/* 4. SECTION HEADER -- animated underline */
+.section-header .main-title {
+  position: relative !important;
+  display: inline-block !important;
+  padding-bottom: 0.6rem !important;
+}
+.section-header .main-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 70%; height: 3px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #5e2217, #e74c3c, #c4a484, #e74c3c, #5e2217);
+  background-size: 200% auto;
+  animation: gradientSlide 3s linear infinite;
+}
+@keyframes gradientSlide {
+  0%   { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+/* 5. GENRE CARDS -- warm glow */
+.multi-strip-card {
+  border-radius: 12px !important;
+  box-shadow: 0 6px 24px rgba(94,34,23,0.12), 0 1px 4px rgba(0,0,0,0.06) !important;
+  transition: box-shadow 0.35s ease, transform 0.35s ease !important;
+  will-change: transform, opacity;
+}
+.multi-strip-card:hover {
+  box-shadow: 0 16px 48px rgba(94,34,23,0.30), 0 4px 12px rgba(231,76,60,0.18) !important;
+  transform: translateY(-6px) scale(1.015) !important;
+}
+.multi-strip-card .strip-item { border-radius: 6px !important; }
+.multi-strip-card .strip-title {
+  font-weight: 700 !important;
+  letter-spacing: 0.15em !important;
+  text-shadow: 0 1px 3px rgba(255,255,255,0.6);
+}
+
+/* 6. BOOK CARDS -- elevated hover */
+.flip-book-card-wrapper {
+  position: relative;
+  border-radius: 12px !important;
+  transition: transform 0.35s cubic-bezier(0.23,1,0.32,1), box-shadow 0.35s ease !important;
+  will-change: transform;
+}
+.flip-book-card-wrapper:hover {
+  transform: translateY(-10px) scale(1.04) !important;
+  box-shadow: 0 20px 48px rgba(94,34,23,0.22), 0 6px 16px rgba(0,0,0,0.10) !important;
+}
+.flip-book-card-front {
+  background: linear-gradient(145deg, #ffffff, #fdfaf3) !important;
+  border-radius: 12px !important;
+}
+.flip-book-card-front .book-title { color: #4a1a14 !important; letter-spacing: 0.01em !important; }
+.add-to-cart-btn {
+  border-radius: 50% !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+.add-to-cart-btn:hover {
+  transform: scale(1.18) !important;
+  box-shadow: 0 4px 14px rgba(94,34,23,0.28) !important;
+}
+
+/* Shimmer layer (JS-injected div) */
+.shimmer-layer {
+  position: absolute;
+  top: 0; left: -80%;
+  width: 60%; height: 100%;
+  background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.22) 50%, transparent 100%);
+  transform: skewX(-20deg);
+  transition: left 0.55s cubic-bezier(0.23, 1, 0.32, 1);
+  z-index: 300;
+  pointer-events: none;
+  border-radius: inherit;
+}
+.flip-book-card-wrapper:hover .shimmer-layer { left: 130%; }
+
+/* 7. PAGINATION -- pill buttons */
+.pagination-button {
+  border-radius: 99px !important;
+  font-weight: 600 !important;
+  border: 1.5px solid rgba(196,164,132,0.5) !important;
+  background: rgba(253,248,213,0.6) !important;
+  color: #5e2217 !important;
+  transition: all 0.22s cubic-bezier(0.23,1,0.32,1) !important;
+}
+.pagination-button:hover:not(.active):not(.disabled) {
+  background: rgba(245,245,220,1) !important;
+  border-color: #c4a484 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(94,34,23,0.14) !important;
+}
+.pagination-button.active {
+  background: linear-gradient(135deg, #5e2217, #8b3a2a) !important;
+  color: #fcf8d5 !important;
+  border-color: #5e2217 !important;
+  box-shadow: 0 4px 14px rgba(94,34,23,0.35) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* 8. EXPLORE BUTTON */
+.explore-btn-sidebar {
+  background: linear-gradient(135deg, #4a1a14, #7a2e1e) !important;
+  box-shadow: 0 3px 12px rgba(94,34,23,0.25) !important;
+  transition: background 0.3s, box-shadow 0.3s, transform 0.3s !important;
+}
+.explore-btn-sidebar:hover {
+  background: linear-gradient(135deg, #5e2217, #9a3b28) !important;
+  box-shadow: 0 6px 22px rgba(94,34,23,0.35) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* 9. FOOTER */
+.site-footer {
+  border-top: 3px solid #c4a484 !important;
+  background: linear-gradient(175deg, #fcf4cc 0%, #fdf8e8 60%, #fcf4cc 100%) !important;
+  position: relative;
+  overflow: hidden;
+}
+.site-footer::before {
+  content: '';
+  position: absolute; top: -50%; left: -20%;
+  width: 60%; height: 200%;
+  background: radial-gradient(ellipse, rgba(196,164,132,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* 10. SEARCH INPUT */
+.left-sidebar .search-input-group input[type="text"] {
+  transition: border-color 0.25s, box-shadow 0.25s !important;
+}
+.left-sidebar .search-input-group input[type="text"]:focus {
+  border-color: #5e2217 !important;
+  box-shadow: 0 0 0 3px rgba(94,34,23,0.12) !important;
+  outline: none !important;
+}
+
+/* 11. CART ICON -- brand red */
+.btn-cart:hover > .icon-cart path { fill: #e74c3c !important; }
+
+/* 12. MOBILE SCROLL-SNAP for genre cards */
+@media (max-width: 768px) {
+  #genre-cards-section {
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    padding: 0 1rem 1rem !important;
+    gap: 1rem !important;
+    scrollbar-width: none !important;
+  }
+  #genre-cards-section::-webkit-scrollbar { display: none !important; }
+  #genre-cards-section .multi-strip-card {
+    flex-shrink: 0 !important;
+    scroll-snap-align: center !important;
+    margin: 0 !important;
+  }
+}
+
+/* 13. GSAP PRE-ANIMATION STATES */
+.hero-new .subtitle,
+.hero-new .title,
+.hero-new .description {
+  animation: none !important;
+  opacity: 0;
+  transform: translateY(30px);
+}
+#genre-cards-section .multi-strip-card {
+  opacity: 0;
+  transform: translateY(40px) scale(0.96);
+}
+.latest-books-online .section-header {
+  opacity: 0;
+  transform: translateY(24px);
+}
+.site-footer .footer-column {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+/* 14. PAGE TRANSITION OVERLAY */
+#page-transition-overlay {
+  position: fixed; inset: 0;
+  background: linear-gradient(135deg, #5e2217 0%, #4a1a14 100%);
+  z-index: 10000; pointer-events: none; opacity: 0;
+  transform-origin: bottom center;
+}
+
+/* 15. LOADER -- brand colours */
+.loader {
+  --background: linear-gradient(135deg, #c4a484, #5e2217) !important;
+  --shadow: rgba(94,34,23,0.28) !important;
+  --text: #5e2217 !important;
+  --page: rgba(252,244,204,0.5) !important;
+  --page-fold: rgba(252,244,204,0.75) !important;
+}
+
+/* 16. MOBILE EXTRA POLISH */
+@media (max-width: 480px) {
+  .flip-book-card-wrapper { border-radius: 14px !important; }
+  .multi-strip-card       { border-radius: 14px !important; }
+}
+
+/* END OF PREMIUM GSAP UPGRADE BLOCK */
