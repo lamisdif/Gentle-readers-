@@ -641,9 +641,9 @@
           Inkwoven stories, timeless classics & rare discoveries.
         </p>
         <div class="hero-actions stagger-animate stagger-4">
-          <a href="#genre-cards-section" class="hero-cta-btn">
+          <a href="#genre-cards-section" class="hero-cta-btn" onclick="document.getElementById('genre-cards-section')?.scrollIntoView({behavior:'smooth'}); return false;">
             <span>EXPLORE CATALOG</span>
-            <i class="fas fa-arrow-right ml-2"></i>
+            <i class="fas fa-arrow-down ml-2"></i>
           </a>
         </div>
       </div>
@@ -919,11 +919,11 @@
 
     <!-- Floating Mobile Bottom Quick Action Bar (Mobile Only) -->
     <div class="floating-mobile-bar lg:hidden">
-      <a href="#" class="mobile-bar-item active">
+      <a href="index.html" class="mobile-bar-item active">
         <i class="fas fa-home"></i>
         <span>Home</span>
       </a>
-      <a href="#genre-cards-section" class="mobile-bar-item">
+      <a href="#genre-cards-section" class="mobile-bar-item" onclick="document.getElementById('genre-cards-section')?.scrollIntoView({behavior:'smooth'}); return false;">
         <i class="fas fa-shapes"></i>
         <span>Genres</span>
       </a>
@@ -931,7 +931,7 @@
         <i class="fas fa-shopping-bag"></i>
         <span>Cart</span>
       </a>
-      <button type="button" onclick="window.scrollTo({top:0, behavior:'smooth'})" class="mobile-bar-item" aria-label="Scroll to top">
+      <button type="button" onclick="window.scrollTo({top:0, behavior:'smooth'});" class="mobile-bar-item" aria-label="Scroll to top">
         <i class="fas fa-arrow-up"></i>
         <span>Top</span>
       </button>
@@ -1334,11 +1334,14 @@
     window.addEventListener('DOMContentLoaded', function () {
       hideLoader();
     });
-    // Show loader on navigation (all <a> and nav buttons)
+    // Show loader on navigation (all <a> and nav buttons), avoiding in-page anchors
     document.addEventListener('DOMContentLoaded', function () {
       document.querySelectorAll('a, button[data-nav]').forEach(el => {
         el.addEventListener('click', function (e) {
-          if (el.href && !el.href.startsWith('#')) showLoader();
+          const rawHref = el.getAttribute('href');
+          if (!rawHref || rawHref.startsWith('#') || rawHref.startsWith('javascript:') || rawHref === '') return;
+          if (el.hostname === window.location.hostname && el.pathname === window.location.pathname && el.hash) return;
+          showLoader();
         });
       });
       // Show loader on search form submit
