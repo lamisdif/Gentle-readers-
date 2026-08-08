@@ -931,11 +931,16 @@
         <i class="fas fa-shopping-bag"></i>
         <span>Cart</span>
       </a>
-      <button type="button" onclick="window.scrollTo({top:0, behavior:'smooth'});" class="mobile-bar-item" aria-label="Scroll to top">
+      <button type="button" onclick="scrollToTop(); return false;" class="mobile-bar-item" aria-label="Scroll to top">
         <i class="fas fa-arrow-up"></i>
         <span>Top</span>
       </button>
     </div>
+
+    <!-- Desktop Floating Scroll To Top Button -->
+    <button type="button" onclick="scrollToTop(); return false;" id="desktopScrollTopBtn" class="hidden lg:flex fixed bottom-8 right-8 bg-[#5e2217] text-[#fcf4cc] w-12 h-12 rounded-full items-center justify-center shadow-xl hover:bg-[#4a1810] transition-all hover:scale-110 z-50 border border-[#c5a059]/40" aria-label="Scroll to top">
+      <i class="fas fa-arrow-up text-base"></i>
+    </button>
 
 
   </div>
@@ -1323,6 +1328,17 @@
 
   </script>
   <script>
+    window.scrollToTop = function () {
+      try {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+        document.body.scrollTo({ top: 0, behavior: 'smooth' });
+        var main = document.querySelector('.main-content');
+        if (main) main.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (e) {
+        window.scrollTo(0, 0);
+      }
+    };
     function showLoader() {
       document.body.classList.add('loading');
       document.getElementById('site-loader').style.display = 'flex';
