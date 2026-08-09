@@ -649,6 +649,78 @@
       </div>
     </section>
 
+    <!-- Newest Books Auto-Scrolling Showcase -->
+    <section class="newest-books-showcase" id="newest-books-section">
+      <div class="newest-books-header">
+        <span class="newest-books-badge"><i class="fas fa-star"></i> NEW ARRIVALS</span>
+        <h2 class="newest-books-title">Just Added to Our Shelves</h2>
+      </div>
+      <div class="newest-books-track" id="newest-books-track">
+        <!-- Books will be injected here by JS -->
+      </div>
+    </section>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        var track = document.getElementById('newest-books-track');
+        if (!track) return;
+
+        Promise.all([
+          fetch('cms-books.json').then(function(r) { return r.json(); }),
+          fetch('settings.json').then(function(r) { return r.json(); }).catch(function() { return { show_newest_slider: true, newest_books_count: 10 }; })
+        ]).then(function(results) {
+          var books = results[0];
+          var settings = results[1];
+
+          if (!settings.show_newest_slider || !Array.isArray(books) || books.length === 0) {
+            var sec = document.getElementById('newest-books-section');
+            if (sec) sec.style.display = 'none';
+            return;
+          }
+
+          var count = Math.min(settings.newest_books_count || 10, books.length);
+          var newest = books.slice(0, count);
+          var allCards = newest.concat(newest);
+
+          track.innerHTML = '';
+          allCards.forEach(function(b) {
+            var id = 'cms_' + (b.slug || b.title);
+            var isOut = (b.status || 'available').toLowerCase() === 'out of stock';
+            var stock = b.stock !== undefined ? b.stock : 10;
+            var cover = b.image || 'https://placehold.co/160x220/ccc/666?text=Cover';
+            var price = b.price ? String(b.price) : '';
+
+            var stockHTML = '';
+            if (isOut || stock <= 0) {
+              stockHTML = '<span class="newest-stock newest-stock-out"><i class="fas fa-times-circle"></i> Out of Stock</span>';
+            } else if (stock <= 3) {
+              stockHTML = '<span class="newest-stock newest-stock-low"><i class="fas fa-exclamation-triangle"></i> Only ' + stock + ' left!</span>';
+            } else {
+              stockHTML = '<span class="newest-stock newest-stock-ok"><i class="fas fa-check-circle"></i> ' + stock + ' in stock</span>';
+            }
+
+            var card = document.createElement('div');
+            card.className = 'newest-book-card';
+            card.onclick = function() { if (window.openBook) window.openBook(id); };
+            card.innerHTML =
+              '<div class="newest-book-cover">' +
+                '<img src="' + cover + '" alt="' + (b.title || '').replace(/"/g, '') + '" onerror="this.src=\'https://placehold.co/160x220/ccc/666?text=Cover\'" />' +
+                '<div class="newest-book-badge-new">NEW</div>' +
+              '</div>' +
+              '<div class="newest-book-info">' +
+                '<p class="newest-book-title">' + (b.title || '') + '</p>' +
+                '<p class="newest-book-author">' + (b.author || '') + '</p>' +
+                (price ? '<p class="newest-book-price">' + price + ' DZD</p>' : '') +
+                stockHTML +
+              '</div>';
+            track.appendChild(card);
+          });
+        }).catch(function(e) {
+          console.error('Failed to load newest books:', e);
+        });
+      });
+    </script>
+
     <!-- Multi-Strip Genre Cards Section (hidden on pages 2+) -->
     <div class="flex flex-col md:flex-row gap-4 md:gap-8 justify-center my-8 px-4" id="genre-cards-section">
       <!-- Multi-Strip Card 1: Religious, Romance, Fiction -->
@@ -813,7 +885,7 @@
                         </div>
                         <p class="book-title">${b.title || ''}</p>
                         <p class="book-author">${b.author || ''}</p>
-                        <p class="book-status-badge" style="color: ${isOutOfStock ? '#dc2626' : '#10b981'}; font-weight: bold; font-size: 12px; margin: 5px 0; text-align: center; background: ${isOutOfStock ? 'rgba(220,38,38,0.1)' : 'rgba(16,185,129,0.1)'}; padding: 2px 8px; border-radius: 12px; display: inline-block;">${isOutOfStock ? 'Out of Stock / نفدت الكمية' : 'Available / متوفر'}</p>
+                        <p class="book-status-badge" style="color: ${isOutOfStock ? '#dc2626' : (b.stock !== undefined && b.stock <= 3 ? '#b45309' : '#10b981')}; font-weight: bold; font-size: 12px; margin: 5px 0; text-align: center; background: ${isOutOfStock ? 'rgba(220,38,38,0.1)' : (b.stock !== undefined && b.stock <= 3 ? 'rgba(245,158,11,0.12)' : 'rgba(16,185,129,0.1)')}; padding: 2px 8px; border-radius: 12px; display: inline-block;">${isOutOfStock ? 'Out of Stock / نفدت الكمية' : (b.stock !== undefined && b.stock <= 3 ? '<i class="fas fa-exclamation-triangle" style="margin-right:3px"></i>Only ' + b.stock + ' left!' : (b.stock !== undefined ? b.stock + ' in stock' : 'Available / متوفر'))}</p>
                         ${price ? '<p class="book-price">Price: ' + price + ' DZD</p>' : '<p class="book-price"></p>'}
                       </div>
                       <div class="flip-book-card-back">
@@ -849,9 +921,9 @@
           
           <!-- Column 1: Brand & Story -->
           <div class="footer-column">
-            <div class="logo-container mb-4 flex items-center">
-              <img src="img/Perfectly made ones right.svg" alt="GentleReaders Logo" class="h-16 w-auto" />
-              <span class="text-2xl font-extrabold ml-3" style="color: #5e2217; font-family: 'Great Vibes', cursive;" id="footer-brand">GentleReaders</span>
+            <div class="logo-container mb-4 flex items-center" style="max-width: 100%; overflow: hidden;">
+              <img src="img/Perfectly made ones right.svg" alt="GentleReaders Logo" class="h-12 w-auto flex-shrink-0" />
+              <span class="text-xl font-extrabold ml-2" style="color: #5e2217; font-family: 'Great Vibes', cursive; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="footer-brand">GentleReaders</span>
             </div>
             <p class="mb-4 text-sm leading-relaxed" style="color: #5a4c4a;" id="footer-desc">
               Your premier sanctuary for handpicked books, timeless classics, and modern bestsellers delivered straight to your doorstep across Algeria.

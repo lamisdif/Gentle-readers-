@@ -18,8 +18,23 @@ collections:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Author", name: "author", widget: "string" }
       - { label: "Price", name: "price", widget: "number", valueType: "int" }
-      - {label: "Status / الحالة", name: "status", widget: "select", options: ["available", "out of stock"], default: "available"}
+      - { label: "Stock Quantity / الكمية في المخزن", name: "stock", widget: "number", valueType: "int", default: 10 }
+      - { label: "Status / الحالة", name: "status", widget: "select", options: ["available", "out of stock"], default: "available" }
       - { label: "Description", name: "description", widget: "text" }
       - { label: "Image", name: "image", widget: "image", required: false }
       - { label: "Draft", name: "draft", widget: "boolean", default: false }
+
+  - name: "settings"
+    label: "Settings / الإعدادات"
+    delete: false
+    editor:
+      preview: false
+    files:
+      - name: "homepage"
+        label: "Homepage Settings"
+        file: "src/data/settings.json"
+        fields:
+          - { label: "Show Moving Grid (Newest Books)", name: "show_newest_slider", widget: "boolean", default: true }
+          - { label: "Number of Newest Books to Show", name: "newest_books_count", widget: "number", default: 10, valueType: "int" }
+
 

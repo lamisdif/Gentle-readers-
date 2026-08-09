@@ -15,6 +15,21 @@ function safeReadJson(filePath) {
 }
 
 function main() {
+  // Process settings.json
+  const settingsSrc = path.join(ROOT, 'src', 'data', 'settings.json');
+  const settingsOut = path.join(ROOT, 'public', 'settings.json');
+  if (fs.existsSync(settingsSrc)) {
+    try {
+      fs.copyFileSync(settingsSrc, settingsOut);
+      console.log('Copied settings.json to public/settings.json');
+    } catch (e) {
+      console.error('Failed to copy settings.json:', e);
+    }
+  } else {
+    fs.writeFileSync(settingsOut, JSON.stringify({ show_newest_slider: true, newest_books_count: 10 }, null, 2) + '\n', 'utf8');
+    console.log('Created default settings.json in public/settings.json');
+  }
+
   if (!fs.existsSync(SRC_DIR)) {
     fs.writeFileSync(OUT_FILE, '[]\n', 'utf8');
     return;
@@ -33,12 +48,21 @@ function main() {
     if (!data) continue;
 
     const slug = path.basename(ent.name, '.json');
+    
+    // Automatically set out of stock if stock is 0
+    let status = data.status || 'available';
+    let stock = data.stock !== undefined ? Number(data.stock) : 10;
+    if (stock <= 0) {
+      status = 'out of stock';
+    }
+
     books.push({
       slug,
       title: data.title || '',
       author: data.author || 'Unknown Author',
       price: data.price ?? '',
-      status: data.status || 'available',
+      status: status,
+      stock: stock,
       description: data.description || '',
       image: data.image || '',
       draft: Boolean(data.draft),
