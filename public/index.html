@@ -678,8 +678,22 @@
             return;
           }
 
-          var count = Math.min(settings.newest_books_count || 10, books.length);
-          var newest = books.slice(0, count);
+          // Filter for books explicitly selected to show in the marquee
+          var chosenBooks = books.filter(function(b) { return b.featured === true; });
+          
+          // Fallback to newest books if no books are selected in CMS
+          if (chosenBooks.length === 0) {
+            chosenBooks = books;
+          } else {
+            // Update title to highlight selection
+            var titleEl = document.querySelector('.newest-books-title');
+            if (titleEl) titleEl.textContent = "Handpicked Showcase / كتب مختارة";
+            var badgeEl = document.querySelector('.newest-books-badge');
+            if (badgeEl) badgeEl.innerHTML = '<i class="fas fa-bookmark"></i> FEATURED';
+          }
+
+          var count = Math.min(settings.newest_books_count || 10, chosenBooks.length);
+          var newest = chosenBooks.slice(0, count);
           var allCards = newest.concat(newest);
 
           track.innerHTML = '';

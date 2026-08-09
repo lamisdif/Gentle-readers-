@@ -63,6 +63,7 @@ function main() {
       price: data.price ?? '',
       status: status,
       stock: stock,
+      featured: Boolean(data.featured),
       description: data.description || '',
       image: data.image || '',
       draft: Boolean(data.draft),
