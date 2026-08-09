@@ -672,7 +672,8 @@
           var books = results[0];
           var settings = results[1];
 
-          if (!settings.show_newest_slider || !Array.isArray(books) || books.length === 0) {
+          var showSlider = !settings || settings.show_newest_slider !== false;
+          if (!showSlider || !Array.isArray(books) || books.length === 0) {
             var sec = document.getElementById('newest-books-section');
             if (sec) sec.style.display = 'none';
             return;

@@ -2374,16 +2374,22 @@ body[lang="en"] {
 
 /* ===== NEWEST BOOKS AUTO-SCROLL SHOWCASE ===== */
 .newest-books-showcase {
-  padding: 2.5rem 1rem 2rem 1rem;
-  overflow: hidden;
-  position: relative;
-  background: linear-gradient(135deg, rgba(250,247,242,0.6) 0%, rgba(241,230,208,0.4) 100%);
-  border-top: 1px solid rgba(196,164,132,0.25);
-  border-bottom: 1px solid rgba(196,164,132,0.25);
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  padding: 2rem 0.5rem 1.8rem 0.5rem !important;
+  overflow: hidden !important;
+  position: relative !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  background: linear-gradient(135deg, rgba(250,247,242,0.95) 0%, rgba(241,230,208,0.85) 100%) !important;
+  border-top: 1px solid rgba(196,164,132,0.3) !important;
+  border-bottom: 1px solid rgba(196,164,132,0.3) !important;
+  z-index: 10 !important;
 }
 .newest-books-header {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 .newest-books-badge {
   display: inline-block;
@@ -2395,7 +2401,7 @@ body[lang="en"] {
   letter-spacing: 2px;
   padding: 4px 16px;
   border-radius: 99px;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
 }
 .newest-books-title {
   font-family: 'Great Vibes', cursive;
@@ -2404,13 +2410,16 @@ body[lang="en"] {
   margin: 0;
 }
 .newest-books-track {
-  display: flex;
-  gap: 1.25rem;
-  animation: newestScroll 40s linear infinite;
-  width: max-content;
+  display: flex !important;
+  gap: 1.25rem !important;
+  animation: newestScroll 35s linear infinite !important;
+  width: max-content !important;
+  min-width: 100% !important;
+  will-change: transform !important;
+  -webkit-overflow-scrolling: touch !important;
 }
 .newest-books-track:hover {
-  animation-play-state: paused;
+  animation-play-state: paused !important;
 }
 @keyframes newestScroll {
   0% { transform: translateX(0); }
@@ -2421,11 +2430,11 @@ body[lang="en"] {
   width: 160px;
   cursor: pointer;
   transition: transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 0.35s ease;
-  background: rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.85);
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid rgba(196,164,132,0.3);
-  box-shadow: 0 2px 12px rgba(74,24,16,0.06);
+  border: 1px solid rgba(196,164,132,0.35);
+  box-shadow: 0 2px 12px rgba(74,24,16,0.08);
 }
 .newest-book-card:hover {
   transform: translateY(-6px) scale(1.03);
@@ -2511,28 +2520,46 @@ body[lang="en"] {
   color: #dc2626;
   background: rgba(220,38,38,0.1);
 }
-.site-footer .logo-container {
-  max-width: 100% !important;
-  overflow: hidden !important;
-}
-.site-footer .logo-container span {
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  max-width: calc(100% - 70px) !important;
-}
+
 @media (max-width: 768px) {
+  .newest-books-showcase {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    padding: 1.5rem 0.25rem 1.25rem 0.25rem !important;
+    margin: 0.5rem 0 !important;
+  }
+  .newest-books-header {
+    margin-bottom: 0.85rem !important;
+  }
   .newest-books-title {
-    font-size: 1.5rem;
-  }
-  .newest-book-card {
-    width: 140px;
-  }
-  .newest-book-cover {
-    height: 170px;
+    font-size: 1.6rem !important;
   }
   .newest-books-track {
-    animation-duration: 30s;
+    animation-duration: 25s !important;
+    gap: 0.75rem !important;
+    touch-action: pan-x pan-y !important;
+  }
+  .newest-book-card {
+    width: 135px !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 12px rgba(74,24,16,0.1) !important;
+  }
+  .newest-book-cover {
+    height: 160px !important;
+  }
+  .newest-book-info {
+    padding: 8px 6px 10px 6px !important;
+  }
+  .newest-book-title {
+    font-size: 0.78rem !important;
+  }
+  .newest-book-author {
+    font-size: 0.68rem !important;
+  }
+  .newest-stock {
+    font-size: 0.6rem !important;
+    padding: 2px 6px !important;
   }
 }
 /* END OF CALM LUXURY CSS */
