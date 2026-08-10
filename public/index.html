@@ -702,8 +702,8 @@
             }
           }
 
-          // Inline SVG placeholder for reliable cover rendering without external network dependency
-          var svgFallback = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="220" viewBox="0 0 160 220"><rect width="100%" height="100%" fill="%23f1e6d0"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%235e2217" font-family="sans-serif" font-size="14" font-weight="bold">Gentle Readers</text></svg>';
+          // Base64 SVG placeholder for reliable cover rendering without HTML attribute syntax errors
+          var svgFallback = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNjAiIGhlaWdodD0iMjIwIiB2aWV3Qm94PSIwIDAgMTYwIDIyMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2YxZTZkMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNWUyMjE3IiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9ImJvbGQiPkdlbnRsZSBSZWFkZXJzPC90ZXh0Pjwvc3ZnPg==';
 
           track.innerHTML = '';
           allCards.forEach(function(b) {

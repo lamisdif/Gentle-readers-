@@ -56,6 +56,9 @@ function main() {
       status = 'out of stock';
     }
 
+    const stat = fs.statSync(fp);
+    const mtime = stat.mtimeMs || 0;
+
     books.push({
       slug,
       title: data.title || '',
@@ -67,22 +70,21 @@ function main() {
       description: data.description || '',
       image: data.image || '',
       draft: Boolean(data.draft),
+      mtime: mtime,
     });
   }
 
   // Remove drafts
   const published = books.filter((b) => !b.draft);
 
-  // Sort: available books first, then out of stock
-  // Within each group: newest first (reverse slug/filename order)
+  // Sort: available books first, then out of stock.
+  // Within each group: newest added/modified in CMS first!
   published.sort((a, b) => {
     const aAvailable = (a.status || 'available').toLowerCase() !== 'out of stock' ? 0 : 1;
     const bAvailable = (b.status || 'available').toLowerCase() !== 'out of stock' ? 0 : 1;
     if (aAvailable !== bAvailable) return aAvailable - bAvailable;
-    // Within same status group: reverse slug order (newest files last in alphabet = first here)
-    const aKey = String(a.slug || '');
-    const bKey = String(b.slug || '');
-    if (aKey !== bKey) return bKey.localeCompare(aKey);
+    // Newest created/modified in CMS first
+    if (b.mtime !== a.mtime) return b.mtime - a.mtime;
     return String(a.title || '').localeCompare(String(b.title || ''));
   });
 
