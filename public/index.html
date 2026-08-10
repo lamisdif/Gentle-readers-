@@ -658,18 +658,21 @@
          ===================================================== -->
     <style id="marquee-styles">
       #marquee-showcase {
-        display: block;
-        width: 100%;
-        overflow: hidden;
-        padding: 2.5rem 0 2rem 0;
-        background: linear-gradient(135deg, rgba(250,247,242,0.97), rgba(241,230,208,0.9));
-        border-top: 1px solid rgba(196,164,132,0.3);
-        border-bottom: 1px solid rgba(196,164,132,0.3);
-        position: relative;
-        z-index: 50;
-        box-sizing: border-box;
-        /* Force LTR so the strip always scrolls left-to-right */
-        direction: ltr;
+        display: block !important;
+        width: 100% !important;
+        /* NO overflow:hidden here — that would clip the children */
+        /* overflow:hidden is ONLY on #marquee-viewport */
+        overflow: visible !important;
+        padding: 2.5rem 0 2rem 0 !important;
+        background: linear-gradient(135deg, rgba(250,247,242,0.97), rgba(241,230,208,0.9)) !important;
+        border-top: 1px solid rgba(196,164,132,0.3) !important;
+        border-bottom: 1px solid rgba(196,164,132,0.3) !important;
+        position: relative !important;
+        z-index: 50 !important;
+        box-sizing: border-box !important;
+        direction: ltr !important;
+        /* Guarantee the section is tall enough to show cards */
+        min-height: 380px !important;
       }
       #marquee-header {
         text-align: center;
@@ -694,11 +697,12 @@
         color: #5e2217;
         margin: 0.4rem 0 0 0;
       }
-      /* The VIEWPORT — clips the scrolling strip */
+      /* The VIEWPORT — the ONLY element with overflow:hidden to clip the scrolling strip */
       #marquee-viewport {
-        width: 100%;
-        overflow: hidden;
-        /* No padding here — keeps the clip clean */
+        width: 100% !important;
+        overflow: hidden !important;
+        min-height: 290px !important;
+        display: block !important;
       }
       /* The STRIP — contains [original cards] + [duplicate cards] side by side */
       #marquee-strip {
