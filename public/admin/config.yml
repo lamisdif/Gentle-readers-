@@ -37,5 +37,6 @@ collections:
         fields:
           - { label: "Show Moving Grid (Newest Books)", name: "show_newest_slider", widget: "boolean", default: true }
           - { label: "Number of Newest Books to Show", name: "newest_books_count", widget: "number", default: 10, valueType: "int" }
+          - { label: "Showcase Mode / وضع العرض", name: "showcase_mode", widget: "select", options: ["newest", "featured"], default: "newest" }
 
 

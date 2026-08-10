@@ -1,4 +1,5 @@
 {
   "show_newest_slider": true,
-  "newest_books_count": 10
+  "newest_books_count": 10,
+  "showcase_mode": "newest"
 }

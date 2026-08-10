@@ -26,7 +26,7 @@ function main() {
       console.error('Failed to copy settings.json:', e);
     }
   } else {
-    fs.writeFileSync(settingsOut, JSON.stringify({ show_newest_slider: true, newest_books_count: 10 }, null, 2) + '\n', 'utf8');
+    fs.writeFileSync(settingsOut, JSON.stringify({ show_newest_slider: true, newest_books_count: 10, showcase_mode: 'newest' }, null, 2) + '\n', 'utf8');
     console.log('Created default settings.json in public/settings.json');
   }
 
