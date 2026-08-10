@@ -681,6 +681,7 @@
           if (sec) sec.style.display = 'block';
 
           var chosenBooks = Array.isArray(books) ? books.filter(function(b) { return b && b.featured === true; }) : [];
+          
           if (chosenBooks.length === 0) {
             chosenBooks = (Array.isArray(books) && books.length > 0) ? books : fallbackBooks;
           } else {
@@ -690,17 +691,26 @@
             if (badgeEl) badgeEl.innerHTML = '<i class="fas fa-bookmark"></i> FEATURED';
           }
 
-          var count = Math.min(settings.newest_books_count || 10, chosenBooks.length);
+          var count = Math.min(settings.newest_books_count || 15, chosenBooks.length);
           var newest = chosenBooks.slice(0, count);
-          // Duplicate items to ensure seamless infinite scrolling marquee loop
-          var allCards = newest.concat(newest).concat(newest);
+          
+          // Repeat array until we have at least 30 cards to ensure an unbroken seamless infinite marquee loop
+          var allCards = [];
+          if (newest.length > 0) {
+            while (allCards.length < 30) {
+              allCards = allCards.concat(newest);
+            }
+          }
+
+          // Inline SVG placeholder for reliable cover rendering without external network dependency
+          var svgFallback = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="220" viewBox="0 0 160 220"><rect width="100%" height="100%" fill="%23f1e6d0"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%235e2217" font-family="sans-serif" font-size="14" font-weight="bold">Gentle Readers</text></svg>';
 
           track.innerHTML = '';
           allCards.forEach(function(b) {
             var id = 'cms_' + (b.slug || b.title);
             var isOut = (b.status || 'available').toLowerCase() === 'out of stock';
             var stock = b.stock !== undefined ? b.stock : 10;
-            var cover = b.image || 'https://placehold.co/160x220/ccc/666?text=Cover';
+            var cover = b.image || svgFallback;
             var price = b.price ? String(b.price) : '';
 
             var stockHTML = '';
@@ -717,8 +727,8 @@
             card.onclick = function() { if (window.openBook) window.openBook(id); };
             card.innerHTML =
               '<div class="newest-book-cover">' +
-                '<img src="' + cover + '" alt="' + (b.title || '').replace(/"/g, '') + '" onerror="this.src=\'https://placehold.co/160x220/ccc/666?text=Cover\'" />' +
-                '<div class="newest-book-badge-new">NEW</div>' +
+                '<img src="' + cover + '" alt="' + (b.title || '').replace(/"/g, '') + '" onerror="this.onerror=null; this.src=\'' + svgFallback + '\';" />' +
+                '<div class="newest-book-badge-new">FEATURED</div>' +
               '</div>' +
               '<div class="newest-book-info">' +
                 '<p class="newest-book-title">' + (b.title || '') + '</p>' +

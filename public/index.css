@@ -1,4 +1,4 @@
-﻿ /* Font face declarations for Dalton White font - Multiple paths for hosting compatibility */
+ /* Font face declarations for Dalton White font - Multiple paths for hosting compatibility */
 @font-face {
   font-family: 'Dalton White';
   src: url('./Dalton White.otf') format('opentype');
@@ -2404,17 +2404,21 @@ body[lang="en"] {
   margin-bottom: 0.4rem;
 }
 .newest-books-title {
-  font-family: 'Great Vibes', cursive;
-  font-size: 2rem;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.8rem;
+  font-weight: 800;
   color: #5e2217;
-  margin: 0;
+  margin: 0.25rem 0 0 0;
+  letter-spacing: 0.5px;
 }
 .newest-books-track {
   display: flex !important;
   gap: 1.25rem !important;
-  animation: newestScroll 35s linear infinite !important;
+  animation: newestScroll 40s linear infinite !important;
   width: max-content !important;
   min-width: 100% !important;
+  min-height: 270px !important;
+  align-items: stretch !important;
   will-change: transform !important;
   -webkit-overflow-scrolling: touch !important;
 }
