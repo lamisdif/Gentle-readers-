@@ -665,28 +665,25 @@
         var track = document.getElementById('newest-books-track');
         if (!track) return;
 
-        Promise.all([
-          fetch('cms-books.json').then(function(r) { return r.json(); }),
-          fetch('settings.json').then(function(r) { return r.json(); }).catch(function() { return { show_newest_slider: true, newest_books_count: 10 }; })
-        ]).then(function(results) {
-          var books = results[0];
-          var settings = results[1];
+        // Fallback sample books if CMS load fails or returns empty
+        var fallbackBooks = [
+          { title: 'وردية الليل', author: 'ستيفن كينغ', price: '2800', image: 'img/الهول.jpg', stock: 5 },
+          { title: 'منهجية السير الى الله', author: 'عمر عبد الكافي', price: '1900', image: 'img/منهجية السير الى الله.jpg', stock: 12 },
+          { title: 'It Ends With Us', author: 'Colleen Hoover', price: '2400', image: 'img/it end with us.jpg', stock: 2 },
+          { title: 'فتاة الياقة الزرقاء', author: 'عمرو عبد الحميد', price: '2100', image: 'img/فتاة الياقة الزرقاء.jpg', stock: 8 },
+          { title: 'احببت وغدا', author: 'عماد رشاد', price: '1800', image: 'img/احببت وغدا.jpg', stock: 4 },
+          { title: 'مرتفعات ويذرنج', author: 'إميلي برونتي', price: '2200', image: 'img/مرتفعات ويذرنج.jpg', stock: 1 }
+        ];
 
-          var showSlider = !settings || settings.show_newest_slider !== false;
-          if (!showSlider || !Array.isArray(books) || books.length === 0) {
-            var sec = document.getElementById('newest-books-section');
-            if (sec) sec.style.display = 'none';
-            return;
-          }
+        function renderMarquee(books, settings) {
+          settings = settings || { show_newest_slider: true, newest_books_count: 10 };
+          var sec = document.getElementById('newest-books-section');
+          if (sec) sec.style.display = 'block';
 
-          // Filter for books explicitly selected to show in the marquee
-          var chosenBooks = books.filter(function(b) { return b.featured === true; });
-          
-          // Fallback to newest books if no books are selected in CMS
+          var chosenBooks = Array.isArray(books) ? books.filter(function(b) { return b && b.featured === true; }) : [];
           if (chosenBooks.length === 0) {
-            chosenBooks = books;
+            chosenBooks = (Array.isArray(books) && books.length > 0) ? books : fallbackBooks;
           } else {
-            // Update title to highlight selection
             var titleEl = document.querySelector('.newest-books-title');
             if (titleEl) titleEl.textContent = "Handpicked Showcase / كتب مختارة";
             var badgeEl = document.querySelector('.newest-books-badge');
@@ -695,7 +692,8 @@
 
           var count = Math.min(settings.newest_books_count || 10, chosenBooks.length);
           var newest = chosenBooks.slice(0, count);
-          var allCards = newest.concat(newest);
+          // Duplicate items to ensure seamless infinite scrolling marquee loop
+          var allCards = newest.concat(newest).concat(newest);
 
           track.innerHTML = '';
           allCards.forEach(function(b) {
@@ -730,8 +728,17 @@
               '</div>';
             track.appendChild(card);
           });
-        }).catch(function(e) {
-          console.error('Failed to load newest books:', e);
+        }
+
+        Promise.all([
+          fetch('cms-books.json').then(function(r) { return r.json(); }).catch(function() { return null; }),
+          fetch('settings.json').then(function(r) { return r.json(); }).catch(function() { return null; })
+        ]).then(function(results) {
+          var books = results[0];
+          var settings = results[1];
+          renderMarquee(books, settings);
+        }).catch(function() {
+          renderMarquee(fallbackBooks, null);
         });
       });
     </script>
