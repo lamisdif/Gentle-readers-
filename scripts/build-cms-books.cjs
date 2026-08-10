@@ -59,6 +59,11 @@ function main() {
     const stat = fs.statSync(fp);
     const mtime = stat.mtimeMs || 0;
 
+    let img = data.image || '';
+    if (img.startsWith('/')) {
+      img = img.substring(1);
+    }
+
     books.push({
       slug,
       title: data.title || '',
@@ -68,7 +73,7 @@ function main() {
       stock: stock,
       featured: Boolean(data.featured),
       description: data.description || '',
-      image: data.image || '',
+      image: img,
       draft: Boolean(data.draft),
       mtime: mtime,
     });
