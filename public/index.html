@@ -660,141 +660,170 @@
       #marquee-showcase {
         display: block !important;
         width: 100% !important;
-        /* NO overflow:hidden here — that would clip the children */
-        /* overflow:hidden is ONLY on #marquee-viewport */
-        overflow: visible !important;
-        padding: 2.5rem 0 2rem 0 !important;
+        padding: 3rem 1rem 3.5rem 1rem !important;
         background: linear-gradient(135deg, rgba(250,247,242,0.97), rgba(241,230,208,0.9)) !important;
         border-top: 1px solid rgba(196,164,132,0.3) !important;
         border-bottom: 1px solid rgba(196,164,132,0.3) !important;
         position: relative !important;
-        z-index: 50 !important;
+        z-index: 10 !important;
         box-sizing: border-box !important;
         direction: ltr !important;
-        /* Guarantee the section is tall enough to show cards */
-        min-height: 380px !important;
+        margin-bottom: 2.5rem !important;
+        flex-shrink: 0 !important;
       }
       #marquee-header {
-        text-align: center;
-        margin-bottom: 1.25rem;
-        direction: ltr;
+        text-align: center !important;
+        margin-bottom: 2rem !important;
+        direction: ltr !important;
       }
       #marquee-badge {
-        display: inline-block;
-        background: linear-gradient(135deg, #c5a059, #d4b06a);
-        color: #3b140d;
-        font-size: 0.7rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        padding: 4px 18px;
-        border-radius: 99px;
+        display: inline-block !important;
+        background: linear-gradient(135deg, #c5a059, #d4b06a) !important;
+        color: #3b140d !important;
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 2px !important;
+        padding: 5px 20px !important;
+        border-radius: 99px !important;
+        box-shadow: 0 2px 8px rgba(197,160,89,0.25) !important;
       }
       #marquee-title {
-        font-family: Georgia, serif;
-        font-size: 1.8rem;
-        font-weight: 800;
-        color: #5e2217;
-        margin: 0.4rem 0 0 0;
+        font-family: Georgia, serif !important;
+        font-size: 1.85rem !important;
+        font-weight: 800 !important;
+        color: #5e2217 !important;
+        margin: 0.5rem 0 0 0 !important;
       }
-      /* The VIEWPORT — the ONLY element with overflow:hidden to clip the scrolling strip */
       #marquee-viewport {
         width: 100% !important;
-        overflow: hidden !important;
-        min-height: 290px !important;
-        display: block !important;
+        position: relative !important;
+        box-sizing: border-box !important;
       }
-      /* The STRIP — contains [original cards] + [duplicate cards] side by side */
       #marquee-strip {
-        display: flex;
-        flex-wrap: nowrap;
-        gap: 1.25rem;
-        align-items: stretch;
-        /* width is set by JS once cards are known */
-        will-change: transform;
-        direction: ltr;
-        padding: 0.5rem 0.75rem 0.75rem 0.75rem;
-        /* NO animation here — JS drives it with rAF */
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        align-items: stretch !important;
+        will-change: transform !important;
+        direction: ltr !important;
+        padding: 0.5rem 0.5rem 1rem 0.5rem !important;
       }
-      /* Individual book card */
+
+      /* Desktop (>768px): Overflow hidden for marquee clip */
+      @media (min-width: 769px) {
+        #marquee-viewport {
+          overflow: hidden !important;
+        }
+        #marquee-strip {
+          gap: 24px !important;
+        }
+        .mq-card {
+          width: 170px !important;
+        }
+      }
+
+      /* Mobile (<=768px): Native touch-swipe horizontal scroll */
+      @media (max-width: 768px) {
+        #marquee-showcase {
+          padding: 2rem 0.75rem 2.5rem 0.75rem !important;
+        }
+        #marquee-viewport {
+          overflow-x: auto !important;
+          overflow-y: hidden !important;
+          -webkit-overflow-scrolling: touch !important;
+          scroll-snap-type: x mandatory !important;
+          padding-bottom: 0.75rem !important;
+        }
+        #marquee-strip {
+          transform: none !important;
+          justify-content: flex-start !important;
+          gap: 16px !important;
+        }
+        .mq-card {
+          scroll-snap-align: start !important;
+          width: 145px !important;
+        }
+      }
+
+      /* Individual book card styling */
       .mq-card {
-        flex-shrink: 0;
-        width: 160px;
-        cursor: pointer;
-        background: rgba(255,255,255,0.92);
-        border-radius: 12px;
-        overflow: hidden;
-        border: 1px solid rgba(196,164,132,0.35);
-        box-shadow: 0 2px 12px rgba(74,24,16,0.08);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        direction: ltr;
-        text-align: center;
+        flex-shrink: 0 !important;
+        cursor: pointer !important;
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        overflow: hidden !important;
+        border: 1px solid rgba(196,164,132,0.3) !important;
+        box-shadow: 0 4px 16px rgba(74,24,16,0.08) !important;
+        transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+        direction: ltr !important;
+        text-align: left !important;
+        display: flex !important;
+        flex-direction: column !important;
+        box-sizing: border-box !important;
       }
       .mq-card:hover {
-        transform: translateY(-6px) scale(1.03);
-        box-shadow: 0 12px 32px rgba(74,24,16,0.16);
+        transform: translateY(-5px) !important;
+        box-shadow: 0 10px 28px rgba(74,24,16,0.15) !important;
       }
       .mq-card-img-wrap {
-        position: relative;
-        width: 100%;
-        height: 200px;
-        overflow: hidden;
-        background: #f0e8d8;
+        position: relative !important;
+        width: 100% !important;
+        height: 200px !important;
+        overflow: hidden !important;
+        background: #f8f6f0 !important;
       }
       .mq-card-img-wrap img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        display: block !important;
       }
       .mq-card-badge {
-        position: absolute;
-        top: 8px;
-        left: 8px;
-        background: linear-gradient(135deg, #d93829, #c5282a);
-        color: #fff;
-        font-size: 0.55rem;
-        font-weight: 800;
-        letter-spacing: 1.5px;
-        padding: 3px 10px;
-        border-radius: 6px;
-        text-transform: uppercase;
-        pointer-events: none;
+        position: absolute !important;
+        top: 8px !important;
+        left: 8px !important;
+        background: #5e2217 !important;
+        color: #fcf4cc !important;
+        font-size: 0.6rem !important;
+        font-weight: 800 !important;
+        letter-spacing: 1px !important;
+        padding: 3px 8px !important;
+        border-radius: 12px !important;
+        text-transform: uppercase !important;
+        pointer-events: none !important;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
       }
       .mq-card-body {
-        padding: 10px 10px 12px 10px;
+        padding: 10px 12px 12px 12px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        flex-grow: 1 !important;
       }
       .mq-card-title {
-        font-size: 0.82rem;
-        font-weight: 700;
-        color: #3b140d;
-        margin: 0 0 3px 0;
-        line-height: 1.3;
-        overflow: hidden;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
+        font-size: 0.88rem !important;
+        font-weight: 700 !important;
+        color: #3b140d !important;
+        margin: 0 0 3px 0 !important;
+        line-height: 1.25 !important;
+        overflow: hidden !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
       }
       .mq-card-author {
-        font-size: 0.72rem;
-        color: #7a5c52;
-        margin: 0 0 5px 0;
-        font-weight: 500;
+        font-size: 0.75rem !important;
+        color: #8d6e63 !important;
+        margin: 0 0 6px 0 !important;
+        font-weight: 500 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
       }
       .mq-card-price {
-        font-size: 0.78rem;
-        font-weight: 700;
-        color: #c5a059;
-        margin: 0 0 5px 0;
-      }
-      .mq-card-stock {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        font-size: 0.65rem;
-        font-weight: 600;
-        padding: 2px 8px;
-        border-radius: 6px;
+        font-size: 0.85rem !important;
+        font-weight: 800 !important;
+        color: #c5a059 !important;
+        margin-top: auto !important;
       }
     </style>
 
@@ -815,34 +844,25 @@
     (function() {
       'use strict';
 
-      var CARD_WIDTH = 160;    // px — must match .mq-card width
-      var CARD_GAP   = 20;     // px — must match #marquee-strip gap (1.25rem ≈ 20px)
-      var SPEED      = 0.6;    // pixels per frame at 60fps (~36px/s)
+      var SPEED      = 0.8;    // px per frame at 60fps
+      var showcase   = document.getElementById('marquee-showcase');
+      var viewport   = document.getElementById('marquee-viewport');
+      var strip      = document.getElementById('marquee-strip');
 
-      var showcase = document.getElementById('marquee-showcase');
-      var strip    = document.getElementById('marquee-strip');
-
-      var offset   = 0;      // current translateX offset (always negative, scrolls left)
-      var halfW    = 0;      // width of ONE set of cards (used for seamless reset)
-      var rafId    = null;
-      var paused   = false;
+      var offset      = 0;
+      var halfW       = 0;
+      var rafId       = null;
+      var paused      = false;
       var svgFallback = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNjAiIGhlaWdodD0iMjIwIiB2aWV3Qm94PSIwIDAgMTYwIDIyMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2YxZTZkMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNWUyMjE3IiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9ImJvbGQiPkdlbnRsZSBSZWFkZXJzPC90ZXh0Pjwvc3ZnPg==';
 
-      // ---- Pause on hover ----
-      var viewport = document.getElementById('marquee-viewport');
       if (viewport) {
         viewport.addEventListener('mouseenter', function() { paused = true; });
         viewport.addEventListener('mouseleave', function() { paused = false; });
-        // Touch support: pause while finger is on the strip
-        viewport.addEventListener('touchstart', function() { paused = true; }, { passive: true });
-        viewport.addEventListener('touchend',   function() { paused = false; }, { passive: true });
       }
 
-      // ---- rAF loop ----
       function tick() {
-        if (!paused) {
+        if (!paused && window.innerWidth > 768) {
           offset -= SPEED;
-          // When we've scrolled by exactly halfW, reset silently to 0
           if (halfW > 0 && offset <= -halfW) {
             offset += halfW;
           }
@@ -851,11 +871,8 @@
         rafId = requestAnimationFrame(tick);
       }
 
-      // ---- Build one card DOM element ----
       function makeCard(b, badgeText) {
         var id = 'cms_' + (b.slug || b.title || Math.random());
-        var isOut = (b.status || 'available').toLowerCase() === 'out of stock';
-        var stock = (b.stock !== undefined) ? Number(b.stock) : 10;
         var cover = (b.image || svgFallback);
         if (cover && cover.startsWith('/') && !cover.startsWith('//')) {
           cover = cover.substring(1);
@@ -882,41 +899,79 @@
         return div;
       }
 
-      // ---- Populate the strip with original + duplicate cards ----
+      // Deduplicate array of books by title/slug
+      function deduplicate(list) {
+        var seen = {};
+        var result = [];
+        (list || []).forEach(function(b) {
+          if (!b) return;
+          var key = String(b.slug || b.title || '').trim().toLowerCase();
+          if (key && !seen[key]) {
+            seen[key] = true;
+            result.push(b);
+          }
+        });
+        return result;
+      }
+
       function populateStrip(chosen, badgeText) {
         strip.innerHTML = '';
         offset = 0;
         strip.style.transform = 'translateX(0px)';
+        if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
 
-        // Build original set
-        var originals = chosen.map(function(b) { return makeCard(b, badgeText); });
-        // Build exact duplicate set
-        var dupes = chosen.map(function(b) { return makeCard(b, badgeText); });
+        var unique = deduplicate(chosen);
+        if (!unique.length) return;
 
-        originals.forEach(function(el) { strip.appendChild(el); });
-        dupes.forEach(function(el)     { strip.appendChild(el); });
+        var isMobile = window.innerWidth <= 768;
 
-        // halfW = width of one set: N cards × (CARD_WIDTH + GAP) - GAP (no trailing gap)
-        halfW = chosen.length * (CARD_WIDTH + CARD_GAP) - CARD_GAP;
-        // We'll recalculate after a frame so the browser has settled layout
-        requestAnimationFrame(function() {
-          // Measure actual rendered width if possible
-          var firstCard = strip.querySelector('.mq-card');
-          if (firstCard && chosen.length > 0) {
-            var rect = firstCard.getBoundingClientRect();
-            var actualCard = rect.width;
-            // gap is the difference between strip width and cards
-            halfW = chosen.length * (actualCard + CARD_GAP) - CARD_GAP;
-          }
-          if (!rafId) { rafId = requestAnimationFrame(tick); }
-        });
+        if (isMobile) {
+          // Mobile: Render ONLY unique cards once for native touch-swipe scrolling
+          unique.forEach(function(b) {
+            strip.appendChild(makeCard(b, badgeText));
+          });
+          return;
+        }
+
+        // Desktop: Check if total cards width is less than or greater than viewport width
+        var CARD_W = 170;
+        var CARD_G = 24;
+        var totalUniqueW = unique.length * (CARD_W + CARD_G) - CARD_G;
+        var viewportW = viewport ? viewport.clientWidth : window.innerWidth;
+
+        if (totalUniqueW < viewportW) {
+          // Cards fit on screen without overflowing: render unique cards once, centered cleanly
+          strip.style.justifyContent = 'center';
+          unique.forEach(function(b) {
+            strip.appendChild(makeCard(b, badgeText));
+          });
+        } else {
+          // Cards overflow: append duplicate set for continuous rAF marquee loop
+          strip.style.justifyContent = 'flex-start';
+          var originals = unique.map(function(b) { return makeCard(b, badgeText); });
+          var dupes     = unique.map(function(b) { return makeCard(b, badgeText); });
+
+          originals.forEach(function(el) { strip.appendChild(el); });
+          dupes.forEach(function(el)     { strip.appendChild(el); });
+
+          halfW = unique.length * (CARD_W + CARD_G);
+
+          requestAnimationFrame(function() {
+            var firstCard = strip.querySelector('.mq-card');
+            if (firstCard) {
+              var rect = firstCard.getBoundingClientRect();
+              if (rect.width > 0) {
+                halfW = unique.length * (rect.width + CARD_G);
+              }
+            }
+            if (!rafId) { rafId = requestAnimationFrame(tick); }
+          });
+        }
       }
 
-      // ---- Main render function ----
       function render(books, settings) {
         settings = settings || {};
 
-        // Hide showcase if disabled in CMS
         var showSlider = (settings.show_newest_slider !== false);
         if (!showSlider) {
           if (showcase) showcase.style.display = 'none';
@@ -946,22 +1001,20 @@
           if (badgeEl) badgeEl.innerHTML   = '<i class="fas fa-star"></i> NEW ARRIVALS';
         }
 
-        // Fallback if nothing resolved
         if (!chosen.length) {
           chosen = [
-            { title: 'وردية الليل',              author: 'ستيفن كينغ',         price: '2800', image: 'img/الهول.jpg',                      stock: 5  },
-            { title: 'منهجية السير الى الله',      author: 'عمر عبد الكافي',     price: '1900', image: 'img/منهجية السير الى الله.jpg',       stock: 12 },
-            { title: 'It Ends With Us',           author: 'Colleen Hoover',      price: '2400', image: 'img/it end with us.jpg',               stock: 2  },
-            { title: 'فتاة الياقة الزرقاء',        author: 'عمرو عبد الحميد',    price: '2100', image: 'img/فتاة الياقة الزرقاء.jpg',          stock: 8  },
-            { title: 'احببت وغدا',               author: 'عماد رشاد',           price: '1800', image: 'img/احببت وغدا.jpg',                    stock: 4  },
-            { title: 'مرتفعات ويذرنج',            author: 'إميلي برونتي',        price: '2200', image: 'img/مرتفعات ويذرنج.jpg',               stock: 1  }
+            { title: 'وردية الليل',              author: 'ستيفن كينغ',         price: '2800', image: 'img/الهول.jpg' },
+            { title: 'منهجية السير الى الله',      author: 'عمر عبد الكافي',     price: '1900', image: 'img/منهجية السير الى الله.jpg' },
+            { title: 'It Ends With Us',           author: 'Colleen Hoover',      price: '2400', image: 'img/it end with us.jpg' },
+            { title: 'فتاة الياقة الزرقاء',        author: 'عمرو عبد الحميد',    price: '2100', image: 'img/فتاة الياقة الزرقاء.jpg' },
+            { title: 'احببت وغدا',               author: 'عماد رشاد',           price: '1800', image: 'img/احببت وغدا.jpg' },
+            { title: 'مرتفعات ويذرنج',            author: 'إميلي برونتي',        price: '2200', image: 'img/مرتفعات ويذرنج.jpg' }
           ];
         }
 
         populateStrip(chosen, badgeText);
       }
 
-      // ---- Kick off: load data then render ----
       Promise.all([
         fetch('cms-books.json').then(function(r) { return r.json(); }).catch(function() { return null; }),
         fetch('settings.json').then(function(r)  { return r.json(); }).catch(function() { return null; })
@@ -975,38 +1028,8 @@
     </script>
 
 
-    <!-- Multi-Strip Genre Cards Section (hidden on pages 2+) -->
-    <div class="flex flex-col md:flex-row gap-4 md:gap-8 justify-center my-8 px-4" id="genre-cards-section">
-      <!-- Multi-Strip Card 1: Religious, Romance, Fiction -->
-      <div class="multi-strip-card">
-        <p class="strip-item" onclick="location.href='religious.html'">
-          <span class="strip-title">RELIGIOUS</span>
-          <img src="img/منهجية السير الى الله.jpg" alt="Religious Cover" class="strip-image" />
-        </p>
-        <p class="strip-item" onclick="location.href='romance.html'">
-          <span class="strip-title">ROMANCE</span>
-          <img src="img/it end with us.jpg" alt="Romance Cover" class="strip-image" />
-        </p>
-        <p class="strip-item" onclick="location.href='fiction.html'">
-          <span class="strip-title">FICTION</span>
-          <img src="img/فتاة الياقة الزرقاء.jpg" alt="Fiction Cover" class="strip-image" />
-        </p>
-      </div>
-      <!-- Multi-Strip Card 2: Development, Horror, Novels -->
-      <div class="multi-strip-card">
-        <p class="strip-item" onclick="location.href='development.html'">
-          <span class="strip-title">DEVELOPMENT</span>
-          <img src="img/احببت وغدا.jpg" alt="Development Cover" class="strip-image" />
-        </p>
-        <p class="strip-item" onclick="location.href='horror.html'">
-          <span class="strip-title">HORROR</span>
-          <img src="img/الهول.jpg" alt="Horror Cover" class="strip-image" />
-        </p>
-        <p class="strip-item" onclick="location.href='novels.html'">
-          <span class="strip-title">NOVELS</span>
-          <img src="img/مرتفعات ويذرنج.jpg" alt="Novels Cover" class="strip-image" />
-        </p>
-      </div>
+    <!-- Multi-Strip Genre Cards Section (Hidden to prevent overlap) -->
+    <div style="display: none !important;" id="genre-cards-section">
     </div>
     <!-- End Multi-Strip Genre Cards Section -->
 
@@ -1468,12 +1491,11 @@
       const page = parseInt(urlParams.get('page')) || 1;
       const heroSection = document.getElementById('hero-section');
       const genreSection = document.getElementById('genre-cards-section');
+      if (genreSection) genreSection.style.display = 'none';
       if (page >= 2) {
         if (heroSection) heroSection.style.display = 'none';
-        if (genreSection) genreSection.style.display = 'none';
       } else {
         if (heroSection) heroSection.style.display = '';
-        if (genreSection) genreSection.style.display = '';
       }
     }
 

@@ -2404,21 +2404,17 @@ body[lang="en"] {
   margin-bottom: 0.4rem;
 }
 .newest-books-title {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.8rem;
-  font-weight: 800;
+  font-family: 'Great Vibes', cursive;
+  font-size: 2rem;
   color: #5e2217;
-  margin: 0.25rem 0 0 0;
-  letter-spacing: 0.5px;
+  margin: 0;
 }
 .newest-books-track {
   display: flex !important;
   gap: 1.25rem !important;
-  animation: newestScroll 40s linear infinite !important;
+  animation: newestScroll 35s linear infinite !important;
   width: max-content !important;
   min-width: 100% !important;
-  min-height: 270px !important;
-  align-items: stretch !important;
   will-change: transform !important;
   -webkit-overflow-scrolling: touch !important;
 }
