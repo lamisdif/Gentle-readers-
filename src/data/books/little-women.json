@@ -1,9 +1,11 @@
 {
-  "title": "نساء صغيرات",
-  "author": "لويزا ماي ألكوت",
+  "draft": false,
   "price": 2200,
+  "author": "لويزا ماي ألكوت",
+  "featured": true,
   "status": "out of stock",
-  "description": "A classic coming-of-age story following the four March sisters - Meg, Jo, Beth, and Amy - as they navigate life, love, and personal growth during the Civil War era. This timeless tale explores themes of family, independence, and the challenges of growing up.",
+  "stock": 1,
+  "title": "نساء صغيرات جزئين",
   "image": "/images/uploads/image_2026-08-09_214918346.png",
-  "draft": false
+  "description": "A classic coming-of-age story following the four March sisters - Meg, Jo, Beth, and Amy - as they navigate life, love, and personal growth during the Civil War era. This timeless tale explores themes of family, independence, and the challenges of growing up."
 }
