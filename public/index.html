@@ -879,17 +879,28 @@
         }
         var price = b.price ? String(b.price) : '';
 
+        var isOut = (b.status || 'available').toLowerCase() === 'out of stock';
+        var statusClass = isOut ? 'mq-card-status stock-out' : 'mq-card-status stock-in';
+        var statusIcon  = isOut ? '\u2717' : '\u2713';
+        var statusEn    = isOut ? 'OUT OF STOCK' : 'IN STOCK';
+        var statusAr    = isOut ? '\u063a\u064a\u0631 \u0645\u062a\u0648\u0641\u0631' : '\u0645\u062a\u0648\u0641\u0631';
+
         var div = document.createElement('div');
         div.className = 'mq-card';
         div.innerHTML =
           '<div class="mq-card-img-wrap">' +
             '<img src="' + cover + '" alt="' + (b.title||'').replace(/"/g,'&quot;') + '"' +
-                 ' onerror="this.onerror=null;this.src=\'' + svgFallback + '\'">' +
+                 ' onerror="this.onerror=null;this.src=\'' + svgFallback + '\'"> ' +
             '<div class="mq-card-badge">' + badgeText + '</div>' +
           '</div>' +
           '<div class="mq-card-body">' +
             '<p class="mq-card-title">' + (b.title||'') + '</p>' +
             '<p class="mq-card-author">' + (b.author||'') + '</p>' +
+            '<div style="text-align:left;margin:5px 0 2px;">' +
+              '<span class="' + statusClass + '">' +
+                statusIcon + ' ' + statusEn + ' / ' + statusAr +
+              '</span>' +
+            '</div>' +
             (price ? '<p class="mq-card-price">' + price + ' DZD</p>' : '') +
           '</div>';
 
@@ -1162,6 +1173,11 @@
                         </div>
                         <p class="book-title">${b.title || ''}</p>
                         <p class="book-author">${b.author || ''}</p>
+                        <div style="text-align: center; margin: 5px 0;">
+                          <span class="book-status-badge ${isOutOfStock ? 'stock-out' : 'stock-in'}">
+                            ${isOutOfStock ? '&#10007; OUT OF STOCK / \u063a\u064a\u0631 \u0645\u062a\u0648\u0641\u0631' : '&#10003; IN STOCK / \u0645\u062a\u0648\u0641\u0631'}
+                          </span>
+                        </div>
                         ${price ? '<p class="book-price">Price: ' + price + ' DZD</p>' : '<p class="book-price"></p>'}
                       </div>
                       <div class="flip-book-card-back">

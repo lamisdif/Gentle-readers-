@@ -2563,3 +2563,105 @@ body[lang="en"] {
   }
 }
 /* END OF CALM LUXURY CSS */
+
+/* ============================================================
+   STOCK STATUS BADGES — site-wide
+   Used on: showcase cards (.mq-card), catalog cards (.card),
+            and the book detail page (.book-detail-status-badge)
+   ============================================================ */
+
+/* Base pill shape */
+.stock-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 10.5px;
+  font-weight: 900;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  unicode-bidi: plaintext; /* preserves mixed LTR/RTL text order */
+  line-height: 1.3;
+}
+
+/* IN STOCK — solid green */
+.stock-status-badge.stock-in {
+  color: #fff;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  border: none;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.30);
+}
+
+/* OUT OF STOCK — solid red */
+.stock-status-badge.stock-out {
+  color: #fff;
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  border: none;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.32);
+}
+
+/* Override the mq-card-status span used inside showcase cards */
+.mq-card-status {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 3px 10px !important;
+  border-radius: 50px !important;
+  font-size: 9.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+  unicode-bidi: plaintext !important;
+  line-height: 1.4 !important;
+}
+.mq-card-status.stock-in {
+  color: #fff !important;
+  background: linear-gradient(135deg, #16a34a, #15803d) !important;
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.28) !important;
+  border: none !important;
+}
+.mq-card-status.stock-out {
+  color: #fff !important;
+  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.30) !important;
+  border: none !important;
+}
+
+/* Catalog card status override */
+.book-status-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 3px 10px !important;
+  border-radius: 50px !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+  unicode-bidi: plaintext !important;
+}
+.book-status-badge.stock-in {
+  color: #fff !important;
+  background: linear-gradient(135deg, #16a34a, #15803d) !important;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.28) !important;
+  border: none !important;
+}
+.book-status-badge.stock-out {
+  color: #fff !important;
+  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.30) !important;
+  border: none !important;
+}
+
+
+/* RTL layout: ensure badge text stays readable in Arabic mode */
+[dir="rtl"] .stock-status-badge,
+[dir="rtl"] .mq-card-status,
+[dir="rtl"] .book-status-badge {
+  flex-direction: row-reverse;
+}
+
