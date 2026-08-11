@@ -862,18 +862,6 @@
         }
         var price = b.price ? String(b.price) : '';
 
-        var stockColor, stockBg, stockText;
-        if (isOut || stock <= 0) {
-          stockColor = '#dc2626'; stockBg = 'rgba(220,38,38,0.1)';
-          stockText  = '<i class="fas fa-times-circle"></i> Out of Stock';
-        } else if (stock <= 3) {
-          stockColor = '#b45309'; stockBg = 'rgba(245,158,11,0.12)';
-          stockText  = '<i class="fas fa-exclamation-triangle"></i> Only ' + stock + ' left!';
-        } else {
-          stockColor = '#15803d'; stockBg = 'rgba(22,163,74,0.1)';
-          stockText  = '<i class="fas fa-check-circle"></i> ' + stock + ' in stock';
-        }
-
         var div = document.createElement('div');
         div.className = 'mq-card';
         div.innerHTML =
@@ -886,7 +874,6 @@
             '<p class="mq-card-title">' + (b.title||'') + '</p>' +
             '<p class="mq-card-author">' + (b.author||'') + '</p>' +
             (price ? '<p class="mq-card-price">' + price + ' DZD</p>' : '') +
-            '<span class="mq-card-stock" style="color:' + stockColor + ';background:' + stockBg + '">' + stockText + '</span>' +
           '</div>';
 
         div.addEventListener('click', function() {
@@ -1152,7 +1139,6 @@
                         </div>
                         <p class="book-title">${b.title || ''}</p>
                         <p class="book-author">${b.author || ''}</p>
-                        <p class="book-status-badge" style="color: ${isOutOfStock ? '#dc2626' : (b.stock !== undefined && b.stock <= 3 ? '#b45309' : '#10b981')}; font-weight: bold; font-size: 12px; margin: 5px 0; text-align: center; background: ${isOutOfStock ? 'rgba(220,38,38,0.1)' : (b.stock !== undefined && b.stock <= 3 ? 'rgba(245,158,11,0.12)' : 'rgba(16,185,129,0.1)')}; padding: 2px 8px; border-radius: 12px; display: inline-block;">${isOutOfStock ? 'Out of Stock / نفدت الكمية' : (b.stock !== undefined && b.stock <= 3 ? '<i class="fas fa-exclamation-triangle" style="margin-right:3px"></i>Only ' + b.stock + ' left!' : (b.stock !== undefined ? b.stock + ' in stock' : 'Available / متوفر'))}</p>
                         ${price ? '<p class="book-price">Price: ' + price + ' DZD</p>' : '<p class="book-price"></p>'}
                       </div>
                       <div class="flip-book-card-back">

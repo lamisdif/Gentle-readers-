@@ -258,35 +258,15 @@
               };
             }
 
-            // Always show stock status badge
             const button = document.querySelector('.button');
-            const statusBadge = document.createElement('p');
-            statusBadge.className = 'book-status-badge';
-            if (book.inStock === false) {
-              statusBadge.style.color = '#dc2626';
-              statusBadge.style.background = 'rgba(220,38,38,0.1)';
-              statusBadge.textContent = 'Out of Stock / نفدت الكمية';
-              if (button) {
-                button.disabled = true;
-                button.style.backgroundColor = '#dc2626';
-                button.style.cursor = 'not-allowed';
-                button.style.opacity = '0.7';
-                button.innerHTML = '<span>Out of Stock / نفدت الكمية</span>';
-              }
-            } else {
-              statusBadge.style.color = '#10b981';
-              statusBadge.style.background = 'rgba(16,185,129,0.1)';
-              statusBadge.textContent = 'Available / متوفر';
+            if (book.inStock === false && button) {
+              button.disabled = true;
+              button.style.backgroundColor = '#dc2626';
+              button.style.cursor = 'not-allowed';
+              button.style.opacity = '0.7';
+              button.innerHTML = '<span>Out of Stock / نفدت الكمية</span>';
             }
-            statusBadge.style.fontWeight = 'bold';
-            statusBadge.style.textAlign = 'center';
-            statusBadge.style.margin = '10px 0';
-            statusBadge.style.padding = '4px 12px';
-            statusBadge.style.borderRadius = '12px';
-            statusBadge.style.display = 'inline-block';
-            if (button && button.parentNode) {
-              button.parentNode.insertBefore(statusBadge, button);
-            }
+
           } catch (error) {
             console.error("Error loading book:", error);
             const titleEl = document.getElementById("book-title");

@@ -19,8 +19,9 @@ collections:
       - { label: "Author", name: "author", widget: "string" }
       - { label: "Price", name: "price", widget: "number", valueType: "int" }
       - { label: "Stock Quantity / الكمية في المخزن", name: "stock", widget: "number", valueType: "int", default: 10 }
-      - { label: "Show in Marquee / عرض في الشريط المتحرك", name: "featured", widget: "boolean", default: false }
+      - { label: "Show in Showcase / عرض في الشريط المتحرك", name: "featured", widget: "boolean", default: false }
       - { label: "Status / الحالة", name: "status", widget: "select", options: ["available", "out of stock"], default: "available" }
+      - { label: "Date Added / تاريخ الإضافة", name: "date", widget: "datetime", required: false }
       - { label: "Description", name: "description", widget: "text" }
       - { label: "Image", name: "image", widget: "image", required: false }
       - { label: "Draft", name: "draft", widget: "boolean", default: false }
@@ -35,8 +36,6 @@ collections:
         label: "Homepage Settings"
         file: "src/data/settings.json"
         fields:
-          - { label: "Show Moving Grid (Newest Books)", name: "show_newest_slider", widget: "boolean", default: true }
-          - { label: "Number of Newest Books to Show", name: "newest_books_count", widget: "number", default: 10, valueType: "int" }
-          - { label: "Showcase Mode / وضع العرض", name: "showcase_mode", widget: "select", options: ["newest", "featured"], default: "newest" }
-
-
+          - { label: "Show Showcase Slider", name: "show_newest_slider", widget: "boolean", default: true }
+          - { label: "Number of Books in Showcase", name: "newest_books_count", widget: "number", default: 10, valueType: "int" }
+          - { label: "Showcase Mode / وضع العرض", name: "showcase_mode", widget: "select", options: ["newest", "featured"], default: "featured" }
