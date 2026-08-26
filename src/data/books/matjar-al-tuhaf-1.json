@@ -1,9 +1,11 @@
 {
-  "title": "متجر التحف القديم 1/2",
-  "author": "تشارلز ديكنز",
+  "draft": false,
   "price": 3200,
-  "status": "available",
-  "description": "الجزء الأول من \\\"متجر التحف القديم\\\".",
+  "author": "تشارلز ديكنز",
+  "featured": false,
+  "status": "out of stock",
+  "stock": 0,
+  "title": "متجر التحف القديم 1/2",
   "image": "img/متجر التحف القديم.png",
-  "draft": false
+  "description": "الجزء الأول من \\\"متجر التحف القديم\\\"."
 }
