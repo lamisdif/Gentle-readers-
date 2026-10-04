@@ -1,4 +1,9 @@
 {
+  "discount": [
+    {
+      "discount_price": 1350
+    }
+  ],
   "draft": false,
   "price": 1500,
   "author": "الان دو بوتون",
