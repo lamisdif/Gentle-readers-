@@ -1,6 +1,11 @@
 {
+  "discount": [
+    {
+      "discount_price": 1000
+    }
+  ],
   "draft": false,
-  "price": 1199,
+  "price": 1200,
   "author": "عماد رشاد عثمان",
   "featured": true,
   "status": "available",
