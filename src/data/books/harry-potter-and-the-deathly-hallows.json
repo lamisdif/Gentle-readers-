@@ -9,7 +9,7 @@
   "draft": false,
   "price": 2800,
   "author": "J K rowling",
-  "featured": false,
+  "featured": true,
   "status": "available",
   "stock": 1,
   "title": "Harry potter and the deathly hallows",
