@@ -1,9 +1,16 @@
 {
-  "title": "دار خولة",
+  "discount": [
+    {
+      "discount_price": 1350
+    }
+  ],
+  "draft": false,
+  "price": 1500,
   "author": "بثينة العيسى",
-  "price": 1300,
+  "featured": true,
   "status": "available",
-  "description": "رواية \\\"دار خولة\\\" لبثينة العيسى.",
+  "stock": 1,
+  "title": "دار خولة",
   "image": "img/دار خولة.png",
-  "draft": false
+  "description": "رواية \\\"دار خولة\\\" لبثينة العيسى."
 }
