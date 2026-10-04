@@ -1,4 +1,9 @@
 {
+  "discount": [
+    {
+      "discount_price": 2580
+    }
+  ],
   "draft": false,
   "price": 2900,
   "author": "لورا بيرسون",
