@@ -284,6 +284,11 @@
         genre: book.genre || '',
         cover: book.cover || '',
         price: book.price || '',
+        original_price: book.original_price,
+        discount_price: book.discount_price,
+        has_discount: book.has_discount,
+        discount_label: book.discount_label,
+        discount_percentage: book.discount_percentage,
         summary: book.description || book.description_ar || '',
         inStock: book.inStock !== false
       }));
@@ -319,10 +324,34 @@
             : "position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200;";
           const buttonTitle = isOutOfStock ? 'title="Out of Stock / نفدت الكمية"' : '';
           const buttonDisabled = isOutOfStock ? 'disabled' : '';
+
+          let priceHtml = '';
+          if (book.has_discount && book.original_price && book.discount_price) {
+            const origStr = Number(book.original_price).toLocaleString();
+            const discStr = Number(book.discount_price).toLocaleString();
+            const label = book.discount_label || `-${book.discount_percentage}%`;
+            priceHtml = `
+              <p class="book-price has-discount" style="display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap;">
+                <span class="price-original" style="text-decoration:line-through; color:#9ca3af; font-size:0.85em;">${origStr} DZD</span>
+                <span class="price-discount" style="font-weight:700; color:#dc2626;">${discStr} DZD</span>
+                ${label ? `<span class="discount-badge-pill" style="background:#dc2626; color:#fff; font-size:0.7rem; font-weight:700; padding:1px 6px; border-radius:4px;">${label}</span>` : ''}
+              </p>
+            `;
+          } else if (book.price) {
+            const formatted = !isNaN(Number(book.price)) ? Number(book.price).toLocaleString() : book.price;
+            priceHtml = `<p class="book-price">Price: ${formatted} DZD</p>`;
+          } else {
+            priceHtml = `<p class="book-price"></p>`;
+          }
+
+          const discountBadgeTag = (book.has_discount && book.discount_label)
+            ? `<div class="card-discount-badge" style="position:absolute; top:8px; left:8px; background:linear-gradient(135deg, #dc2626, #991b1b); color:#fff; font-size:0.72rem; font-weight:800; padding:3px 8px; border-radius:6px; z-index:210; box-shadow:0 2px 8px rgba(0,0,0,0.25);">${book.discount_label}</div>`
+            : '';
           
           resultsList.innerHTML += `
             <div class="item" style="--position: 1">
               <div class="card" onclick="openBook('${book.id}')" style="cursor: pointer; position: relative; z-index: 100;">
+                ${discountBadgeTag}
                 <button class="add-to-cart-btn" onclick="addToCartFromCard('${book.id}', event)" style="${buttonStyle}" ${buttonTitle} ${buttonDisabled}>
                   <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
                     <title>icon-cart</title>
@@ -339,7 +368,7 @@
                       <p class="book-title">${book.title}</p>
                       <p class="book-author">${book.author}</p>
                       <p class="book-status-badge" style="color: ${isOutOfStock ? '#dc2626' : '#10b981'}; font-weight: bold; font-size: 13px; margin: 5px 0; text-align: center; background: ${isOutOfStock ? 'rgba(220,38,38,0.1)' : 'rgba(16,185,129,0.1)'}; padding: 2px 8px; border-radius: 12px; display: inline-block;">${isOutOfStock ? 'Out of Stock / نفدت الكمية' : 'Available / متوفر'}</p>
-                      <p class="book-price">${book.price ? 'Price: ' + book.price : ''}</p>
+                      ${priceHtml}
                     </div>
                     <div class="flip-book-card-back">
                       <div class="flip-book-card-back-content">
@@ -386,13 +415,23 @@
             cmsBooks.forEach(function (b) {
               const id = 'cms_' + (b.slug || b.title || '');
               if (!id.trim()) return;
+              const hasDiscount = Boolean(b.has_discount || (b.discount_price && b.original_price && Number(b.discount_price) < Number(b.original_price)));
+              const effectivePrice = hasDiscount ? (b.discount_price || b.price) : b.price;
+              const originalPrice = hasDiscount ? (b.original_price || b.price) : b.price;
+              const discountLabel = hasDiscount ? (b.discount_label || (b.discount_percentage ? '-' + b.discount_percentage + '%' : 'SALE')) : '';
+
               books[id] = {
                 title: b.title || '',
                 author: b.author || '',
                 description: b.description || '',
                 description_ar: b.description || '',
                 cover: b.image || '',
-                price: b.price ? String(b.price) : '',
+                price: effectivePrice ? String(effectivePrice) : '',
+                original_price: originalPrice,
+                discount_price: effectivePrice,
+                has_discount: hasDiscount,
+                discount_label: discountLabel,
+                discount_percentage: b.discount_percentage,
                 inStock: (b.status || 'available').toLowerCase() !== 'out of stock'
               };
             });

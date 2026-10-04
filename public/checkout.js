@@ -16,11 +16,20 @@ async function mergeCmsBooksIntoCheckout() {
     if (Array.isArray(data)) {
       data.forEach(b => {
         const id = 'cms_' + (b.slug || b.title || '');
+        const hasDiscount = Boolean(b.has_discount || (b.discount_price && b.original_price && Number(b.discount_price) < Number(b.original_price)));
+        const effectivePrice = hasDiscount ? (b.discount_price || b.price) : b.price;
+        const originalPrice = hasDiscount ? (b.original_price || b.price) : b.price;
+        const discountLabel = hasDiscount ? (b.discount_label || (b.discount_percentage ? '-' + b.discount_percentage + '%' : '')) : '';
+
         books[id] = {
-          title: b.title || '',
-          author: b.author || '',
-          price: b.price ? String(b.price) : '',
-          inStock: (b.status || 'available').toLowerCase() !== 'out of stock'
+          title:          b.title          || '',
+          author:         b.author         || '',
+          price:          effectivePrice   ? String(effectivePrice) : '',
+          original_price: originalPrice,
+          discount_price: effectivePrice,
+          has_discount:   hasDiscount,
+          discount_label: discountLabel,
+          inStock:        (b.status || 'available').toLowerCase() !== 'out of stock'
         };
       });
     }
@@ -89,10 +98,14 @@ function loadOrderSummary() {
     const lineTotal = price * qty;
     subtotal += lineTotal;
 
+    const discountTag = (book.has_discount && book.discount_label)
+      ? `<span style="background:rgba(220,38,38,0.1); color:#dc2626; font-size:0.75rem; font-weight:700; padding:1px 5px; border-radius:4px; margin-left:4px;">${book.discount_label}</span>`
+      : '';
+
     const itemDiv = document.createElement("div");
     itemDiv.className = "book-item";
     itemDiv.innerHTML = `
-      <span>${getBookTitle(book, lang)}</span>
+      <span>${getBookTitle(book, lang)}${discountTag}</span>
       <div class="qty-controls">
         <button type="button" class="qty-btn qty-dec" data-id="${bookId}">−</button>
         <span class="qty">${qty}</span>

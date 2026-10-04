@@ -1,12 +1,322 @@
 <!doctype html>
-<html>
+<html lang="ar">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Content Manager</title>
+  <title>GentleReaders - Content Manager</title>
+  <style>
+    /* Clean styling enhancements for Decap CMS editor */
+    [class*="ControlPaneContainer"] [class*="FieldLabel"] {
+      font-weight: 600;
+    }
+    
+    /* Highlight the discount section */
+    div[data-slate-editor="false"],
+    [class*="ListControl"] {
+      border-radius: 8px;
+    }
+
+    /* Live calculation badge in CMS */
+    .cms-discount-live-box {
+      margin: 12px 0;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      font-size: 13px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .cms-discount-live-box strong {
+      color: #dc2626;
+      font-weight: 700;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+
+  <script>
+    // ── Live Discount Percentage & Preview Helper ────────────────────────────
+    (function () {
+      function setReactValue(input, val) {
+        if (!input) return;
+        const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+        if (nativeSetter) {
+          nativeSetter.call(input, val);
+        } else {
+          input.value = val;
+        }
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+
+      function findInputByName(container, name) {
+        return container.querySelector(`input[id*="${name}"], input[name*="${name}"]`);
+      }
+
+      function handleDiscountInputs() {
+        // Find inputs in current document
+        const inputs = Array.from(document.querySelectorAll('input'));
+        
+        // Find root price input
+        const rootPriceInput = inputs.find(i => {
+          const id = (i.id || '').toLowerCase();
+          return (id.includes('field-price') || id.endsWith('-price')) && !id.includes('discount');
+        });
+
+        // Find discount fields
+        const origPriceInput = inputs.find(i => (i.id || '').toLowerCase().includes('original_price'));
+        const discPriceInput = inputs.find(i => (i.id || '').toLowerCase().includes('discount_price'));
+        const percentageInput = inputs.find(i => (i.id || '').toLowerCase().includes('percentage'));
+        const labelInput = inputs.find(i => {
+          const id = (i.id || '').toLowerCase();
+          return id.includes('discount') && id.includes('label');
+        });
+
+        if (!discPriceInput) {
+          // Remove helper box if discount section was removed
+          const existingBox = document.getElementById('cms-discount-helper-box');
+          if (existingBox) existingBox.remove();
+          return;
+        }
+
+        const discVal = parseFloat(discPriceInput.value);
+        let origVal = origPriceInput ? parseFloat(origPriceInput.value) : NaN;
+
+        // If original price is not filled in discount, fall back to root book price
+        if (isNaN(origVal) && rootPriceInput) {
+          origVal = parseFloat(rootPriceInput.value);
+        }
+
+        // Parent container to attach live info box
+        const parentSection = discPriceInput.closest('[class*="ListItem"], [class*="ObjectControl"], [class*="ControlPane"]') || discPriceInput.parentElement;
+
+        let helperBox = document.getElementById('cms-discount-helper-box');
+        if (!helperBox && parentSection) {
+          helperBox = document.createElement('div');
+          helperBox.id = 'cms-discount-helper-box';
+          helperBox.className = 'cms-discount-live-box';
+          discPriceInput.parentElement.insertAdjacentElement('afterend', helperBox);
+        }
+
+        if (!isNaN(discVal) && discVal > 0 && !isNaN(origVal) && origVal > discVal) {
+          const calculatedPct = Math.round(((origVal - discVal) / origVal) * 100);
+          const savings = origVal - discVal;
+
+          // Auto-fill percentage field if empty or auto-managed
+          if (percentageInput && (!percentageInput.value || percentageInput.dataset.autoManaged === 'true')) {
+            if (percentageInput.value !== String(calculatedPct)) {
+              percentageInput.dataset.autoManaged = 'true';
+              setReactValue(percentageInput, calculatedPct);
+            }
+          }
+
+          // Auto-fill label if empty
+          if (labelInput && (!labelInput.value || labelInput.dataset.autoManaged === 'true')) {
+            const autoLabel = `-${calculatedPct}%`;
+            if (labelInput.value !== autoLabel) {
+              labelInput.dataset.autoManaged = 'true';
+              setReactValue(labelInput, autoLabel);
+            }
+          }
+
+          if (helperBox) {
+            helperBox.innerHTML = `
+              <span>🏷️</span>
+              <span>
+                <strong>خصم ${calculatedPct}%</strong> (توفير ${savings.toLocaleString()} دج)
+                &nbsp;|&nbsp;
+                السعر الأصلي: <s>${origVal.toLocaleString()} دج</s> ➔ السعر المخفض: <strong>${discVal.toLocaleString()} دج</strong>
+              </span>
+            `;
+            helperBox.style.display = 'flex';
+          }
+        } else if (!isNaN(discVal) && discVal > 0) {
+          if (helperBox) {
+            helperBox.innerHTML = `
+              <span>⚠️</span>
+              <span>تنبيه: أدخل السعر الأصلي أو تأكد أن سعر التخفيض (${discVal.toLocaleString()} دج) أقل من السعر العادي (${isNaN(origVal) ? 'غير محدد' : origVal.toLocaleString() + ' دج'}).</span>
+            `;
+            helperBox.style.display = 'flex';
+          }
+        } else {
+          if (helperBox) {
+            helperBox.style.display = 'none';
+          }
+        }
+      }
+
+      // Mark manual inputs so user can override auto-calculations if desired
+      document.addEventListener('input', function (e) {
+        if (!e.target || !e.target.id) return;
+        const id = e.target.id.toLowerCase();
+        if (id.includes('percentage') || (id.includes('discount') && id.includes('label'))) {
+          // If the user manually edited this field, stop overwriting it
+          e.target.dataset.autoManaged = 'false';
+        }
+        handleDiscountInputs();
+      });
+
+      // Periodically check in case Decap CMS re-renders components
+      setInterval(handleDiscountInputs, 1000);
+    })();
+
+    // ── Register Decap CMS Book Preview ──────────────────────────────────────
+    if (window.CMS) {
+      try {
+        const BookPreview = window.createReactClass({
+          render: function () {
+            const entry = this.props.entry;
+            const title = entry.getIn(['data', 'title']) || 'عنوان الكتاب';
+            const author = entry.getIn(['data', 'author']) || 'اسم المؤلف';
+            const normalPrice = entry.getIn(['data', 'price']) || 0;
+            const stock = entry.getIn(['data', 'stock']) ?? 10;
+            const status = entry.getIn(['data', 'status']) || 'available';
+            const description = entry.getIn(['data', 'description']) || '';
+            const image = this.props.getAsset(entry.getIn(['data', 'image']));
+
+            // Discount
+            const discountList = entry.getIn(['data', 'discount']);
+            let discData = null;
+            if (discountList && discountList.size > 0) {
+              discData = discountList.get(0);
+            } else if (discountList && typeof discountList.toJS === 'function') {
+              const js = discountList.toJS();
+              if (Array.isArray(js) && js.length > 0) discData = js[0];
+              else if (typeof js === 'object' && js.discount_price) discData = js;
+            }
+
+            let hasDiscount = false;
+            let origPrice = normalPrice;
+            let salePrice = normalPrice;
+            let discountPct = 0;
+            let discountLabel = '';
+
+            if (discData) {
+              const dPrice = typeof discData.get === 'function' ? discData.get('discount_price') : discData.discount_price;
+              const oPrice = typeof discData.get === 'function' ? discData.get('original_price') : discData.original_price;
+              const pct = typeof discData.get === 'function' ? discData.get('percentage') : discData.percentage;
+              const lbl = typeof discData.get === 'function' ? discData.get('label') : discData.label;
+
+              if (dPrice) {
+                hasDiscount = true;
+                salePrice = Number(dPrice);
+                origPrice = Number(oPrice) || Number(normalPrice);
+                discountPct = Number(pct) || (origPrice > salePrice ? Math.round(((origPrice - salePrice) / origPrice) * 100) : 0);
+                discountLabel = lbl || (discountPct ? `-${discountPct}%` : 'تخفيض');
+              }
+            }
+
+            const isOut = status === 'out of stock';
+
+            return window.h(
+              'div',
+              {
+                style: {
+                  fontFamily: 'system-ui, -apple-system, sans-serif',
+                  padding: '24px',
+                  maxWidth: '480px',
+                  margin: '20px auto',
+                  background: '#fcf8d5',
+                  borderRadius: '16px',
+                  boxShadow: '0 8px 30px rgba(0,0,0,0.1)',
+                  color: '#5e2217',
+                  textAlign: 'center'
+                }
+              },
+              image
+                ? window.h('div', { style: { position: 'relative', display: 'inline-block', marginBottom: '16px' } },
+                    window.h('img', {
+                      src: image.toString(),
+                      style: { maxWidth: '220px', maxHeight: '300px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', display: 'block' }
+                    }),
+                    hasDiscount
+                      ? window.h('span', {
+                          style: {
+                            position: 'absolute',
+                            top: '8px',
+                            left: '8px',
+                            background: 'linear-gradient(135deg, #dc2626, #991b1b)',
+                            color: '#fff',
+                            fontSize: '12px',
+                            fontWeight: '800',
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.3)'
+                          }
+                        }, discountLabel)
+                      : null
+                  )
+                : null,
+              window.h('h2', { style: { margin: '0 0 6px 0', fontSize: '24px', fontWeight: '800' } }, title),
+              window.h('p', { style: { margin: '0 0 14px 0', color: '#8d6e63', fontSize: '15px' } }, author),
+              
+              // Price display
+              window.h('div', {
+                style: {
+                  margin: '12px 0 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '10px'
+                }
+              },
+                hasDiscount
+                  ? [
+                      window.h('span', { style: { textDecoration: 'line-through', color: '#9ca3af', fontSize: '16px', fontWeight: '500' } }, `${Number(origPrice).toLocaleString()} DZD`),
+                      window.h('span', { style: { color: '#dc2626', fontSize: '22px', fontWeight: '800' } }, `${Number(salePrice).toLocaleString()} DZD`),
+                      window.h('span', {
+                        style: {
+                          background: '#dc2626',
+                          color: '#fff',
+                          fontSize: '11px',
+                          fontWeight: '800',
+                          padding: '2px 8px',
+                          borderRadius: '12px'
+                        }
+                      }, discountLabel)
+                    ]
+                  : [
+                      window.h('span', { style: { color: '#dc2626', fontSize: '20px', fontWeight: '700' } }, `${Number(normalPrice).toLocaleString()} DZD`)
+                    ]
+              ),
+
+              // Stock Status
+              window.h('span', {
+                style: {
+                  display: 'inline-block',
+                  padding: '4px 14px',
+                  borderRadius: '20px',
+                  fontSize: '12px',
+                  fontWeight: '700',
+                  color: isOut ? '#dc2626' : '#15803d',
+                  background: isOut ? 'rgba(220,38,38,0.1)' : 'rgba(22,163,74,0.1)',
+                  marginBottom: '16px'
+                }
+              }, isOut ? '✗ OUT OF STOCK' : '✓ IN STOCK'),
+
+              // Description
+              description ? window.h('p', { style: { textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#4a3b32', marginTop: '16px' } }, description) : null
+            );
+          }
+        });
+
+        window.CMS.registerPreviewTemplate('books', BookPreview);
+      } catch (e) {
+        console.warn('CMS preview template registration error:', e);
+      }
+    }
+  </script>
 </body>
 </html>
-

@@ -15,16 +15,28 @@ collections:
     extension: "json"
     slug: "{{slug}}"
     fields:
-      - { label: "Title", name: "title", widget: "string" }
-      - { label: "Author", name: "author", widget: "string" }
-      - { label: "Price", name: "price", widget: "number", valueType: "int" }
+      - { label: "Title / العنوان", name: "title", widget: "string" }
+      - { label: "Author / المؤلف", name: "author", widget: "string" }
+      - { label: "Price / السعر العادي", name: "price", widget: "number", valueType: "int", hint: "السعر الأساسي للكتاب بالدينار الجزائري (DZD)" }
+      - label: "Discount / تخفيض السعر (اختياري)"
+        name: "discount"
+        widget: "list"
+        max: 1
+        required: false
+        label_singular: "Discount Info / تفاصيل التخفيض"
+        summary: "خصم: {{fields.discount_price}} DZD ({{fields.percentage}}%)"
+        fields:
+          - { label: "Original Price (Old Price) / السعر الأصلي قبل التخفيض", name: "original_price", widget: "number", valueType: "int", required: false, hint: "اتركه فارغاً ليتم استخدام السعر العادي أعلاه تلقائياً" }
+          - { label: "Discount Price (Sale Price) / السعر المخفض الجديد", name: "discount_price", widget: "number", valueType: "int", required: true, hint: "سعر البيع المخفض الذي سيظهر للزبون" }
+          - { label: "Discount Percentage / نسبة التخفيض (%)", name: "percentage", widget: "number", valueType: "int", required: false, hint: "يتم حسابها تلقائياً من السعرين إذا تركت فارغة" }
+          - { label: "Discount Label / شارة أو نص التخفيض", name: "label", widget: "string", required: false, hint: "اختياري، مثلاً: 'خصم 20%' أو 'تخفيض' (إذا تركت فارغة سيظهر -X% تلقائياً)" }
       - { label: "Stock Quantity / الكمية في المخزن", name: "stock", widget: "number", valueType: "int", default: 10 }
       - { label: "Show in Showcase / عرض في الشريط المتحرك", name: "featured", widget: "boolean", default: false }
       - { label: "Status / الحالة", name: "status", widget: "select", options: ["available", "out of stock"], default: "available" }
       - { label: "Date Added / تاريخ الإضافة", name: "date", widget: "datetime", required: false }
-      - { label: "Description", name: "description", widget: "text" }
-      - { label: "Image", name: "image", widget: "image", required: false }
-      - { label: "Draft", name: "draft", widget: "boolean", default: false }
+      - { label: "Description / الوصف", name: "description", widget: "text" }
+      - { label: "Image / صورة الغلاف", name: "image", widget: "image", required: false }
+      - { label: "Draft / مسودة", name: "draft", widget: "boolean", default: false }
 
   - name: "settings"
     label: "Settings / الإعدادات"

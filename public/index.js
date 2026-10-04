@@ -246,6 +246,10 @@ function setLanguage(lang) {
   // Book price labels - with error handling
   try {
     document.querySelectorAll('.book-price').forEach(function(el) {
+      if (el.classList.contains('has-discount')) {
+        // Leave the rich discounted markup with strikethrough and badge intact
+        return;
+      }
       var priceSource = el.dataset.price || el.textContent;
       var priceMatch = priceSource ? priceSource.match(/\d+[\d,.]*/) : null;
       var currency = el.dataset.currency ? el.dataset.currency.trim() : '';

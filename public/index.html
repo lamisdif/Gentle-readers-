@@ -885,6 +885,27 @@
         var statusEn    = isOut ? 'OUT OF STOCK' : 'IN STOCK';
         var statusAr    = isOut ? '\u063a\u064a\u0631 \u0645\u062a\u0648\u0641\u0631' : '\u0645\u062a\u0648\u0641\u0631';
 
+        var hasDisc   = Boolean(b.has_discount || (b.discount_price && b.original_price && Number(b.discount_price) < Number(b.original_price)));
+        var discPrice = hasDisc ? (b.discount_price || b.price) : null;
+        var origPrice = hasDisc ? (b.original_price || b.price) : null;
+        var discLabel = hasDisc ? (b.discount_label || (b.discount_percentage ? '-' + b.discount_percentage + '%' : 'SALE')) : '';
+
+        var priceHtml = '';
+        if (hasDisc && discPrice && origPrice) {
+          priceHtml = '<p class="mq-card-price has-discount">' +
+                        '<span class="mq-price-original">' + Number(origPrice).toLocaleString() + ' DZD</span>' +
+                        '<span class="mq-price-discount">' + Number(discPrice).toLocaleString() + ' DZD</span>' +
+                        (discLabel ? '<span class="mq-discount-pill">' + discLabel + '</span>' : '') +
+                      '</p>';
+        } else if (price) {
+          var formattedPrice = !isNaN(Number(price)) ? Number(price).toLocaleString() : price;
+          priceHtml = '<p class="mq-card-price">' + formattedPrice + ' DZD</p>';
+        }
+
+        var discountBadgeHtml = (hasDisc && discLabel)
+          ? '<div class="mq-card-discount-badge">' + discLabel + '</div>'
+          : '';
+
         var div = document.createElement('div');
         div.className = 'mq-card';
         div.innerHTML =
@@ -892,6 +913,7 @@
             '<img src="' + cover + '" alt="' + (b.title||'').replace(/"/g,'&quot;') + '"' +
                  ' onerror="this.onerror=null;this.src=\'' + svgFallback + '\'"> ' +
             '<div class="mq-card-badge">' + badgeText + '</div>' +
+            discountBadgeHtml +
           '</div>' +
           '<div class="mq-card-body">' +
             '<p class="mq-card-title">' + (b.title||'') + '</p>' +
@@ -901,7 +923,7 @@
                 statusIcon + ' ' + statusEn + ' / ' + statusAr +
               '</span>' +
             '</div>' +
-            (price ? '<p class="mq-card-price">' + price + ' DZD</p>' : '') +
+            priceHtml +
           '</div>';
 
         div.addEventListener('click', function() {
@@ -1143,7 +1165,11 @@
               books.forEach((b, index) => {
                 const id = 'cms_' + (b.slug || b.title);
                 const isOutOfStock = (b.status || 'available').toLowerCase() === 'out of stock';
-                const price = b.price ? String(b.price) : '';
+                const hasDiscount = Boolean(b.has_discount || (b.discount_price && b.original_price && Number(b.discount_price) < Number(b.original_price)));
+                const effectivePrice = hasDiscount ? (b.discount_price || b.price) : b.price;
+                const originalPrice = hasDiscount ? (b.original_price || b.price) : b.price;
+                const discountLabel = hasDiscount ? (b.discount_label || (b.discount_percentage ? '-' + b.discount_percentage + '%' : 'SALE')) : '';
+                const price = effectivePrice ? String(effectivePrice) : '';
                 const cover = b.image || 'https://placehold.co/200x280/ccc/666?text=Cover';
 
                 const buttonStyle = isOutOfStock
@@ -1152,7 +1178,36 @@
                 const buttonDisabled = isOutOfStock ? 'disabled' : '';
 
                 window.books = window.books || {};
-                window.books[id] = { title: b.title, author: b.author, inStock: !isOutOfStock, price: price };
+                window.books[id] = {
+                  title: b.title,
+                  author: b.author,
+                  inStock: !isOutOfStock,
+                  price: price,
+                  originalPrice: originalPrice,
+                  discountPrice: effectivePrice,
+                  hasDiscount: hasDiscount,
+                  discountLabel: discountLabel,
+                  discountPercentage: b.discount_percentage
+                };
+
+                let priceHtml = '';
+                if (hasDiscount && originalPrice && effectivePrice) {
+                  priceHtml = `
+                    <p class="book-price has-discount" data-original="${originalPrice}" data-discount="${effectivePrice}">
+                      <span class="price-original">${Number(originalPrice).toLocaleString()} DZD</span>
+                      <span class="price-discount">${Number(effectivePrice).toLocaleString()} DZD</span>
+                      ${discountLabel ? `<span class="discount-badge-pill">${discountLabel}</span>` : ''}
+                    </p>
+                  `;
+                } else if (price) {
+                  priceHtml = `<p class="book-price" data-price="${price}">Price: ${Number(price).toLocaleString()} DZD</p>`;
+                } else {
+                  priceHtml = `<p class="book-price"></p>`;
+                }
+
+                const discountBadgeTag = (hasDiscount && discountLabel)
+                  ? `<div class="card-discount-badge">${discountLabel}</div>`
+                  : '';
 
                 const item = document.createElement('div');
                 item.className = 'item hidden'; // hidden by default for pagination
@@ -1160,6 +1215,7 @@
 
                 item.innerHTML = `
                 <div class="card" onclick="openBook('${id}')" style="cursor: pointer; position: relative; z-index: 100;">
+                  ${discountBadgeTag}
                   <button class="add-to-cart-btn" onclick="addToCartFromCard('${id}', event)" style="${buttonStyle}" ${buttonDisabled}>
                     <svg class="icon-cart" viewBox="0 0 24.38 30.52" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
                       <path transform="translate(-3.62 -0.85)" d="M28,27.3,26.24,7.51a.75.75,0,0,0-.76-.69h-3.7a6,6,0,0,0-12,0H6.13a.76.76,0,0,0-.76.69L3.62,27.3v.07a4.29,4.29,0,0,0,4.52,4H23.48a4.29,4.29,0,0,0,4.52-4ZM15.81,2.37a4.47,4.47,0,0,1,4.46,4.45H11.35a4.47,4.47,0,0,1,4.46-4.45Zm7.67,27.48H8.13a2.79,2.79,0,0,1-3-2.45L6.83,8.34h3V11a.76.76,0,0,0,1.52,0V8.34h8.92V11a.76.76,0,0,0,1.52,0V8.34h3L26.48,27.4a2.79,2.79,0,0,1-3,2.44Zm0,0"></path>
@@ -1178,7 +1234,7 @@
                             ${isOutOfStock ? '&#10007; OUT OF STOCK / \u063a\u064a\u0631 \u0645\u062a\u0648\u0641\u0631' : '&#10003; IN STOCK / \u0645\u062a\u0648\u0641\u0631'}
                           </span>
                         </div>
-                        ${price ? '<p class="book-price">Price: ' + price + ' DZD</p>' : '<p class="book-price"></p>'}
+                        ${priceHtml}
                       </div>
                       <div class="flip-book-card-back">
                         <div class="flip-book-card-back-content">

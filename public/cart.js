@@ -105,8 +105,16 @@ function renderCart() {
     const priceDisplay = !isNaN(priceNum)
       ? `${(priceNum * qty).toLocaleString()} DZD`
       : 'Price unavailable';
+    const isDiscounted = Boolean(book.has_discount && book.original_price && book.discount_price);
+    const origNum = parsePrice(book.original_price);
+    const origDisplay = (isDiscounted && !isNaN(origNum))
+      ? `<span style="text-decoration:line-through; color:#9ca3af; font-size:0.8rem; margin-right:6px;">${origNum.toLocaleString()} DZD</span>`
+      : '';
+    const discountBadge = (isDiscounted && book.discount_label)
+      ? `<span style="background:rgba(220,38,38,0.1); color:#dc2626; font-size:0.75rem; font-weight:700; padding:1px 6px; border-radius:4px; margin-left:6px;">${book.discount_label}</span>`
+      : '';
     const unitPrice = !isNaN(priceNum)
-      ? `${priceNum.toLocaleString()} DZD each`
+      ? `${origDisplay}${priceNum.toLocaleString()} DZD each${discountBadge}`
       : '';
     const inStockBadge = book.inStock === false
       ? `<span style="color:#dc2626;font-size:12px;margin-left:8px;">Out of Stock</span>`
@@ -164,11 +172,20 @@ window.addEventListener('load', function () {
       if (Array.isArray(books)) {
         books.forEach(b => {
           const id = 'cms_' + (b.slug || b.title || '');
+          const hasDiscount = Boolean(b.has_discount || (b.discount_price && b.original_price && Number(b.discount_price) < Number(b.original_price)));
+          const effectivePrice = hasDiscount ? (b.discount_price || b.price) : b.price;
+          const originalPrice = hasDiscount ? (b.original_price || b.price) : b.price;
+          const discountLabel = hasDiscount ? (b.discount_label || (b.discount_percentage ? '-' + b.discount_percentage + '%' : '')) : '';
+
           cmsBooks[id] = {
-            title:   b.title   || '',
-            author:  b.author  || '',
-            price:   b.price   || '',
-            inStock: (b.status || 'available').toLowerCase() !== 'out of stock'
+            title:          b.title          || '',
+            author:         b.author         || '',
+            price:          effectivePrice   || '',
+            original_price: originalPrice,
+            discount_price: effectivePrice,
+            has_discount:   hasDiscount,
+            discount_label: discountLabel,
+            inStock:        (b.status || 'available').toLowerCase() !== 'out of stock'
           };
         });
       }

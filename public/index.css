@@ -2665,3 +2665,86 @@ body[lang="en"] {
   flex-direction: row-reverse;
 }
 
+/* ── Discount Price & Badge Styles ────────────────────────────────────────── */
+.price-original,
+.mq-price-original {
+  text-decoration: line-through !important;
+  color: #9ca3af !important;
+  font-size: 0.88em !important;
+  font-weight: 500 !important;
+  margin-right: 6px !important;
+  opacity: 0.85;
+}
+
+.price-discount,
+.mq-price-discount {
+  color: #dc2626 !important;
+  font-weight: 800 !important;
+  font-size: 1.08em !important;
+}
+
+.discount-badge-pill,
+.mq-discount-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  color: #ffffff !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  padding: 2px 7px !important;
+  border-radius: 12px !important;
+  letter-spacing: 0.5px !important;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3) !important;
+  margin-left: 6px !important;
+  vertical-align: middle !important;
+  line-height: 1.2 !important;
+}
+
+.card-discount-badge {
+  position: absolute !important;
+  top: 8px !important;
+  left: 8px !important;
+  background: linear-gradient(135deg, #dc2626, #991b1b) !important;
+  color: #ffffff !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  padding: 3px 8px !important;
+  border-radius: 6px !important;
+  z-index: 210 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+  letter-spacing: 0.5px !important;
+  pointer-events: none !important;
+}
+
+.mq-card-discount-badge {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  background: linear-gradient(135deg, #dc2626, #991b1b) !important;
+  color: #ffffff !important;
+  font-size: 0.65rem !important;
+  font-weight: 800 !important;
+  padding: 3px 8px !important;
+  border-radius: 12px !important;
+  z-index: 210 !important;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4) !important;
+  letter-spacing: 0.5px !important;
+  pointer-events: none !important;
+}
+
+.book-price.has-discount {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-wrap: wrap !important;
+  gap: 4px !important;
+}
+
+.mq-card-price.has-discount {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 4px !important;
+}
+
+
