@@ -1,4 +1,9 @@
 {
+  "discount": [
+    {
+      "discount_price": 1000
+    }
+  ],
   "draft": false,
   "price": 1200,
   "author": "د عماد رشاد عثمان",
