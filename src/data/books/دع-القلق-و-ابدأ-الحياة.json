@@ -1,4 +1,9 @@
 {
+  "discount": [
+    {
+      "discount_price": 740
+    }
+  ],
   "draft": false,
   "price": 800,
   "author": "ديل كارنيجي",
