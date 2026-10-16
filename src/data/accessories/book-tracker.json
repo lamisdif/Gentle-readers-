@@ -1,0 +1,13 @@
+{
+  "name": "Reading Log & Book Tracker / بطاقة تتبع القراءة والمراجعات",
+  "category": "Reading Tracker",
+  "price": null,
+  "active": true,
+  "order": 1,
+  "description": "Double-sided premium cardstock Reading Log & Book Tracker card. Features designated sections for book title, author, dates, key takeaways, ratings, and quotes.",
+  "images": [
+    "img/new products/bookmarks/book tracker.jpg"
+  ],
+  "image": "img/new products/bookmarks/book tracker.jpg",
+  "draft": false
+}

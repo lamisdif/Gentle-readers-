@@ -38,6 +38,218 @@ async function mergeCmsBooksIntoCheckout() {
   }
 }
 
+// Packaging pricing dictionary & labels
+const PACKAGING_PRICES = {
+  'none': 0,
+  'papier_craft': 500,
+  'surprise': 500,
+  'paper_wildflowers': 600,
+  'paper_pine_berries': 600,
+  'paper_celestial_crane': 600
+};
+
+const PACKAGING_LABELS = {
+  'none': 'No packaging / بدون تغليف',
+  'papier_craft': 'Papier Craft / ورق كرافت',
+  'surprise': 'Surprise / مفاجأة',
+  'paper_wildflowers': 'Vintage Wildflowers / ورق زهور برية كلاسيكي',
+  'paper_pine_berries': 'Festive Pine & Berries / ورق صنوبر وتوت شتوي',
+  'paper_celestial_crane': 'Celestial Crane & Mountain / ورق الرافعات والجبال الذهبي'
+};
+
+let bookmarksData = [];
+let accessoriesData = [];
+const selectedAddons = {}; // addonId -> quantity
+
+async function loadCmsAddons() {
+  try {
+    const [bmRes, accRes] = await Promise.all([
+      fetch('cms-bookmarks.json').then(r => r.ok ? r.json() : []).catch(() => []),
+      fetch('cms-accessories.json').then(r => r.ok ? r.json() : []).catch(() => [])
+    ]);
+
+    bookmarksData = Array.isArray(bmRes) ? bmRes : [];
+    accessoriesData = Array.isArray(accRes) ? accRes : [];
+
+    // Register active bookmarks into global books dictionary for cart compatibility
+    bookmarksData.forEach(b => {
+      const id = b.id || ('bookmark_' + b.slug);
+      books[id] = {
+        title: b.name || 'Cute Bookmark',
+        author: 'Gentle Readers Collection',
+        price: (b.price !== null && b.price !== undefined) ? String(b.price) : '',
+        inStock: b.active !== false
+      };
+    });
+
+    // Register active accessories into global books dictionary
+    accessoriesData.forEach(a => {
+      const id = a.id || ('acc_' + a.slug);
+      books[id] = {
+        title: a.name || 'Reading Accessory',
+        author: 'Gentle Readers Collection',
+        price: (a.price !== null && a.price !== undefined) ? String(a.price) : '',
+        inStock: a.active !== false
+      };
+    });
+
+    renderAddonLists();
+  } catch (err) {
+    console.error('Error loading CMS addons for checkout:', err);
+  }
+}
+
+function renderAddonLists() {
+  const bmListEl = document.getElementById('bookmarkAddonsList');
+  const accListEl = document.getElementById('accessoryAddonsList');
+  const accSection = document.getElementById('tracker-addon-section');
+
+  // 1. Render Bookmarks
+  if (bmListEl) {
+    const activeBookmarks = bookmarksData.filter(b => b.active !== false);
+    if (activeBookmarks.length === 0) {
+      bmListEl.innerHTML = '<div style="color: #888; font-size: 12px; padding: 6px;">No bookmarks currently available.</div>';
+    } else {
+      bmListEl.innerHTML = '';
+      activeBookmarks.forEach(b => {
+        const id = b.id || ('bookmark_' + b.slug);
+        const hasPrice = b.price !== null && b.price !== undefined && !isNaN(Number(b.price)) && Number(b.price) > 0;
+        const priceDisplay = hasPrice ? `${Number(b.price).toLocaleString()} DA` : '<span style="color:#b45309;font-size:11px;">Price set via CMS</span>';
+        const imgUrl = (b.images && b.images[0]) || b.image || 'img/new products/bookmarks/cats bookmarks.jpg';
+        const isSelected = Boolean(selectedAddons[id]);
+        const qty = selectedAddons[id] || 1;
+
+        const card = document.createElement('div');
+        card.className = `addon-card ${isSelected ? 'selected' : ''}`;
+        card.id = `addon-card-${id}`;
+
+        let galleryThumbs = '';
+        if (b.images && b.images.length > 1) {
+          galleryThumbs = `
+            <div style="display:flex; gap:4px; margin-top:4px;">
+              ${b.images.map((im, idx) => `
+                <img src="${encodeURI(im)}" alt="thumb" style="width:20px; height:20px; object-fit:cover; border-radius:3px; cursor:pointer; border:${idx===0?'1.5px solid #105652':'1px solid #ccc'};" onclick="event.stopPropagation(); document.getElementById('img-${id}').src='${encodeURI(im)}';" />
+              `).join('')}
+            </div>
+          `;
+        }
+
+        card.innerHTML = `
+          <div class="addon-img-wrap">
+            <img id="img-${id}" src="${encodeURI(imgUrl)}" alt="${b.name}">
+          </div>
+          <div class="addon-info">
+            <div class="addon-name">${b.name}</div>
+            <div class="addon-sub">${b.description ? b.description.substring(0, 90) + '...' : ''}</div>
+            ${galleryThumbs}
+            <div class="addon-price-tag">${priceDisplay}</div>
+          </div>
+          <div class="addon-controls">
+            ${isSelected ? `
+              <div class="qty-controls" style="margin-right: 6px;">
+                <button type="button" class="qty-btn" onclick="event.stopPropagation(); changeAddonQty('${id}', -1)">−</button>
+                <span class="qty">${qty}</span>
+                <button type="button" class="qty-btn" onclick="event.stopPropagation(); changeAddonQty('${id}', 1)">+</button>
+              </div>
+            ` : ''}
+            <input type="checkbox" class="addon-checkbox" ${isSelected ? 'checked' : ''} ${!hasPrice ? 'disabled title="Price not yet configured"' : ''} onchange="toggleAddon('${id}', this.checked)" />
+          </div>
+        `;
+
+        card.addEventListener('click', (e) => {
+          if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'IMG') return;
+          if (!hasPrice) return;
+          const chk = card.querySelector('.addon-checkbox');
+          if (chk) {
+            chk.checked = !chk.checked;
+            toggleAddon(id, chk.checked);
+          }
+        });
+
+        bmListEl.appendChild(card);
+      });
+    }
+  }
+
+  // 2. Render Accessories / Tracker
+  if (accListEl) {
+    const activeAccessories = accessoriesData.filter(a => a.active !== false);
+    if (activeAccessories.length > 0) {
+      if (accSection) accSection.style.display = 'block';
+      accListEl.innerHTML = '';
+      activeAccessories.forEach(a => {
+        const id = a.id || ('acc_' + a.slug);
+        const hasPrice = a.price !== null && a.price !== undefined && !isNaN(Number(a.price)) && Number(a.price) > 0;
+        const priceDisplay = hasPrice ? `${Number(a.price).toLocaleString()} DA` : '<span style="color:#b45309;font-size:11px;">Price set via CMS</span>';
+        const imgUrl = (a.images && a.images[0]) || a.image || 'img/new products/bookmarks/book tracker.jpg';
+        const isSelected = Boolean(selectedAddons[id]);
+        const qty = selectedAddons[id] || 1;
+
+        const card = document.createElement('div');
+        card.className = `addon-card ${isSelected ? 'selected' : ''}`;
+        card.id = `addon-card-${id}`;
+
+        card.innerHTML = `
+          <div class="addon-img-wrap">
+            <img id="img-${id}" src="${encodeURI(imgUrl)}" alt="${a.name}">
+          </div>
+          <div class="addon-info">
+            <div class="addon-name">${a.name}</div>
+            <div class="addon-sub">${a.description ? a.description.substring(0, 90) + '...' : ''}</div>
+            <div class="addon-price-tag">${priceDisplay}</div>
+          </div>
+          <div class="addon-controls">
+            ${isSelected ? `
+              <div class="qty-controls" style="margin-right: 6px;">
+                <button type="button" class="qty-btn" onclick="event.stopPropagation(); changeAddonQty('${id}', -1)">−</button>
+                <span class="qty">${qty}</span>
+                <button type="button" class="qty-btn" onclick="event.stopPropagation(); changeAddonQty('${id}', 1)">+</button>
+              </div>
+            ` : ''}
+            <input type="checkbox" class="addon-checkbox" ${isSelected ? 'checked' : ''} ${!hasPrice ? 'disabled title="Price not yet configured"' : ''} onchange="toggleAddon('${id}', this.checked)" />
+          </div>
+        `;
+
+        card.addEventListener('click', (e) => {
+          if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'IMG') return;
+          if (!hasPrice) return;
+          const chk = card.querySelector('.addon-checkbox');
+          if (chk) {
+            chk.checked = !chk.checked;
+            toggleAddon(id, chk.checked);
+          }
+        });
+
+        accListEl.appendChild(card);
+      });
+    } else {
+      if (accSection) accSection.style.display = 'none';
+    }
+  }
+}
+
+window.toggleAddon = function(id, isChecked) {
+  if (isChecked) {
+    selectedAddons[id] = selectedAddons[id] || 1;
+  } else {
+    delete selectedAddons[id];
+  }
+  renderAddonLists();
+  loadOrderSummary();
+};
+
+window.changeAddonQty = function(id, delta) {
+  const current = selectedAddons[id] || 1;
+  const next = current + delta;
+  if (next <= 0) {
+    delete selectedAddons[id];
+  } else {
+    selectedAddons[id] = next;
+  }
+  renderAddonLists();
+  loadOrderSummary();
+};
+
 // wilayaDairaData is now handled in js/shipping-data.js
 
 function getCurrentLang() {
@@ -180,19 +392,40 @@ function loadOrderSummary() {
     }
   }
 
+  // Calculate Add-ons Subtotal
+  let addonsSubtotal = 0;
+  Object.keys(selectedAddons).forEach(addonId => {
+    const qty = selectedAddons[addonId] || 0;
+    if (qty <= 0) return;
+    const item = bookmarksData.find(b => (b.id || 'bookmark_' + b.slug) === addonId) ||
+                 accessoriesData.find(a => (a.id || 'acc_' + a.slug) === addonId);
+    if (!item) return;
+    const price = Number(item.price) || 0;
+    const lineTotal = price * qty;
+    addonsSubtotal += lineTotal;
+
+    const detailTitle = document.createElement("span");
+    detailTitle.textContent = `${item.name} × ${qty}`;
+    detailTitle.style.color = '#105652';
+    detailTitle.style.fontWeight = '600';
+    
+    const detailPrice = document.createElement("span");
+    detailPrice.textContent = `${lineTotal.toLocaleString()} DZD`;
+    detailPrice.style.fontWeight = '600';
+
+    orderDetailsDiv.appendChild(detailTitle);
+    orderDetailsDiv.appendChild(detailPrice);
+  });
+
   // Calculate Packaging
-  let packagingPrice = 0;
   const packagingOption = document.querySelector('input[name="packaging"]:checked');
   const packagingType = packagingOption ? packagingOption.value : 'none';
-  
-  if (packagingType === 'papier_craft' || packagingType === 'surprise') {
-    packagingPrice = 500;
-  }
+  const packagingPrice = PACKAGING_PRICES[packagingType] !== undefined ? PACKAGING_PRICES[packagingType] : 0;
 
   // Add packaging to summary
-  if (packagingType !== 'none') {
+  if (packagingType !== 'none' && packagingPrice > 0) {
     const packagingTitle = document.createElement("span");
-    const packagingLabel = packagingType === 'papier_craft' ? 'Papier Craft / ورق كرافت' : 'Surprise / مفاجأة';
+    const packagingLabel = PACKAGING_LABELS[packagingType] || packagingType;
     packagingTitle.textContent = `Packaging / التغليف (${packagingLabel})`;
     packagingTitle.style.fontSize = '0.9rem';
     
@@ -204,7 +437,7 @@ function loadOrderSummary() {
     orderDetailsDiv.appendChild(packagingPriceSpan);
   }
   
-  const finalTotal = subtotal + shippingCost + packagingPrice;
+  const finalTotal = subtotal + addonsSubtotal + shippingCost + packagingPrice;
   totalPriceLabel.textContent = `${finalTotal.toLocaleString()} DZD`;
 
   // Trigger validation after summary (and shipping price) is updated
@@ -253,14 +486,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Packaging selection change
   document.querySelectorAll('input[name="packaging"]').forEach(radio => {
-    radio.addEventListener('change', loadOrderSummary);
+    radio.addEventListener('change', function() {
+      document.querySelectorAll('.packaging-option').forEach(el => el.classList.remove('selected'));
+      const parentLabel = this.closest('.packaging-option');
+      if (parentLabel) parentLabel.classList.add('selected');
+      loadOrderSummary();
+    });
   });
 
-  // Merge CMS books, then load order summary
-  mergeCmsBooksIntoCheckout()
-    .finally(function () {
-      setTimeout(loadOrderSummary, 100);
-    });
+  // Merge CMS books & addons, then load order summary
+  Promise.all([
+    mergeCmsBooksIntoCheckout(),
+    loadCmsAddons()
+  ]).finally(function () {
+    setTimeout(loadOrderSummary, 100);
+  });
 });
 
 // Quantity controls (event delegation)
@@ -367,8 +607,21 @@ if (checkoutForm) {
       return `${book.title} × ${qty}`;
     });
 
+    // Add selected bookmarks and accessories to items & subtotal
+    Object.keys(selectedAddons).forEach(addonId => {
+      const qty = selectedAddons[addonId] || 0;
+      if (qty <= 0) return;
+      // Validate against CMS data as source of truth
+      const item = bookmarksData.find(b => (b.id || 'bookmark_' + b.slug) === addonId && b.active !== false) ||
+                   accessoriesData.find(a => (a.id || 'acc_' + a.slug) === addonId && a.active !== false);
+      if (!item) return;
+      const price = Number(item.price) || 0;
+      subtotal += price * qty;
+      items.push(`${item.name} [Add-on] × ${qty}`);
+    });
+
     const shippingPrice = getShippingPrice(wilaya, deliveryMethod);
-    const packagingPrice = (packagingType === 'none') ? 0 : 500;
+    const packagingPrice = PACKAGING_PRICES[packagingType] !== undefined ? PACKAGING_PRICES[packagingType] : 0;
     const finalTotal = subtotal + shippingPrice + packagingPrice;
 
     // Final safety check before submission

@@ -38,6 +38,51 @@ collections:
       - { label: "Image / صورة الغلاف", name: "image", widget: "image", required: false }
       - { label: "Draft / مسودة", name: "draft", widget: "boolean", default: false }
 
+  - name: "bookmarks"
+    label: "Bookmarks / فواصل كتب"
+    label_singular: "Bookmark / فاصل كتب"
+    folder: "src/data/bookmarks"
+    create: true
+    format: "json"
+    extension: "json"
+    slug: "{{slug}}"
+    fields:
+      - { label: "Product Name / اسم الفاصل", name: "name", widget: "string" }
+      - { label: "Price / السعر بالدينار (DA)", name: "price", widget: "number", valueType: "int", required: false, hint: "السعر بالدينار الجزائري (اتركه فارغاً إذا لم يحدد بعد)" }
+      - { label: "Active & Available / متاح للطلب والعرض", name: "active", widget: "boolean", default: true }
+      - { label: "Display Order / ترتيب العرض", name: "order", widget: "number", valueType: "int", default: 1, required: false }
+      - { label: "Description / الوصف", name: "description", widget: "text", required: false }
+      - label: "Images Gallery / معرض الصور (صور متعددة لنفس المنتج)"
+        name: "images"
+        widget: "list"
+        summary: '{{fields.image}}'
+        field: { label: "Image / صورة", name: "image", widget: "image" }
+      - { label: "Main Cover Image / صورة الغلاف الرئيسية (اختياري)", name: "image", widget: "image", required: false, hint: "إذا لم تختر صورة، سيتم اعتماد أول صورة من المعرض تلقائياً" }
+      - { label: "Draft / مسودة", name: "draft", widget: "boolean", default: false }
+
+  - name: "accessories"
+    label: "Accessories & Trackers / ملحقات وتراكرز"
+    label_singular: "Accessory / ملحق"
+    folder: "src/data/accessories"
+    create: true
+    format: "json"
+    extension: "json"
+    slug: "{{slug}}"
+    fields:
+      - { label: "Product Name / اسم المنتج", name: "name", widget: "string" }
+      - { label: "Category / نوع الملحق", name: "category", widget: "select", options: ["Reading Tracker", "Accessory", "Stationery"], default: "Reading Tracker" }
+      - { label: "Price / السعر بالدينار (DA)", name: "price", widget: "number", valueType: "int", required: false, hint: "السعر بالدينار الجزائري" }
+      - { label: "Active & Available / متاح للطلب والعرض", name: "active", widget: "boolean", default: true }
+      - { label: "Display Order / ترتيب العرض", name: "order", widget: "number", valueType: "int", default: 1, required: false }
+      - { label: "Description / الوصف", name: "description", widget: "text", required: false }
+      - label: "Images Gallery / معرض الصور"
+        name: "images"
+        widget: "list"
+        summary: '{{fields.image}}'
+        field: { label: "Image / صورة", name: "image", widget: "image" }
+      - { label: "Main Cover Image / صورة رئيسية (اختياري)", name: "image", widget: "image", required: false }
+      - { label: "Draft / مسودة", name: "draft", widget: "boolean", default: false }
+
   - name: "settings"
     label: "Settings / الإعدادات"
     delete: false

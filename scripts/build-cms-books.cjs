@@ -199,6 +199,119 @@ function main() {
 
   fs.writeFileSync(OUT_FILE, JSON.stringify(published, null, 2) + '\n', 'utf8');
   console.log(`Wrote ${published.length} CMS books (newest-first) to ${path.relative(ROOT, OUT_FILE)}`);
+
+  // Build Bookmarks
+  buildBookmarks();
+
+  // Build Accessories
+  buildAccessories();
+}
+
+function normalizeImages(data) {
+  let list = [];
+  if (Array.isArray(data.images)) {
+    list = data.images.map(item => {
+      if (typeof item === 'string') return item;
+      if (item && typeof item === 'object') return item.image || item.url || '';
+      return '';
+    }).filter(Boolean);
+  } else if (typeof data.images === 'string' && data.images.trim()) {
+    list = [data.images.trim()];
+  }
+
+  if (data.image && typeof data.image === 'string' && !list.includes(data.image)) {
+    list.unshift(data.image);
+  }
+
+  // Normalize paths: strip leading slash for consistency
+  return list.map(img => img.startsWith('/') && !img.startsWith('//') ? img.substring(1) : img);
+}
+
+function buildBookmarks() {
+  const BOOKMARKS_SRC = path.join(ROOT, 'src', 'data', 'bookmarks');
+  const BOOKMARKS_OUT = path.join(ROOT, 'public', 'cms-bookmarks.json');
+
+  if (!fs.existsSync(BOOKMARKS_SRC)) {
+    fs.writeFileSync(BOOKMARKS_OUT, '[]\n', 'utf8');
+    return;
+  }
+
+  const entries = fs.readdirSync(BOOKMARKS_SRC, { withFileTypes: true });
+  const bookmarks = [];
+
+  for (const ent of entries) {
+    if (!ent.isFile() || !ent.name.toLowerCase().endsWith('.json')) continue;
+    const fp = path.join(BOOKMARKS_SRC, ent.name);
+    const data = safeReadJson(fp);
+    if (!data) continue;
+
+    const slug = path.basename(ent.name, '.json');
+    const images = normalizeImages(data);
+    const mainImg = images[0] || (data.image ? String(data.image).replace(/^\//, '') : '');
+
+    bookmarks.push({
+      id: 'bookmark_' + slug,
+      slug,
+      name: data.name || data.title || slug,
+      price: data.price !== undefined && data.price !== null && data.price !== '' ? Number(data.price) : null,
+      active: data.active !== false,
+      order: data.order !== undefined ? Number(data.order) : 99,
+      description: data.description || '',
+      images: images,
+      image: mainImg,
+      draft: Boolean(data.draft)
+    });
+  }
+
+  const published = bookmarks.filter(b => !b.draft);
+  published.sort((a, b) => (a.order - b.order) || a.name.localeCompare(b.name));
+
+  fs.writeFileSync(BOOKMARKS_OUT, JSON.stringify(published, null, 2) + '\n', 'utf8');
+  console.log(`Wrote ${published.length} CMS bookmarks to ${path.relative(ROOT, BOOKMARKS_OUT)}`);
+}
+
+function buildAccessories() {
+  const ACCESSORIES_SRC = path.join(ROOT, 'src', 'data', 'accessories');
+  const ACCESSORIES_OUT = path.join(ROOT, 'public', 'cms-accessories.json');
+
+  if (!fs.existsSync(ACCESSORIES_SRC)) {
+    fs.writeFileSync(ACCESSORIES_OUT, '[]\n', 'utf8');
+    return;
+  }
+
+  const entries = fs.readdirSync(ACCESSORIES_SRC, { withFileTypes: true });
+  const accessories = [];
+
+  for (const ent of entries) {
+    if (!ent.isFile() || !ent.name.toLowerCase().endsWith('.json')) continue;
+    const fp = path.join(ACCESSORIES_SRC, ent.name);
+    const data = safeReadJson(fp);
+    if (!data) continue;
+
+    const slug = path.basename(ent.name, '.json');
+    const images = normalizeImages(data);
+    const mainImg = images[0] || (data.image ? String(data.image).replace(/^\//, '') : '');
+
+    accessories.push({
+      id: 'acc_' + slug,
+      slug,
+      name: data.name || data.title || slug,
+      category: data.category || 'Accessory',
+      price: data.price !== undefined && data.price !== null && data.price !== '' ? Number(data.price) : null,
+      active: data.active !== false,
+      order: data.order !== undefined ? Number(data.order) : 99,
+      description: data.description || '',
+      images: images,
+      image: mainImg,
+      draft: Boolean(data.draft)
+    });
+  }
+
+  const published = accessories.filter(a => !a.draft);
+  published.sort((a, b) => (a.order - b.order) || a.name.localeCompare(b.name));
+
+  fs.writeFileSync(ACCESSORIES_OUT, JSON.stringify(published, null, 2) + '\n', 'utf8');
+  console.log(`Wrote ${published.length} CMS accessories to ${path.relative(ROOT, ACCESSORIES_OUT)}`);
 }
 
 main();

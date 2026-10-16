@@ -164,11 +164,14 @@ function updateCartCounter() {
   });
 }
 
-// ── Boot: fetch CMS books then render ─────────────────────────────────────────
+// ── Boot: fetch CMS books, bookmarks, and accessories then render ───────────
 window.addEventListener('load', function () {
-  fetch('cms-books.json')
-    .then(res => res.ok ? res.json() : [])
-    .then(books => {
+  Promise.all([
+    fetch('cms-books.json').then(res => res.ok ? res.json() : []).catch(() => []),
+    fetch('cms-bookmarks.json').then(res => res.ok ? res.json() : []).catch(() => []),
+    fetch('cms-accessories.json').then(res => res.ok ? res.json() : []).catch(() => [])
+  ])
+    .then(([books, bookmarks, accessories]) => {
       if (Array.isArray(books)) {
         books.forEach(b => {
           const id = 'cms_' + (b.slug || b.title || '');
@@ -186,6 +189,30 @@ window.addEventListener('load', function () {
             has_discount:   hasDiscount,
             discount_label: discountLabel,
             inStock:        (b.status || 'available').toLowerCase() !== 'out of stock'
+          };
+        });
+      }
+
+      if (Array.isArray(bookmarks)) {
+        bookmarks.forEach(b => {
+          const id = b.id || ('bookmark_' + b.slug);
+          cmsBooks[id] = {
+            title:          b.name           || 'Cute Bookmark',
+            author:         'Gentle Readers Bookmark Collection',
+            price:          (b.price !== null && b.price !== undefined) ? String(b.price) : '',
+            inStock:        b.active !== false
+          };
+        });
+      }
+
+      if (Array.isArray(accessories)) {
+        accessories.forEach(a => {
+          const id = a.id || ('acc_' + a.slug);
+          cmsBooks[id] = {
+            title:          a.name           || 'Reading Accessory',
+            author:         'Gentle Readers Accessory',
+            price:          (a.price !== null && a.price !== undefined) ? String(a.price) : '',
+            inStock:        a.active !== false
           };
         });
       }

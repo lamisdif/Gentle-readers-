@@ -367,19 +367,26 @@
       gap: 15px;
       padding: 16px 18px;
       background: #fdfaf2;
-      border: 1px solid rgba(16, 86, 82, 0.2);
+      border: 1.5px solid rgba(16, 86, 82, 0.2);
       border-radius: 12px;
       cursor: pointer;
       transition: all 0.3s ease;
     }
     .packaging-option:hover {
       box-shadow: 0 6px 16px rgba(16, 86, 82, 0.12);
-      border-color: rgba(16, 86, 82, 0.4);
+      border-color: rgba(16, 86, 82, 0.45);
       transform: translateY(-2px);
+    }
+    .packaging-option.selected,
+    .packaging-option:has(input:checked) {
+      border-color: #105652;
+      background: #f5eedf;
+      box-shadow: 0 4px 14px rgba(16, 86, 82, 0.15);
     }
     .packaging-option img {
       border-radius: 8px;
       object-fit: cover;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
     .packaging-emoji {
       font-size: 28px;
@@ -391,9 +398,83 @@
     }
     .packaging-price {
       font-weight: 700;
-      color: #10b981;
+      color: #105652;
       font-size: 14px;
       margin-top: 4px;
+    }
+    .addon-grid {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .addon-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: #fdfaf2;
+      border: 1.5px solid rgba(16, 86, 82, 0.2);
+      border-radius: 12px;
+      transition: all 0.25s ease;
+    }
+    .addon-card:hover {
+      border-color: rgba(16, 86, 82, 0.4);
+      box-shadow: 0 4px 12px rgba(16, 86, 82, 0.08);
+    }
+    .addon-card.selected {
+      border-color: #105652;
+      background: #f5eedf;
+      box-shadow: 0 2px 10px rgba(16, 86, 82, 0.12);
+    }
+    .addon-img-wrap {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: #eee6d6;
+      border: 1px solid rgba(94, 34, 23, 0.1);
+      position: relative;
+    }
+    .addon-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .addon-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .addon-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #5e2217;
+      line-height: 1.25;
+      margin-bottom: 2px;
+    }
+    .addon-sub {
+      font-size: 11.5px;
+      color: #666;
+      line-height: 1.3;
+      margin-bottom: 4px;
+    }
+    .addon-price-tag {
+      font-size: 13px;
+      font-weight: 700;
+      color: #105652;
+    }
+    .addon-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .addon-checkbox {
+      width: 18px;
+      height: 18px;
+      accent-color: #105652;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -468,8 +549,35 @@
               <span id="checkout-address-label">ADDRESS / العنوان</span>
               <textarea name="address" class="input_field" id="checkout-address-input" placeholder="Enter your full address for home delivery / أدخل عنوانك الكامل للتوصيل للمنزل" rows="3" style="resize: vertical; min-height: 60px;"></textarea>
             </div>
-            <div style="margin-top: 15px;">
-              <span id="checkout-packaging-label" style="display: block; font-size: 13px; font-weight: 600; color: #000000; margin-bottom: 12px;">PACKAGING / التغليف</span>
+            <!-- Add-on Bookmarks Section -->
+            <div style="margin-top: 20px; border-top: 1px dashed rgba(16, 86, 82, 0.25); padding-top: 16px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span id="checkout-addons-label" style="font-size: 13px; font-weight: 700; color: #5e2217;">
+                  ADD CUTE BOOKMARKS / فواصل كتب إضافية ✨
+                </span>
+                <span style="font-size: 11px; color: #888; font-weight: 500;">Optional / اختياري</span>
+              </div>
+              <p style="font-size: 11.5px; color: #666; margin-bottom: 12px; line-height: 1.35;">
+                Select cute handcrafted bookmarks to accompany your books.
+              </p>
+              <div id="bookmarkAddonsList" class="addon-grid">
+                <div style="text-align: center; color: #888; font-size: 12px; padding: 10px;">Loading cute bookmarks...</div>
+              </div>
+            </div>
+
+            <!-- Optional Book Tracker / Accessories Section -->
+            <div id="tracker-addon-section" style="margin-top: 14px; border-top: 1px dashed rgba(16, 86, 82, 0.25); padding-top: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 13px; font-weight: 700; color: #5e2217;">
+                  READING LOG & TRACKER / سجل القراءة 📖
+                </span>
+                <span style="font-size: 11px; color: #888; font-weight: 500;">Optional / اختياري</span>
+              </div>
+              <div id="accessoryAddonsList" class="addon-grid"></div>
+            </div>
+
+            <div style="margin-top: 20px; border-top: 1px solid rgba(16, 86, 82, 0.15); padding-top: 16px;">
+              <span id="checkout-packaging-label" style="display: block; font-size: 13px; font-weight: 700; color: #000000; margin-bottom: 12px;">PACKAGING / التغليف 🎁</span>
               <div class="packaging-options">
                 <label class="packaging-option">
                   <input type="radio" name="packaging" value="none" checked style="accent-color: #105652;">
@@ -481,7 +589,7 @@
                 </label>
                 <label class="packaging-option">
                   <input type="radio" name="packaging" value="papier_craft" style="accent-color: #105652;">
-                  <img src="/img/papier-craft.PNG" alt="Papier Craft" width="80">
+                  <img src="/img/papier-craft.PNG" alt="Papier Craft" width="80" height="80" style="width: 80px; height: 80px; object-fit: cover;">
                   <div class="packaging-emoji">🎁</div>
                   <div style="flex: 1;">
                     <div style="font-size: 15px; font-weight: 600;">Papier Craft / ورق كرافت</div>
@@ -490,11 +598,42 @@
                 </label>
                 <label class="packaging-option">
                   <input type="radio" name="packaging" value="surprise" style="accent-color: #105652;">
-                  <img src="/img/surprise.PNG" alt="Surprise" width="80">
+                  <img src="/img/surprise.PNG" alt="Surprise" width="80" height="80" style="width: 80px; height: 80px; object-fit: cover;">
                   <div class="packaging-emoji">✨</div>
                   <div style="flex: 1;">
                     <div style="font-size: 15px; font-weight: 600;">Surprise / مفاجأة</div>
                     <div class="packaging-price">500 DA <span style="font-size: 11px; color: #666; font-weight: 500;">— see samples on Instagram / شاهد نماذج على إنستغرام</span></div>
+                  </div>
+                </label>
+                <!-- New 600 DA Wrapping Paper Options -->
+                <label class="packaging-option">
+                  <input type="radio" name="packaging" value="paper_wildflowers" style="accent-color: #105652;">
+                  <img src="img/new%20products/wrapping%20paper/packaging%20paper%201.jpg" alt="Vintage Wildflowers" width="80" height="80" style="width: 80px; height: 80px; object-fit: cover;">
+                  <div class="packaging-emoji">🌸</div>
+                  <div style="flex: 1;">
+                    <div style="font-size: 15px; font-weight: 600;">Vintage Wildflowers / ورق زهور برية كلاسيكي</div>
+                    <div style="font-size: 11.5px; color: #777;">Botanical wildflower field on kraft paper / نقشة زهور ونباتات برية</div>
+                    <div class="packaging-price">600 DA</div>
+                  </div>
+                </label>
+                <label class="packaging-option">
+                  <input type="radio" name="packaging" value="paper_pine_berries" style="accent-color: #105652;">
+                  <img src="img/new%20products/wrapping%20paper/packaging%20paper%202.jpg" alt="Festive Pine & Berries" width="80" height="80" style="width: 80px; height: 80px; object-fit: cover;">
+                  <div class="packaging-emoji">🌲</div>
+                  <div style="flex: 1;">
+                    <div style="font-size: 15px; font-weight: 600;">Festive Pine & Berries / ورق صنوبر وتوت شتوي</div>
+                    <div style="font-size: 11.5px; color: #777;">Winter botanical pine & berries with holiday stripes / صنوبر شتوي مع خطوط أعياد على الوجه الآخر</div>
+                    <div class="packaging-price">600 DA</div>
+                  </div>
+                </label>
+                <label class="packaging-option">
+                  <input type="radio" name="packaging" value="paper_celestial_crane" style="accent-color: #105652;">
+                  <img src="img/new%20products/wrapping%20paper/packaging%20paper%203.jpg" alt="Celestial Crane & Mountains" width="80" height="80" style="width: 80px; height: 80px; object-fit: cover;">
+                  <div class="packaging-emoji">🕊️</div>
+                  <div style="flex: 1;">
+                    <div style="font-size: 15px; font-weight: 600;">Celestial Crane & Mountain / ورق الرافعات والجبال الذهبي</div>
+                    <div style="font-size: 11.5px; color: #777;">Traditional oriental landscape with golden clouds & blue peaks / طيور كركي وجبال ذهبية ساحرة</div>
+                    <div class="packaging-price">600 DA</div>
                   </div>
                 </label>
               </div>

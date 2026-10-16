@@ -1262,6 +1262,458 @@
       <div class="pagination-container" id="pagination-1"></div>
     </section>
 
+    <!-- ========================================================
+         NEW CUTE PRODUCTS SECTION (Bookmarks Collection)
+         ======================================================== -->
+    <section id="cute-bookmarks-section" class="cute-bookmarks-section animate-fade-in" style="padding: 40px 20px 60px; max-width: 1200px; margin: 0 auto; position: relative; z-index: 50;">
+      <style>
+        .cute-bookmarks-section {
+          width: 100%;
+        }
+        .cute-section-header {
+          text-align: center;
+          margin-bottom: 36px;
+        }
+        .cute-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: rgba(94, 34, 23, 0.08);
+          color: #5e2217;
+          border: 1px solid rgba(94, 34, 23, 0.18);
+          padding: 5px 14px;
+          border-radius: 20px;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+          margin-bottom: 10px;
+        }
+        .cute-title {
+          font-size: 2.2rem;
+          font-weight: 800;
+          color: #5e2217;
+          letter-spacing: -0.5px;
+          margin: 0;
+        }
+        .cute-subtitle {
+          color: #7a524a;
+          font-size: 14.5px;
+          max-width: 580px;
+          margin: 8px auto 0;
+          line-height: 1.5;
+        }
+        .cute-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+          gap: 28px;
+          justify-content: center;
+        }
+        .cute-card {
+          background: #ffffff;
+          border: 1.5px solid rgba(94, 34, 23, 0.12);
+          border-radius: 18px;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          box-shadow: 0 4px 18px rgba(94, 34, 23, 0.06);
+          transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.3s;
+          position: relative;
+        }
+        .cute-card:hover {
+          transform: translateY(-6px);
+          box-shadow: 0 12px 32px rgba(94, 34, 23, 0.14);
+          border-color: rgba(94, 34, 23, 0.3);
+        }
+        .cute-card-img-wrap {
+          position: relative;
+          width: 100%;
+          height: 280px;
+          background: #fdfaf2;
+          overflow: hidden;
+          cursor: pointer;
+        }
+        .cute-card-main-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+          transition: transform 0.4s ease, opacity 0.25s ease;
+        }
+        .cute-card:hover .cute-card-main-img {
+          transform: scale(1.03);
+        }
+        .cute-tag-badge {
+          position: absolute;
+          top: 12px;
+          left: 12px;
+          background: rgba(94, 34, 23, 0.88);
+          backdrop-filter: blur(4px);
+          color: #fcf4cc;
+          font-size: 10.5px;
+          font-weight: 800;
+          letter-spacing: 0.8px;
+          padding: 4px 10px;
+          border-radius: 20px;
+          text-transform: uppercase;
+          pointer-events: none;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        /* Multi-image thumbnail bar on card */
+        .cute-thumb-bar {
+          display: flex;
+          gap: 8px;
+          padding: 8px 14px;
+          background: #fdfcf7;
+          border-top: 1px solid rgba(94, 34, 23, 0.08);
+          border-bottom: 1px solid rgba(94, 34, 23, 0.08);
+          overflow-x: auto;
+          scrollbar-width: none;
+        }
+        .cute-thumb-bar::-webkit-scrollbar {
+          display: none;
+        }
+        .cute-thumb-item {
+          width: 44px;
+          height: 44px;
+          border-radius: 8px;
+          overflow: hidden;
+          flex-shrink: 0;
+          cursor: pointer;
+          border: 2px solid transparent;
+          transition: all 0.2s ease;
+          background: #eee6d6;
+        }
+        .cute-thumb-item img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+        .cute-thumb-item.active {
+          border-color: #5e2217;
+          box-shadow: 0 0 0 1px #5e2217;
+          transform: scale(1.05);
+        }
+        .cute-card-body {
+          padding: 16px 18px 20px;
+          display: flex;
+          flex-direction: column;
+          flex-grow: 1;
+        }
+        .cute-card-title {
+          font-size: 1.05rem;
+          font-weight: 700;
+          color: #3b140d;
+          line-height: 1.3;
+          margin-bottom: 6px;
+        }
+        .cute-card-desc {
+          font-size: 0.82rem;
+          color: #7c5850;
+          line-height: 1.45;
+          margin-bottom: 14px;
+          flex-grow: 1;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        .cute-card-footer {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding-top: 12px;
+          border-top: 1px solid rgba(94, 34, 23, 0.08);
+          margin-top: auto;
+          gap: 10px;
+        }
+        .cute-card-price {
+          font-size: 1.1rem;
+          font-weight: 800;
+          color: #105652;
+        }
+        .cute-card-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: #5e2217;
+          color: #fcf4cc;
+          font-size: 12.5px;
+          font-weight: 700;
+          padding: 8px 14px;
+          border-radius: 8px;
+          border: none;
+          cursor: pointer;
+          transition: background 0.2s, transform 0.15s;
+          text-decoration: none;
+          white-space: nowrap;
+        }
+        .cute-card-btn:hover {
+          background: #7a2d1e;
+          transform: translateY(-1px);
+          color: #ffffff;
+        }
+        .cute-card-btn.view-btn {
+          background: rgba(16, 86, 82, 0.12);
+          color: #105652;
+          border: 1px solid rgba(16, 86, 82, 0.3);
+        }
+        .cute-card-btn.view-btn:hover {
+          background: #105652;
+          color: #ffffff;
+        }
+
+        /* Modal styles for full view */
+        #cute-detail-modal {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: rgba(0, 0, 0, 0.65);
+          backdrop-filter: blur(5px);
+          z-index: 99999;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+          box-sizing: border-box;
+        }
+        #cute-detail-modal.active {
+          display: flex;
+        }
+        .cute-modal-box {
+          background: #FCF8D5;
+          max-width: 640px;
+          width: 100%;
+          border-radius: 20px;
+          border: 2px solid #5e2217;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+          overflow: hidden;
+          position: relative;
+          max-height: 90vh;
+          overflow-y: auto;
+          animation: modalPop 0.28s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+        @keyframes modalPop {
+          0% { transform: scale(0.92); opacity: 0; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        .cute-modal-close {
+          position: absolute;
+          top: 14px;
+          right: 14px;
+          background: #5e2217;
+          color: #fcf4cc;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          border: none;
+          cursor: pointer;
+          font-weight: bold;
+          font-size: 16px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10;
+        }
+        .cute-modal-close:hover {
+          background: #8b3425;
+        }
+      </style>
+
+      <div class="cute-section-header">
+        <span class="cute-badge"><i class="fas fa-sparkles text-amber-600"></i> HANDPICKED ACCESSORIES</span>
+        <h2 class="cute-title">NEW CUTE PRODUCTS ✨</h2>
+        <p class="cute-subtitle">
+          Delightful bookmarks crafted to hold your place in every cozy story. Browse photos from multiple angles and add your favorites to your order!
+        </p>
+      </div>
+
+      <!-- Bookmarks Grid -->
+      <div id="cute-bookmarks-grid" class="cute-grid">
+        <!-- Rendered dynamically by JavaScript from cms-bookmarks.json -->
+      </div>
+
+      <!-- Bottom action link to view books & checkout -->
+      <div style="text-align: center; margin-top: 36px;">
+        <a href="#section-latest-books" class="inline-flex items-center gap-2 font-bold text-sm px-6 py-3 rounded-full transition-all" 
+           style="background: rgba(94, 34, 23, 0.08); color: #5e2217; border: 1.5px solid rgba(94, 34, 23, 0.25);">
+          <span>Browse Book Collection to Order Bookmarks as Add-ons</span>
+          <i class="fas fa-arrow-down text-xs"></i>
+        </a>
+      </div>
+    </section>
+
+    <!-- Modal for Detailed Bookmark View -->
+    <div id="cute-detail-modal" onclick="if(event.target===this) closeBookmarkModal()">
+      <div class="cute-modal-box">
+        <button class="cute-modal-close" onclick="closeBookmarkModal()">✕</button>
+        <div style="position: relative; width: 100%; height: 360px; background: #fdfaf2; overflow: hidden;">
+          <img id="modal-main-img" src="" alt="Bookmark preview" style="width: 100%; height: 100%; object-fit: contain; display: block;" />
+        </div>
+        <div id="modal-thumbs-row" style="display: flex; gap: 8px; padding: 12px 18px; background: #fdfcf7; border-bottom: 1px solid rgba(94, 34, 23, 0.1); overflow-x: auto;">
+          <!-- Thumbnails injected by JS -->
+        </div>
+        <div style="padding: 20px 24px 26px;">
+          <h3 id="modal-title" style="font-size: 1.3rem; font-weight: 800; color: #5e2217; margin-bottom: 8px;"></h3>
+          <p id="modal-desc" style="font-size: 0.92rem; color: #5a3d36; line-height: 1.6; margin-bottom: 16px;"></p>
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding-top: 14px; border-top: 1px solid rgba(94, 34, 23, 0.15);">
+            <div id="modal-price" style="font-size: 1.3rem; font-weight: 900; color: #105652;"></div>
+            <a href="checkout.html" class="cute-card-btn" style="padding: 10px 20px; font-size: 14px;">
+              <span>Order with Book in Checkout 📖</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // ========================================================
+      // NEW CUTE PRODUCTS (BOOKMARKS) DYNAMIC CMS LOADER
+      // ========================================================
+      (function() {
+        var grid = document.getElementById('cute-bookmarks-grid');
+        if (!grid) return;
+
+        window.bookmarkGalleryState = {}; // bookmarkSlug -> { activeIndex, images }
+
+        window.switchBookmarkImage = function(slug, index, event) {
+          if (event) event.stopPropagation();
+          var state = window.bookmarkGalleryState[slug];
+          if (!state || !state.images || !state.images[index]) return;
+          state.activeIndex = index;
+
+          var mainImg = document.getElementById('cute-main-img-' + slug);
+          if (mainImg) {
+            mainImg.style.opacity = '0.35';
+            setTimeout(function() {
+              mainImg.src = encodeURI(state.images[index]);
+              mainImg.style.opacity = '1';
+            }, 120);
+          }
+
+          var thumbs = document.querySelectorAll('.thumb-' + slug);
+          thumbs.forEach(function(th, idx) {
+            if (idx === index) th.classList.add('active');
+            else th.classList.remove('active');
+          });
+        };
+
+        window.openBookmarkModal = function(slug) {
+          var state = window.bookmarkGalleryState[slug];
+          if (!state) return;
+          var modal = document.getElementById('cute-detail-modal');
+          var modalImg = document.getElementById('modal-main-img');
+          var modalTitle = document.getElementById('modal-title');
+          var modalDesc = document.getElementById('modal-desc');
+          var modalPrice = document.getElementById('modal-price');
+          var modalThumbs = document.getElementById('modal-thumbs-row');
+
+          if (!modal) return;
+          modalTitle.textContent = state.name;
+          modalDesc.textContent = state.description;
+          modalPrice.innerHTML = state.priceText;
+          modalImg.src = encodeURI(state.images[state.activeIndex || 0]);
+
+          modalThumbs.innerHTML = '';
+          state.images.forEach(function(im, idx) {
+            var th = document.createElement('div');
+            th.className = 'cute-thumb-item' + (idx === (state.activeIndex || 0) ? ' active' : '');
+            th.style.width = '52px';
+            th.style.height = '52px';
+            th.innerHTML = '<img src="' + encodeURI(im) + '" alt="thumb" style="width:100%;height:100%;object-fit:cover;" />';
+            th.onclick = function() {
+              modalImg.src = encodeURI(im);
+              modalThumbs.querySelectorAll('.cute-thumb-item').forEach(function(el, i) {
+                if (i === idx) el.classList.add('active');
+                else el.classList.remove('active');
+              });
+            };
+            modalThumbs.appendChild(th);
+          });
+
+          modal.classList.add('active');
+        };
+
+        window.closeBookmarkModal = function() {
+          var modal = document.getElementById('cute-detail-modal');
+          if (modal) modal.classList.remove('active');
+        };
+
+        fetch('cms-bookmarks.json')
+          .then(function(res) { return res.ok ? res.json() : []; })
+          .then(function(bookmarks) {
+            if (!Array.isArray(bookmarks)) return;
+            // Filter strictly active bookmarks
+            var activeBookmarks = bookmarks.filter(function(b) {
+              return b && b.active !== false && !b.draft;
+            });
+
+            if (activeBookmarks.length === 0) {
+              var section = document.getElementById('cute-bookmarks-section');
+              if (section) section.style.display = 'none';
+              return;
+            }
+
+            grid.innerHTML = '';
+            activeBookmarks.forEach(function(b) {
+              var slug = b.slug || b.id || Math.random().toString(36).substring(2);
+              var images = Array.isArray(b.images) && b.images.length > 0 ? b.images : [b.image || 'img/new products/bookmarks/cats bookmarks.jpg'];
+              var hasPrice = b.price !== null && b.price !== undefined && !isNaN(Number(b.price)) && Number(b.price) > 0;
+              var priceText = hasPrice ? (Number(b.price).toLocaleString() + ' DA') : '<span style="color:#b45309;font-size:0.8rem;font-weight:600;background:rgba(217,119,6,0.1);padding:2px 8px;border-radius:4px;">Price configured via CMS</span>';
+
+              window.bookmarkGalleryState[slug] = {
+                slug: slug,
+                name: b.name || 'Cute Bookmark',
+                description: b.description || '',
+                priceText: priceText,
+                images: images,
+                activeIndex: 0
+              };
+
+              var card = document.createElement('div');
+              card.className = 'cute-card';
+
+              var thumbsHtml = '';
+              if (images.length > 1) {
+                thumbsHtml = '<div class="cute-thumb-bar">';
+                images.forEach(function(im, idx) {
+                  thumbsHtml += '<div class="cute-thumb-item thumb-' + slug + (idx === 0 ? ' active' : '') + '" onclick="switchBookmarkImage(\'' + slug + '\', ' + idx + ', event)">' +
+                                  '<img src="' + encodeURI(im) + '" alt="' + (b.name||'').replace(/"/g, '&quot;') + ' ' + (idx+1) + '" />' +
+                                '</div>';
+                });
+                thumbsHtml += '</div>';
+              }
+
+              card.innerHTML = 
+                '<div class="cute-card-img-wrap" onclick="openBookmarkModal(\'' + slug + '\')">' +
+                  '<img id="cute-main-img-' + slug + '" class="cute-card-main-img" src="' + encodeURI(images[0]) + '" alt="' + (b.name||'').replace(/"/g, '&quot;') + '" onerror="this.src=\'img/new products/bookmarks/cats bookmarks.jpg\'" />' +
+                  '<div class="cute-tag-badge">✨ NEW BOOKMARK</div>' +
+                '</div>' +
+                thumbsHtml +
+                '<div class="cute-card-body">' +
+                  '<h3 class="cute-card-title">' + (b.name || '') + '</h3>' +
+                  '<p class="cute-card-desc">' + (b.description || '') + '</p>' +
+                  '<div class="cute-card-footer">' +
+                    '<div class="cute-card-price">' + priceText + '</div>' +
+                    '<button type="button" class="cute-card-btn view-btn" onclick="openBookmarkModal(\'' + slug + '\')">' +
+                      '<span>Photos & Details</span>' +
+                      '<i class="fas fa-expand-alt text-xs"></i>' +
+                    '</button>' +
+                  '</div>' +
+                '</div>';
+
+              grid.appendChild(card);
+            });
+          })
+          .catch(function(err) {
+            console.error('Failed to load cute bookmarks for homepage:', err);
+          });
+      })();
+    </script>
+
     <!-- Complete Premium 4-Column Footer -->
     <footer class="site-footer">
       <div class="max-w-7xl mx-auto px-6 py-14">
