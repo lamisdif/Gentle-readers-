@@ -535,23 +535,76 @@ function loadOrderSummary() {
     }
   }
 
-  // 4. Calculate Packaging
-  const packagingOption = document.querySelector('input[name="packaging"]:checked');
-  const packagingType = packagingOption ? packagingOption.value : 'none';
-  const packagingPrice = PACKAGING_PRICES[packagingType] !== undefined ? PACKAGING_PRICES[packagingType] : 0;
+  // 4. Update Order Type Badge
+  const orderBadge = document.getElementById('checkout-order-type-badge');
+  const orderIcon = document.getElementById('order-type-icon');
+  const orderTitle = document.getElementById('order-type-title');
+  const orderSub = document.getElementById('order-type-sub');
+  const orderSwitch = document.getElementById('order-type-switch-link');
+  const isBookOrder = bookIds.length > 0;
 
-  if (packagingType !== 'none' && packagingPrice > 0) {
-    const packagingTitle = document.createElement("span");
-    const packagingLabel = PACKAGING_LABELS[packagingType] || packagingType;
-    packagingTitle.textContent = lang === 'ar' ? `التغليف (${packagingLabel})` : `Packaging (${packagingLabel})`;
-    packagingTitle.style.fontSize = '0.9rem';
-    
-    const packagingPriceSpan = document.createElement("span");
-    packagingPriceSpan.textContent = `${packagingPrice.toLocaleString()} DZD`;
-    packagingPriceSpan.style.fontSize = '0.9rem';
-    
-    orderDetailsDiv.appendChild(packagingTitle);
-    orderDetailsDiv.appendChild(packagingPriceSpan);
+  if (orderBadge) {
+    if (isBookOrder) {
+      if (orderIcon) orderIcon.textContent = '📖';
+      if (orderTitle) orderTitle.textContent = lang === 'ar' ? 'طلب كتب ومرفقات' : 'Book Order (+ optional bookmarks & packaging)';
+      if (orderSub) orderSub.textContent = lang === 'ar' ? 'طلبك يحتوي على كتب. يمكنك إضافة فواصل وسجل قراءة وتغليف هدايا.' : 'Your order includes books. You can add bookmarks, reading tracker, and gift wrapping below.';
+      if (orderSwitch) {
+        orderSwitch.textContent = lang === 'ar' ? '+ استعراض الفواصل' : '+ Browse Bookmarks';
+        orderSwitch.href = '#bookmarkAddonsList';
+      }
+    } else {
+      if (orderIcon) orderIcon.textContent = '✨';
+      if (orderTitle) orderTitle.textContent = lang === 'ar' ? 'طلب فواصل وإكسسوارات منفردة' : 'Accessories-Only Order / طلب فواصل وإكسسوارات منفردة';
+      if (orderSub) orderSub.textContent = lang === 'ar' ? 'طلبك يحتوي على فواصل أو إكسسوارات فقط. التوصيل متوفر لجميع الولايات!' : 'You are ordering bookmarks/accessories alone without books. Delivery is available across all 58 Wilayas!';
+      if (orderSwitch) {
+        orderSwitch.textContent = lang === 'ar' ? '+ أضف كتباً لطلبك' : '+ Add Books';
+        orderSwitch.href = 'index.html#section-latest-books';
+      }
+    }
+  }
+
+  // 5. Calculate Packaging (strictly available only for book orders)
+  const packagingSection = document.getElementById('checkout-packaging-section');
+  const packagingNotice = document.getElementById('packaging-book-only-notice');
+  let packagingPrice = 0;
+  let packagingType = 'none';
+
+  if (!isBookOrder) {
+    // Accessory-only order: Packaging is strictly locked / disabled
+    if (packagingNotice) packagingNotice.style.display = 'block';
+    if (packagingSection) packagingSection.classList.add('packaging-disabled');
+    const noneRadio = document.querySelector('input[name="packaging"][value="none"]');
+    if (noneRadio) noneRadio.checked = true;
+    document.querySelectorAll('input[name="packaging"]').forEach(r => {
+      r.disabled = true;
+    });
+    packagingType = 'none';
+    packagingPrice = 0;
+  } else {
+    // Book order: Packaging is available
+    if (packagingNotice) packagingNotice.style.display = 'none';
+    if (packagingSection) packagingSection.classList.remove('packaging-disabled');
+    document.querySelectorAll('input[name="packaging"]').forEach(r => {
+      r.disabled = false;
+    });
+
+    const packagingOption = document.querySelector('input[name="packaging"]:checked');
+    packagingType = packagingOption ? packagingOption.value : 'none';
+    packagingPrice = PACKAGING_PRICES[packagingType] !== undefined ? PACKAGING_PRICES[packagingType] : 0;
+
+    if (packagingType !== 'none' && packagingPrice > 0) {
+      const packagingTitle = document.createElement("span");
+      const packagingLabel = PACKAGING_LABELS[packagingType] || packagingType;
+      packagingTitle.textContent = lang === 'ar' ? `التغليف (${packagingLabel})` : `Packaging (${packagingLabel})`;
+      packagingTitle.style.fontSize = '0.9rem';
+      
+      const packagingPriceSpan = document.createElement("span");
+      packagingPriceSpan.textContent = `${packagingPrice.toLocaleString()} DZD`;
+      packagingPriceSpan.style.fontSize = '0.9rem';
+      
+      orderDetailsDiv.appendChild(packagingTitle);
+      orderDetailsDiv.appendChild(packagingPriceSpan);
+    }
   }
   
   const finalTotal = booksSubtotal + addonsSubtotal + shippingCost + packagingPrice;
@@ -716,6 +769,14 @@ if (checkoutForm) {
       return;
     }
 
+    // Strict packaging enforcement: Packaging can only be ordered with books!
+    let finalPackagingType = 'none';
+    if (hasBooks) {
+      const packagingOption = document.querySelector('input[name="packaging"]:checked');
+      finalPackagingType = packagingOption ? packagingOption.value : 'none';
+    }
+    const packagingPrice = hasBooks && PACKAGING_PRICES[finalPackagingType] !== undefined ? PACKAGING_PRICES[finalPackagingType] : 0;
+
     // Calculate Subtotal and Shipping Price
     let subtotal = 0;
     const items = [];
@@ -743,7 +804,6 @@ if (checkoutForm) {
     });
 
     const shippingPrice = getShippingPrice(wilaya, deliveryMethod);
-    const packagingPrice = PACKAGING_PRICES[packagingType] !== undefined ? PACKAGING_PRICES[packagingType] : 0;
     const finalTotal = subtotal + shippingPrice + packagingPrice;
 
     // Final safety check before submission
@@ -752,8 +812,15 @@ if (checkoutForm) {
       return;
     }
 
-        // Send to backend
-    console.log('Submitting order. Subtotal:', subtotal, 'Shipping:', shippingPrice, 'Total:', finalTotal);
+    // Prevent accidental duplicate submissions
+    const submitBtn = document.getElementById("checkout-submit-button");
+    const submitBtnSpan = document.getElementById("checkout-submit-btn");
+    const originalBtnText = submitBtnSpan ? submitBtnSpan.innerHTML : 'Submit Order / إرسال الطلب';
+
+    if (submitBtn) submitBtn.disabled = true;
+    if (submitBtnSpan) submitBtnSpan.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting Order... / جارٍ إرسال الطلب...';
+
+    console.log('Submitting order. Books:', bookIds.length, 'Addons:', activeAddonKeys.length, 'Packaging:', finalPackagingType, 'Total:', finalTotal);
     
     try {
       const { data, error } = await supabase
@@ -770,19 +837,21 @@ if (checkoutForm) {
           desk,
           items, 
           shipping_price: shippingPrice,
-          packaging_type: packagingType,
+          packaging_type: finalPackagingType,
           packaging_price: packagingPrice,
           total_price: finalTotal 
         }]);
 
       if (error) throw error;
       
-      alert(getCurrentLang() === 'ar' ? "تم إرسال الطلب بنجاح!" : "Successfully submitted order!");
+      alert(getCurrentLang() === 'ar' ? "تم إرسال الطلب بنجاح! شكراً لطلبك من Gentle Readers" : "Order placed successfully! Thank you for choosing Gentle Readers.");
       localStorage.removeItem("cart");
       window.location.href = "index.html";
     } catch (err) {
       console.error('Checkout error:', err);
-      alert(getCurrentLang() === 'ar' ? "حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى." : "Error submitting order. Please try again.");
+      alert(getCurrentLang() === 'ar' ? ("حدث خطأ أثناء إرسال الطلب: " + (err.message || "يرجى المحاولة مجدداً")) : ("Error submitting order: " + (err.message || "Please try again.")));
+      if (submitBtn) submitBtn.disabled = false;
+      if (submitBtnSpan) submitBtnSpan.innerHTML = originalBtnText;
     }
   });
 }

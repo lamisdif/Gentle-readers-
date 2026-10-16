@@ -147,5 +147,12 @@ $published = $books | Where-Object { -not $_.draft }
 $sorted = $published | Sort-Object -Property @{ Expression = "createdTime"; Descending = $true }, @{ Expression = "title"; Descending = $false }
 
 $json = $sorted | ConvertTo-Json -Depth 5
-[System.IO.File]::WriteAllText($OutFile, $json + "`n", [System.Text.Encoding]::UTF8)
+$utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+[System.IO.File]::WriteAllText($OutFile, $json + "`n", $utf8NoBom)
 Write-Host "Wrote $($sorted.Count) CMS books to public/cms-books.json"
+
+# Build bookmarks and accessories
+$buildDataPy = Join-Path $PSScriptRoot "build-cms-data.py"
+if (Test-Path $buildDataPy) {
+    python $buildDataPy
+}

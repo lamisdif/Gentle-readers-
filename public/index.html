@@ -543,6 +543,8 @@
         </li>
         <li><a href="#" class="active" id="nav-home">HOME</a></li>
         <li><a href="#cute-bookmarks-section" id="nav-cute-bookmarks"><i class="fas fa-bookmark text-amber-600 mr-1"></i> BOOKMARKS ✨</a></li>
+        <li><a href="#reading-accessories-section" id="nav-reading-accessories"><i class="fas fa-book-open text-emerald-600 mr-1"></i> ACCESSORIES 📖</a></li>
+        <li><a href="#packaging-showcase-section" id="nav-packaging-showcase"><i class="fas fa-gift text-red-600 mr-1"></i> PACKAGING 🎁</a></li>
         <li>
           <a href="#" class="flex items-center justify-between" id="nav-pages">PAGES <i
               class="fas fa-chevron-down text-xs ml-1"></i></a>
@@ -1406,7 +1408,9 @@
           box-sizing: border-box;
         }
         #cute-lightbox-modal.active {
-          display: flex;
+          display: flex !important;
+          opacity: 1 !important;
+          visibility: visible !important;
         }
         .cute-lightbox-box {
           background: #FCF8D5;
@@ -1420,11 +1424,8 @@
           max-height: 94vh;
           display: flex;
           flex-direction: column;
-          animation: lbPop 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.25);
-        }
-        @keyframes lbPop {
-          0% { transform: scale(0.93); opacity: 0; }
-          100% { transform: scale(1); opacity: 1; }
+          opacity: 1 !important;
+          transform: none !important;
         }
         .cute-lightbox-header {
           display: flex;
@@ -1491,8 +1492,9 @@
           width: auto;
           height: auto;
           object-fit: contain;
-          display: block;
-          transition: opacity 0.2s ease, transform 0.2s ease;
+          display: block !important;
+          opacity: 1 !important;
+          margin: auto;
         }
         .cute-lightbox-arrow {
           position: absolute;
@@ -1751,13 +1753,225 @@
       </div>
     </section>
 
-    <!-- Bookmarks JavaScript Gallery & CMS Sync Handler -->
+    <!-- ========================================================
+         READING ACCESSORIES & LOGS SECTION
+         Dedicated section for reading companions & book trackers
+         ======================================================== -->
+    <section id="reading-accessories-section" class="cute-accessories-section" style="width: 100%; max-width: 1240px; margin: 20px auto 40px; padding: 30px 20px 40px; box-sizing: border-box; display: block !important;">
+      <div class="cute-section-header">
+        <span class="cute-badge" style="background: rgba(16, 86, 82, 0.08); color: #105652; border-color: rgba(16, 86, 82, 0.25);">
+          <i class="fas fa-book-open text-emerald-700"></i> READING COMPANIONS
+        </span>
+        <h2 class="cute-title" style="color: #105652;">READING ACCESSORIES & LOG 📖</h2>
+        <p class="cute-subtitle" style="color: #435b56;">
+          Keep track of every book you read, capture memorable quotes, and track your annual reading goals. Available as a standalone purchase or together with books!
+        </p>
+      </div>
+
+      <div style="max-width: 580px; margin: 0 auto;">
+        <div class="cute-card" id="cute-card-book-tracker" style="max-width: 580px; margin: 0 auto;">
+          <div class="cute-card-img-wrap" style="height: 380px;" onclick="openProductLightbox('book-tracker', 0, event)">
+            <img id="cute-main-img-book-tracker" class="cute-card-main-img" src="img/new products/bookmarks/book tracker.jpg" alt="Reading Log & Book Tracker" style="height: 380px; object-fit: contain; background: #f7f1e5;" />
+            <div class="cute-tag-badge" style="background: #105652;">📖 ESSENTIAL ACCESSORY</div>
+            <button type="button" class="cute-card-zoom-btn" onclick="openProductLightbox('book-tracker', 0, event)" title="Enlarge photo">
+              <i class="fas fa-search-plus"></i>
+              <span>Enlarge</span>
+            </button>
+          </div>
+          <div class="cute-card-body">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 6px;">
+              <h3 class="cute-card-title" style="margin: 0; color: #105652;">Reading Log & Book Tracker / بطاقة وسجل تتبع القراءة</h3>
+              <span style="background: rgba(16, 86, 82, 0.1); color: #105652; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; white-space: nowrap;">Reading Tracker</span>
+            </div>
+            <p class="cute-card-desc">
+              Premium tactile cardstock tracker designed for passionate readers. Easily log book titles, authors, completion dates, ratings, and inspiring quotes. Available for individual order or as an add-on!
+            </p>
+            <div class="cute-card-footer">
+              <div class="cute-card-price" id="cute-price-book-tracker" style="color: #105652;">600 DA</div>
+              <div class="cute-card-actions">
+                <button type="button" class="cute-btn cute-btn-outline" onclick="openProductLightbox('book-tracker', 0, event)" title="View photo details">
+                  <i class="fas fa-expand-alt"></i>
+                  <span>Photos</span>
+                </button>
+                <button type="button" class="cute-btn cute-btn-outline" onclick="addAccessoryToCart('book-tracker', event)" title="Add to cart">
+                  <i class="fas fa-cart-plus"></i>
+                  <span>Cart</span>
+                </button>
+                <a href="checkout.html?addon=acc_book-tracker" class="cute-btn" style="background: #105652; color: #ffffff;" title="Order Reading Tracker alone">
+                  <span>Buy Tracker ⚡</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         PREMIUM GIFT PACKAGING SECTION
+         Showcases wrapping papers available with book orders
+         ======================================================== -->
+    <section id="packaging-showcase-section" class="packaging-showcase-section" style="width: 100%; max-width: 1240px; margin: 30px auto 50px; padding: 35px 20px 45px; box-sizing: border-box; background: rgba(94, 34, 23, 0.03); border-radius: 24px; border: 1.5px dashed rgba(94, 34, 23, 0.18); display: block !important;">
+      <div class="cute-section-header">
+        <span class="cute-badge" style="background: #5e2217; color: #fcf4cc;">
+          <i class="fas fa-gift text-amber-300"></i> GIFT WRAPPING COLLECTION
+        </span>
+        <h2 class="cute-title">PREMIUM GIFT PACKAGING 🎁</h2>
+        <p class="cute-subtitle" style="margin-bottom: 14px;">
+          Make your book a memorable gift! Choose from our artist-designed, high-grade wrapping papers to elegantly wrap your book orders.
+        </p>
+        <!-- Crucial Notice: Exclusively with book orders -->
+        <div style="display: inline-block; background: #fff8eb; border: 1.5px solid #d97706; border-radius: 12px; padding: 10px 18px; max-width: 720px; margin: 0 auto; text-align: center; box-shadow: 0 2px 8px rgba(217, 119, 6, 0.1);">
+          <div style="font-weight: 700; color: #92400e; font-size: 13.5px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span>✨</span>
+            <span>Packaging is available exclusively with Book Orders (cannot be ordered alone)</span>
+          </div>
+          <div style="font-size: 12px; color: #b45309; margin-top: 3px;">
+            ورق التغليف مخصص لطلبات الكتب ولا يمكن شراؤه منفرداً. عند اختيارك كتاباً، ستتمكن من تحديد نوع التغليف المفضل لديك في صفحة الدفع.
+          </div>
+        </div>
+      </div>
+
+      <!-- Packaging Grid (3 New Packaging Designs @ 600 DA) -->
+      <div class="cute-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
+        
+        <!-- Packaging 1: Vintage Wildflowers -->
+        <div class="cute-card" id="packaging-card-wildflowers">
+          <div class="cute-card-img-wrap" onclick="openProductLightbox('paper_wildflowers', 0, event)">
+            <img class="cute-card-main-img" src="img/new products/wrapping paper/packaging paper 1.jpg" alt="Vintage Wildflowers Wrapping Paper" />
+            <div class="cute-tag-badge" style="background: #7a524a;">🌸 GIFT WRAPPING</div>
+            <button type="button" class="cute-card-zoom-btn" onclick="openProductLightbox('paper_wildflowers', 0, event)" title="Enlarge pattern">
+              <i class="fas fa-search-plus"></i>
+              <span>Enlarge Pattern</span>
+            </button>
+          </div>
+          <div class="cute-card-body">
+            <h3 class="cute-card-title">Vintage Wildflowers / ورق زهور برية كلاسيكي</h3>
+            <p class="cute-card-desc">
+              Charming vintage botanical print on premium heavy paper with delicate field florals and foliage. Gives any novel a warm, timeless literary feel.
+            </p>
+            <div class="cute-card-footer">
+              <div>
+                <div class="cute-card-price" style="color: #5e2217;">600 DA</div>
+                <div style="font-size: 11px; color: #888;">Available with book orders</div>
+              </div>
+              <div class="cute-card-actions">
+                <button type="button" class="cute-btn cute-btn-outline" onclick="openProductLightbox('paper_wildflowers', 0, event)" title="View enlarged pattern">
+                  <i class="fas fa-expand-alt"></i>
+                  <span>View Pattern</span>
+                </button>
+                <a href="#section-latest-books" class="cute-btn cute-btn-primary" title="Choose a book to add this packaging">
+                  <span>Pair with a Book 📖</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Packaging 2: Festive Pine & Berries (Dual-Side) -->
+        <div class="cute-card" id="packaging-card-pine-berries">
+          <div class="cute-card-img-wrap" onclick="openProductLightbox('paper_pine_berries', null, event)">
+            <img id="cute-main-img-paper_pine_berries" class="cute-card-main-img" src="img/new products/wrapping paper/packaging paper 2.jpg" alt="Festive Pine & Berries Wrapping Paper" />
+            <div class="cute-tag-badge" style="background: #1b4d3e;">🌲 2-SIDED DESIGN</div>
+            <button type="button" class="cute-card-zoom-btn" onclick="openProductLightbox('paper_pine_berries', null, event)" title="Enlarge pattern">
+              <i class="fas fa-search-plus"></i>
+              <span>Enlarge Pattern</span>
+            </button>
+            <button type="button" class="cute-card-nav-prev" onclick="stepBookmarkCard('paper_pine_berries', -1, event)" aria-label="Previous photo">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <button type="button" class="cute-card-nav-next" onclick="stepBookmarkCard('paper_pine_berries', 1, event)" aria-label="Next photo">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+          <div class="cute-thumb-bar">
+            <div class="cute-thumb-item thumb-paper_pine_berries active" onclick="switchBookmarkImage('paper_pine_berries', 0, event)">
+              <img src="img/new products/wrapping paper/packaging paper 2.jpg" alt="Pine & Berries Front" />
+            </div>
+            <div class="cute-thumb-item thumb-paper_pine_berries" onclick="switchBookmarkImage('paper_pine_berries', 1, event)">
+              <img src="img/new products/wrapping paper/packaging paper 2 (2).jpg" alt="Striped Reverse Side" />
+            </div>
+          </div>
+          <div class="cute-card-body">
+            <h3 class="cute-card-title">Festive Pine & Berries / ورق صنوبر وتوت شتوي</h3>
+            <p class="cute-card-desc">
+              Cozy seasonal pine cones, evergreens, and vibrant red berries on the front, with a festive candy-stripe pattern on the reverse side.
+            </p>
+            <div class="cute-card-footer">
+              <div>
+                <div class="cute-card-price" style="color: #5e2217;">600 DA</div>
+                <div style="font-size: 11px; color: #888;">Available with book orders</div>
+              </div>
+              <div class="cute-card-actions">
+                <button type="button" class="cute-btn cute-btn-outline" onclick="openProductLightbox('paper_pine_berries', null, event)" title="View enlarged pattern">
+                  <i class="fas fa-expand-alt"></i>
+                  <span>View Pattern</span>
+                </button>
+                <a href="#section-latest-books" class="cute-btn cute-btn-primary" title="Choose a book to add this packaging">
+                  <span>Pair with a Book 📖</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Packaging 3: Celestial Crane & Mountain -->
+        <div class="cute-card" id="packaging-card-celestial-crane">
+          <div class="cute-card-img-wrap" onclick="openProductLightbox('paper_celestial_crane', 0, event)">
+            <img class="cute-card-main-img" src="img/new products/wrapping paper/packaging paper 3.jpg" alt="Celestial Crane & Mountain Wrapping Paper" />
+            <div class="cute-tag-badge" style="background: #2b4c6f;">🕊️ ORIENTAL ART</div>
+            <button type="button" class="cute-card-zoom-btn" onclick="openProductLightbox('paper_celestial_crane', 0, event)" title="Enlarge pattern">
+              <i class="fas fa-search-plus"></i>
+              <span>Enlarge Pattern</span>
+            </button>
+          </div>
+          <div class="cute-card-body">
+            <h3 class="cute-card-title">Celestial Crane & Mountain / ورق الرافعات والجبال السماوية</h3>
+            <p class="cute-card-desc">
+              Majestic Japanese-style cranes soaring above mist-shrouded peaks and pines against deep indigo tones. An extraordinary presentation for literature.
+            </p>
+            <div class="cute-card-footer">
+              <div>
+                <div class="cute-card-price" style="color: #5e2217;">600 DA</div>
+                <div style="font-size: 11px; color: #888;">Available with book orders</div>
+              </div>
+              <div class="cute-card-actions">
+                <button type="button" class="cute-btn cute-btn-outline" onclick="openProductLightbox('paper_celestial_crane', 0, event)" title="View enlarged pattern">
+                  <i class="fas fa-expand-alt"></i>
+                  <span>View Pattern</span>
+                </button>
+                <a href="#section-latest-books" class="cute-btn cute-btn-primary" title="Choose a book to add this packaging">
+                  <span>Pair with a Book 📖</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Note on Classic Packaging Options -->
+      <div style="margin-top: 25px; padding: 14px 18px; background: rgba(94, 34, 23, 0.05); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+        <div style="font-size: 13px; color: #5e2217;">
+          <strong>Also available at checkout:</strong> Classic Papier Craft (500 DA) and Mystery Surprise Wrap (500 DA).
+        </div>
+        <a href="#section-latest-books" class="inline-flex items-center gap-2 font-bold text-xs px-5 py-2.5 rounded-full" style="background: #5e2217; color: #fcf4cc;">
+          <span>Explore Books to Gift 📖</span>
+          <i class="fas fa-arrow-down text-xs"></i>
+        </a>
+      </div>
+    </section>
+
+    <!-- Unified Products & Accessories JavaScript Gallery & CMS Sync Handler -->
     <script>
       (function() {
-        // Initial state for pre-rendered bookmarks
-        window.bookmarkGalleryState = {
+        // Unified state dictionary for bookmarks, accessories, and packaging
+        window.productGalleryState = {
+          // --- Bookmarks (available alone or with books) ---
           'cat-bookmarks': {
+            id: 'cat-bookmarks',
             slug: 'cat-bookmarks',
+            type: 'bookmark',
             name: 'Acrylic Cat Bookmarks / فواصل قطط لطيفة',
             description: 'Adorable acrylic stretching cat bookmarks featuring playful ginger and tabby designs. Perfect companion for cat lovers and cozy reading sessions.',
             price: 450,
@@ -1770,7 +1984,9 @@
             activeIndex: 0
           },
           'metallic-leaf-bookmarks': {
+            id: 'metallic-leaf-bookmarks',
             slug: 'metallic-leaf-bookmarks',
+            type: 'bookmark',
             name: 'Metallic Leaf Chain Bookmarks / فواصل أوراق شجر معدنية ذهبية',
             description: 'Exquisite golden metallic bookmarks with delicate maple and ginkgo leaf pendants on a dainty chain. Elegant, durable, and timeless. (2500 DA FOR THE WHOLE PACK)',
             price: 700,
@@ -1782,7 +1998,9 @@
             activeIndex: 0
           },
           'boot-shaped-bookmarks': {
+            id: 'boot-shaped-bookmarks',
             slug: 'boot-shaped-bookmarks',
+            type: 'bookmark',
             name: 'Whimsical Boots Bookmarks / فاصل الأحذية المميز',
             description: 'Charming 3D bookmark featuring striped legs and sparkling ruby/glitter boots sticking out of your book pages. Adds a touch of magic and humor to your library.',
             price: 800,
@@ -1794,28 +2012,83 @@
               'img/new products/bookmarks/boots bookmark (4).jpg'
             ],
             activeIndex: 0
+          },
+
+          // --- Reading Accessories (available alone or with books) ---
+          'book-tracker': {
+            id: 'book-tracker',
+            slug: 'book-tracker',
+            type: 'accessory',
+            name: 'Reading Log & Book Tracker / بطاقة وسجل تتبع القراءة',
+            description: 'Premium tactile cardstock tracker designed for passionate readers. Easily log book titles, authors, completion dates, ratings, and inspiring quotes. The perfect reading journal companion!',
+            price: 600,
+            priceText: '600 DA',
+            images: [
+              'img/new products/bookmarks/book tracker.jpg'
+            ],
+            activeIndex: 0
+          },
+
+          // --- Packaging Options (EXCLUSIVELY available with book orders) ---
+          'paper_wildflowers': {
+            id: 'paper_wildflowers',
+            slug: 'paper_wildflowers',
+            type: 'packaging',
+            name: 'Vintage Wildflowers Wrapping Paper / ورق زهور برية كلاسيكي',
+            description: 'Charming vintage botanical print on heavy premium paper with delicate field florals and foliage. Available exclusively when ordering a book.',
+            price: 600,
+            priceText: '600 DA (Book Orders Only)',
+            images: [
+              'img/new products/wrapping paper/packaging paper 1.jpg'
+            ],
+            activeIndex: 0
+          },
+          'paper_pine_berries': {
+            id: 'paper_pine_berries',
+            slug: 'paper_pine_berries',
+            type: 'packaging',
+            name: 'Festive Pine & Berries Wrapping Paper / ورق صنوبر وتوت شتوي',
+            description: 'Cozy seasonal pine cones, evergreens, and vibrant red berries on the front, with a festive candy-stripe pattern on the reverse side. Available exclusively when ordering a book.',
+            price: 600,
+            priceText: '600 DA (Book Orders Only)',
+            images: [
+              'img/new products/wrapping paper/packaging paper 2.jpg',
+              'img/new products/wrapping paper/packaging paper 2 (2).jpg'
+            ],
+            activeIndex: 0
+          },
+          'paper_celestial_crane': {
+            id: 'paper_celestial_crane',
+            slug: 'paper_celestial_crane',
+            type: 'packaging',
+            name: 'Celestial Crane & Mountain Wrapping Paper / ورق الرافعات والجبال السماوية',
+            description: 'Majestic oriental cranes soaring above mist-shrouded peaks and pines against deep indigo tones. Available exclusively when ordering a book.',
+            price: 600,
+            priceText: '600 DA (Book Orders Only)',
+            images: [
+              'img/new products/wrapping paper/packaging paper 3.jpg'
+            ],
+            activeIndex: 0
           }
         };
 
-        window.currentLightboxSlug = null;
+        // Backward compatibility alias
+        window.bookmarkGalleryState = window.productGalleryState;
+        window.currentLightboxId = null;
 
         // Switch main image on card
-        window.switchBookmarkImage = function(slug, index, event) {
+        window.switchBookmarkImage = function(id, index, event) {
           if (event) event.stopPropagation();
-          var state = window.bookmarkGalleryState[slug];
+          var state = window.productGalleryState[id];
           if (!state || !state.images || !state.images[index]) return;
           state.activeIndex = index;
 
-          var mainImg = document.getElementById('cute-main-img-' + slug);
+          var mainImg = document.getElementById('cute-main-img-' + id);
           if (mainImg) {
-            mainImg.style.opacity = '0.4';
-            setTimeout(function() {
-              mainImg.src = encodeURI(state.images[index]);
-              mainImg.style.opacity = '1';
-            }, 100);
+            mainImg.src = encodeURI(state.images[index]);
           }
 
-          var thumbs = document.querySelectorAll('.thumb-' + slug);
+          var thumbs = document.querySelectorAll('.thumb-' + id);
           thumbs.forEach(function(th, idx) {
             if (idx === index) th.classList.add('active');
             else th.classList.remove('active');
@@ -1823,21 +2096,21 @@
         };
 
         // Step through images on card via arrows
-        window.stepBookmarkCard = function(slug, delta, event) {
+        window.stepBookmarkCard = function(id, delta, event) {
           if (event) event.stopPropagation();
-          var state = window.bookmarkGalleryState[slug];
+          var state = window.productGalleryState[id];
           if (!state || !state.images || state.images.length === 0) return;
           var total = state.images.length;
           var newIdx = ((state.activeIndex || 0) + delta + total) % total;
-          window.switchBookmarkImage(slug, newIdx, event);
+          window.switchBookmarkImage(id, newIdx, event);
         };
 
-        // Open Lightbox Modal
-        window.openBookmarkLightbox = function(slug, initialIndex, event) {
+        // Open Lightbox Modal for Any Product (Bookmark, Accessory, Packaging)
+        window.openProductLightbox = function(id, initialIndex, event) {
           if (event) event.stopPropagation();
-          var state = window.bookmarkGalleryState[slug];
+          var state = window.productGalleryState[id];
           if (!state) return;
-          window.currentLightboxSlug = slug;
+          window.currentLightboxId = id;
           if (typeof initialIndex === 'number') {
             state.activeIndex = initialIndex;
           } else if (state.activeIndex === undefined) {
@@ -1849,14 +2122,30 @@
           var descEl = document.getElementById('lightbox-desc');
           var priceEl = document.getElementById('lightbox-price');
           var buyBtn = document.getElementById('lightbox-buy-now-btn');
+          var buyText = document.getElementById('lightbox-buy-now-text');
+          var actionsRow = document.getElementById('lightbox-actions-row');
+          var packagingNotice = document.getElementById('lightbox-packaging-notice');
 
           if (!modal) return;
           titleEl.textContent = state.name;
           descEl.textContent = state.description;
           priceEl.innerHTML = state.priceText || (state.price ? (state.price + ' DA') : '');
 
-          if (buyBtn) {
-            buyBtn.href = 'checkout.html?addon=bookmark_' + slug;
+          if (state.type === 'packaging') {
+            // Packaging is only available with book orders
+            if (actionsRow) actionsRow.style.display = 'none';
+            if (packagingNotice) packagingNotice.style.display = 'block';
+          } else {
+            // Bookmarks & accessories can be ordered alone or with books
+            if (actionsRow) actionsRow.style.display = 'flex';
+            if (packagingNotice) packagingNotice.style.display = 'none';
+            if (buyBtn) {
+              var paramId = state.type === 'accessory' ? ('acc_' + id) : ('bookmark_' + id);
+              buyBtn.href = 'checkout.html?addon=' + paramId;
+            }
+            if (buyText) {
+              buyText.textContent = state.type === 'accessory' ? 'Buy Accessory Now ⚡' : 'Buy Bookmark Now ⚡';
+            }
           }
 
           updateLightboxDisplay();
@@ -1864,10 +2153,13 @@
           document.body.style.overflow = 'hidden';
         };
 
-        // Update active image, counter, and thumbs in Lightbox
+        // Alias for openBookmarkLightbox
+        window.openBookmarkLightbox = window.openProductLightbox;
+
+        // Update active image, counter, arrows, and thumbs in Lightbox
         function updateLightboxDisplay() {
-          var slug = window.currentLightboxSlug;
-          var state = window.bookmarkGalleryState[slug];
+          var id = window.currentLightboxId;
+          var state = window.productGalleryState[id];
           if (!state) return;
           var activeIdx = state.activeIndex || 0;
           var total = state.images.length;
@@ -1875,44 +2167,55 @@
           var imgEl = document.getElementById('lightbox-main-img');
           var counterEl = document.getElementById('lightbox-counter');
           var thumbsRow = document.getElementById('lightbox-thumbs');
+          var prevBtn = document.getElementById('lightbox-arrow-prev');
+          var nextBtn = document.getElementById('lightbox-arrow-next');
 
-          if (imgEl) {
-            imgEl.style.opacity = '0.35';
-            setTimeout(function() {
-              imgEl.src = encodeURI(state.images[activeIdx]);
-              imgEl.style.opacity = '1';
-            }, 80);
+          if (imgEl && state.images[activeIdx]) {
+            imgEl.src = encodeURI(state.images[activeIdx]);
+            imgEl.style.display = 'block';
+            imgEl.style.opacity = '1';
           }
 
           if (counterEl) {
-            counterEl.textContent = 'Photo ' + (activeIdx + 1) + ' of ' + total;
+            counterEl.textContent = total > 1 ? ('Photo ' + (activeIdx + 1) + ' of ' + total) : 'Photo 1 of 1';
           }
 
+          // Toggle arrow visibility
+          if (prevBtn) prevBtn.style.display = total > 1 ? 'flex' : 'none';
+          if (nextBtn) nextBtn.style.display = total > 1 ? 'flex' : 'none';
+
+          // Toggle thumbs row visibility
           if (thumbsRow) {
-            thumbsRow.innerHTML = '';
-            state.images.forEach(function(src, idx) {
-              var th = document.createElement('div');
-              th.className = 'cute-lightbox-thumb' + (idx === activeIdx ? ' active' : '');
-              th.innerHTML = '<img src="' + encodeURI(src) + '" alt="Angle ' + (idx + 1) + '" />';
-              th.onclick = function() {
-                state.activeIndex = idx;
-                updateLightboxDisplay();
-                window.switchBookmarkImage(slug, idx);
-              };
-              thumbsRow.appendChild(th);
-            });
+            if (total > 1) {
+              thumbsRow.style.display = 'flex';
+              thumbsRow.innerHTML = '';
+              state.images.forEach(function(src, idx) {
+                var th = document.createElement('div');
+                th.className = 'cute-lightbox-thumb' + (idx === activeIdx ? ' active' : '');
+                th.innerHTML = '<img src="' + encodeURI(src) + '" alt="Angle ' + (idx + 1) + '" />';
+                th.onclick = function() {
+                  state.activeIndex = idx;
+                  updateLightboxDisplay();
+                  window.switchBookmarkImage(id, idx);
+                };
+                thumbsRow.appendChild(th);
+              });
+            } else {
+              thumbsRow.style.display = 'none';
+              thumbsRow.innerHTML = '';
+            }
           }
         }
 
         // Step image in Lightbox
         window.stepBookmarkLightbox = function(delta) {
-          var slug = window.currentLightboxSlug;
-          var state = window.bookmarkGalleryState[slug];
+          var id = window.currentLightboxId;
+          var state = window.productGalleryState[id];
           if (!state || !state.images || state.images.length === 0) return;
           var total = state.images.length;
           state.activeIndex = ((state.activeIndex || 0) + delta + total) % total;
           updateLightboxDisplay();
-          window.switchBookmarkImage(slug, state.activeIndex);
+          window.switchBookmarkImage(id, state.activeIndex);
         };
 
         // Close Lightbox
@@ -1920,7 +2223,7 @@
           var modal = document.getElementById('cute-lightbox-modal');
           if (modal) modal.classList.remove('active');
           document.body.style.overflow = '';
-          window.currentLightboxSlug = null;
+          window.currentLightboxId = null;
         };
 
         // Keyboard navigation for Lightbox
@@ -1936,14 +2239,44 @@
           }
         });
 
-        // Add bookmark directly to cart (allows purchasing bookmarks/accessories alone)
+        // Add bookmark directly to cart
         window.addBookmarkToCart = function(slug, event) {
           if (event) {
             event.stopPropagation();
             event.preventDefault();
           }
           if (!slug) return;
-          var id = 'bookmark_' + slug;
+          addItemToCartStorage('bookmark_' + slug);
+          var name = (window.productGalleryState[slug] && window.productGalleryState[slug].name) || 'Cute Bookmark';
+          showToast(name, false);
+        };
+
+        // Add accessory directly to cart (e.g. book-tracker)
+        window.addAccessoryToCart = function(slug, event) {
+          if (event) {
+            event.stopPropagation();
+            event.preventDefault();
+          }
+          if (!slug) return;
+          addItemToCartStorage('acc_' + slug);
+          var name = (window.productGalleryState[slug] && window.productGalleryState[slug].name) || 'Reading Accessory';
+          showToast(name, true);
+        };
+
+        // Lightbox add to cart button handler
+        window.handleLightboxAddToCart = function(event) {
+          var id = window.currentLightboxId;
+          if (!id) return;
+          var state = window.productGalleryState[id];
+          if (!state) return;
+          if (state.type === 'accessory') {
+            window.addAccessoryToCart(id, event);
+          } else {
+            window.addBookmarkToCart(id, event);
+          }
+        };
+
+        function addItemToCartStorage(id) {
           var stored = {};
           try {
             stored = JSON.parse(localStorage.getItem('cart')) || {};
@@ -1976,12 +2309,9 @@
             btn.style.transform = 'scale(1.25)';
             setTimeout(function() { btn.style.transform = 'scale(1)'; }, 250);
           });
+        }
 
-          var name = (window.bookmarkGalleryState[slug] && window.bookmarkGalleryState[slug].name) || 'Cute Bookmark';
-          showBookmarkToast(name);
-        };
-
-        function showBookmarkToast(title) {
+        function showToast(title, isAccessory) {
           var existing = document.getElementById('cute-bookmark-toast');
           if (existing) existing.remove();
 
@@ -1989,7 +2319,7 @@
           toast.id = 'cute-bookmark-toast';
           toast.style.cssText = 'position: fixed; bottom: 24px; right: 24px; z-index: 999999; background: #5e2217; color: #fcf4cc; padding: 14px 20px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); display: flex; align-items: center; gap: 14px; font-family: inherit; font-size: 13.5px; border: 1.5px solid rgba(252,244,204,0.3); max-width: 90vw;';
           toast.innerHTML = `
-            <span style="font-size: 20px;">✨</span>
+            <span style="font-size: 20px;">${isAccessory ? '📖' : '✨'}</span>
             <div style="flex: 1; min-width: 0;">
               <div style="font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px;">${title}</div>
               <div style="font-size: 11.5px; opacity: 0.9;">Added to cart / تمت الإضافة للسلة</div>
@@ -2025,24 +2355,23 @@
           }, { passive: true });
         }
 
-        // Fetch dynamic CMS bookmarks to update prices/descriptions or add new bookmarks
-        fetch('cms-bookmarks.json')
-          .then(function(res) { return res.ok ? res.json() : []; })
-          .then(function(cmsBookmarks) {
-            if (!Array.isArray(cmsBookmarks) || cmsBookmarks.length === 0) return;
-            var activeBookmarks = cmsBookmarks.filter(function(b) {
-              return b && b.active !== false && !b.draft;
-            });
-            if (activeBookmarks.length === 0) return;
+        // Fetch dynamic CMS bookmarks and accessories to sync updates
+        Promise.all([
+          fetch('cms-bookmarks.json').then(function(r) { return r.ok ? r.json() : []; }).catch(function() { return []; }),
+          fetch('cms-accessories.json').then(function(r) { return r.ok ? r.json() : []; }).catch(function() { return []; })
+        ]).then(function(results) {
+          var cmsBookmarks = results[0];
+          var cmsAccessories = results[1];
 
-            // Update each bookmark
-            activeBookmarks.forEach(function(b) {
+          if (Array.isArray(cmsBookmarks)) {
+            cmsBookmarks.forEach(function(b) {
+              if (!b || b.active === false || b.draft) return;
               var slug = b.slug || b.id;
               var hasPrice = b.price !== null && b.price !== undefined && !isNaN(Number(b.price)) && Number(b.price) > 0;
               var priceText = hasPrice ? (Number(b.price).toLocaleString() + ' DA') : 'Price set in CMS';
 
-              if (window.bookmarkGalleryState[slug]) {
-                var cur = window.bookmarkGalleryState[slug];
+              if (window.productGalleryState[slug]) {
+                var cur = window.productGalleryState[slug];
                 if (b.name) cur.name = b.name;
                 if (b.description) cur.description = b.description;
                 if (b.price !== null) cur.price = b.price;
@@ -2053,10 +2382,31 @@
                 if (pEl) pEl.innerHTML = priceText;
               }
             });
-          })
-          .catch(function(err) {
-            console.log('CMS bookmarks offline or unchanged:', err);
-          });
+          }
+
+          if (Array.isArray(cmsAccessories)) {
+            cmsAccessories.forEach(function(a) {
+              if (!a || a.active === false || a.draft) return;
+              var slug = a.slug || a.id;
+              var hasPrice = a.price !== null && a.price !== undefined && !isNaN(Number(a.price)) && Number(a.price) > 0;
+              var priceText = hasPrice ? (Number(a.price).toLocaleString() + ' DA') : 'Price set in CMS';
+
+              if (window.productGalleryState[slug]) {
+                var cur = window.productGalleryState[slug];
+                if (a.name) cur.name = a.name;
+                if (a.description) cur.description = a.description;
+                if (a.price !== null) cur.price = a.price;
+                cur.priceText = priceText;
+                if (Array.isArray(a.images) && a.images.length > 0) cur.images = a.images;
+
+                var pEl = document.getElementById('cute-price-' + slug);
+                if (pEl) pEl.innerHTML = priceText;
+              }
+            });
+          }
+        }).catch(function(err) {
+          console.log('CMS data sync notice:', err);
+        });
       })();
     </script>
 
@@ -2217,6 +2567,8 @@
             <ul class="space-y-2.5 text-sm">
               <li><a href="#" class="footer-link hover:text-red-700 transition-colors flex items-center"><i class="fas fa-chevron-right text-xs mr-2 text-red-600"></i>Home</a></li>
               <li><a href="#cute-bookmarks-section" class="footer-link hover:text-red-700 transition-colors flex items-center"><i class="fas fa-chevron-right text-xs mr-2 text-red-600"></i>Cute Bookmarks ✨</a></li>
+              <li><a href="#reading-accessories-section" class="footer-link hover:text-red-700 transition-colors flex items-center"><i class="fas fa-chevron-right text-xs mr-2 text-emerald-600"></i>Reading Accessories 📖</a></li>
+              <li><a href="#packaging-showcase-section" class="footer-link hover:text-red-700 transition-colors flex items-center"><i class="fas fa-chevron-right text-xs mr-2 text-red-600"></i>Gift Packaging 🎁</a></li>
               <li><a href="cart.html" class="footer-link hover:text-red-700 transition-colors flex items-center"><i class="fas fa-chevron-right text-xs mr-2 text-red-600"></i>Shopping Cart</a></li>
               <li><a href="search.html" class="footer-link hover:text-red-700 transition-colors flex items-center"><i class="fas fa-chevron-right text-xs mr-2 text-red-600"></i>Search Books</a></li>
               <li><a href="#genre-cards-section" class="footer-link hover:text-red-700 transition-colors flex items-center"><i class="fas fa-chevron-right text-xs mr-2 text-red-600"></i>Explore Genres</a></li>
@@ -2901,18 +3253,18 @@
     <div id="cute-lightbox-modal" onclick="if(event.target===this) closeBookmarkLightbox()">
       <div class="cute-lightbox-box">
         <div class="cute-lightbox-header">
-          <div style="display: flex; align-items: center; min-width: 0;">
-            <h3 class="cute-lightbox-title" id="lightbox-title">Bookmark Details</h3>
-            <span class="cute-lightbox-counter" id="lightbox-counter">Photo 1 of 3</span>
+          <div style="display: flex; align-items: center; min-width: 0; gap: 8px;">
+            <h3 class="cute-lightbox-title" id="lightbox-title">Product Details</h3>
+            <span class="cute-lightbox-counter" id="lightbox-counter">Photo 1 of 1</span>
           </div>
           <button type="button" class="cute-lightbox-close" onclick="closeBookmarkLightbox()" aria-label="Close modal">✕</button>
         </div>
         <div class="cute-lightbox-stage" id="lightbox-stage">
-          <button type="button" class="cute-lightbox-arrow prev" onclick="stepBookmarkLightbox(-1)" aria-label="Previous photo">
+          <button type="button" class="cute-lightbox-arrow prev" id="lightbox-arrow-prev" onclick="stepBookmarkLightbox(-1)" aria-label="Previous photo">
             <i class="fas fa-chevron-left"></i>
           </button>
-          <img id="lightbox-main-img" class="cute-lightbox-img" src="" alt="Enlarged bookmark photo" />
-          <button type="button" class="cute-lightbox-arrow next" onclick="stepBookmarkLightbox(1)" aria-label="Next photo">
+          <img id="lightbox-main-img" class="cute-lightbox-img" src="" alt="Enlarged photo" />
+          <button type="button" class="cute-lightbox-arrow next" id="lightbox-arrow-next" onclick="stepBookmarkLightbox(1)" aria-label="Next photo">
             <i class="fas fa-chevron-right"></i>
           </button>
         </div>
@@ -2923,14 +3275,27 @@
           <p class="cute-lightbox-desc" id="lightbox-desc"></p>
           <div class="cute-lightbox-footer">
             <div class="cute-lightbox-price" id="lightbox-price"></div>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-              <button type="button" class="cute-btn cute-btn-outline" id="lightbox-add-cart-btn" onclick="addBookmarkToCart(window.currentLightboxSlug, event)" style="padding: 10px 18px; font-size: 13.5px;">
+            <div id="lightbox-actions-row" style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button type="button" class="cute-btn cute-btn-outline" id="lightbox-add-cart-btn" onclick="handleLightboxAddToCart(event)" style="padding: 10px 18px; font-size: 13.5px;">
                 <i class="fas fa-cart-plus"></i>
                 <span>Add to Cart</span>
               </button>
               <a href="checkout.html" id="lightbox-buy-now-btn" class="cute-btn cute-btn-primary" style="padding: 10px 20px; font-size: 14px;">
-                <span>Buy Bookmark Now ⚡</span>
+                <span id="lightbox-buy-now-text">Buy Now ⚡</span>
               </a>
+            </div>
+            <div id="lightbox-packaging-notice" style="display: none; width: 100%;">
+              <div style="background: rgba(94,34,23,0.08); border: 1.5px solid rgba(94,34,23,0.2); border-radius: 10px; padding: 12px 16px; font-size: 12.5px; color: #5e2217; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+                <div>
+                  <div style="font-weight: 700;">🎁 Available Exclusively with Book Orders</div>
+                  <div style="font-size: 11.5px; color: #7a524a; margin-top: 2px;">
+                    Gift wrapping papers can only be purchased when ordering books. Add a book to wrap it in this design!
+                  </div>
+                </div>
+                <a href="#section-latest-books" onclick="closeBookmarkLightbox()" class="cute-btn cute-btn-primary" style="padding: 9px 18px; font-size: 12.5px; text-decoration: none;">
+                  Browse Books 📖
+                </a>
+              </div>
             </div>
           </div>
         </div>
