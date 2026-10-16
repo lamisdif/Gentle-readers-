@@ -359,6 +359,18 @@ function loadOrderSummary() {
   const cartKeys = Object.keys(cart);
   const bookIds = cartKeys.filter(id => !isAccessoryId(id));
 
+  // Sync accessories from cart into selectedAddons
+  cartKeys.forEach(id => {
+    if (isAccessoryId(id)) {
+      const normId = normalizeAddonId(id);
+      if (cart[id] > 0) {
+        selectedAddons[normId] = cart[id];
+      } else {
+        delete selectedAddons[normId];
+      }
+    }
+  });
+
   // Build active addons list
   let addonsSubtotal = 0;
   const activeAddonsList = [];
@@ -428,7 +440,7 @@ function loadOrderSummary() {
     const itemDiv = document.createElement("div");
     itemDiv.className = "book-item";
     itemDiv.innerHTML = `
-      <span>${getBookTitle(book, lang)}${discountTag}</span>
+      <div class="book-title-col"><span>${getBookTitle(book, lang)}${discountTag}</span></div>
       <div class="qty-controls">
         <button type="button" class="qty-btn qty-dec" data-id="${bookId}">−</button>
         <span class="qty">${qty}</span>
@@ -448,16 +460,15 @@ function loadOrderSummary() {
   // 2. Render accessories in the item list
   activeAddonsList.forEach(addon => {
     const itemDiv = document.createElement("div");
-    itemDiv.className = "book-item";
-    itemDiv.style.cssText = "background: #fdfaf2; border-left: 3.5px solid #105652; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;";
+    itemDiv.className = "book-item accessory-item";
     itemDiv.innerHTML = `
-      <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0;">
-        <img src="${encodeURI(addon.image)}" alt="thumb" style="width:34px; height:34px; object-fit:cover; border-radius:6px; flex-shrink:0; border:1px solid rgba(16,86,82,0.2);" />
-        <span style="font-weight:600; color:#105652; font-size:13.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+      <div class="book-title-col" style="display:flex; align-items:center; gap:8px;">
+        <img src="${encodeURI(addon.image)}" alt="thumb" style="width:32px; height:32px; object-fit:cover; border-radius:6px; flex-shrink:0; border:1px solid rgba(16,86,82,0.2);" />
+        <span style="font-weight:600; color:#105652; font-size:13px; word-break:break-word;">
           ${addon.name}
         </span>
       </div>
-      <div class="qty-controls" style="margin: 0 10px;">
+      <div class="qty-controls">
         <button type="button" class="qty-btn" onclick="changeAddonQty('${addon.id}', -1)">−</button>
         <span class="qty">${addon.qty}</span>
         <button type="button" class="qty-btn" onclick="changeAddonQty('${addon.id}', 1)">+</button>
@@ -612,6 +623,8 @@ function loadOrderSummary() {
 
   if (typeof validateForm === 'function') validateForm();
 }
+window.loadOrderSummary = loadOrderSummary;
+window.selectedAddons = selectedAddons;
 document.addEventListener("DOMContentLoaded", function () {
   populateWilayas();
 
@@ -1007,8 +1020,9 @@ window.addEventListener('DOMContentLoaded', function() {
     fields.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-            const eventType = el.tagName === 'SELECT' ? 'change' : 'input';
-            el.addEventListener(eventType, validateForm);
+            el.addEventListener('input', validateForm);
+            el.addEventListener('change', validateForm);
+            el.addEventListener('blur', validateForm);
         }
     });
 
@@ -1047,32 +1061,79 @@ function validateForm() {
     const hasItems = hasBooks || hasAddons;
 
     let isValid = true;
+    let missingReasons = [];
 
-    if (!hasItems) isValid = false;
-    if (!firstName) isValid = false;
-    if (!familyName) isValid = false;
-    if (!phoneNumber) isValid = false;
-    if (!instagramUsername) isValid = false;
-    if (!deliveryMethod) isValid = false;
-    if (!wilaya) isValid = false;
-    if (!daira) isValid = false;
+    if (!hasItems) {
+        isValid = false;
+        missingReasons.push("Cart items / عناصر السلة");
+    }
+    if (!firstName) {
+        isValid = false;
+        missingReasons.push("First name / الاسم الأول");
+    }
+    if (!familyName) {
+        isValid = false;
+        missingReasons.push("Family name / اسم العائلة");
+    }
+    if (!phoneNumber) {
+        isValid = false;
+        missingReasons.push("Phone number / رقم الهاتف");
+    }
+    // Instagram is OPTIONAL — do not block checkout if blank!
+    if (!deliveryMethod) {
+        isValid = false;
+        missingReasons.push("Delivery method / طريقة التوصيل");
+    }
+    if (!wilaya) {
+        isValid = false;
+        missingReasons.push("Wilaya / الولاية");
+    }
+    if (!daira) {
+        isValid = false;
+        missingReasons.push("Daira / الدائرة");
+    }
     
-    if (deliveryMethod === 'home' && !address) isValid = false;
-    if (deliveryMethod === 'desk' && !desk) isValid = false;
+    if (deliveryMethod === 'home' && !address) {
+        isValid = false;
+        missingReasons.push("Home address / العنوان");
+    }
+    if (deliveryMethod === 'desk' && !desk) {
+        isValid = false;
+        missingReasons.push("Agency desk / مكتب الاستلام");
+    }
     
     // Shipping price must be > 0 (all zones have prices now)
-    if (wilaya && shippingPrice <= 0) isValid = false;
+    if (wilaya && shippingPrice <= 0) {
+        isValid = false;
+        missingReasons.push("Shipping price / سعر التوصيل");
+    }
 
-    // Packaging must be selected (it has a default 'none')
-    const packagingOption = document.querySelector('input[name="packaging"]:checked');
-    if (!packagingOption) isValid = false;
+    // Packaging must be selected for book orders (has default 'none')
+    if (hasBooks) {
+        const packagingOption = document.querySelector('input[name="packaging"]:checked');
+        if (!packagingOption) {
+            isValid = false;
+            missingReasons.push("Packaging / التغليف");
+        }
+    }
+
+    const lang = getCurrentLang();
 
     if (isValid) {
         submitBtn.disabled = false;
         validationMsg.style.display = 'none';
+        validationMsg.textContent = '';
     } else {
         submitBtn.disabled = true;
-        validationMsg.style.display = 'block';
+        const hasStarted = Boolean(firstName || familyName || phoneNumber || deliveryMethod || wilaya);
+        if (hasStarted && missingReasons.length > 0) {
+            validationMsg.style.display = 'block';
+            validationMsg.textContent = (lang === 'ar')
+                ? `يرجى إكمال الحقول التالية: ${missingReasons.join('، ')}`
+                : `Please complete required fields: ${missingReasons.join(', ')}`;
+        } else {
+            validationMsg.style.display = 'none';
+        }
     }
 }
 window.validateForm = validateForm;

@@ -125,10 +125,10 @@ def main():
         # -------------------------------------------------------------
         c, pid = open_page("checkout.html")
         c.evaluate("""
-            localStorage.setItem('cart', JSON.stringify({'cms_1984': 1}));
-            window.location.reload();
+            localStorage.setItem('cart', JSON.stringify({'cms_موسم-الهجرة-الى-الشمال': 1}));
+            if (typeof loadOrderSummary === 'function') loadOrderSummary();
         """)
-        time.sleep(1.2)
+        time.sleep(0.5)
         s1_eval = c.evaluate("""
             (function() {
                 var badgeTitle = document.getElementById('order-type-title') ? document.getElementById('order-type-title').textContent : '';
@@ -142,7 +142,7 @@ def main():
             })()
         """)
         passed_s1 = s1_eval and ('Book Order' in s1_eval['badgeTitle'] or 'طلب كتب' in s1_eval['badgeTitle']) and s1_eval['allEnabled'] and s1_eval['isNoticeHidden']
-        log_result(1, "Order a book without accessories or packaging", passed_s1, f"Badge: '{s1_eval.get('badgeTitle')}', Packaging radios enabled: {s1_eval.get('allEnabled')}")
+        log_result(1, "Order a book without accessories or packaging", passed_s1, f"Badge: '{s1_eval.get('badgeTitle') if s1_eval else ''}', Packaging radios enabled: {s1_eval.get('allEnabled') if s1_eval else False}")
         close_page(pid)
 
         # -------------------------------------------------------------
@@ -150,10 +150,10 @@ def main():
         # -------------------------------------------------------------
         c, pid = open_page("checkout.html")
         c.evaluate("""
-            localStorage.setItem('cart', JSON.stringify({'cms_1984': 1, 'bookmark_cat-bookmarks': 1}));
-            window.location.reload();
+            localStorage.setItem('cart', JSON.stringify({'cms_موسم-الهجرة-الى-الشمال': 1, 'bookmark_cat-bookmarks': 1}));
+            if (typeof loadOrderSummary === 'function') loadOrderSummary();
         """)
-        time.sleep(1.2)
+        time.sleep(0.5)
         s2_eval = c.evaluate("""
             (function() {
                 var cartItems = document.getElementById('cartItems') ? document.getElementById('cartItems').textContent : '';
@@ -172,10 +172,10 @@ def main():
         # -------------------------------------------------------------
         c, pid = open_page("checkout.html")
         c.evaluate("""
-            localStorage.setItem('cart', JSON.stringify({'cms_1984': 1}));
-            window.location.reload();
+            localStorage.setItem('cart', JSON.stringify({'cms_موسم-الهجرة-الى-الشمال': 1}));
+            if (typeof loadOrderSummary === 'function') loadOrderSummary();
         """)
-        time.sleep(1.2)
+        time.sleep(0.5)
         s3_eval = c.evaluate("""
             (function() {
                 var craftRadio = document.querySelector('input[name="packaging"][value="papier_craft"]');
@@ -198,10 +198,10 @@ def main():
         # -------------------------------------------------------------
         c, pid = open_page("checkout.html")
         c.evaluate("""
-            localStorage.setItem('cart', JSON.stringify({'cms_1984': 1}));
-            window.location.reload();
+            localStorage.setItem('cart', JSON.stringify({'cms_موسم-الهجرة-الى-الشمال': 1}));
+            if (typeof loadOrderSummary === 'function') loadOrderSummary();
         """)
-        time.sleep(1.2)
+        time.sleep(0.5)
         s4_eval = c.evaluate("""
             (function() {
                 var results = {};
@@ -230,9 +230,9 @@ def main():
         c, pid = open_page("checkout.html")
         c.evaluate("""
             localStorage.setItem('cart', JSON.stringify({'bookmark_cat-bookmarks': 2, 'acc_book-tracker': 1}));
-            window.location.reload();
+            if (typeof loadOrderSummary === 'function') loadOrderSummary();
         """)
-        time.sleep(1.2)
+        time.sleep(0.5)
         s5_eval = c.evaluate("""
             (function() {
                 var badgeTitle = document.getElementById('order-type-title') ? document.getElementById('order-type-title').textContent : '';
@@ -244,7 +244,7 @@ def main():
             })()
         """)
         passed_s5 = s5_eval and s5_eval['isAccessoryBadge'] and s5_eval['hasCat'] and s5_eval['hasTracker']
-        log_result(5, "Order accessories without a book (standalone)", passed_s5, f"Badge clearly shows accessories-only mode: '{s5_eval.get('badge')}'")
+        log_result(5, "Order accessories without a book (standalone)", passed_s5, f"Badge clearly shows accessories-only mode: '{s5_eval.get('badge') if s5_eval else ''}'")
         close_page(pid)
 
         # -------------------------------------------------------------
@@ -253,8 +253,9 @@ def main():
         c, pid = open_page("checkout.html")
         c.evaluate("""
             localStorage.setItem('cart', JSON.stringify({'bookmark_cat-bookmarks': 1}));
-            window.location.reload();
+            if (typeof loadOrderSummary === 'function') loadOrderSummary();
         """)
+        time.sleep(0.5)
         time.sleep(1.2)
         s6_eval = c.evaluate("""
             (function() {
@@ -282,16 +283,15 @@ def main():
         # -------------------------------------------------------------
         c, pid = open_page("checkout.html")
         c.evaluate("""
-            localStorage.setItem('cart', JSON.stringify({'cms_1984': 1, 'bookmark_metallic-leaf-bookmarks': 1}));
-            window.location.reload();
+            localStorage.setItem('cart', JSON.stringify({'cms_موسم-الهجرة-الى-الشمال': 1, 'bookmark_metallic-leaf-bookmarks': 1}));
+            if (typeof loadOrderSummary === 'function') loadOrderSummary();
         """)
-        time.sleep(1.2)
+        time.sleep(0.5)
         s7_eval = c.evaluate("""
             (function() {
-                // Set wilaya to Alger (wilaya code '16') and home delivery
                 var wSelect = document.getElementById('checkout-wilaya-select');
                 var dSelect = document.getElementById('checkout-delivery-select');
-                if (wSelect) { wSelect.value = '16'; wSelect.dispatchEvent(new Event('change', { bubbles: true })); }
+                if (wSelect) { wSelect.value = 'Alger'; wSelect.dispatchEvent(new Event('change', { bubbles: true })); }
                 if (dSelect) { dSelect.value = 'home'; dSelect.dispatchEvent(new Event('change', { bubbles: true })); }
                 
                 // Select 600 DA packaging
@@ -303,7 +303,7 @@ def main():
             })()
         """)
         passed_s7 = s7_eval and 'DZD' in s7_eval['totalText'] and s7_eval['totalText'] != '0 DZD'
-        log_result(7, "Confirm all order totals are mathematically exact", passed_s7, f"Computed exact total with book + bookmark + 600 DA paper + shipping: {s7_eval.get('totalText')}")
+        log_result(7, "Confirm all order totals are mathematically exact", passed_s7, f"Computed exact total with book + bookmark + 600 DA paper + shipping: {s7_eval.get('totalText') if s7_eval else ''}")
         close_page(pid)
 
         # -------------------------------------------------------------
@@ -379,12 +379,12 @@ def main():
                 openBookmarkLightbox('boot-shaped-bookmarks');
                 var img = document.getElementById('lightbox-main-img');
                 var initialSrc = img ? img.src : '';
-                var counter1 = document.getElementById('lightbox-counter').textContent;
+                var counter1 = document.getElementById('lightbox-counter') ? document.getElementById('lightbox-counter').textContent : '';
                 
                 // Step to next image
                 stepBookmarkLightbox(1);
                 var steppedSrc = img ? img.src : '';
-                var counter2 = document.getElementById('lightbox-counter').textContent;
+                var counter2 = document.getElementById('lightbox-counter') ? document.getElementById('lightbox-counter').textContent : '';
                 
                 // Step back
                 stepBookmarkLightbox(-1);
@@ -400,8 +400,10 @@ def main():
                 };
             })()
         """)
-        passed_s10 = s10_eval and s10_eval['initialSrc'] != s10_eval['steppedSrc'] and s10_eval['steppedBackSrc'] == s10_eval['initialSrc']
-        log_result(10, "Navigate multiple product images (arrows & thumbs)", passed_s10, f"Counter 1: '{s10_eval.get('counter1')}', Counter 2: '{s10_eval.get('counter2')}', Photo switched smoothly")
+        passed_s10 = s10_eval and s10_eval.get('initialSrc') != s10_eval.get('steppedSrc') and s10_eval.get('steppedBackSrc') == s10_eval.get('initialSrc')
+        c1 = s10_eval.get('counter1') if s10_eval else 'N/A'
+        c2 = s10_eval.get('counter2') if s10_eval else 'N/A'
+        log_result(10, "Navigate multiple product images (arrows & thumbs)", passed_s10, f"Counter 1: '{c1}', Counter 2: '{c2}', Photo switched smoothly")
         close_page(pid)
 
         # -------------------------------------------------------------

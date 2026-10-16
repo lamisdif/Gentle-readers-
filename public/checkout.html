@@ -2,420 +2,433 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
   <title>Checkout - GentleReaders</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&display=swap" rel="stylesheet" />
   <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-text-size-adjust: 100%;
+    }
     body {
       background: #FCF8D5;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       min-height: 100vh;
-      padding: 2rem;
+      padding: 24px 16px;
+      color: #5E2217;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    @media (max-width: 640px) {
+      body {
+        padding: 12px 10px 24px 10px;
+      }
+    }
+    @media (max-width: 360px) {
+      body {
+        padding: 8px 6px 20px 6px;
+      }
+    }
+
+    /* Top Navigation Header */
+    .checkout-header {
+      width: 100%;
+      max-width: 580px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding: 4px 6px;
+    }
+    .back-store-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #105652;
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 700;
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: rgba(16, 86, 82, 0.09);
+      border: 1px solid rgba(16, 86, 82, 0.18);
+      transition: all 0.2s ease;
+      touch-action: manipulation;
+    }
+    .back-store-btn:hover {
+      background: rgba(16, 86, 82, 0.16);
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
       color: #5E2217;
     }
-    .container {
-      display: grid;
-      grid-template-columns: auto;
-      gap: 0px;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
+    .header-brand img {
+      height: 32px;
+      width: auto;
+      object-fit: contain;
     }
-    hr {
-      height: 1px;
-      background-color: rgba(16, 86, 82, .75);
-      border: none;
+    .header-brand span {
+      font-family: 'Ubuntu', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      color: #5E2217;
+    }
+    @media (max-width: 400px) {
+      .header-brand span {
+        display: none;
+      }
+      .back-store-btn {
+        padding: 6px 10px;
+        font-size: 12.5px;
+      }
+    }
+
+    /* Checkout Container & Cards */
+    .container {
+      width: 100%;
+      max-width: 580px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+    }
+    #checkoutForm {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
     }
     .card {
-      width: 400px;
-      background: rgb(255, 250, 235);
-      box-shadow: 0px 187px 75px rgba(0, 0, 0, 0.01), 0px 105px 63px rgba(0, 0, 0, 0.05), 0px 47px 47px rgba(0, 0, 0, 0.09), 0px 12px 26px rgba(0, 0, 0, 0.1), 0px 0px 0px rgba(0, 0, 0, 0.1);
-      border-radius: 19px 19px 0px 0px;
-      margin-bottom: 0;
+      width: 100%;
+      background: #FFFAF0;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0,0,0,0.05);
+      border-radius: 18px 18px 0 0;
+      border: 1px solid rgba(16, 86, 82, 0.12);
+      border-bottom: none;
+      overflow: hidden;
+    }
+    .card.checkout {
+      border-radius: 0 0 18px 18px;
+      border-top: none;
+      border-bottom: 1px solid rgba(16, 86, 82, 0.12);
+      margin-top: 0;
     }
     .title {
       width: 100%;
-      height: 40px;
-      position: relative;
+      min-height: 44px;
       display: flex;
       align-items: center;
-      padding-left: 20px;
-      border-bottom: 1px solid rgba(16, 86, 82, .75);
-      font-weight: 700;
-      font-size: 11px;
-      color: #000000;
+      padding: 0 18px;
+      border-bottom: 1px solid rgba(16, 86, 82, 0.2);
+      background: rgba(16, 86, 82, 0.05);
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      color: #105652;
     }
+
     .cart .steps {
       display: flex;
       flex-direction: column;
       padding: 20px;
+      gap: 16px;
     }
-    .cart .steps .step {
-      display: grid;
-      gap: 10px;
+    @media (max-width: 480px) {
+      .cart .steps {
+        padding: 14px 12px;
+        gap: 14px;
+      }
     }
-    .cart .steps .step span {
-      font-size: 13px;
-      font-weight: 600;
-      color: #000000;
-      margin-bottom: 8px;
-      display: block;
-    }
-    .cart .steps .step p {
-      font-size: 11px;
-      font-weight: 600;
-      color: #000000;
-    }
-    .promo form {
-      display: grid;
-      grid-template-columns: 1fr 80px;
-      gap: 10px;
-      padding: 0px;
-    }
-    .input_field {
-      width: 100%;
-      height: 38px;
-      padding: 0 12px;
-      border-radius: 8px;
-      outline: none;
-      border: 1px solid rgba(16, 86, 82, 0.4);
-      background-color: #fbf3e4;
-      transition: all 0.2s;
-      font-size: 14px;
-      color: #5E2217;
-    }
-    .input_field:focus {
-      border: 1px solid rgba(16, 86, 82, 0.8);
-      box-shadow: 0 0 0 3px rgba(16, 86, 82, 0.1);
-      background-color: #fff;
-    }
-    .book-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 14px;
-      border-bottom: 2px solid rgba(16, 86, 82, 0.05);
-      font-size: 14px;
-      background: #fdfaf2;
-      border-radius: 8px;
-      margin-bottom: 8px;
-    }
-    .book-item span:first-child {
-      font-weight: 600;
-      color: #5E2217;
-      flex: 1;
-      padding-right: 12px;
-    }
-    .qty-controls {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: #f0e9d6;
-      padding: 4px 8px;
-      border-radius: 6px;
-      margin-right: 12px;
-    }
-    .qty-btn {
-      background: #fff;
-      border: 1px solid rgba(16, 86, 82, 0.2);
-      border-radius: 4px;
-      width: 24px;
-      height: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-weight: bold;
-      color: #5E2217;
-      font-size: 14px;
-    }
-    .qty-btn:hover {
-      background: #fdfaf2;
-    }
-    .book-price-line {
-      font-weight: 700;
-      color: #5E2217;
-      min-width: 80px;
-      text-align: right;
-    }
-    .books-purchased-list {
-      max-height: 280px;
-      overflow-y: auto;
-      padding: 10px 4px;
-    }
-    .books-purchased-list::-webkit-scrollbar {
-      width: 5px;
-    }
-    .books-purchased-list::-webkit-scrollbar-thumb {
-      background: rgba(16, 86, 82, 0.1);
-      border-radius: 10px;
-    }
-    .promo form button {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      align-items: center;
-      padding: 10px 18px;
-      gap: 10px;
-      width: 100%;
-      height: 36px;
-      background: rgba(16, 86, 82, .75);
-      box-shadow: 0px 0.5px 0.5px #F3D2C9, 0px 1px 0.5px rgba(239, 239, 239, 0.5);
-      border-radius: 5px;
-      border: 0;
-      font-style: normal;
-      font-weight: 600;
-      font-size: 12px;
-      line-height: 15px;
-      color: #000000;
-    }
-    .payments .details {
-      display: grid;
-      grid-template-columns: 10fr 1fr;
-      padding: 0px;
-      gap: 5px;
-    }
-    .payments .details span:nth-child(odd) {
-      font-size: 12px;
-      font-weight: 600;
-      color: #000000;
-      margin: auto auto auto 0;
-    }
-    .payments .details span:nth-child(even) {
-      font-size: 13px;
-      font-weight: 600;
-      color: #000000;
-      margin: auto 0 auto auto;
-    }
-    .checkout .footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 10px 10px 20px;
-      background-color: rgba(16, 86, 82, .5);
-    }
-    .price {
-      position: relative;
-      font-size: 22px;
-      color: #2B2B2F;
-      font-weight: 900;
-    }
-    .checkout .checkout-btn {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      align-items: center;
-      width: 150px;
-      height: 36px;
-      background: rgba(16, 86, 82, .55);
-      box-shadow: 0px 0.5px 0.5px rgba(16, 86, 82, .75), 0px 1px 0.5px rgba(16, 86, 82, .75);
-      border-radius: 7px;
-      border: 1px solid rgb(16, 86, 82);
-      color: #000000;
-      font-size: 13px;
-      font-weight: 600;
-      transition: all 0.3s cubic-bezier(0.15, 0.83, 0.66, 1);
-    }
-    .cta {
-      position: relative;
-      margin: auto;
-      padding: 12px 18px;
-      transition: all 0.2s ease;
-      border: none;
-      background: none;
-      cursor: pointer;
-    }
-    .cta:before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      display: block;
-      border-radius: 50px;
-      background: #b1dae7;
-      width: 45px;
-      height: 45px;
-      transition: all 0.3s ease;
-    }
-    .cta span {
-      position: relative;
-      font-family: "Ubuntu", sans-serif;
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      color: #234567;
-    }
-    .cta svg {
-      position: relative;
-      top: 0;
-      margin-left: 10px;
-      fill: none;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      stroke: #234567;
-      stroke-width: 2;
-      transform: translateX(-5px);
-      transition: all 0.3s ease;
-    }
-    .cta:hover:before {
-      width: 100%;
-      background: #b1dae7;
-    }
-    .cta:hover svg {
-      transform: translateX(0);
-    }
-    .cta:active {
-      transform: scale(0.95);
-    }
-    .books-purchased-list {
+
+    .step-section {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      margin-top: 8px;
+      gap: 8px;
+      width: 100%;
     }
-    .books-purchased-list .book-item {
-      background: #f7f3e6;
-      border-radius: 8px;
-      padding: 8px 14px;
+    .section-label {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #5E2217;
+      letter-spacing: 0.02em;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      box-shadow: 0 1px 4px rgba(16,86,82,0.07);
-      font-size: 14px;
+      gap: 6px;
+    }
+    .required-star {
+      color: #dc2626;
+      margin-left: 2px;
+    }
+    .optional-note {
+      font-size: 11px;
       font-weight: 500;
-      color: #5E2217;
-      transition: box-shadow 0.2s;
+      color: #7a6e6c;
     }
-    .books-purchased-list .book-item:hover {
-      box-shadow: 0 4px 12px rgba(16,86,82,0.13);
-      background: #f0e9d6;
+    hr {
+      height: 1px;
+      background-color: rgba(16, 86, 82, 0.15);
+      border: none;
+      margin: 4px 0;
     }
+
+    /* Customer Information & Logo Row */
     .inputs-logo-row {
       display: flex;
       flex-direction: row;
       align-items: flex-start;
-      gap: 24px;
-      margin-bottom: 18px;
+      gap: 20px;
+      width: 100%;
+      margin-bottom: 6px;
     }
     .inputs-col {
       flex: 1 1 0%;
+      min-width: 0;
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 12px;
+      width: 100%;
+    }
+    .name-fields-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: 100%;
+    }
+    @media (max-width: 500px) {
+      .name-fields-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
     }
     .logo-col {
       display: flex;
-      align-items: stretch;
+      align-items: center;
       justify-content: center;
-      min-width: 120px;
-      height: 100%;
+      width: 130px;
+      flex-shrink: 0;
+      padding-top: 6px;
     }
     .side-logo {
       width: 100%;
-      max-width: 180px;
-      height: 100%;
+      max-width: 130px;
+      max-height: 120px;
       object-fit: contain;
       display: block;
       animation: floatLogo 2.8s ease-in-out infinite;
     }
     @keyframes floatLogo {
       0% { transform: translateY(0); }
-      50% { transform: translateY(-18px); }
+      50% { transform: translateY(-10px); }
       100% { transform: translateY(0); }
     }
-    .animate-fade-in {
-      opacity: 1;
-      transform: translateY(0);
-      transition: opacity 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1);
+    @media (max-width: 640px) {
+      .inputs-logo-row {
+        flex-direction: column;
+        gap: 10px;
+      }
+      .logo-col {
+        width: 100%;
+        order: -1;
+        padding-top: 0;
+        margin-bottom: 4px;
+      }
+      .side-logo {
+        max-width: 110px;
+        max-height: 55px;
+      }
     }
-    .animate-fade-in.visible {
-      opacity: 1;
-      transform: translateY(0);
+
+    /* Form Fields */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      width: 100%;
     }
-    #address-field {
-      transition: all 0.3s ease-in-out;
+    .input_field {
+      width: 100%;
+      height: 46px;
+      padding: 0 14px;
+      border-radius: 10px;
+      outline: none;
+      border: 1.5px solid rgba(16, 86, 82, 0.3);
+      background-color: #fcf6eb;
+      transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+      font-size: 16px; /* Crucial: 16px prevents iOS Safari auto-zoom */
+      color: #5E2217;
+      box-sizing: border-box;
+      -webkit-appearance: none;
+      appearance: none;
     }
-    #checkout-address-input {
-      font-family: inherit;
-      font-size: 14px;
+    select.input_field {
+      background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23105652%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px top 50%;
+      background-size: 11px auto;
+      padding-right: 36px;
+    }
+    textarea.input_field {
+      height: auto;
+      min-height: 70px;
+      padding: 10px 14px;
       line-height: 1.4;
+      font-family: inherit;
     }
-    .validation-error {
-      color: #dc2626;
-      font-size: 12px;
-      font-weight: 600;
-      margin-top: 12px;
-      text-align: center;
-      display: none;
-      padding: 8px;
-      background: rgba(220, 38, 38, 0.05);
-      border-radius: 6px;
+    .input_field:focus {
+      border-color: #105652;
+      box-shadow: 0 0 0 3px rgba(16, 86, 82, 0.15);
+      background-color: #ffffff;
     }
-    .cta:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      filter: grayscale(1);
+
+    /* Cart Items & Quantity Controls */
+    .books-purchased-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 290px;
+      overflow-y: auto;
+      padding: 2px 1px;
     }
-    .packaging-options {
-      display: grid;
-      gap: 16px;
+    .books-purchased-list::-webkit-scrollbar {
+      width: 5px;
     }
-    .packaging-option {
+    .books-purchased-list::-webkit-scrollbar-thumb {
+      background: rgba(16, 86, 82, 0.2);
+      border-radius: 10px;
+    }
+    .book-item {
       display: flex;
       align-items: center;
-      gap: 15px;
-      padding: 16px 18px;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
       background: #fdfaf2;
-      border: 1.5px solid rgba(16, 86, 82, 0.2);
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.3s ease;
+      border: 1px solid rgba(16, 86, 82, 0.12);
+      border-radius: 10px;
+      box-sizing: border-box;
+      width: 100%;
+      transition: background 0.2s;
     }
-    .packaging-option:hover {
-      box-shadow: 0 6px 16px rgba(16, 86, 82, 0.12);
-      border-color: rgba(16, 86, 82, 0.45);
-      transform: translateY(-2px);
+    .book-item.accessory-item {
+      border-left: 3.5px solid #105652;
     }
-    .packaging-option.selected,
-    .packaging-option:has(input:checked) {
-      border-color: #105652;
-      background: #f5eedf;
-      box-shadow: 0 4px 14px rgba(16, 86, 82, 0.15);
+    .book-title-col {
+      flex: 1 1 0%;
+      min-width: 0;
+      font-weight: 600;
+      color: #5E2217;
+      font-size: 13.5px;
+      line-height: 1.35;
+      word-break: break-word;
     }
-    .packaging-option img {
+    .book-price-line {
+      font-weight: 700;
+      color: #5E2217;
+      text-align: right;
+      flex-shrink: 0;
+      font-size: 14px;
+    }
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #f0e9d6;
+      padding: 3px 6px;
       border-radius: 8px;
-      object-fit: cover;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      flex-shrink: 0;
     }
-    .packaging-emoji {
-      font-size: 28px;
-      line-height: 1;
+    .qty-btn {
+      background: #ffffff;
+      border: 1px solid rgba(16, 86, 82, 0.25);
+      border-radius: 6px;
+      width: 30px;
+      height: 30px;
+      min-width: 30px;
       display: flex;
       align-items: center;
       justify-content: center;
-      min-width: 36px;
+      cursor: pointer;
+      font-weight: 700;
+      color: #5E2217;
+      font-size: 16px;
+      touch-action: manipulation;
+      user-select: none;
+      transition: background 0.15s;
     }
-    .packaging-price {
+    .qty-btn:active {
+      background: #e2d9c4;
+    }
+    .qty {
+      font-size: 13.5px;
+      font-weight: 700;
+      min-width: 20px;
+      text-align: center;
+      color: #5E2217;
+    }
+    @media (max-width: 460px) {
+      .book-item {
+        flex-wrap: wrap;
+        padding: 10px 10px;
+      }
+      .book-title-col {
+        flex: 1 1 100%;
+        margin-bottom: 2px;
+        font-size: 13px;
+      }
+      .book-price-line {
+        margin-left: auto;
+      }
+    }
+
+    /* Payments Summary */
+    .payments .details {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 6px 12px;
+      padding: 4px 0;
+    }
+    .payments .details span:nth-child(odd) {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #5E2217;
+      text-align: left;
+    }
+    .payments .details span:nth-child(even) {
+      font-size: 13.5px;
       font-weight: 700;
       color: #105652;
-      font-size: 14px;
-      margin-top: 4px;
+      text-align: right;
     }
+
+    /* Add-on Bookmarks & Accessories */
     .addon-grid {
       display: grid;
-      gap: 12px;
-      margin-bottom: 8px;
+      gap: 10px;
+      margin-bottom: 6px;
+      width: 100%;
     }
     .addon-card {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 12px 14px;
+      padding: 10px 12px;
       background: #fdfaf2;
       border: 1.5px solid rgba(16, 86, 82, 0.2);
       border-radius: 12px;
       transition: all 0.25s ease;
+      box-sizing: border-box;
+      width: 100%;
     }
     .addon-card:hover {
       border-color: rgba(16, 86, 82, 0.4);
@@ -427,8 +440,8 @@
       box-shadow: 0 2px 10px rgba(16, 86, 82, 0.12);
     }
     .addon-img-wrap {
-      width: 60px;
-      height: 60px;
+      width: 52px;
+      height: 52px;
       border-radius: 8px;
       overflow: hidden;
       flex-shrink: 0;
@@ -443,7 +456,7 @@
       display: block;
     }
     .addon-info {
-      flex: 1;
+      flex: 1 1 0%;
       min-width: 0;
     }
     .addon-name {
@@ -457,7 +470,7 @@
       font-size: 11.5px;
       color: #666;
       line-height: 1.3;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
     .addon-price-tag {
       font-size: 13px;
@@ -471,10 +484,123 @@
       flex-shrink: 0;
     }
     .addon-checkbox {
+      width: 22px;
+      height: 22px;
+      accent-color: #105652;
+      cursor: pointer;
+    }
+    @media (max-width: 480px) {
+      .addon-card {
+        padding: 8px 10px;
+        gap: 8px;
+      }
+      .addon-img-wrap {
+        width: 46px;
+        height: 46px;
+      }
+      .addon-name {
+        font-size: 12.5px;
+      }
+      .addon-sub {
+        font-size: 11px;
+      }
+    }
+
+    /* Packaging Options */
+    .packaging-options {
+      display: grid;
+      gap: 10px;
+      width: 100%;
+    }
+    .packaging-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: #fdfaf2;
+      border: 1.5px solid rgba(16, 86, 82, 0.2);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-sizing: border-box;
+      width: 100%;
+      touch-action: manipulation;
+    }
+    .packaging-option:hover {
+      box-shadow: 0 4px 12px rgba(16, 86, 82, 0.1);
+      border-color: rgba(16, 86, 82, 0.45);
+    }
+    .packaging-option.selected,
+    .packaging-option:has(input:checked) {
+      border-color: #105652;
+      background: #f5eedf;
+      box-shadow: 0 3px 10px rgba(16, 86, 82, 0.12);
+    }
+    .packaging-option input[type="radio"] {
       width: 18px;
       height: 18px;
       accent-color: #105652;
+      flex-shrink: 0;
       cursor: pointer;
+    }
+    .packaging-option img {
+      width: 65px;
+      height: 65px;
+      border-radius: 8px;
+      object-fit: cover;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      flex-shrink: 0;
+    }
+    .packaging-emoji {
+      font-size: 24px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 30px;
+      flex-shrink: 0;
+    }
+    .packaging-info {
+      flex: 1 1 0%;
+      min-width: 0;
+    }
+    .packaging-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #5E2217;
+      line-height: 1.3;
+    }
+    .packaging-sub {
+      font-size: 11.5px;
+      color: #777;
+      margin-top: 2px;
+      line-height: 1.35;
+    }
+    .packaging-price {
+      font-weight: 700;
+      color: #105652;
+      font-size: 13.5px;
+      margin-top: 3px;
+    }
+    @media (max-width: 640px) {
+      .packaging-option {
+        padding: 10px 10px;
+        gap: 8px;
+      }
+      .packaging-option img {
+        width: 52px;
+        height: 52px;
+      }
+      /* Hide redundant emoji on mobile when image is shown to give text maximum breathing room */
+      .packaging-option:has(img) .packaging-emoji {
+        display: none;
+      }
+      .packaging-title {
+        font-size: 13px;
+      }
+      .packaging-sub {
+        font-size: 11px;
+      }
     }
     .packaging-disabled {
       opacity: 0.5;
@@ -482,210 +608,419 @@
       filter: grayscale(0.6);
       user-select: none;
     }
+
+    /* Checkout Footer & Submit Button */
+    .checkout .footer {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 18px 20px;
+      background-color: #f7f1e1;
+      border-top: 1.5px solid rgba(16, 86, 82, 0.15);
+      border-radius: 0 0 18px 18px;
+      box-sizing: border-box;
+      width: 100%;
+    }
+    @media (max-width: 480px) {
+      .checkout .footer {
+        padding: 14px 12px;
+      }
+    }
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+    .total-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: #5E2217;
+    }
+    .price {
+      font-size: 24px;
+      color: #105652;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    @media (max-width: 360px) {
+      .price {
+        font-size: 20px;
+      }
+      .total-label {
+        font-size: 13px;
+      }
+    }
+
+    /* Primary Submit Button (Clean, Solid, Responsive, Full-Width) */
+    .cta {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      min-height: 50px;
+      padding: 14px 20px;
+      background: #105652;
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 14px rgba(16, 86, 82, 0.25);
+      text-decoration: none;
+      box-sizing: border-box;
+      touch-action: manipulation;
+    }
+    .cta:before {
+      display: none !important; /* Eliminate awkward off-center 45px circular bubble */
+    }
+    .cta span {
+      position: relative;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: normal;
+    }
+    .cta svg {
+      position: relative;
+      top: 0;
+      margin-left: 6px;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke: #ffffff;
+      stroke-width: 2.2;
+      width: 15px;
+      height: 11px;
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+    .cta:hover:not(:disabled) {
+      background: #0b3d3a;
+      box-shadow: 0 6px 18px rgba(16, 86, 82, 0.35);
+      transform: translateY(-1px);
+    }
+    .cta:hover:not(:disabled) svg {
+      transform: translateX(3px);
+    }
+    .cta:active:not(:disabled) {
+      transform: translateY(1px);
+      box-shadow: 0 2px 6px rgba(16, 86, 82, 0.2);
+    }
+    .cta:disabled {
+      background: #a3b8b6;
+      color: #ffffff;
+      opacity: 0.7;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+    .cta:disabled span {
+      color: #ffffff;
+    }
+    .cta:disabled svg {
+      stroke: #ffffff;
+    }
+
+    .validation-error {
+      color: #dc2626;
+      font-size: 12.5px;
+      font-weight: 600;
+      text-align: center;
+      display: none;
+      padding: 10px 12px;
+      background: rgba(220, 38, 38, 0.08);
+      border: 1px solid rgba(220, 38, 38, 0.2);
+      border-radius: 8px;
+      line-height: 1.4;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .animate-fade-in {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
   </style>
 </head>
 <body>
+  <!-- Top Navigation Header -->
+  <header class="checkout-header">
+    <a href="index.html" class="back-store-btn" id="back-to-store-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      <span id="back-to-store-text">Store / المتجر</span>
+    </a>
+    <a href="index.html" class="header-brand">
+      <img src="img/Perfectly made ones right.svg" alt="GentleReaders Logo" />
+      <span>Gentle Readers</span>
+    </a>
+  </header>
+
   <div class="container">
     <form id="checkoutForm">
       <div class="card cart animate-fade-in">
         <label class="title" id="checkout-title">CHECKOUT / الدفع</label>
         
-        <!-- Order Mode Indicator Badge -->
-        <div id="checkout-order-type-badge" style="background: rgba(16, 86, 82, 0.08); border: 1.5px solid rgba(16, 86, 82, 0.22); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span id="order-type-icon" style="font-size: 22px;">📖</span>
-            <div>
-              <div id="order-type-title" style="font-weight: 700; color: #105652; font-size: 13.5px;">Book Order / طلب كتب</div>
-              <div id="order-type-sub" style="font-size: 11.5px; color: #5a4c4a;">Ordering books with optional bookmarks, reading log, and gift packaging.</div>
+        <div class="steps">
+          <!-- Order Mode Indicator Badge -->
+          <div id="checkout-order-type-badge" style="background: rgba(16, 86, 82, 0.08); border: 1.5px solid rgba(16, 86, 82, 0.22); border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span id="order-type-icon" style="font-size: 22px; flex-shrink: 0;">📖</span>
+              <div>
+                <div id="order-type-title" style="font-weight: 700; color: #105652; font-size: 13.5px;">Book Order / طلب كتب</div>
+                <div id="order-type-sub" style="font-size: 11.5px; color: #5a4c4a; line-height: 1.35;">Ordering books with optional bookmarks, reading log, and gift packaging.</div>
+              </div>
+            </div>
+            <a href="index.html#cute-bookmarks-section" id="order-type-switch-link" style="font-size: 11.5px; font-weight: 700; color: #5e2217; text-decoration: underline; white-space: nowrap; flex-shrink: 0;">
+              Browse More
+            </a>
+          </div>
+
+          <!-- Customer Name & Details Row with Floating Logo -->
+          <div class="inputs-logo-row">
+            <div class="inputs-col">
+              <div class="name-fields-row">
+                <div class="form-group">
+                  <label for="checkout-name-input" class="section-label" id="checkout-name-label">
+                    <span>NAME / الاسم <span class="required-star">*</span></span>
+                  </label>
+                  <input type="text" name="userName" class="input_field" placeholder="First Name / الاسم الأول" id="checkout-name-input" required autocomplete="given-name" />
+                </div>
+                <div class="form-group">
+                  <label for="checkout-family-input" class="section-label" id="checkout-family-label">
+                    <span>FAMILY / العائلة <span class="required-star">*</span></span>
+                  </label>
+                  <input type="text" name="userFamily" class="input_field" placeholder="Family Name / اسم العائلة" id="checkout-family-input" required autocomplete="family-name" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="checkout-number-input" class="section-label" id="checkout-number-label">
+                  <span>PHONE / رقم الهاتف <span class="required-star">*</span></span>
+                </label>
+                <input type="tel" name="userNumber" class="input_field" placeholder="05 / 06 / 07... (رقم الهاتف)" id="checkout-number-input" required autocomplete="tel" inputmode="tel" />
+              </div>
+
+              <div class="form-group">
+                <label for="checkout-instagram-input" class="section-label" id="checkout-instagram-label">
+                  <span>INSTAGRAM / إنستغرام <span class="optional-note">(Optional / اختياري)</span></span>
+                </label>
+                <input type="text" name="userInstagram" class="input_field" placeholder="@username (Optional / اختياري)" id="checkout-instagram-input" autocomplete="username" />
+              </div>
+            </div>
+
+            <div class="logo-col">
+              <img src="img/Perfectly made ones right.svg" alt="GentleReaders Logo" class="side-logo" />
             </div>
           </div>
-          <a href="index.html#cute-bookmarks-section" id="order-type-switch-link" style="font-size: 11.5px; font-weight: 700; color: #5e2217; text-decoration: underline; white-space: nowrap;">
-            Browse More
-          </a>
-        </div>
 
-        <div class="steps">
-          <div class="step">
-            <div class="inputs-logo-row">
-              <div class="inputs-col">
-                <div>
-                  <span id="checkout-name-label">NAME / الاسم</span>
-                  <input type="text" name="userName" class="input_field" placeholder="First Name / الاسم الأول" id="checkout-name-input" required />
-                </div>
-                <div>
-                  <span id="checkout-family-label">FAMILY NAME / اسم العائلة</span>
-                  <input type="text" name="userFamily" class="input_field" placeholder="Family Name / اسم العائلة" id="checkout-family-input" required />
-                </div>
-                <div>
-                  <span id="checkout-number-label">CELL / رقم الجوال</span>
-                  <input type="tel" name="userNumber" class="input_field" placeholder="Phone Number / رقم الهاتف" id="checkout-number-input" required />
-                </div>
-                <div>
-                  <span id="checkout-instagram-label">INSTAGRAM USERNAME / اسم المستخدم في إنستغرام</span>
-                  <input type="text" name="userInstagram" class="input_field" placeholder="Instagram Username / اسم المستخدم في إنستغرام" id="checkout-instagram-input" />
-                </div>
+          <hr>
+
+          <!-- Order Items (Books & Accessories) -->
+          <div class="step-section">
+            <label class="section-label" id="checkout-books-label">
+              <span>ORDER ITEMS / تفاصيل الطلب (Books & Accessories)</span>
+            </label>
+            <div id="cartItems" class="books-purchased-list"></div>
+          </div>
+
+          <hr>
+
+          <!-- Payment Breakdown -->
+          <div class="payments step-section">
+            <label class="section-label" id="checkout-payment-label">
+              <span>PAYMENT DETAILS / تفاصيل الدفع</span>
+            </label>
+            <div class="details" id="orderDetails"></div>
+          </div>
+
+          <hr>
+
+          <!-- Delivery Selection -->
+          <div class="step-section">
+            <label for="checkout-delivery-select" class="section-label" id="checkout-delivery-label">
+              <span>DELIVERY METHOD / طريقة التوصيل <span class="required-star">*</span></span>
+            </label>
+            <select name="delivery" class="input_field" id="checkout-delivery-select" required>
+              <option value="" id="checkout-delivery-placeholder">Select delivery method / اختر طريقة التوصيل</option>
+              <option value="home" id="checkout-delivery-home">Home Delivery / التوصيل للمنزل</option>
+              <option value="desk" id="checkout-delivery-desk">Desk Pickup / الاستلام من المكتب</option>
+            </select>
+          </div>
+
+          <div class="step-section">
+            <label for="checkout-wilaya-select" class="section-label" id="checkout-wilaya-label">
+              <span>WILAYA / الولاية <span class="required-star">*</span></span>
+            </label>
+            <select name="wilaya" class="input_field" id="checkout-wilaya-select" required>
+              <option value="" id="checkout-wilaya-placeholder">Select wilaya / اختر الولاية</option>
+            </select>
+          </div>
+
+          <div class="step-section">
+            <label for="checkout-daira-select" class="section-label" id="checkout-daira-label">
+              <span>DAIRA / الدائرة <span class="required-star">*</span></span>
+            </label>
+            <select name="daira" class="input_field" id="checkout-daira-select" required>
+              <option value="" id="checkout-daira-placeholder">Select daira / اختر الدائرة</option>
+            </select>
+          </div>
+
+          <div id="desk-field" class="step-section" style="display: none;">
+            <label for="checkout-desk-select" class="section-label" id="checkout-desk-label">
+              <span>DESK / AGENCY / المكتب <span class="required-star">*</span></span>
+            </label>
+            <select name="desk" class="input_field" id="checkout-desk-select">
+              <option value="">Select agency / اختر المكتب</option>
+            </select>
+          </div>
+
+          <div id="address-field" class="step-section" style="display: none;">
+            <label for="checkout-address-input" class="section-label" id="checkout-address-label">
+              <span>ADDRESS / العنوان <span class="required-star">*</span></span>
+            </label>
+            <textarea name="address" class="input_field" id="checkout-address-input" placeholder="Enter your full street address for home delivery / أدخل عنوانك الكامل للتوصيل للمنزل" rows="3"></textarea>
+          </div>
+
+          <!-- Add-on Cute Bookmarks Section -->
+          <div style="margin-top: 10px; border-top: 1px dashed rgba(16, 86, 82, 0.25); padding-top: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span id="checkout-addons-label" style="font-size: 13px; font-weight: 700; color: #5e2217;">
+                ADD CUTE BOOKMARKS / فواصل كتب إضافية ✨
+              </span>
+              <span style="font-size: 11px; color: #888; font-weight: 500;">Alone or with books</span>
+            </div>
+            <p style="font-size: 11.5px; color: #666; margin-bottom: 10px; line-height: 1.35;">
+              Select cute handcrafted bookmarks. You can order bookmarks alone or add them to your book order!
+            </p>
+            <div id="bookmarkAddonsList" class="addon-grid">
+              <div style="text-align: center; color: #888; font-size: 12px; padding: 10px;">Loading cute bookmarks...</div>
+            </div>
+          </div>
+
+          <!-- Optional Book Tracker Section -->
+          <div id="tracker-addon-section" style="margin-top: 6px; border-top: 1px dashed rgba(16, 86, 82, 0.25); padding-top: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 13px; font-weight: 700; color: #5e2217;">
+                READING LOG & TRACKER / سجل القراءة 📖
+              </span>
+              <span style="font-size: 11px; color: #888; font-weight: 500;">Optional / اختياري</span>
+            </div>
+            <div id="accessoryAddonsList" class="addon-grid"></div>
+          </div>
+
+          <!-- Packaging Section -->
+          <div id="checkout-packaging-section" style="margin-top: 10px; border-top: 1px solid rgba(16, 86, 82, 0.15); padding-top: 14px;">
+            <span id="checkout-packaging-label" style="display: block; font-size: 13px; font-weight: 700; color: #5E2217; margin-bottom: 10px;">
+              PACKAGING / التغليف 🎁
+            </span>
+            
+            <!-- Notice displayed when ordering accessories alone -->
+            <div id="packaging-book-only-notice" style="display: none; background: rgba(94, 34, 23, 0.07); border: 1.5px solid rgba(94, 34, 23, 0.22); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; font-size: 12px; color: #5e2217;">
+              <div style="font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                <span>🎁</span>
+                <span>Packaging is available for book orders only / التغليف متاح فقط مع طلبات الكتب</span>
               </div>
-              <div class="logo-col">
-                <img src="img/Perfectly made ones right.svg" alt="GentleReaders Logo" class="side-logo" />
-              </div>
-            </div>
-            <hr>
-            <div>
-              <span id="checkout-books-label">ORDER ITEMS / تفاصيل الطلب (Books & Accessories)</span>
-              <div id="cartItems" class="books-purchased-list"></div>
-            </div>
-            <hr>
-            <div class="payments">
-              <span id="checkout-payment-label">PAYMENT / الدفع</span>
-              <div class="details" id="orderDetails"></div>
-            </div>
-            <hr>
-            <div>
-              <span id="checkout-delivery-label">DELIVERY METHOD / طريقة التوصيل</span>
-              <select name="delivery" class="input_field" id="checkout-delivery-select" required>
-                <option value="" id="checkout-delivery-placeholder">Select delivery method / اختر طريقة التوصيل</option>
-                <option value="home" id="checkout-delivery-home">Home Delivery / التوصيل للمنزل</option>
-                <option value="desk" id="checkout-delivery-desk">Desk Pickup / الاستلام من المكتب</option>
-              </select>
-            </div>
-            <div>
-              <span id="checkout-wilaya-label">WILAYA / الولاية</span>
-              <select name="wilaya" class="input_field" id="checkout-wilaya-select" required>
-                <option value="" id="checkout-wilaya-placeholder">Select wilaya / اختر الولاية</option>
-              </select>
-            </div>
-            <div>
-              <span id="checkout-daira-label">DAIRA / الدائرة</span>
-              <select name="daira" class="input_field" id="checkout-daira-select" required>
-                <option value="" id="checkout-daira-placeholder">Select daira / اختر الدائرة</option>
-              </select>
-            </div>
-            <div id="desk-field" style="display: none;">
-              <span id="checkout-desk-label">DESK/AGENCY / المكتب</span>
-              <select name="desk" class="input_field" id="checkout-desk-select">
-                <option value="">Select agency / اختر المكتب</option>
-              </select>
-            </div>
-            <div id="address-field" style="display: none;">
-              <span id="checkout-address-label">ADDRESS / العنوان</span>
-              <textarea name="address" class="input_field" id="checkout-address-input" placeholder="Enter your full address for home delivery / أدخل عنوانك الكامل للتوصيل للمنزل" rows="3" style="resize: vertical; min-height: 60px;"></textarea>
-            </div>
-            <!-- Add-on Bookmarks Section -->
-            <div style="margin-top: 20px; border-top: 1px dashed rgba(16, 86, 82, 0.25); padding-top: 16px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <span id="checkout-addons-label" style="font-size: 13px; font-weight: 700; color: #5e2217;">
-                  ADD CUTE BOOKMARKS / فواصل كتب إضافية ✨
-                </span>
-                <span style="font-size: 11px; color: #888; font-weight: 500;">Can be ordered alone or with books</span>
-              </div>
-              <p style="font-size: 11.5px; color: #666; margin-bottom: 12px; line-height: 1.35;">
-                Select cute handcrafted bookmarks. You can order bookmarks alone or add them to your book order!
-              </p>
-              <div id="bookmarkAddonsList" class="addon-grid">
-                <div style="text-align: center; color: #888; font-size: 12px; padding: 10px;">Loading cute bookmarks...</div>
+              <div style="font-size: 11.5px; margin-top: 4px; color: #7a524a; line-height: 1.4;">
+                Gift wrapping papers are exclusively offered to accompany book purchases. Accessories are safely delivered in standard protective parcel packaging. (Add a book to enable custom gift wrap).
               </div>
             </div>
 
-            <!-- Optional Book Tracker / Accessories Section -->
-            <div id="tracker-addon-section" style="margin-top: 14px; border-top: 1px dashed rgba(16, 86, 82, 0.25); padding-top: 14px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span style="font-size: 13px; font-weight: 700; color: #5e2217;">
-                  READING LOG & TRACKER / سجل القراءة 📖
-                </span>
-                <span style="font-size: 11px; color: #888; font-weight: 500;">Optional / اختياري</span>
-              </div>
-              <div id="accessoryAddonsList" class="addon-grid"></div>
-            </div>
-
-            <div id="checkout-packaging-section" style="margin-top: 20px; border-top: 1px solid rgba(16, 86, 82, 0.15); padding-top: 16px;">
-              <span id="checkout-packaging-label" style="display: block; font-size: 13px; font-weight: 700; color: #000000; margin-bottom: 12px;">PACKAGING / التغليف 🎁</span>
-              
-              <!-- Notice displayed when ordering accessories alone -->
-              <div id="packaging-book-only-notice" style="display: none; background: rgba(94, 34, 23, 0.07); border: 1.5px solid rgba(94, 34, 23, 0.22); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; font-size: 12.5px; color: #5e2217;">
-                <div style="font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                  <span>🎁</span>
-                  <span>Packaging is available for book orders only / التغليف متاح فقط مع طلبات الكتب</span>
+            <div class="packaging-options">
+              <label class="packaging-option">
+                <input type="radio" name="packaging" value="none" checked>
+                <div class="packaging-emoji">📦</div>
+                <div class="packaging-info">
+                  <div class="packaging-title">No packaging / بدون تغليف</div>
+                  <div class="packaging-price">0 DA</div>
                 </div>
-                <div style="font-size: 11.5px; margin-top: 4px; color: #7a524a; line-height: 1.4;">
-                  Gift wrapping papers are exclusively offered to accompany book purchases. Accessories are safely delivered in standard protective parcel packaging. (Add a book to enable custom gift wrap).
-                </div>
-              </div>
+              </label>
 
-              <div class="packaging-options">
-                <label class="packaging-option">
-                  <input type="radio" name="packaging" value="none" checked style="accent-color: #105652;">
-                  <div class="packaging-emoji">📦</div>
-                  <div style="flex: 1;">
-                    <div style="font-size: 15px; font-weight: 600;">No packaging / بدون تغليف</div>
-                    <div class="packaging-price">0 DA</div>
-                  </div>
-                </label>
-                <label class="packaging-option">
-                  <input type="radio" name="packaging" value="papier_craft" style="accent-color: #105652;">
-                  <img src="/img/papier-craft.PNG" alt="Papier Craft" width="80" height="80" style="width: 80px; height: 80px; object-fit: cover;">
-                  <div class="packaging-emoji">🎁</div>
-                  <div style="flex: 1;">
-                    <div style="font-size: 15px; font-weight: 600;">Papier Craft / ورق كرافت</div>
-                    <div class="packaging-price">500 DA</div>
-                  </div>
-                </label>
-                <label class="packaging-option">
-                  <input type="radio" name="packaging" value="surprise" style="accent-color: #105652;">
-                  <img src="/img/surprise.PNG" alt="Surprise" width="80" height="80" style="width: 80px; height: 80px; object-fit: cover;">
-                  <div class="packaging-emoji">✨</div>
-                  <div style="flex: 1;">
-                    <div style="font-size: 15px; font-weight: 600;">Surprise / مفاجأة</div>
-                    <div class="packaging-price">500 DA <span style="font-size: 11px; color: #666; font-weight: 500;">— see samples on Instagram / شاهد نماذج على إنستغرام</span></div>
-                  </div>
-                </label>
-                <!-- New 600 DA Wrapping Paper Options -->
-                <label class="packaging-option">
-                  <input type="radio" name="packaging" value="paper_wildflowers" style="accent-color: #105652;">
-                  <img src="img/new%20products/wrapping%20paper/packaging%20paper%201.jpg" alt="Vintage Wildflowers" width="80" height="80" style="width: 80px; height: 80px; object-fit: cover;">
-                  <div class="packaging-emoji">🌸</div>
-                  <div style="flex: 1;">
-                    <div style="font-size: 15px; font-weight: 600;">Vintage Wildflowers / ورق زهور برية كلاسيكي</div>
-                    <div style="font-size: 11.5px; color: #777;">Botanical wildflower field on kraft paper / نقشة زهور ونباتات برية</div>
-                    <div class="packaging-price">600 DA</div>
-                  </div>
-                </label>
-                <label class="packaging-option">
-                  <input type="radio" name="packaging" value="paper_pine_berries" style="accent-color: #105652;">
-                  <img src="img/new%20products/wrapping%20paper/packaging%20paper%202.jpg" alt="Festive Pine & Berries" width="80" height="80" style="width: 80px; height: 80px; object-fit: cover;">
-                  <div class="packaging-emoji">🌲</div>
-                  <div style="flex: 1;">
-                    <div style="font-size: 15px; font-weight: 600;">Festive Pine & Berries / ورق صنوبر وتوت شتوي</div>
-                    <div style="font-size: 11.5px; color: #777;">Winter botanical pine & berries with holiday stripes / صنوبر شتوي مع خطوط أعياد على الوجه الآخر</div>
-                    <div class="packaging-price">600 DA</div>
-                  </div>
-                </label>
-                <label class="packaging-option">
-                  <input type="radio" name="packaging" value="paper_celestial_crane" style="accent-color: #105652;">
-                  <img src="img/new%20products/wrapping%20paper/packaging%20paper%203.jpg" alt="Celestial Crane & Mountains" width="80" height="80" style="width: 80px; height: 80px; object-fit: cover;">
-                  <div class="packaging-emoji">🕊️</div>
-                  <div style="flex: 1;">
-                    <div style="font-size: 15px; font-weight: 600;">Celestial Crane & Mountain / ورق الرافعات والجبال الذهبي</div>
-                    <div style="font-size: 11.5px; color: #777;">Traditional oriental landscape with golden clouds & blue peaks / طيور كركي وجبال ذهبية ساحرة</div>
-                    <div class="packaging-price">600 DA</div>
-                  </div>
-                </label>
-              </div>
+              <label class="packaging-option">
+                <input type="radio" name="packaging" value="papier_craft">
+                <img src="/img/papier-craft.PNG" alt="Papier Craft" width="65" height="65" loading="lazy">
+                <div class="packaging-emoji">🎁</div>
+                <div class="packaging-info">
+                  <div class="packaging-title">Papier Craft / ورق كرافت</div>
+                  <div class="packaging-price">500 DA</div>
+                </div>
+              </label>
+
+              <label class="packaging-option">
+                <input type="radio" name="packaging" value="surprise">
+                <img src="/img/surprise.PNG" alt="Surprise" width="65" height="65" loading="lazy">
+                <div class="packaging-emoji">✨</div>
+                <div class="packaging-info">
+                  <div class="packaging-title">Surprise / مفاجأة</div>
+                  <div class="packaging-price">500 DA <span style="font-size: 11px; color: #666; font-weight: 500;">— samples on Instagram / شاهد على إنستغرام</span></div>
+                </div>
+              </label>
+
+              <!-- 600 DA Wrapping Paper Options -->
+              <label class="packaging-option">
+                <input type="radio" name="packaging" value="paper_wildflowers">
+                <img src="img/new%20products/wrapping%20paper/packaging%20paper%201.jpg" alt="Vintage Wildflowers" width="65" height="65" loading="lazy">
+                <div class="packaging-emoji">🌸</div>
+                <div class="packaging-info">
+                  <div class="packaging-title">Vintage Wildflowers / ورق زهور برية كلاسيكي</div>
+                  <div class="packaging-sub">Botanical wildflower field on kraft paper / نقشة زهور ونباتات برية</div>
+                  <div class="packaging-price">600 DA</div>
+                </div>
+              </label>
+
+              <label class="packaging-option">
+                <input type="radio" name="packaging" value="paper_pine_berries">
+                <img src="img/new%20products/wrapping%20paper/packaging%20paper%202.jpg" alt="Festive Pine & Berries" width="65" height="65" loading="lazy">
+                <div class="packaging-emoji">🌲</div>
+                <div class="packaging-info">
+                  <div class="packaging-title">Festive Pine & Berries / ورق صنوبر وتوت شتوي</div>
+                  <div class="packaging-sub">Winter botanical pine & berries with holiday stripes / صنوبر شتوي مع خطوط أعياد على الوجه الآخر</div>
+                  <div class="packaging-price">600 DA</div>
+                </div>
+              </label>
+
+              <label class="packaging-option">
+                <input type="radio" name="packaging" value="paper_celestial_crane">
+                <img src="img/new%20products/wrapping%20paper/packaging%20paper%203.jpg" alt="Celestial Crane & Mountains" width="65" height="65" loading="lazy">
+                <div class="packaging-emoji">🕊️</div>
+                <div class="packaging-info">
+                  <div class="packaging-title">Celestial Crane & Mountain / ورق الرافعات والجبال الذهبي</div>
+                  <div class="packaging-sub">Traditional oriental landscape with golden clouds & blue peaks / طيور كركي وجبال ذهبية ساحرة</div>
+                  <div class="packaging-price">600 DA</div>
+                </div>
+              </label>
             </div>
           </div>
         </div>
       </div>
+
+      <!-- Checkout Footer Card -->
       <div class="card checkout animate-fade-in">
-        <div class="footer" style="flex-direction: column; align-items: stretch; gap: 8px; padding: 15px 20px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <div class="footer">
+          <div class="total-row">
+            <span class="total-label" id="checkout-total-label">Total to Pay / المجموع الكلي:</span>
             <label class="price" id="totalPrice">0 DZD</label>
-            <button type="submit" class="cta" id="checkout-submit-button" disabled>
-              <span id="checkout-submit-btn">Submit Order / إرسال الطلب</span>
-              <svg width="15px" height="10px" viewBox="0 0 13 10">
-                <path d="M1,5 L11,5"></path>
-                <polyline points="8 1 12 5 8 9"></polyline>
-              </svg>
-            </button>
           </div>
+          
+          <button type="submit" class="cta" id="checkout-submit-button" disabled>
+            <span id="checkout-submit-btn">Submit Order / إرسال الطلب</span>
+            <svg width="15px" height="11px" viewBox="0 0 13 10">
+              <path d="M1,5 L11,5"></path>
+              <polyline points="8 1 12 5 8 9"></polyline>
+            </svg>
+          </button>
+          
           <div id="validation-message" class="validation-error">
             Please fill all required fields / الرجاء تعبئة جميع الحقول المطلوبة
           </div>
@@ -693,22 +1028,19 @@
       </div>
     </form>
   </div>
+
   <script src="js/shipping-data.js"></script>
   <script type="module" src="checkout.js"></script>
   
-  <!-- Fallback script to ensure page is visible even if main scripts fail -->
   <script>
-    // Ensure page is visible even if other scripts fail
     document.addEventListener('DOMContentLoaded', function() {
       setTimeout(function() {
         document.querySelectorAll('.animate-fade-in').forEach(el => {
           el.style.opacity = '1';
           el.style.transform = 'translateY(0)';
         });
-      }, 100);
+      }, 50);
     });
   </script>
-
-  
 </body>
 </html>
