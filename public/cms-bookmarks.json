@@ -34,7 +34,7 @@
     "id": "bookmark_boot-shaped-bookmarks",
     "slug": "boot-shaped-bookmarks",
     "name": "Whimsical Boots Bookmarks / فاصل الأحذية المميز",
-    "price": 500,
+    "price": 800,
     "active": true,
     "order": 3,
     "description": "Charming 3D bookmark featuring striped legs and sparkling ruby/glitter boots sticking out of your book pages. Adds a touch of magic and humor to your library.",
@@ -42,7 +42,8 @@
       "img/new products/bookmarks/boots bookmark.jpg",
       "img/new products/bookmarks/boots bookmark (2).jpg",
       "img/new products/bookmarks/boots bookmark (3).jpg",
-      "img/new products/bookmarks/boots bookmark (4).jpg"
+      "img/new products/bookmarks/boots bookmark (4).jpg",
+      "images/uploads/boots-bookmark-4-.jpg"
     ],
     "image": "img/new products/bookmarks/boots bookmark.jpg",
     "draft": false
