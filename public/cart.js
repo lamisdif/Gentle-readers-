@@ -196,24 +196,28 @@ window.addEventListener('load', function () {
       if (Array.isArray(bookmarks)) {
         bookmarks.forEach(b => {
           const id = b.id || ('bookmark_' + b.slug);
-          cmsBooks[id] = {
+          const item = {
             title:          b.name           || 'Cute Bookmark',
             author:         'Gentle Readers Bookmark Collection',
             price:          (b.price !== null && b.price !== undefined) ? String(b.price) : '',
             inStock:        b.active !== false
           };
+          cmsBooks[id] = item;
+          if (b.slug) cmsBooks[b.slug] = item;
         });
       }
 
       if (Array.isArray(accessories)) {
         accessories.forEach(a => {
           const id = a.id || ('acc_' + a.slug);
-          cmsBooks[id] = {
+          const item = {
             title:          a.name           || 'Reading Accessory',
             author:         'Gentle Readers Accessory',
             price:          (a.price !== null && a.price !== undefined) ? String(a.price) : '',
             inStock:        a.active !== false
           };
+          cmsBooks[id] = item;
+          if (a.slug) cmsBooks[a.slug] = item;
         });
       }
     })

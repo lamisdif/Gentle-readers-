@@ -61,6 +61,24 @@ let bookmarksData = [];
 let accessoriesData = [];
 const selectedAddons = {}; // addonId -> quantity
 
+function isAccessoryId(id) {
+  if (!id) return false;
+  if (id.startsWith('bookmark_') || id.startsWith('acc_')) return true;
+  if (bookmarksData.some(b => b.slug === id || b.id === id)) return true;
+  if (accessoriesData.some(a => a.slug === id || a.id === id)) return true;
+  return false;
+}
+
+function normalizeAddonId(id) {
+  if (!id) return id;
+  if (id.startsWith('bookmark_') || id.startsWith('acc_')) return id;
+  const bm = bookmarksData.find(b => b.slug === id || b.id === id);
+  if (bm) return bm.id || ('bookmark_' + bm.slug);
+  const acc = accessoriesData.find(a => a.slug === id || a.id === id);
+  if (acc) return acc.id || ('acc_' + acc.slug);
+  return id;
+}
+
 async function loadCmsAddons() {
   try {
     const [bmRes, accRes] = await Promise.all([
@@ -71,26 +89,52 @@ async function loadCmsAddons() {
     bookmarksData = Array.isArray(bmRes) ? bmRes : [];
     accessoriesData = Array.isArray(accRes) ? accRes : [];
 
-    // Register active bookmarks into global books dictionary for cart compatibility
+    // Register active bookmarks into global books dictionary
     bookmarksData.forEach(b => {
-      const id = b.id || ('bookmark_' + b.slug);
-      books[id] = {
+      const fullId = b.id || ('bookmark_' + b.slug);
+      const data = {
         title: b.name || 'Cute Bookmark',
         author: 'Gentle Readers Collection',
         price: (b.price !== null && b.price !== undefined) ? String(b.price) : '',
+        image: (b.images && b.images[0]) || b.image || 'img/new products/bookmarks/cats bookmarks.jpg',
         inStock: b.active !== false
       };
+      books[fullId] = data;
+      books[b.slug] = data;
     });
 
     // Register active accessories into global books dictionary
     accessoriesData.forEach(a => {
-      const id = a.id || ('acc_' + a.slug);
-      books[id] = {
+      const fullId = a.id || ('acc_' + a.slug);
+      const data = {
         title: a.name || 'Reading Accessory',
         author: 'Gentle Readers Collection',
         price: (a.price !== null && a.price !== undefined) ? String(a.price) : '',
+        image: (a.images && a.images[0]) || a.image || 'img/new products/bookmarks/book tracker.jpg',
         inStock: a.active !== false
       };
+      books[fullId] = data;
+      books[a.slug] = data;
+    });
+
+    // 1. Sync from URL parameters if customer clicked "Buy Now" on bookmark
+    const urlParams = new URLSearchParams(window.location.search);
+    const addonParam = urlParams.get('addon') || urlParams.get('bookmark') || urlParams.get('accessory');
+    if (addonParam) {
+      const normId = normalizeAddonId(addonParam);
+      selectedAddons[normId] = (selectedAddons[normId] || 0) + 1;
+      const cart = getCartObject();
+      cart[normId] = selectedAddons[normId];
+      localStorage.setItem('cart', JSON.stringify(cart));
+    }
+
+    // 2. Sync any bookmarks or accessories already in localStorage cart into selectedAddons
+    const cart = getCartObject();
+    Object.keys(cart).forEach(id => {
+      if (isAccessoryId(id)) {
+        const normId = normalizeAddonId(id);
+        selectedAddons[normId] = cart[id];
+      }
     });
 
     renderAddonLists();
@@ -229,23 +273,42 @@ function renderAddonLists() {
 }
 
 window.toggleAddon = function(id, isChecked) {
+  const normId = normalizeAddonId(id);
   if (isChecked) {
-    selectedAddons[id] = selectedAddons[id] || 1;
+    selectedAddons[normId] = selectedAddons[normId] || 1;
   } else {
-    delete selectedAddons[id];
+    delete selectedAddons[normId];
   }
+  // Sync into localStorage cart
+  const cart = getCartObject();
+  if (isChecked) {
+    cart[normId] = selectedAddons[normId];
+  } else {
+    delete cart[normId];
+  }
+  localStorage.setItem('cart', JSON.stringify(cart));
+
   renderAddonLists();
   loadOrderSummary();
 };
 
 window.changeAddonQty = function(id, delta) {
-  const current = selectedAddons[id] || 1;
+  const normId = normalizeAddonId(id);
+  const current = selectedAddons[normId] || 1;
   const next = current + delta;
   if (next <= 0) {
-    delete selectedAddons[id];
+    delete selectedAddons[normId];
   } else {
-    selectedAddons[id] = next;
+    selectedAddons[normId] = next;
   }
+  const cart = getCartObject();
+  if (next <= 0) {
+    delete cart[normId];
+  } else {
+    cart[normId] = next;
+  }
+  localStorage.setItem('cart', JSON.stringify(cart));
+
   renderAddonLists();
   loadOrderSummary();
 };
@@ -274,6 +337,7 @@ function getCartObject() {
   }
   return stored;
 }
+window.getCartObject = getCartObject;
 
 function loadOrderSummary() {
   const cart = getCartObject();
@@ -286,29 +350,76 @@ function loadOrderSummary() {
     return;
   }
 
-  let subtotal = 0;
+  let booksSubtotal = 0;
   cartItemsDiv.innerHTML = "";
   orderDetailsDiv.innerHTML = "";
   const lang = getCurrentLang();
 
-  const ids = Object.keys(cart);
-  if (ids.length === 0) {
-    cartItemsDiv.innerHTML = '<div style="text-align: center; color: #666; font-style: italic; padding: 20px;">Your cart is empty / السلة فارغة</div>';
-    orderDetailsDiv.innerHTML = '<span>No items</span><span>0 DZD</span>';
+  // Separate book IDs from accessory IDs
+  const cartKeys = Object.keys(cart);
+  const bookIds = cartKeys.filter(id => !isAccessoryId(id));
+
+  // Build active addons list
+  let addonsSubtotal = 0;
+  const activeAddonsList = [];
+
+  Object.keys(selectedAddons).forEach(addonId => {
+    const qty = selectedAddons[addonId] || 0;
+    if (qty <= 0) return;
+    const item = bookmarksData.find(b => (b.id || 'bookmark_' + b.slug) === addonId || b.slug === addonId) ||
+                 accessoriesData.find(a => (a.id || 'acc_' + a.slug) === addonId || a.slug === addonId);
+    if (!item) return;
+    const price = Number(item.price) || 0;
+    const lineTotal = price * qty;
+    addonsSubtotal += lineTotal;
+    activeAddonsList.push({
+      id: addonId,
+      name: item.name,
+      price: price,
+      qty: qty,
+      lineTotal: lineTotal,
+      image: (item.images && item.images[0]) || item.image || 'img/new products/bookmarks/cats bookmarks.jpg'
+    });
+  });
+
+  const hasAnyItems = (bookIds.length > 0) || (activeAddonsList.length > 0);
+
+  if (!hasAnyItems) {
+    cartItemsDiv.innerHTML = '<div style="text-align: center; color: #7a524a; font-style: italic; padding: 20px; background: rgba(94,34,23,0.05); border-radius: 8px;">' +
+      (lang === 'ar' ? 'سلة الطلب فارغة حالياً. يمكنك اختيار كتب أو فواصل وإكسسوارات من الأسفل لإتمام الشراء!' : 'Your order is currently empty. Add books or select bookmarks & accessories below to purchase!') +
+      '</div>';
+    orderDetailsDiv.innerHTML = '<span>' + (lang === 'ar' ? 'لا توجد عناصر' : 'No items') + '</span><span>0 DZD</span>';
     totalPriceLabel.textContent = "0 DZD";
+    if (typeof validateForm === 'function') validateForm();
     return;
   }
 
-  ids.forEach(bookId => {
+  // If ordering accessories alone without any book, display an encouraging badge
+  if (bookIds.length === 0) {
+    const infoDiv = document.createElement("div");
+    infoDiv.style.cssText = "background: rgba(16, 86, 82, 0.08); border: 1.5px solid rgba(16, 86, 82, 0.22); border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px;";
+    infoDiv.innerHTML = `
+      <span style="font-size: 20px;">✨</span>
+      <div>
+        <div style="font-weight: 700; color: #105652; font-size: 13.5px;">
+          ${lang === 'ar' ? 'طلب إكسسوارات وفواصل منفردة' : 'Accessories-Only Order'}
+        </div>
+        <div style="font-size: 11.5px; color: #5a4c4a;">
+          ${lang === 'ar' ? 'يمكنك إتمام هذا الطلب للفواصل والإكسسوارات وحدها دون الحاجة لشراء كتاب!' : 'You are purchasing accessories/bookmarks alone without a book. You can add more below!'}
+        </div>
+      </div>
+    `;
+    cartItemsDiv.appendChild(infoDiv);
+  }
+
+  // 1. Render books
+  bookIds.forEach(bookId => {
     const book = books[bookId] || { title: 'Unknown Book', price: '0' };
     const qty = cart[bookId] || 1;
     let price = 0;
-    
-    if (book.price) {
-      price = parseFloat(String(book.price).replace(/[^\d.]/g, ""));
-    }
+    if (book.price) price = parseFloat(String(book.price).replace(/[^\d.]/g, ""));
     const lineTotal = price * qty;
-    subtotal += lineTotal;
+    booksSubtotal += lineTotal;
 
     const discountTag = (book.has_discount && book.discount_label)
       ? `<span style="background:rgba(220,38,38,0.1); color:#dc2626; font-size:0.75rem; font-weight:700; padding:1px 5px; border-radius:4px; margin-left:4px;">${book.discount_label}</span>`
@@ -326,7 +437,6 @@ function loadOrderSummary() {
       <span class="book-price-line">${lineTotal.toLocaleString()} DZD</span>`;
     cartItemsDiv.appendChild(itemDiv);
 
-    // Sidebar summary details
     const detailTitle = document.createElement("span");
     detailTitle.textContent = `${book.title} × ${qty}`;
     const detailPrice = document.createElement("span");
@@ -335,7 +445,41 @@ function loadOrderSummary() {
     orderDetailsDiv.appendChild(detailPrice);
   });
 
-  // Calculate Shipping
+  // 2. Render accessories in the item list
+  activeAddonsList.forEach(addon => {
+    const itemDiv = document.createElement("div");
+    itemDiv.className = "book-item";
+    itemDiv.style.cssText = "background: #fdfaf2; border-left: 3.5px solid #105652; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;";
+    itemDiv.innerHTML = `
+      <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0;">
+        <img src="${encodeURI(addon.image)}" alt="thumb" style="width:34px; height:34px; object-fit:cover; border-radius:6px; flex-shrink:0; border:1px solid rgba(16,86,82,0.2);" />
+        <span style="font-weight:600; color:#105652; font-size:13.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+          ${addon.name}
+        </span>
+      </div>
+      <div class="qty-controls" style="margin: 0 10px;">
+        <button type="button" class="qty-btn" onclick="changeAddonQty('${addon.id}', -1)">−</button>
+        <span class="qty">${addon.qty}</span>
+        <button type="button" class="qty-btn" onclick="changeAddonQty('${addon.id}', 1)">+</button>
+      </div>
+      <span class="book-price-line" style="color:#105652; font-weight:700;">${addon.lineTotal.toLocaleString()} DZD</span>
+    `;
+    cartItemsDiv.appendChild(itemDiv);
+
+    const detailTitle = document.createElement("span");
+    detailTitle.textContent = `${addon.name} × ${addon.qty}`;
+    detailTitle.style.color = '#105652';
+    detailTitle.style.fontWeight = '600';
+    
+    const detailPrice = document.createElement("span");
+    detailPrice.textContent = `${addon.lineTotal.toLocaleString()} DZD`;
+    detailPrice.style.fontWeight = '600';
+
+    orderDetailsDiv.appendChild(detailTitle);
+    orderDetailsDiv.appendChild(detailPrice);
+  });
+
+  // 3. Calculate Shipping
   let shippingCost = 0;
   const deliveryMethod = document.getElementById("checkout-delivery-select")?.value;
   const wilaya = document.getElementById("checkout-wilaya-select")?.value;
@@ -344,9 +488,8 @@ function loadOrderSummary() {
     shippingCost = getShippingPrice(wilaya, deliveryMethod);
   }
 
-  // Add shipping to summary
   const shippingTitle = document.createElement("span");
-  shippingTitle.textContent = "Shipping / التوصيل";
+  shippingTitle.textContent = lang === 'ar' ? "التوصيل" : "Shipping";
   shippingTitle.style.fontWeight = "bold";
   shippingTitle.style.fontSize = "14px";
   
@@ -358,7 +501,7 @@ function loadOrderSummary() {
   orderDetailsDiv.appendChild(shippingTitle);
   orderDetailsDiv.appendChild(shippingPriceSpan);
 
-  // Add desk info if applicable
+  // Agency desk info if applicable
   if (deliveryMethod === 'desk') {
     const deskSelect = document.getElementById('checkout-desk-select');
     const selectedOption = deskSelect?.options[deskSelect.selectedIndex];
@@ -392,41 +535,15 @@ function loadOrderSummary() {
     }
   }
 
-  // Calculate Add-ons Subtotal
-  let addonsSubtotal = 0;
-  Object.keys(selectedAddons).forEach(addonId => {
-    const qty = selectedAddons[addonId] || 0;
-    if (qty <= 0) return;
-    const item = bookmarksData.find(b => (b.id || 'bookmark_' + b.slug) === addonId) ||
-                 accessoriesData.find(a => (a.id || 'acc_' + a.slug) === addonId);
-    if (!item) return;
-    const price = Number(item.price) || 0;
-    const lineTotal = price * qty;
-    addonsSubtotal += lineTotal;
-
-    const detailTitle = document.createElement("span");
-    detailTitle.textContent = `${item.name} × ${qty}`;
-    detailTitle.style.color = '#105652';
-    detailTitle.style.fontWeight = '600';
-    
-    const detailPrice = document.createElement("span");
-    detailPrice.textContent = `${lineTotal.toLocaleString()} DZD`;
-    detailPrice.style.fontWeight = '600';
-
-    orderDetailsDiv.appendChild(detailTitle);
-    orderDetailsDiv.appendChild(detailPrice);
-  });
-
-  // Calculate Packaging
+  // 4. Calculate Packaging
   const packagingOption = document.querySelector('input[name="packaging"]:checked');
   const packagingType = packagingOption ? packagingOption.value : 'none';
   const packagingPrice = PACKAGING_PRICES[packagingType] !== undefined ? PACKAGING_PRICES[packagingType] : 0;
 
-  // Add packaging to summary
   if (packagingType !== 'none' && packagingPrice > 0) {
     const packagingTitle = document.createElement("span");
     const packagingLabel = PACKAGING_LABELS[packagingType] || packagingType;
-    packagingTitle.textContent = `Packaging / التغليف (${packagingLabel})`;
+    packagingTitle.textContent = lang === 'ar' ? `التغليف (${packagingLabel})` : `Packaging (${packagingLabel})`;
     packagingTitle.style.fontSize = '0.9rem';
     
     const packagingPriceSpan = document.createElement("span");
@@ -437,10 +554,9 @@ function loadOrderSummary() {
     orderDetailsDiv.appendChild(packagingPriceSpan);
   }
   
-  const finalTotal = subtotal + addonsSubtotal + shippingCost + packagingPrice;
+  const finalTotal = booksSubtotal + addonsSubtotal + shippingCost + packagingPrice;
   totalPriceLabel.textContent = `${finalTotal.toLocaleString()} DZD`;
 
-  // Trigger validation after summary (and shipping price) is updated
   if (typeof validateForm === 'function') validateForm();
 }
 document.addEventListener("DOMContentLoaded", function () {
@@ -588,36 +704,42 @@ if (checkoutForm) {
       alert('Please select an agency for desk pickup');
       return;
     }
-    if (!cartItems || Object.keys(cartItems).length === 0) {
-      alert('Your cart is empty. Please add some books before placing an order.');
+    const cartKeys = Object.keys(cartItems);
+    const bookIds = cartKeys.filter(id => !isAccessoryId(id));
+    const activeAddonKeys = Object.keys(selectedAddons).filter(id => (selectedAddons[id] || 0) > 0);
+
+    const hasBooks = bookIds.length > 0;
+    const hasAddons = activeAddonKeys.length > 0;
+
+    if (!hasBooks && !hasAddons) {
+      alert(getCurrentLang() === 'ar' ? 'سلة الطلب فارغة. يرجى اختيار كتاب أو إكسسوار للطلب.' : 'Your order is empty. Please select books or accessories before placing an order.');
       return;
     }
 
     // Calculate Subtotal and Shipping Price
     let subtotal = 0;
-    const items = Object.keys(cartItems).map(bookId => {
+    const items = [];
+
+    // Add books
+    bookIds.forEach(bookId => {
       const book = books[bookId] || { title: `Unknown Book (${bookId})`, price: '0' };
       const qty = cartItems[bookId] || 1;
-      
       let price = 0;
-      if (book.price) {
-        price = parseFloat(String(book.price).replace(/[^\d.]/g, ""));
-      }
+      if (book.price) price = parseFloat(String(book.price).replace(/[^\d.]/g, ""));
       subtotal += price * qty;
-      return `${book.title} × ${qty}`;
+      items.push(`${book.title} × ${qty}`);
     });
 
-    // Add selected bookmarks and accessories to items & subtotal
-    Object.keys(selectedAddons).forEach(addonId => {
+    // Add selected bookmarks and accessories
+    activeAddonKeys.forEach(addonId => {
       const qty = selectedAddons[addonId] || 0;
       if (qty <= 0) return;
-      // Validate against CMS data as source of truth
-      const item = bookmarksData.find(b => (b.id || 'bookmark_' + b.slug) === addonId && b.active !== false) ||
-                   accessoriesData.find(a => (a.id || 'acc_' + a.slug) === addonId && a.active !== false);
+      const item = bookmarksData.find(b => (b.id || 'bookmark_' + b.slug) === addonId || b.slug === addonId && b.active !== false) ||
+                   accessoriesData.find(a => (a.id || 'acc_' + a.slug) === addonId || a.slug === addonId && a.active !== false);
       if (!item) return;
       const price = Number(item.price) || 0;
       subtotal += price * qty;
-      items.push(`${item.name} [Add-on] × ${qty}`);
+      items.push(`${item.name} [Accessory] × ${qty}`);
     });
 
     const shippingPrice = getShippingPrice(wilaya, deliveryMethod);
@@ -626,11 +748,11 @@ if (checkoutForm) {
 
     // Final safety check before submission
     if (shippingPrice <= 0 && wilaya) {
-        alert('Shipping price not calculated / لم يتم حساب سعر التوصيل');
-        return;
+      alert(getCurrentLang() === 'ar' ? 'لم يتم حساب سعر التوصيل، يرجى اختيار الولاية وطريقة التوصيل' : 'Shipping price not calculated');
+      return;
     }
 
-    // Send to backend
+        // Send to backend
     console.log('Submitting order. Subtotal:', subtotal, 'Shipping:', shippingPrice, 'Total:', finalTotal);
     
     try {
@@ -848,9 +970,16 @@ function validateForm() {
     // Check shipping price is calculated
     const shippingPrice = getShippingPrice(wilaya, deliveryMethod);
     
-    let isValid = true;
-    let missingFields = [];
+    // Check if order has books OR accessories
+    const cart = getCartObject();
+    const cartKeys = Object.keys(cart);
+    const hasBooks = cartKeys.some(id => !isAccessoryId(id));
+    const hasAddons = Object.values(selectedAddons).some(qty => qty > 0);
+    const hasItems = hasBooks || hasAddons;
 
+    let isValid = true;
+
+    if (!hasItems) isValid = false;
     if (!firstName) isValid = false;
     if (!familyName) isValid = false;
     if (!phoneNumber) isValid = false;
@@ -865,7 +994,7 @@ function validateForm() {
     // Shipping price must be > 0 (all zones have prices now)
     if (wilaya && shippingPrice <= 0) isValid = false;
 
-    // Packaging must be selected (it has a default 'none', but being safe)
+    // Packaging must be selected (it has a default 'none')
     const packagingOption = document.querySelector('input[name="packaging"]:checked');
     if (!packagingOption) isValid = false;
 
@@ -877,3 +1006,4 @@ function validateForm() {
         validationMsg.style.display = 'block';
     }
 }
+window.validateForm = validateForm;

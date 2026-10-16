@@ -1620,12 +1620,16 @@
             <div class="cute-card-footer">
               <div class="cute-card-price" id="cute-price-cat-bookmarks">450 DA</div>
               <div class="cute-card-actions">
-                <button type="button" class="cute-btn cute-btn-outline" onclick="openBookmarkLightbox('cat-bookmarks', null, event)">
+                <button type="button" class="cute-btn cute-btn-outline" onclick="openBookmarkLightbox('cat-bookmarks', null, event)" title="View photos gallery">
                   <i class="fas fa-expand-alt"></i>
-                  <span>Gallery</span>
+                  <span>Photos</span>
                 </button>
-                <a href="checkout.html" class="cute-btn cute-btn-primary">
-                  <span>Order 📖</span>
+                <button type="button" class="cute-btn cute-btn-outline" onclick="addBookmarkToCart('cat-bookmarks', event)" title="Add to cart">
+                  <i class="fas fa-cart-plus"></i>
+                  <span>Cart</span>
+                </button>
+                <a href="checkout.html?addon=bookmark_cat-bookmarks" class="cute-btn cute-btn-primary" title="Buy this bookmark alone">
+                  <span>Buy Now ⚡</span>
                 </a>
               </div>
             </div>
@@ -1662,12 +1666,16 @@
             <div class="cute-card-footer">
               <div class="cute-card-price" id="cute-price-metallic-leaf-bookmarks">550 DA</div>
               <div class="cute-card-actions">
-                <button type="button" class="cute-btn cute-btn-outline" onclick="openBookmarkLightbox('metallic-leaf-bookmarks', null, event)">
+                <button type="button" class="cute-btn cute-btn-outline" onclick="openBookmarkLightbox('metallic-leaf-bookmarks', null, event)" title="View photos gallery">
                   <i class="fas fa-expand-alt"></i>
-                  <span>Gallery</span>
+                  <span>Photos</span>
                 </button>
-                <a href="checkout.html" class="cute-btn cute-btn-primary">
-                  <span>Order 📖</span>
+                <button type="button" class="cute-btn cute-btn-outline" onclick="addBookmarkToCart('metallic-leaf-bookmarks', event)" title="Add to cart">
+                  <i class="fas fa-cart-plus"></i>
+                  <span>Cart</span>
+                </button>
+                <a href="checkout.html?addon=bookmark_metallic-leaf-bookmarks" class="cute-btn cute-btn-primary" title="Buy this bookmark alone">
+                  <span>Buy Now ⚡</span>
                 </a>
               </div>
             </div>
@@ -1710,12 +1718,16 @@
             <div class="cute-card-footer">
               <div class="cute-card-price" id="cute-price-boot-shaped-bookmarks">800 DA</div>
               <div class="cute-card-actions">
-                <button type="button" class="cute-btn cute-btn-outline" onclick="openBookmarkLightbox('boot-shaped-bookmarks', null, event)">
+                <button type="button" class="cute-btn cute-btn-outline" onclick="openBookmarkLightbox('boot-shaped-bookmarks', null, event)" title="View photos gallery">
                   <i class="fas fa-expand-alt"></i>
-                  <span>Gallery</span>
+                  <span>Photos</span>
                 </button>
-                <a href="checkout.html" class="cute-btn cute-btn-primary">
-                  <span>Order 📖</span>
+                <button type="button" class="cute-btn cute-btn-outline" onclick="addBookmarkToCart('boot-shaped-bookmarks', event)" title="Add to cart">
+                  <i class="fas fa-cart-plus"></i>
+                  <span>Cart</span>
+                </button>
+                <a href="checkout.html?addon=bookmark_boot-shaped-bookmarks" class="cute-btn cute-btn-primary" title="Buy this bookmark alone">
+                  <span>Buy Now ⚡</span>
                 </a>
               </div>
             </div>
@@ -1724,11 +1736,16 @@
 
       </div>
 
-      <!-- Action Button to View Full Books -->
-      <div style="text-align: center; margin-top: 36px;">
+      <!-- Action Button to View Full Books or Order Accessories -->
+      <div style="text-align: center; margin-top: 36px; display: flex; flex-wrap: wrap; justify-content: center; gap: 14px;">
+        <a href="checkout.html" class="inline-flex items-center gap-2 font-bold text-sm px-6 py-3 rounded-full transition-all shadow-sm" 
+           style="background: #105652; color: #ffffff; border: 1.5px solid #105652;">
+          <i class="fas fa-shopping-bag"></i>
+          <span>Purchase Accessories & Bookmarks Directly / شراء الفواصل منفردة</span>
+        </a>
         <a href="#section-latest-books" class="inline-flex items-center gap-2 font-bold text-sm px-6 py-3 rounded-full transition-all" 
            style="background: rgba(94, 34, 23, 0.08); color: #5e2217; border: 1.5px solid rgba(94, 34, 23, 0.25);">
-          <span>Browse Book Collection to Order Bookmarks as Add-ons</span>
+          <span>Or Pair With a Book from Our Library 📖</span>
           <i class="fas fa-arrow-down text-xs"></i>
         </a>
       </div>
@@ -1831,11 +1848,16 @@
           var titleEl = document.getElementById('lightbox-title');
           var descEl = document.getElementById('lightbox-desc');
           var priceEl = document.getElementById('lightbox-price');
+          var buyBtn = document.getElementById('lightbox-buy-now-btn');
 
           if (!modal) return;
           titleEl.textContent = state.name;
           descEl.textContent = state.description;
           priceEl.innerHTML = state.priceText || (state.price ? (state.price + ' DA') : '');
+
+          if (buyBtn) {
+            buyBtn.href = 'checkout.html?addon=bookmark_' + slug;
+          }
 
           updateLightboxDisplay();
           modal.classList.add('active');
@@ -1913,6 +1935,77 @@
             window.stepBookmarkLightbox(1);
           }
         });
+
+        // Add bookmark directly to cart (allows purchasing bookmarks/accessories alone)
+        window.addBookmarkToCart = function(slug, event) {
+          if (event) {
+            event.stopPropagation();
+            event.preventDefault();
+          }
+          if (!slug) return;
+          var id = 'bookmark_' + slug;
+          var stored = {};
+          try {
+            stored = JSON.parse(localStorage.getItem('cart')) || {};
+          } catch(e) {
+            stored = {};
+          }
+          if (Array.isArray(stored)) {
+            var obj = {};
+            stored.forEach(function(k) { obj[k] = (obj[k] || 0) + 1; });
+            obj[id] = (obj[id] || 0) + 1;
+            localStorage.setItem('cart', JSON.stringify(obj));
+          } else {
+            stored[id] = (stored[id] || 0) + 1;
+            localStorage.setItem('cart', JSON.stringify(stored));
+          }
+
+          // Trigger cart counter update
+          if (typeof updateCartCounter === 'function') {
+            updateCartCounter();
+          } else {
+            var currentCart = JSON.parse(localStorage.getItem('cart')) || {};
+            var total = Object.values(currentCart).reduce(function(a, b) { return a + b; }, 0);
+            document.querySelectorAll('.btn-cart').forEach(function(btn) {
+              btn.setAttribute('data-quantity', total);
+            });
+          }
+
+          var cartBtns = document.querySelectorAll('.btn-cart');
+          cartBtns.forEach(function(btn) {
+            btn.style.transform = 'scale(1.25)';
+            setTimeout(function() { btn.style.transform = 'scale(1)'; }, 250);
+          });
+
+          var name = (window.bookmarkGalleryState[slug] && window.bookmarkGalleryState[slug].name) || 'Cute Bookmark';
+          showBookmarkToast(name);
+        };
+
+        function showBookmarkToast(title) {
+          var existing = document.getElementById('cute-bookmark-toast');
+          if (existing) existing.remove();
+
+          var toast = document.createElement('div');
+          toast.id = 'cute-bookmark-toast';
+          toast.style.cssText = 'position: fixed; bottom: 24px; right: 24px; z-index: 999999; background: #5e2217; color: #fcf4cc; padding: 14px 20px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); display: flex; align-items: center; gap: 14px; font-family: inherit; font-size: 13.5px; border: 1.5px solid rgba(252,244,204,0.3); max-width: 90vw;';
+          toast.innerHTML = `
+            <span style="font-size: 20px;">✨</span>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px;">${title}</div>
+              <div style="font-size: 11.5px; opacity: 0.9;">Added to cart / تمت الإضافة للسلة</div>
+            </div>
+            <a href="checkout.html" style="background: #105652; color: #ffffff; text-decoration: none; padding: 7px 12px; border-radius: 8px; font-weight: 700; font-size: 12px; white-space: nowrap;">Checkout ⚡</a>
+            <button type="button" onclick="this.parentElement.remove()" style="background: transparent; border: none; color: #fcf4cc; font-size: 16px; cursor: pointer; padding: 0 4px; line-height: 1;">✕</button>
+          `;
+          document.body.appendChild(toast);
+          setTimeout(function() {
+            if (toast && toast.parentElement) {
+              toast.style.opacity = '0';
+              toast.style.transition = 'opacity 0.4s';
+              setTimeout(function() { if (toast.parentElement) toast.remove(); }, 400);
+            }
+          }, 3500);
+        }
 
         // Touch swipe support for mobile
         var touchStartX = 0;
@@ -2457,6 +2550,7 @@
         stored[bookId] = (stored[bookId] || 0) + 1;
         localStorage.setItem('cart', JSON.stringify(stored));
       }
+      updateCartCounter();
       // Animate the cart icon in navigation
       const cartIcon = document.querySelector('.btn-cart');
       if (cartIcon) {
@@ -2829,9 +2923,13 @@
           <p class="cute-lightbox-desc" id="lightbox-desc"></p>
           <div class="cute-lightbox-footer">
             <div class="cute-lightbox-price" id="lightbox-price"></div>
-            <div style="display: flex; gap: 10px;">
-              <a href="checkout.html" class="cute-btn cute-btn-primary" style="padding: 10px 20px; font-size: 14px;">
-                <span>Order with Book in Checkout 📖</span>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button type="button" class="cute-btn cute-btn-outline" id="lightbox-add-cart-btn" onclick="addBookmarkToCart(window.currentLightboxSlug, event)" style="padding: 10px 18px; font-size: 13.5px;">
+                <i class="fas fa-cart-plus"></i>
+                <span>Add to Cart</span>
+              </button>
+              <a href="checkout.html" id="lightbox-buy-now-btn" class="cute-btn cute-btn-primary" style="padding: 10px 20px; font-size: 14px;">
+                <span>Buy Bookmark Now ⚡</span>
               </a>
             </div>
           </div>
