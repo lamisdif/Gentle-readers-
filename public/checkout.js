@@ -45,7 +45,7 @@ const PACKAGING_PRICES = {
   'surprise': 500,
   'paper_wildflowers': 600,
   'paper_pine_berries': 600,
-  'paper_celestial_crane': 600
+  'paper_celestial_crane': 800
 };
 
 const PACKAGING_LABELS = {

@@ -1932,7 +1932,7 @@
             </p>
             <div class="cute-card-footer">
               <div>
-                <div class="cute-card-price" style="color: #5e2217;">600 DA</div>
+                <div class="cute-card-price" style="color: #5e2217;">800 DA</div>
                 <div style="font-size: 11px; color: #888;">Available with book orders</div>
               </div>
               <div class="cute-card-actions">
@@ -2063,8 +2063,8 @@
             type: 'packaging',
             name: 'Celestial Crane & Mountain Wrapping Paper / ورق الرافعات والجبال السماوية',
             description: 'Majestic oriental cranes soaring above mist-shrouded peaks and pines against deep indigo tones. Available exclusively when ordering a book.',
-            price: 600,
-            priceText: '600 DA (Book Orders Only)',
+            price: 800,
+            priceText: '800 DA (Book Orders Only)',
             images: [
               'img/new products/wrapping paper/packaging paper 3.jpg'
             ],
@@ -2431,11 +2431,28 @@
           const sliderList = document.querySelector('.slider .list');
           if (!sliderList) return;
 
-          fetch('cms-books.json')
-            .then(res => res.json())
+          const defaultCoverSvg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='280' viewBox='0 0 200 280'><rect width='200' height='280' fill='%23F4EFE6'/><rect x='8' y='8' width='184' height='264' fill='none' stroke='%23C5A880' stroke-width='1.5' stroke-dasharray='4,4'/><path d='M70 110h60v2H70zm0 15h45v2H70zm0 15h55v2H70z' fill='%238C7355'/><text x='100' y='175' font-family='serif' font-size='12' fill='%236B5843' text-anchor='middle'>Gentle Readers</text></svg>";
+
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+          fetch('cms-books.json', { signal: controller.signal })
+            .then(res => {
+              clearTimeout(timeoutId);
+              if (!res.ok) throw new Error('HTTP ' + res.status);
+              return res.json();
+            })
             .then(books => {
               if (!Array.isArray(books)) return;
               sliderList.innerHTML = '';
+
+              // Sort books chronologically: newest additions first
+              books.sort((a, b) => {
+                const timeA = Number(a.createdTime || a.createdAt || a.created_at || (a.date ? new Date(a.date).getTime() : 0)) || 0;
+                const timeB = Number(b.createdTime || b.createdAt || b.created_at || (b.date ? new Date(b.date).getTime() : 0)) || 0;
+                if (timeB !== timeA) return timeB - timeA;
+                return String(a.title || '').localeCompare(String(b.title || ''));
+              });
 
               const slider = document.querySelector('.slider');
               if (slider) slider.style.setProperty('--quantity', books.length);
@@ -2448,7 +2465,7 @@
                 const originalPrice = hasDiscount ? (b.original_price || b.price) : b.price;
                 const discountLabel = hasDiscount ? (b.discount_label || (b.discount_percentage ? '-' + b.discount_percentage + '%' : 'SALE')) : '';
                 const price = effectivePrice ? String(effectivePrice) : '';
-                const cover = b.image || 'https://placehold.co/200x280/ccc/666?text=Cover';
+                const cover = b.image || defaultCoverSvg;
 
                 const buttonStyle = isOutOfStock
                   ? "position: absolute; top: 8px; right: 8px; background: rgba(220,38,38,0.9); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: not-allowed; display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0.7;"
@@ -2503,7 +2520,7 @@
                     <div class="flip-book-card-content">
                       <div class="flip-book-card-front">
                         <div class="book-cover-image">
-                          <img src="${cover}" alt="Book Cover" onerror="this.src='https://placehold.co/200x280/ccc/666?text=Cover+Image+Unavailable'" />
+                          <img src="${cover}" alt="Book Cover" onerror="this.onerror=null;this.src='${defaultCoverSvg}';" />
                         </div>
                         <p class="book-title">${b.title || ''}</p>
                         <p class="book-author">${b.author || ''}</p>
@@ -2533,7 +2550,13 @@
                 }, 100);
               }
             })
-            .catch(e => console.error('Failed to load CMS books for index slider', e));
+            .catch(e => {
+              clearTimeout(timeoutId);
+              console.warn('CMS books loaded with fallback or offline:', e);
+              if (typeof initPagination === 'function') {
+                initPagination(0);
+              }
+            });
         });
       </script>
       <!-- Pagination for first section -->
@@ -2763,7 +2786,42 @@
       // Hide all items initially
       items.forEach(item => item.classList.add('hidden'));
 
-      function showPage(page) {
+      function scrollToBooksSection(smooth = true) {
+        const target = document.querySelector('.latest-books-online') || document.getElementById('section-latest-books') || slider;
+        if (!target) return;
+
+        const behavior = smooth ? 'smooth' : 'auto';
+        const mc = document.querySelector('.main-content');
+
+        // Check if fixed mobile header is visible
+        let headerOffset = 15;
+        const mobileHeader = document.querySelector('.mobile-header');
+        if (mobileHeader && window.getComputedStyle(mobileHeader).display !== 'none') {
+          headerOffset = mobileHeader.offsetHeight + 10;
+        }
+
+        if (mc) {
+          const mcRect = mc.getBoundingClientRect();
+          const targetRect = target.getBoundingClientRect();
+          const offsetTop = mc.scrollTop + (targetRect.top - mcRect.top) - headerOffset;
+          mc.scrollTo({
+            top: Math.max(0, offsetTop),
+            behavior: behavior
+          });
+        }
+
+        // Cross-browser & mobile fallbacks
+        try {
+          target.scrollIntoView({ behavior: behavior, block: 'start' });
+        } catch (e) {}
+
+        try {
+          const winY = target.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+          window.scrollTo({ top: Math.max(0, winY), behavior: behavior });
+        } catch (e) {}
+      }
+
+      function showPage(page, shouldScroll) {
         if (page < 1 || page > totalPages) return;
         currentPage = page;
 
@@ -2778,7 +2836,23 @@
           }
         });
 
+        // Update URL state without page reload
+        const newUrl = page === 1 ? window.location.pathname : `${window.location.pathname}?page=${page}`;
+        if (window.history && window.history.pushState) {
+          window.history.pushState({ page: page }, '', newUrl);
+        }
+
+        if (typeof updateHeroAndGenreVisibility === 'function') {
+          updateHeroAndGenreVisibility();
+        }
+
         renderPagination();
+
+        if (shouldScroll) {
+          requestAnimationFrame(() => {
+            scrollToBooksSection(true);
+          });
+        }
       }
 
       function renderPagination() {
@@ -2791,7 +2865,7 @@
 
         // Prev button
         if (currentPage > 1) {
-          html += `<a href="?page=${currentPage - 1}" class="pagination-button">&lt;</a>`;
+          html += `<a href="?page=${currentPage - 1}" data-page="${currentPage - 1}" class="pagination-button">&lt;</a>`;
         } else {
           html += `<a href="#" class="pagination-button disabled" onclick="return false;">&lt;</a>`;
         }
@@ -2799,7 +2873,7 @@
         // Page numbers (compact: always show first, last, current ±2, with ellipsis)
         const makeLink = (i) => {
           const url = i === 1 ? 'index.html' : `index.html?page=${i}`;
-          return `<a href="${url}" class="pagination-button ${i === currentPage ? 'active' : ''}">${i}</a>`;
+          return `<a href="${url}" data-page="${i}" class="pagination-button ${i === currentPage ? 'active' : ''}">${i}</a>`;
         };
 
         if (totalPages <= 7) {
@@ -2820,7 +2894,7 @@
 
         // Next button
         if (currentPage < totalPages) {
-          html += `<a href="?page=${currentPage + 1}" class="pagination-button">&gt;</a>`;
+          html += `<a href="?page=${currentPage + 1}" data-page="${currentPage + 1}" class="pagination-button">&gt;</a>`;
         } else {
           html += `<a href="#" class="pagination-button disabled" onclick="return false;">&gt;</a>`;
         }
@@ -2828,32 +2902,50 @@
         paginationContainer.innerHTML = html;
       }
 
-      showPage(currentPage);
+      // Intercept pagination clicks for smooth client-side pagination
+      paginationContainer.onclick = function(e) {
+        const link = e.target.closest('a[data-page]');
+        if (link) {
+          e.preventDefault();
+          const targetPage = parseInt(link.getAttribute('data-page'));
+          if (targetPage && targetPage !== currentPage && targetPage >= 1 && targetPage <= totalPages) {
+            showPage(targetPage, true);
+          }
+        }
+      };
+
+      // Listen for browser forward/back buttons
+      if (!window._paginationPopstateRegistered) {
+        window._paginationPopstateRegistered = true;
+        window.addEventListener('popstate', function(e) {
+          const urlParams = new URLSearchParams(window.location.search);
+          const p = Math.max(1, Math.min(totalPages, parseInt(urlParams.get('page')) || 1));
+          if (p !== currentPage) {
+            showPage(p, true);
+          }
+        });
+      }
+
+      showPage(currentPage, false);
+      if (currentPage > 1) {
+        // If loaded directly with ?page=2 or higher, immediately position customer at books
+        requestAnimationFrame(() => {
+          scrollToBooksSection(false);
+        });
+      }
     }
 
     // Initialize pagination after the CMS fetch has populated the slider
     document.addEventListener('DOMContentLoaded', function () {
-      // initPagination is also called from inside the CMS fetch .then() above (after books are loaded),
-      // but we fire it here too for safety with a short delay.
       setTimeout(function () { initPagination(0); }, 200);
     });
 
-    // Hide hero and genre sections on pages 2, 3, 4, 5... (show only on page 1)
+    // Ensure genre section placeholder is hidden; keep hero section and bookmarks preserved
     function updateHeroAndGenreVisibility() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const page = parseInt(urlParams.get('page')) || 1;
-      const heroSection = document.getElementById('hero-section');
       const genreSection = document.getElementById('genre-cards-section');
       if (genreSection) genreSection.style.display = 'none';
-      if (page >= 2) {
-        if (heroSection) heroSection.style.display = 'none';
-      } else {
-        if (heroSection) heroSection.style.display = '';
-      }
     }
 
-    // Pagination is now initialized only after Strapi fetch settles (see Strapi script below)
-    // so that page 1 includes Strapi books on both desktop and mobile.
     document.addEventListener('DOMContentLoaded', function () {
       updateHeroAndGenreVisibility();
     });
@@ -3042,21 +3134,29 @@
         window.scrollTo(0, 0);
       }
     };
+    let __loaderWatchdog = null;
     function showLoader() {
       document.body.classList.add('loading');
-      document.getElementById('site-loader').style.display = 'flex';
+      const loader = document.getElementById('site-loader');
+      if (loader) loader.style.display = 'flex';
+      clearTimeout(__loaderWatchdog);
+      __loaderWatchdog = setTimeout(hideLoader, 5000); // 5-second watchdog timer prevents stuck infinite loader
     }
     function hideLoader() {
+      clearTimeout(__loaderWatchdog);
       document.body.classList.remove('loading');
-      document.getElementById('site-loader').style.display = 'none';
+      const loader = document.getElementById('site-loader');
+      if (loader) loader.style.display = 'none';
     }
-    window.addEventListener('DOMContentLoaded', function () {
-      hideLoader();
-    });
-    // Show loader on navigation (all <a> and nav buttons), avoiding in-page anchors
+    window.addEventListener('DOMContentLoaded', hideLoader);
+    window.addEventListener('pageshow', hideLoader);
+    window.addEventListener('load', hideLoader);
+
+    // Show loader on external navigation only, avoiding pagination and in-page anchors
     document.addEventListener('DOMContentLoaded', function () {
       document.querySelectorAll('a, button[data-nav]').forEach(el => {
         el.addEventListener('click', function (e) {
+          if (el.classList.contains('pagination-button') || el.hasAttribute('data-page')) return;
           const rawHref = el.getAttribute('href');
           if (!rawHref || rawHref.startsWith('#') || rawHref.startsWith('javascript:') || rawHref === '') return;
           if (el.hostname === window.location.hostname && el.pathname === window.location.pathname && el.hash) return;
@@ -3091,7 +3191,6 @@
       localStorage.setItem('lang', lang);
       location.reload();
     }
-    window.addEventListener('offline', showLoader);
     window.addEventListener('online', hideLoader);
   </script>
   <script>

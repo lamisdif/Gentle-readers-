@@ -1,0 +1,30 @@
+{
+  "name": "Gentle Readers Manager — قرّائي الأعزاء",
+  "short_name": "GR Manager",
+  "description": "Offline-First Bookstore & Business Management for Gentle Readers",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#FFF9EC",
+  "theme_color": "#FFF9EC",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "../img/Perfectly made ones right.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

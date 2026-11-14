@@ -1,0 +1,1374 @@
+﻿<!DOCTYPE html>
+<html lang="en" dir="ltr"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Gentle Readers Manager ΓÇö ┘é╪▒┘æ╪º╪ª┘è ╪º┘ä╪ú╪╣╪▓╪º╪í</title>
+  
+  <!-- Favicon & PWA Theme -->
+  <link rel="icon" type="image/svg+xml" href="../img/Perfectly made ones right.svg">
+  <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+  <meta name="theme-color" content="#FFF9EC">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="GR Manager">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&amp;family=Inter:wght@400;500;600;700&amp;family=Playfair+Display:ital,wght@0,600;0,700;1,500&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Bespoke Vintage Stylesheet -->
+  <link rel="stylesheet" href="manager.css?v=12">
+</head>
+<body>
+
+<!-- Single Owner Login Overlay (Active when unauthenticated) -->
+<div id="login-overlay" class="login-overlay" style="display: none;">
+  <div class="login-card">
+    <div class="login-header">
+      <img src="../img/Perfectly made ones right.svg" alt="Gentle Readers" class="login-logo">
+      <h2>Gentle Readers Manager</h2>
+      <p class="login-sub-ar">┘é╪▒┘æ╪º╪ª┘è ╪º┘ä╪ú╪╣╪▓╪º╪í ΓÇö ┘ä┘ê╪¡╪⌐ ╪º┘ä╪Ñ╪»╪º╪▒╪⌐ ╪º┘ä╪«╪º╪╡╪⌐</p>
+      <div class="login-badge-pill">
+        <i class="fa-solid fa-lock"></i> Store Owner Portal
+      </div>
+    </div>
+
+    <div class="login-body">
+      <p class="login-prompt">
+        Sign in with your verified GitHub account to manage store inventory, orders, purchase batches, and ledger.
+      </p>
+
+      <div id="login-error-msg" class="login-error" style="display: none;"></div>
+
+      <div id="login-protocol-hint" class="login-protocol-hint" style="display: none;">
+        <i class="fa-solid fa-circle-info"></i> <strong>Local Testing Note:</strong> GitHub OAuth redirects require an HTTP local server (e.g. <code>http://localhost:8080/public/manager/</code>) because GitHub does not support <code>file://</code> redirects.
+      </div>
+
+      <a id="github-login-btn" class="github-login-btn" href="https://fsximdllrhglabxbqvay.supabase.co/auth/v1/authorize?provider=github&amp;redirect_to=http://localhost:8080/public/manager/">
+        <i class="fa-brands fa-github"></i>
+        <span>Continue with GitHub / ╪º┘ä╪»╪«┘ê┘ä ╪╣╪¿╪▒ ╪¼┘è╪¬ ┘ç╪º╪¿</span>
+      </a>
+
+      <div class="login-security-notice">
+        <p><i class="fa-solid fa-shield-halved"></i> <strong>Strict Access Policy:</strong> Authentication is restricted exclusively to <code>lamisdif@gmail.com</code>. Every other account is rejected and blocked from accessing management data by Supabase Database Row-Level Security (RLS).</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="app-main-layout" class="app-container" style="display: none;">
+  
+  <!-- Mobile Sidebar Backdrop -->
+  <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+
+  <!-- Sidebar -->
+  <aside id="app-sidebar" class="app-sidebar">
+    <div class="sidebar-header">
+      <img src="../img/Perfectly made ones right.svg" alt="Gentle Readers" class="sidebar-logo">
+      <div class="sidebar-title">
+        <h1>Gentle Readers</h1>
+        <p>┘é╪▒┘æ╪º╪ª┘è ╪º┘ä╪ú╪╣╪▓╪º╪í</p>
+      </div>
+    </div>
+
+    <!-- 9 Main Navigation Sections -->
+    <nav class="sidebar-nav">
+      <a class="nav-item active" data-section="dashboard">
+        <i class="fa-solid fa-compass"></i>
+        <span>Dashboard / ┘ä┘ê╪¡╪⌐ ╪º┘ä┘é┘è╪º╪»╪⌐</span>
+      </a>
+
+      <a class="nav-item" data-section="inventory">
+        <i class="fa-solid fa-book-bookmark"></i>
+        <span>Inventory / ╪º┘ä┘à╪«╪▓┘ê┘å</span>
+        <span id="inventory-nav-badge" class="nav-badge">-</span>
+      </a>
+
+      <a class="nav-item" data-section="orders">
+        <i class="fa-solid fa-bag-shopping"></i>
+        <span>Orders / ╪º┘ä╪╖┘ä╪¿╪º╪¬</span>
+        <span id="orders-nav-badge" class="nav-badge">-</span>
+      </a>
+
+      <a class="nav-item" data-section="purchases">
+        <i class="fa-solid fa-boxes-packing"></i>
+        <span>Purchases / ╪º┘ä┘à╪┤╪¬╪▒┘è╪º╪¬</span>
+      </a>
+
+      <a class="nav-item" data-section="expenses">
+        <i class="fa-solid fa-receipt"></i>
+        <span>Expenses / ╪º┘ä┘à╪╡╪º╪▒┘è┘ü</span>
+      </a>
+
+      <a class="nav-item" data-section="finance">
+        <i class="fa-solid fa-coins"></i>
+        <span>Finance / ╪º┘ä┘à╪º┘ä┘è╪⌐ ┘ê╪º┘ä╪ú╪▒╪¿╪º╪¡</span>
+      </a>
+
+      <a class="nav-item" data-section="debts">
+        <i class="fa-solid fa-scale-balanced"></i>
+        <span>Debts / ╪º┘ä╪»┘è┘ê┘å</span>
+      </a>
+
+      <a class="nav-item" data-section="advertising">
+        <i class="fa-brands fa-instagram"></i>
+        <span>Advertising / ╪º┘ä╪Ñ╪╣┘ä╪º┘å╪º╪¬</span>
+      </a>
+
+      <a class="nav-item" data-section="settings">
+        <i class="fa-solid fa-gear"></i>
+        <span>Settings / ╪º┘ä╪Ñ╪╣╪»╪º╪»╪º╪¬</span>
+      </a>
+    </nav>
+
+    <!-- Sidebar Footer / Owner Account -->
+    <div class="sidebar-footer">
+      <div class="owner-pill">
+        <div class="owner-avatar">LD</div>
+        <div class="owner-info">
+          <span class="owner-name">Lamis Dif</span>
+          <span class="owner-role">Store Owner &amp; Founder</span>
+        </div>
+      </div>
+      <button id="logout-btn" class="logout-btn" title="Log Out / ╪¬╪│╪¼┘è┘ä ╪º┘ä╪«╪▒┘ê╪¼">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Wrapper -->
+  <main class="app-main">
+    
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle Navigation">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="header-title">
+          <h2 id="header-section-title">Dashboard <span>┘ä┘ê╪¡╪⌐ ╪º┘ä┘é┘è╪º╪»╪⌐</span></h2>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <!-- Excel Importer Quick Button -->
+        <button class="btn-secondary" style="padding: 6px 14px; font-size: 0.82rem; display: flex; align-items: center; gap: 6px;" onclick="openExcelImportModal()">
+          <i class="fa-solid fa-file-excel" style="color: #1D6F42;"></i>
+          <span>Import Excel</span>
+        </button>
+
+        <!-- Sync & Offline Status Pill -->
+        <div id="sync-status-pill" class="sync-pill" title="Click to trigger manual sync">
+          <span id="sync-status-dot" class="status-dot"></span>
+          <span id="sync-status-text">Checking...</span>
+        </div>
+
+        <!-- Date Pill -->
+        <div id="current-date-display" class="date-pill">
+          <i class="fa-regular fa-calendar"></i> Today
+        </div>
+      </div>
+    </header>
+
+    <!-- Content Sections Area -->
+    <div class="content-area">
+
+      <!-- ==================================================================
+           SECTION 1: DASHBOARD
+           ================================================================== -->
+      <section id="section-dashboard" class="section-view active">
+        <div class="dashboard-overview">
+          
+          <!-- Cozy Vintage Welcome Banner -->
+          <div class="welcome-banner">
+            <h3>Gentle Readers Management System</h3>
+            <p>Welcome back, Lamis. Here is your bookstore's live status, real orders history, and book fair batch progress.</p>
+          </div>
+
+          <!-- Key Metrics Grid -->
+          <div class="metrics-grid">
+            
+            <!-- 1. Cash Balance -->
+            <div class="metric-card">
+              <div class="metric-top">
+                <span class="metric-label">Available Cash / ╪º┘ä╪│┘è┘ê┘ä╪⌐</span>
+                <div class="metric-icon gold"><i class="fa-solid fa-wallet"></i></div>
+              </div>
+              <div id="metric-cash-balance" class="metric-value" style="font-size: 1.05rem;">Not reconciled / ╪║┘è╪▒ ┘à╪¡╪│┘ê╪¿╪⌐ ╪¿╪╣╪»</div>
+              <div id="metric-cash-subtext" class="metric-subtext"><i class="fa-solid fa-triangle-exclamation"></i> Awaiting reconciliation / ╪¿╪º┘å╪¬╪╕╪º╪▒ ╪º┘ä╪¼╪▒╪» ┘ê╪º┘ä╪¬╪»┘é┘è┘é</div>
+            </div>
+
+            <!-- 2. Historical Order Value -->
+            <div class="metric-card">
+              <div class="metric-top">
+                <span class="metric-label">Historical Order Value / ╪Ñ╪¼┘à╪º┘ä┘è ┘é┘è┘à╪⌐ ╪º┘ä╪╖┘ä╪¿╪º╪¬ ╪º┘ä╪¬╪º╪▒┘è╪«┘è╪⌐</span>
+                <div class="metric-icon green"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+              </div>
+              <div id="metric-total-sales" class="metric-value">0 DA</div>
+              <div class="metric-subtext"><i class="fa-solid fa-clock-rotate-left"></i> Gross total of 139 customer orders (not cash received)</div>
+            </div>
+
+            <!-- 3. Total Customer Orders -->
+            <div class="metric-card">
+              <div class="metric-top">
+                <span class="metric-label">Customer Orders / ╪º┘ä╪╖┘ä╪¿╪º╪¬</span>
+                <div class="metric-icon blue"><i class="fa-solid fa-bag-shopping"></i></div>
+              </div>
+              <div id="metric-total-orders" class="metric-value">0</div>
+              <div class="metric-subtext"><i class="fa-solid fa-database"></i> Live in Supabase database</div>
+            </div>
+
+            <!-- 4. Inventory Asset Value -->
+            <div class="metric-card">
+              <div class="metric-top">
+                <span class="metric-label">Inventory Asset / ┘é┘è┘à╪⌐ ╪º┘ä┘à╪«╪▓┘ê┘å</span>
+                <div class="metric-icon amber"><i class="fa-solid fa-boxes-stacked"></i></div>
+              </div>
+              <div id="metric-inventory-val" class="metric-value">0 DA</div>
+              <div id="metric-inventory-subtext" class="metric-subtext"><i class="fa-solid fa-calculator"></i> Valued from stock items at cost</div>
+            </div>
+
+            <!-- 5. Catalog Titles -->
+            <div class="metric-card">
+              <div class="metric-top">
+                <span class="metric-label">Book Titles / ╪º┘ä╪╣┘å╪º┘ê┘è┘å</span>
+                <div class="metric-icon blue"><i class="fa-solid fa-book"></i></div>
+              </div>
+              <div id="metric-catalog-count" class="metric-value">150</div>
+              <div class="metric-subtext"><i class="fa-solid fa-list-check"></i> Published in storefront</div>
+            </div>
+
+          </div>
+
+          <!-- Dashboard Split Panel -->
+          <div class="dashboard-split">
+            
+            <!-- Left: Recent Customer Orders -->
+            <div class="card-panel">
+              <div class="panel-header">
+                <h4><i class="fa-solid fa-clock-rotate-left"></i> Recent Orders / ╪ó╪«╪▒ ╪º┘ä╪╖┘ä╪¿╪º╪¬</h4>
+                <button class="panel-action-btn" onclick="switchSection('orders')">
+                  View All Orders <i class="fa-solid fa-arrow-right"></i>
+                </button>
+              </div>
+              <div class="vintage-table-wrapper">
+                <table class="vintage-table">
+                  <thead>
+                    <tr>
+                      <th>Order</th>
+                      <th>Customer / ╪º┘ä┘ç╪º╪¬┘ü</th>
+                      <th>Items / ╪º┘ä┘â╪¬╪¿</th>
+                      <th>Total (DA)</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dashboard-recent-orders-tbody">
+                    <tr><td colspan="5" class="empty-state">Loading real orders from database...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Right: Book Fair Batch Alert & Quick Actions -->
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+              
+              <!-- Excel Import & Accounting Quick Card -->
+              <div class="card-panel" style="border-left: 4px solid var(--vintage-blue);">
+                <div class="panel-header">
+                  <h4 style="color: var(--vintage-blue);"><i class="fa-solid fa-file-excel"></i> Inventory &amp; Accounting Import</h4>
+                </div>
+                <div class="panel-body" style="font-size: 0.9rem; line-height: 1.6;">
+                  <p><strong>Actual Inventory &amp; Batches:</strong> Calculated dynamically from your Excel workbook (<code>Gentle_Readers_Inventory_Starter.xlsx</code>).</p>
+                  <p style="color: var(--text-muted); margin-top: 6px;">
+                    Separates <strong>NEW BATCH</strong> (New Stock) and <strong>OLD STOCK</strong>, records debts, and tracks provisional vs confirmed profit with zero hardcoded estimates.
+                  </p>
+                  <button class="btn-primary" style="margin-top: 14px; width: 100%;" onclick="openExcelImportModal()">
+                    <i class="fa-solid fa-file-import"></i> Open Excel Importer
+                  </button>
+                </div>
+              </div>
+
+              <!-- Quick Actions -->
+              <div class="card-panel">
+                <div class="panel-header">
+                  <h4><i class="fa-solid fa-bolt"></i> Quick Actions</h4>
+                </div>
+                <div class="panel-body">
+                  <div class="action-buttons-list">
+                    <button class="action-btn" onclick="openModal('modal-add-inventory')">
+                      <i class="fa-solid fa-book-medical"></i>
+                      <span>Add Inventory Item / ╪Ñ╪╢╪º┘ü╪⌐ ┘à┘å╪¬╪¼</span>
+                    </button>
+                    <button class="action-btn" onclick="openModal('modal-add-batch')">
+                      <i class="fa-solid fa-plus-circle"></i>
+                      <span>Record Purchase Batch / ╪»┘ü╪╣╪⌐ ┘à╪┤╪¬╪▒┘è╪º╪¬</span>
+                    </button>
+                    <button class="action-btn" onclick="openModal('modal-add-expense')">
+                      <i class="fa-solid fa-receipt"></i>
+                      <span>Record Expense / ╪Ñ╪╢╪º┘ü╪⌐ ┘à╪╡╪▒┘ê┘ü</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           SECTION 2: INVENTORY
+           ================================================================== -->
+      <section id="section-inventory" class="section-view">
+        <div class="section-toolbar">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" class="search-input" placeholder="Search title, author, or ISBN..." oninput="handleSearch(this.value)">
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn-secondary" onclick="openExcelImportModal()">
+              <i class="fa-solid fa-file-excel" style="color: #1D6F42;"></i> Import Excel (.xlsx)
+            </button>
+            <button class="btn-primary" onclick="openModal('modal-add-inventory')">
+              <i class="fa-solid fa-plus"></i> Add Item
+            </button>
+          </div>
+        </div>
+
+        <div class="tabs-nav">
+          <button class="tab-btn active" data-filter="all" onclick="setInventoryFilter('all')">All Items / ╪º┘ä┘â┘ä</button>
+          <button class="tab-btn" data-filter="old_stock" onclick="setInventoryFilter('old_stock')">Old Stock / ┘à╪º ┘é╪¿┘ä ╪º┘ä┘à╪╣╪▒╪╢</button>
+          <button class="tab-btn" data-filter="new_stock" onclick="setInventoryFilter('new_stock')">New Stock / ╪º┘ä┘à╪╣╪▒╪╢ 2026</button>
+          <button class="tab-btn" data-filter="accessories" onclick="setInventoryFilter('accessories')">All Accessories / ┘â┘ä ╪º┘ä╪Ñ┘â╪│╪│┘ê╪º╪▒╪º╪¬</button>
+          <button class="tab-btn" data-filter="book" onclick="setInventoryFilter('book')">Books / ╪º┘ä┘â╪¬╪¿</button>
+          <button class="tab-btn" data-filter="bookmark" onclick="setInventoryFilter('bookmark')">Bookmarks / ╪º┘ä┘ü┘ê╪º╪╡┘ä</button>
+          <button class="tab-btn" data-filter="accessory" onclick="setInventoryFilter('accessory')">Accessories / ╪º┘ä┘à┘ä╪¡┘é╪º╪¬</button>
+          <button class="tab-btn" data-filter="packaging" onclick="setInventoryFilter('packaging')">Packaging / ╪º┘ä╪¬╪║┘ä┘è┘ü</button>
+          <button class="tab-btn" data-filter="low_stock" onclick="setInventoryFilter('low_stock')">Low Stock / ┘à┘å╪«┘ü╪╢</button>
+          <button class="tab-btn" data-filter="unknown_cost" onclick="setInventoryFilter('unknown_cost')">Unknown Cost / ╪¿╪»┘ê┘å ╪¬┘â┘ä┘ü╪⌐</button>
+        </div>
+
+        <div class="card-panel">
+          <div class="panel-header">
+            <h4><i class="fa-solid fa-boxes-stacked"></i> Catalog Items &amp; Stock</h4>
+            <span id="inventory-total-count" style="font-size: 0.85rem; color: var(--text-muted);">-</span>
+          </div>
+          <div class="vintage-table-wrapper">
+            <table class="vintage-table">
+              <thead>
+                <tr>
+                  <th>Book Title &amp; Author / ╪º┘ä╪╣┘å┘ê╪º┘å</th>
+                  <th>Group / ╪º┘ä┘à╪¼┘à┘ê╪╣╪⌐</th>
+                  <th>Category</th>
+                  <th>Physical Count</th>
+                  <th>Reserved</th>
+                  <th>Available</th>
+                  <th>Unit Cost (DA)</th>
+                  <th>Selling Price (DA)</th>
+                </tr>
+              </thead>
+              <tbody id="inventory-table-tbody">
+                <tr><td colspan="7" class="empty-state">Loading catalog inventory...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           SECTION 3: ORDERS
+           ================================================================== -->
+      <section id="section-orders" class="section-view">
+        <div class="section-toolbar">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" class="search-input" placeholder="Search order ID, customer name, phone, or wilaya..." oninput="handleSearch(this.value)">
+          </div>
+          <div>
+            <button class="btn-secondary" onclick="triggerManualSync()">
+              <i class="fa-solid fa-rotate"></i> Refresh from Supabase
+            </button>
+          </div>
+        </div>
+
+        <div class="tabs-nav">
+          <button class="tab-btn active" data-order-filter="all" onclick="setOrdersFilter('all')">All Orders</button>
+          <button class="tab-btn" data-order-filter="historical" onclick="setOrdersFilter('historical')">Historical (139 Records)</button>
+          <button class="tab-btn" data-order-filter="pending" onclick="setOrdersFilter('pending')">Pending Confirmation</button>
+          <button class="tab-btn" data-order-filter="shipped" onclick="setOrdersFilter('shipped')">Shipped / Delivered</button>
+        </div>
+
+        <div class="card-panel">
+          <div class="panel-header">
+            <h4><i class="fa-solid fa-receipt"></i> Orders Records</h4>
+            <span id="orders-total-count" style="font-size: 0.85rem; color: var(--text-muted);">-</span>
+          </div>
+          <div class="vintage-table-wrapper">
+            <table class="vintage-table">
+              <thead>
+                <tr>
+                  <th>Order #</th>
+                  <th>Date</th>
+                  <th>Customer / ╪º┘ä┘ç╪º╪¬┘ü</th>
+                  <th>Items / ╪º┘ä┘â╪¬╪¿</th>
+                  <th>Delivery &amp; Wilaya</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="orders-table-tbody">
+                <tr><td colspan="8" class="empty-state">Loading orders from Supabase...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           SECTION 4: PURCHASES & SUPPLIERS
+           ================================================================== -->
+      <section id="section-purchases" class="section-view">
+        <div class="section-toolbar">
+          <h3 style="font-family: var(--font-serif); font-size: 1.25rem;">Purchase Batches &amp; Supplier Records</h3>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn-secondary" onclick="openExcelImportModal()">
+              <i class="fa-solid fa-file-excel" style="color: #1D6F42;"></i> Import Batches (.xlsx)
+            </button>
+            <button class="btn-primary" onclick="openModal('modal-add-batch')">
+              <i class="fa-solid fa-plus"></i> New Purchase Batch
+            </button>
+          </div>
+        </div>
+
+        <div id="purchases-batches-list">
+          <!-- Rendered dynamically by manager.js -->
+        </div>
+
+        <div class="card-panel">
+          <div class="panel-header">
+            <h4><i class="fa-solid fa-truck-field"></i> Suppliers Directory / ╪»┘ä┘è┘ä ╪º┘ä┘à┘ê╪▒╪»┘è┘å</h4>
+          </div>
+          <div class="vintage-table-wrapper">
+            <table class="vintage-table">
+              <thead>
+                <tr>
+                  <th>Supplier Name</th>
+                  <th>Contact Details</th>
+                  <th>Batches Supplied</th>
+                  <th>Total Purchased</th>
+                  <th>Outstanding Debt</th>
+                </tr>
+              </thead>
+              <tbody id="purchases-suppliers-tbody">
+                <tr><td colspan="5" class="empty-state">No supplier records yet. Import batches from Excel or add a new batch.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           SECTION 5: OPERATING EXPENSES
+           ================================================================== -->
+      <section id="section-expenses" class="section-view">
+        <div class="section-toolbar">
+          <div>
+            <h3 style="font-family: var(--font-serif); font-size: 1.25rem;">Operating Expenses / ╪º┘ä┘à╪╡╪º╪▒┘è┘ü ╪º┘ä╪¬╪┤╪║┘è┘ä┘è╪⌐</h3>
+            <p style="font-size: 0.86rem; color: var(--text-muted);">Packaging, advertising, delivery surcharges, exhibition fees.</p>
+          </div>
+          <button class="btn-primary" onclick="openModal('modal-add-expense')">
+            <i class="fa-solid fa-plus"></i> Record Expense
+          </button>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-top"><span class="metric-label">Packaging Expenses</span><div class="metric-icon gold"><i class="fa-solid fa-box"></i></div></div>
+            <div id="metric-exp-packaging" class="metric-value">0 DA</div>
+            <div class="metric-subtext">Parchment, ribbon, stickers</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-top"><span class="metric-label">Advertising Spend</span><div class="metric-icon rose"><i class="fa-brands fa-instagram"></i></div></div>
+            <div id="metric-exp-advertising" class="metric-value">0 DA</div>
+            <div class="metric-subtext">Meta / Instagram ads</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-top"><span class="metric-label">Fair &amp; Entry Fees</span><div class="metric-icon amber"><i class="fa-solid fa-ticket"></i></div></div>
+            <div id="metric-exp-fair" class="metric-value">0 DA</div>
+            <div class="metric-subtext">Transportation &amp; logistics</div>
+          </div>
+        </div>
+
+        <div class="card-panel">
+          <div class="panel-header">
+            <h4><i class="fa-solid fa-list-ul"></i> Expenses Ledger</h4>
+          </div>
+          <div id="expenses-list-container">
+            <div class="empty-state">
+              <i class="fa-solid fa-receipt"></i>
+              <h4>No Operating Expenses Recorded Yet</h4>
+              <p>Remember: Buying inventory is an asset, not an operating expense.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           SECTION 6: FINANCE & PROFIT
+           ================================================================== -->
+      <section id="section-finance" class="section-view">
+        <div class="section-toolbar">
+          <div>
+            <h3 style="font-family: var(--font-serif); font-size: 1.25rem;">Financial Position &amp; Double-Entry Ledger</h3>
+            <p style="font-size: 0.86rem; color: var(--text-muted);">Strict separation between inventory assets, sales, and operating expenses.</p>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn-secondary" onclick="openExcelImportModal()">
+              <i class="fa-solid fa-file-excel" style="color: #1D6F42;"></i> Import Excel
+            </button>
+            <button class="btn-secondary" onclick="exportLocalBackup()">
+              <i class="fa-solid fa-download"></i> Export Ledger (JSON)
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 Key Financial Metrics -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-top"><span class="metric-label">Cash on Hand / ╪º┘ä╪│┘è┘ê┘ä╪⌐</span><div class="metric-icon gold"><i class="fa-solid fa-vault"></i></div></div>
+            <div id="finance-cash-balance" class="metric-value" style="font-size: 1.05rem;">Not reconciled / ╪║┘è╪▒ ┘à╪¡╪│┘ê╪¿╪⌐ ╪¿╪╣╪»</div>
+            <div id="finance-cash-subtext" class="metric-subtext"><i class="fa-solid fa-triangle-exclamation"></i> Awaiting reconciliation / ╪¿╪º┘å╪¬╪╕╪º╪▒ ╪º┘ä╪¼╪▒╪» ┘ê╪º┘ä╪¬╪»┘é┘è┘é</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-top"><span class="metric-label">Inventory Asset / ╪º┘ä┘à╪«╪▓┘ê┘å</span><div class="metric-icon blue"><i class="fa-solid fa-boxes-stacked"></i></div></div>
+            <div id="finance-inventory-val" class="metric-value">0 DA</div>
+            <div id="finance-inventory-subtext" class="metric-subtext"><i class="fa-solid fa-calculator"></i> Valued at unit cost</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-top"><span class="metric-label">Gross Profit / ╪Ñ╪¼┘à╪º┘ä┘è ╪º┘ä╪▒╪¿╪¡</span><div class="metric-icon green"><i class="fa-solid fa-chart-line"></i></div></div>
+            <div id="finance-gross-profit" class="metric-value">203ΓÇ»813 DA</div>
+            <div id="finance-gross-subtext" class="metric-subtext confirmed"><i class="fa-solid fa-circle-check"></i> Sales (443ΓÇ»630 DA) ΓêÆ COGS (239ΓÇ»817 DA) ΓÇó 46% Margin</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-top"><span class="metric-label">Net Profit / ╪╡╪º┘ü┘è ╪º┘ä╪▒╪¿╪¡</span><div class="metric-icon green"><i class="fa-solid fa-scale-balanced"></i></div></div>
+            <div id="finance-net-profit" class="metric-value">203ΓÇ»813 DA</div>
+            <div id="finance-net-subtext" class="metric-subtext confirmed"><i class="fa-solid fa-circle-check"></i> Gross Profit ΓêÆ Operating Expenses (0 DA)</div>
+          </div>
+        </div>
+
+        <!-- Two Inventory Groups Profit Breakdown (OLD STOCK vs NEW STOCK) -->
+        <div class="profit-group-grid">
+          
+          <!-- Old Stock Card -->
+          <div class="profit-group-card old-stock">
+            <div class="profit-group-header">
+              <div>
+                <span class="badge-oldstock"><i class="fa-solid fa-clock-rotate-left"></i> OLD STOCK</span>
+                <h4 style="margin-top: 4px;">Old Inventory / ┘à╪º ┘é╪¿┘ä ╪º┘ä┘à╪╣╪▒╪╢</h4>
+              </div>
+              <span id="finance-old-stock-status" class="badge badge-amber">Tracking</span>
+            </div>
+            <div class="profit-metrics-row">
+              <div class="profit-metric-item">
+                <span class="p-lbl">Copies Sold</span>
+                <span id="finance-old-sold-qty" class="p-val">0</span>
+              </div>
+              <div class="profit-metric-item">
+                <span class="p-lbl">Sales Revenue</span>
+                <span id="finance-old-revenue" class="p-val">0 DA</span>
+              </div>
+              <div class="profit-metric-item">
+                <span class="p-lbl">Cost of Goods (COGS)</span>
+                <span id="finance-old-cogs" class="p-val">0 DA</span>
+              </div>
+              <div class="profit-metric-item">
+                <span class="p-lbl">Gross Profit</span>
+                <span id="finance-old-profit" class="p-val" style="color: var(--success);">0 DA</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- New Stock Card -->
+          <div class="profit-group-card">
+            <div class="profit-group-header">
+              <div>
+                <span class="badge-newstock"><i class="fa-solid fa-boxes-stacked"></i> NEW STOCK</span>
+                <h4 style="margin-top: 4px;">Book Fair 2026 / ┘à╪╣╪▒╪╢ ╪º┘ä┘â╪¬╪º╪¿</h4>
+              </div>
+              <span id="finance-new-stock-status" class="badge badge-green"><i class="fa-solid fa-check"></i> 100% In Stock (0 Sold)</span>
+            </div>
+            <div class="profit-metrics-row">
+              <div class="profit-metric-item">
+                <span class="p-lbl">Stock Status</span>
+                <span id="finance-new-sold-qty" class="p-val">0 Sold (87 in stock)</span>
+              </div>
+              <div class="profit-metric-item">
+                <span class="p-lbl">Retail Value (Selling Price ├ù Qty)</span>
+                <span id="finance-new-retail-val" class="p-val" style="color: var(--vintage-blue); font-weight: 700;">195,200 DA</span>
+              </div>
+              <div class="profit-metric-item">
+                <span class="p-lbl">Total Purchase Cost</span>
+                <span id="finance-new-cogs" class="p-val">93,654.50 DA</span>
+              </div>
+              <div class="profit-metric-item">
+                <span class="p-lbl">Expected Gross Profit</span>
+                <span id="finance-new-profit" class="p-val" style="color: var(--success); font-weight: 700;">+101,545.50 DA (52.0%)</span>
+              </div>
+            </div>
+            <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border-color); display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted);">
+              <span>Realized Sales to Date: <strong id="finance-new-revenue" style="color: var(--text);">0 DA</strong></span>
+              <span>Realized COGS: <strong style="color: var(--text);">0 DA</strong></span>
+              <span><i class="fa-solid fa-box-archive"></i> November 2026 Fair Batch (87 copies on hand)</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Profit Per Title Table -->
+        <div class="card-panel">
+          <div class="panel-header">
+            <div>
+              <h4><i class="fa-solid fa-list-check"></i> Profit Per Book Title / ╪¬┘ü╪╡┘è┘ä ╪º┘ä╪▒╪¿╪¡ ┘ä┘â┘ä ╪╣┘å┘ê╪º┘å</h4>
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">
+                Calculates unit sales, Cost of Goods Sold (COGS), gross margins, and clearly flags provisional titles pending cost confirmation.
+              </p>
+            </div>
+          </div>
+
+          <div class="tabs-nav" style="margin-top: 10px;">
+            <button class="tab-btn active" data-profit-filter="all" onclick="setProfitFilter('all')">All Titles / ╪º┘ä┘â┘ä</button>
+            <button class="tab-btn" data-profit-filter="old_stock" onclick="setProfitFilter('old_stock')">Old Stock Only</button>
+            <button class="tab-btn" data-profit-filter="new_stock" onclick="setProfitFilter('new_stock')">New Stock Only</button>
+            <button class="tab-btn" data-profit-filter="confirmed" onclick="setProfitFilter('confirmed')">Confirmed Profit</button>
+            <button class="tab-btn" data-profit-filter="provisional" onclick="setProfitFilter('provisional')">Provisional (Unknown Cost)</button>
+          </div>
+
+          <div class="vintage-table-wrapper">
+            <table class="vintage-table">
+              <thead>
+                <tr>
+                  <th>Book Title &amp; Author / ╪º┘ä╪╣┘å┘ê╪º┘å</th>
+                  <th>Group</th>
+                  <th>Sold</th>
+                  <th>Revenue (DA)</th>
+                  <th>COGS (DA)</th>
+                  <th>Gross Profit (DA)</th>
+                  <th>Margin %</th>
+                  <th>Profit Status</th>
+                </tr>
+              </thead>
+              <tbody id="finance-profit-titles-tbody">
+                <tr><td colspan="8" class="empty-state">Loading sales and cost analysis...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Inventory Physical Counts & Valuation -->
+        <div class="card-panel" style="margin-top: 20px;">
+          <div class="panel-header">
+            <h4><i class="fa-solid fa-boxes-packing"></i> Physical Stock Availability &amp; Valuation</h4>
+          </div>
+          <div class="vintage-table-wrapper">
+            <table class="vintage-table">
+              <thead>
+                <tr>
+                  <th>Stock Group</th>
+                  <th>Total Counted</th>
+                  <th>Available</th>
+                  <th>Reserved (Pending Orders)</th>
+                  <th>Damaged Copies</th>
+                  <th>Inventory Value at Cost</th>
+                </tr>
+              </thead>
+              <tbody id="finance-stock-summary-tbody">
+                <tr><td colspan="6" class="empty-state">Calculating stock levels...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Accounting Rules -->
+        <div class="card-panel" style="margin-top: 20px;">
+          <div class="panel-header">
+            <h4><i class="fa-solid fa-book-journal-whills"></i> Double-Entry Accounting Principles Enforced</h4>
+          </div>
+          <div class="panel-body" style="line-height: 1.8; font-size: 0.92rem;">
+            <ul style="padding-left: 20px; color: var(--text-secondary);">
+              <li><strong>Inventory Asset:</strong> Book purchases are recorded as inventory assets at cost on the balance sheet and are not expensed immediately upon purchase.</li>
+              <li><strong>COGS Recognition:</strong> Cost of Goods Sold is recognized strictly when each book is sold, matched against the unit purchase cost.</li>
+              <li><strong>Provisional vs Confirmed:</strong> When a book's purchase cost is unknown (<code>NULL</code>), gross profit is marked as provisional until physical cost reconciliation.</li>
+              <li><strong>Owner Contributions:</strong> Funds contributed by Lamis are tracked as equity additions, never confused with customer sales revenue.</li>
+              <li><strong>Zero Floating-Point Errors:</strong> All calculations in Algerian Dinars (DA) are conducted with exact integer arithmetic.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           SECTION 7: DEBTS
+           ================================================================== -->
+      <section id="section-debts" class="section-view">
+        <div class="section-toolbar">
+          <div>
+            <h3 style="font-family: var(--font-serif); font-size: 1.25rem;">Debt &amp; Liabilities Management</h3>
+            <p style="font-size: 0.86rem; color: var(--text-muted);">Tracks supplier debts, loans, and separates bookstore debts from owner borrowings.</p>
+          </div>
+          <button class="btn-primary" onclick="openModal('modal-add-debt')">
+            <i class="fa-solid fa-plus"></i> Record Debt
+          </button>
+        </div>
+
+        <div class="tabs-nav">
+          <button class="tab-btn active">All Debts</button>
+          <button class="tab-btn">Storefront Debts to Suppliers</button>
+          <button class="tab-btn">Personal Borrowings from Store</button>
+          <button class="tab-btn">Paid in Full</button>
+        </div>
+
+        <div class="card-panel">
+          <div class="panel-header">
+            <h4><i class="fa-solid fa-handshake-angle"></i> Creditor Records (Matches DEBTS sheet in workbook)</h4>
+          </div>
+          <div id="debts-list-container">
+            <div class="empty-state">
+              <i class="fa-solid fa-scale-balanced"></i>
+              <h4>No Debts Recorded Yet</h4>
+              <p>You can record liabilities or import creditors from the <strong>DEBTS</strong> sheet of <code>Gentle_Readers_Inventory_Starter.xlsx</code> in Phase 3.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           SECTION 8: ADVERTISING
+           ================================================================== -->
+      <section id="section-advertising" class="section-view">
+        <div class="section-toolbar">
+          <div>
+            <h3 style="font-family: var(--font-serif); font-size: 1.25rem;">Instagram &amp; Meta Advertising</h3>
+            <p style="font-size: 0.86rem; color: var(--text-muted);">Attributed orders, ad spend in DA, followers gained, and Return on Ad Spend (ROAS).</p>
+          </div>
+          <button class="btn-primary" onclick="alert('New campaign tracker modal.')">
+            <i class="fa-solid fa-plus"></i> Add Campaign
+          </button>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-top"><span class="metric-label">Total Ad Spend</span><div class="metric-icon rose"><i class="fa-brands fa-instagram"></i></div></div>
+            <div class="metric-value">0 DA</div>
+            <div class="metric-subtext">Lifetime tracked campaigns</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-top"><span class="metric-label">Attributed Orders</span><div class="metric-icon blue"><i class="fa-solid fa-bag-shopping"></i></div></div>
+            <div class="metric-value">0</div>
+            <div class="metric-subtext">Orders via Instagram promotions</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-top"><span class="metric-label">Average ROAS</span><div class="metric-icon green"><i class="fa-solid fa-chart-pie"></i></div></div>
+            <div class="metric-value">0.0x</div>
+            <div class="metric-subtext">Return on ad spend</div>
+          </div>
+        </div>
+
+        <div class="card-panel">
+          <div class="panel-header">
+            <h4><i class="fa-solid fa-bullhorn"></i> Active &amp; Past Campaigns</h4>
+          </div>
+          <div class="empty-state">
+            <i class="fa-brands fa-instagram"></i>
+            <h4>No Advertising Campaigns Logged</h4>
+            <p>Track your sponsored Instagram posts to measure real book sales generated per Dinar spent.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           SECTION 9: SETTINGS & OFFLINE
+           ================================================================== -->
+      <section id="section-settings" class="section-view">
+        <div class="section-toolbar">
+          <div>
+            <h3 style="font-family: var(--font-serif); font-size: 1.25rem;">Settings, Security &amp; Offline Sync</h3>
+            <p style="font-size: 0.86rem; color: var(--text-muted);">PWA status, database synchronization, and local backups.</p>
+          </div>
+        </div>
+
+        <div class="card-panel" style="margin-bottom: 24px;">
+          <div class="panel-header">
+            <h4><i class="fa-solid fa-user-shield"></i> Verified Store Owner</h4>
+          </div>
+          <div class="panel-body">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+              <div><strong>Owner Account:</strong> Lamis Dif</div>
+              <div><strong>Verified Email:</strong> lamisdif@gmail.com</div>
+              <div><strong>Access Policy:</strong> Single-Owner Locked (RLS enforced)</div>
+              <div><strong>Public Signup:</strong> Disabled for Manager</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-panel">
+          <div class="panel-header">
+            <h4><i class="fa-solid fa-mobile-screen"></i> PWA Offline &amp; Storage Diagnostics</h4>
+          </div>
+          <div class="panel-body">
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <p><strong>Storage Engine:</strong> IndexedDB (Zero-latency local persistent store)</p>
+              <p><strong>iPhone Support:</strong> <code>visibilitychange</code> background-sync trigger active for iOS Safari foreground returns.</p>
+              <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; align-items: center;">
+                <button class="btn-secondary" onclick="exportLocalBackup()">
+                  <i class="fa-solid fa-file-export"></i> Export Local Backup (JSON)
+                </button>
+                <label class="btn-secondary" style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin: 0;">
+                  <i class="fa-solid fa-file-import"></i> Restore Backup (JSON)
+                  <input type="file" id="input-restore-backup" accept=".json" style="display: none;" onchange="handleRestoreBackupFile(event)">
+                </label>
+                <button class="btn-primary" onclick="triggerManualSync()">
+                  <i class="fa-solid fa-sync"></i> Test Full Synchronization
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+</div>
+
+<!-- ========================================================================
+     WORKING INTERACTIVE MODALS
+     ======================================================================== -->
+
+<!-- 1. Modal: Add Inventory Item -->
+<div id="modal-add-inventory" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-book"></i> Add Inventory Item / ╪Ñ╪╢╪º┘ü╪⌐ ╪╣┘å╪╡╪▒ ╪Ñ┘ä┘ë ╪º┘ä┘à╪«╪▓┘ê┘å</h3>
+      <button class="modal-close" onclick="closeModal('modal-add-inventory')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="form-add-inventory" onsubmit="handleSaveInventoryItem(event)">
+        <div class="form-group">
+          <label for="inv-item-title">Title / ╪╣┘å┘ê╪º┘å ╪º┘ä┘â╪¬╪º╪¿ ╪ú┘ê ╪º┘ä┘à┘å╪¬╪¼ *</label>
+          <input type="text" id="inv-item-title" class="form-control" placeholder="e.g. Pride and Prejudice" required="">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="inv-item-author">Author / ╪º┘ä┘à╪ñ┘ä┘ü</label>
+            <input type="text" id="inv-item-author" class="form-control" placeholder="e.g. Jane Austen">
+          </div>
+          <div class="form-group">
+            <label for="inv-item-isbn">ISBN / ╪º┘ä┘à╪╣╪▒┘æ┘ü ╪º┘ä╪»┘ê┘ä┘è</label>
+            <input type="text" id="inv-item-isbn" class="form-control" placeholder="e.g. 9780141439518">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="inv-item-group">Stock Group / ┘à╪¼┘à┘ê╪╣╪⌐ ╪º┘ä┘à╪«╪▓┘ê┘å *</label>
+            <select id="inv-item-group" class="form-control" required="">
+              <option value="NEW_STOCK">NEW STOCK ΓÇö ┘à╪╣╪▒╪╢ ╪º┘ä┘â╪¬╪º╪¿ 2026 (Book Fair)</option>
+              <option value="OLD_STOCK">OLD STOCK ΓÇö ┘à╪º ┘é╪¿┘ä ╪º┘ä┘à╪╣╪▒╪╢ (Old Inventory)</option>
+              <option value="ACCESSORIES">ACCESSORIES ΓÇö ┘ü┘ê╪º╪╡┘ä ┘ê╪Ñ┘â╪│╪│┘ê╪º╪▒╪º╪¬ ┘ê╪¬╪║┘ä┘è┘ü</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="inv-item-type">Item Type / ╪º┘ä╪╡┘å┘ü</label>
+            <select id="inv-item-type" class="form-control">
+              <option value="book">Book / ┘â╪¬╪º╪¿</option>
+              <option value="bookmark">Bookmark / ┘ü╪º╪╡┘ä ┘â╪¬╪¿</option>
+              <option value="accessory">Accessory / ┘à┘ä╪¡┘é ╪ú┘ê ╪Ñ┘â╪│╪│┘ê╪º╪▒</option>
+              <option value="packaging">Packaging / ┘à╪º╪»╪⌐ ╪¬╪║┘ä┘è┘ü</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="inv-item-batch">Purchase Batch / ╪»┘ü╪╣╪⌐ ╪º┘ä╪┤╪▒╪º╪í</label>
+          <select id="inv-item-batch" class="form-control">
+            <option value="batch-nov-2026">November 2026 Book Fair (┘à╪╣╪▒╪╢ ╪º┘ä┘â╪¬╪º╪¿)</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="inv-item-qty">Quantity Received / ╪º┘ä┘â┘à┘è╪⌐ ╪º┘ä┘à╪│╪¬┘ä┘à╪⌐ *</label>
+            <input type="number" id="inv-item-qty" class="form-control" min="1" value="1" required="">
+          </div>
+          <div class="form-group">
+            <label for="inv-item-cost">Unit Purchase Cost (DA) / ╪¬┘â┘ä┘ü╪⌐ ╪º┘ä╪┤╪▒╪º╪í</label>
+            <input type="number" id="inv-item-cost" class="form-control" step="any" placeholder="Leave empty if unknown">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="inv-item-price">Selling Price (DA) / ╪│╪╣╪▒ ╪º┘ä╪¿┘è╪╣ ╪º┘ä┘à┘é╪¬╪▒╪¡</label>
+          <input type="number" id="inv-item-price" class="form-control" step="any" placeholder="e.g. 1200">
+        </div>
+
+        <div class="form-group">
+          <label for="inv-item-notes">Notes &amp; Condition / ┘à┘ä╪º╪¡╪╕╪º╪¬ ┘ê╪¡╪º┘ä╪⌐ ╪º┘ä┘â╪¬╪º╪¿</label>
+          <textarea id="inv-item-notes" class="form-control" placeholder="Publisher, condition, language, or edition details..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeModal('modal-add-inventory')">Cancel / ╪Ñ┘ä╪║╪º╪í</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-save"></i> Save to Inventory / ╪¡┘ü╪╕ ┘ü┘è ╪º┘ä┘à╪«╪▓┘ê┘å</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 2. Modal: New Purchase Batch -->
+<div id="modal-add-batch" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-boxes-packing"></i> New Purchase Batch / ╪»┘ü╪╣╪⌐ ┘à╪┤╪¬╪▒┘è╪º╪¬ ╪¼╪»┘è╪»╪⌐</h3>
+      <button class="modal-close" onclick="closeModal('modal-add-batch')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="form-add-batch" onsubmit="handleSaveBatch(event)">
+        <div class="form-group">
+          <label for="batch-input-name">Batch Name / ╪º╪│┘à ╪º┘ä╪»┘ü╪╣╪⌐ *</label>
+          <input type="text" id="batch-input-name" class="form-control" placeholder="e.g. December Restock or Book Fair" required="">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="batch-input-supplier">Supplier / ╪º┘ä┘à┘ê╪▒╪»</label>
+            <input type="text" id="batch-input-supplier" class="form-control" placeholder="e.g. Book Fair Exhibitors">
+          </div>
+          <div class="form-group">
+            <label for="batch-input-date">Purchase Date / ╪¬╪º╪▒┘è╪« ╪º┘ä╪┤╪▒╪º╪í</label>
+            <input type="date" id="batch-input-date" class="form-control">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="batch-input-cost">Total Batch Cost (DA) / ╪º┘ä╪¬┘â┘ä┘ü╪⌐ ╪º┘ä╪Ñ╪¼┘à╪º┘ä┘è╪⌐ ┘ä┘ä╪»┘ü╪╣╪⌐</label>
+            <input type="number" id="batch-input-cost" class="form-control" step="any" placeholder="Leave empty if counting">
+          </div>
+          <div class="form-group">
+            <label for="batch-input-paid">Amount Paid (DA) / ╪º┘ä┘à╪¿┘ä╪║ ╪º┘ä┘à╪»┘ü┘ê╪╣ ┘ü╪╣┘ä┘è╪º┘ï</label>
+            <input type="number" id="batch-input-paid" class="form-control" step="any" value="0">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="batch-input-status">Payment &amp; Accounting Status / ╪¡╪º┘ä╪⌐ ╪º┘ä╪»┘ü╪╣ ┘ê╪º┘ä╪¼╪▒╪»</label>
+          <select id="batch-input-status" class="form-control">
+            <option value="unpaid">Unpaid / ╪║┘è╪▒ ┘à╪»┘ü┘ê╪╣╪⌐ (┘à╪ñ╪¼┘ä╪⌐)</option>
+            <option value="paid">Paid in Full / ┘à╪»┘ü┘ê╪╣╪⌐ ╪¿╪º┘ä┘â╪º┘à┘ä</option>
+            <option value="partial">Partial Payment / ╪»┘ü╪╣╪⌐ ╪¼╪▓╪ª┘è╪⌐</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="batch-input-notes">Notes / ┘à┘ä╪º╪¡╪╕╪º╪¬</label>
+          <textarea id="batch-input-notes" class="form-control" placeholder="Batch details, receipt numbers, terms..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeModal('modal-add-batch')">Cancel / ╪Ñ┘ä╪║╪º╪í</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-save"></i> Save Batch / ╪¬╪│╪¼┘è┘ä ╪º┘ä╪»┘ü╪╣╪⌐</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Modal: Record Operating Expense -->
+<div id="modal-add-expense" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-receipt"></i> Record Operating Expense / ╪¬╪│╪¼┘è┘ä ┘à╪╡╪▒┘ê┘ü ╪¬╪┤╪║┘è┘ä┘è</h3>
+      <button class="modal-close" onclick="closeModal('modal-add-expense')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="form-add-expense" onsubmit="handleSaveExpense(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="expense-input-category">Expense Category / ╪╡┘å┘ü ╪º┘ä┘à╪╡╪▒┘ê┘ü *</label>
+            <select id="expense-input-category" class="form-control" required="">
+              <option value="packaging">Packaging / ┘à┘ê╪º╪» ╪º┘ä╪¬╪║┘ä┘è┘ü</option>
+              <option value="transportation">Transportation &amp; Delivery / ╪┤╪¡┘å ┘ê╪¬┘ê╪╡┘è┘ä</option>
+              <option value="marketing">Marketing &amp; Advertising / ╪Ñ╪╣┘ä╪º┘å╪º╪¬ ┘ê╪»╪╣╪º┘è╪⌐</option>
+              <option value="fair_fees">Fair &amp; Exhibition / ╪▒╪│┘ê┘à ╪º┘ä┘à╪╣╪º╪▒╪╢</option>
+              <option value="supplies">Office &amp; Store Supplies / ┘ä┘ê╪º╪▓┘à ┘à┘â╪¬╪¿┘è╪⌐</option>
+              <option value="software">Software &amp; Subscriptions / ╪¿╪▒┘à╪¼┘è╪º╪¬ ┘ê╪º╪┤╪¬╪▒╪º┘â╪º╪¬</option>
+              <option value="salaries">Salaries / ╪ú╪¼┘ê╪▒ ┘ê┘à┘â╪º┘ü╪ó╪¬</option>
+              <option value="other">Other / ┘à╪╡╪º╪▒┘è┘ü ╪ú╪«╪▒┘ë</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="expense-input-amount">Amount (DA) / ╪º┘ä┘à╪¿┘ä╪║ ╪¿╪º┘ä╪»┘è┘å╪º╪▒ *</label>
+            <input type="number" id="expense-input-amount" class="form-control" step="any" min="1" placeholder="e.g. 2500" required="">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="expense-input-method">Payment Method / ╪╖╪▒┘è┘é╪⌐ ╪º┘ä╪»┘ü╪╣</label>
+            <select id="expense-input-method" class="form-control">
+              <option value="cash">Cash / ┘å┘é╪»╪º┘ï</option>
+              <option value="baridimob">Baridimob / ╪¿╪▒┘è╪»┘è ┘à┘ê╪¿</option>
+              <option value="bank_transfer">Bank Transfer / ╪¬╪¡┘ê┘è┘ä ╪¿┘å┘â┘è</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="expense-input-desc">Description / ╪º┘ä╪¿┘è╪º┘å *</label>
+            <input type="text" id="expense-input-desc" class="form-control" placeholder="e.g. Satin ribbons and stamp ink" required="">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeModal('modal-add-expense')">Cancel / ╪Ñ┘ä╪║╪º╪í</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-save"></i> Save Expense / ╪¡┘ü╪╕ ╪º┘ä┘à╪╡╪▒┘ê┘ü</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 4. Modal: Record Debt or Liability -->
+<div id="modal-add-debt" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-scale-balanced"></i> Record Debt / ╪¬╪│╪¼┘è┘ä ╪º┘ä╪¬╪▓╪º┘à ╪ú┘ê ╪»┘è┘å</h3>
+      <button class="modal-close" onclick="closeModal('modal-add-debt')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="form-add-debt" onsubmit="handleSaveDebt(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="debt-input-creditor">Creditor or Party / ╪º┘ä╪»╪º╪ª┘å ╪ú┘ê ╪º┘ä╪╖╪▒┘ü *</label>
+            <input type="text" id="debt-input-creditor" class="form-control" placeholder="e.g. Supplier Name or Owner Account" required="">
+          </div>
+          <div class="form-group">
+            <label for="debt-input-type">Liability Type / ┘å┘ê╪╣ ╪º┘ä╪º┘ä╪¬╪▓╪º┘à *</label>
+            <select id="debt-input-type" class="form-control" required="">
+              <option value="store_to_supplier">Storefront Debt to Supplier / ╪»┘è┘å ╪º┘ä┘à╪¡┘ä ┘ä┘ä┘à┘ê╪▒╪»</option>
+              <option value="owner_borrowing">Personal Borrowing from Store / ╪│╪¡╪¿ ╪┤╪«╪╡┘è ┘à┘å ╪º┘ä┘à╪¡┘ä</option>
+              <option value="store_to_owner">Storefront Debt to Owner / ╪│┘ä┘ü╪⌐ ┘à┘å ╪º┘ä┘à╪º┘ä┘â ┘ä┘ä┘à╪¡┘ä</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="debt-input-amount">Amount (DA) / ╪º┘ä┘à╪¿┘ä╪║ ╪¿╪º┘ä╪»┘è┘å╪º╪▒ *</label>
+          <input type="number" id="debt-input-amount" class="form-control" step="any" min="1" placeholder="e.g. 15000" required="">
+        </div>
+
+        <div class="form-group">
+          <label for="debt-input-notes">Notes &amp; Repayment Terms / ┘à┘ä╪º╪¡╪╕╪º╪¬ ┘ê╪┤╪▒┘ê╪╖ ╪º┘ä╪│╪»╪º╪»</label>
+          <textarea id="debt-input-notes" class="form-control" placeholder="Due date, repayment plan, reference..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeModal('modal-add-debt')">Cancel / ╪Ñ┘ä╪║╪º╪í</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-save"></i> Save Debt / ╪¬╪│╪¼┘è┘ä ╪º┘ä╪º┘ä╪¬╪▓╪º┘à</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 4b. Modal: Record Debt Repayment Transaction -->
+<div id="modal-add-repayment" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-hand-holding-dollar"></i> Record Debt Repayment / ╪¬╪│╪¼┘è┘ä ╪»┘ü╪╣╪⌐ ╪│╪»╪º╪»</h3>
+      <button class="modal-close" onclick="closeModal('modal-add-repayment')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="form-add-repayment" onsubmit="handleSaveDebtRepayment(event)">
+        <input type="hidden" id="repayment-debt-id">
+        <div class="form-group">
+          <label>Creditor / ╪º┘ä╪»╪º╪ª┘å</label>
+          <input type="text" id="repayment-creditor-name" class="form-control" readonly="" style="background: #F8F5EE;">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Remaining Balance / ╪º┘ä┘à╪¿┘ä╪║ ╪º┘ä┘à╪¬╪¿┘é┘è</label>
+            <input type="text" id="repayment-remaining-display" class="form-control" readonly="" style="background: #F8F5EE; font-weight: bold; color: var(--warning);">
+          </div>
+          <div class="form-group">
+            <label for="repayment-input-amount">Payment Amount (DA) / ┘à╪¿┘ä╪║ ╪º┘ä╪»┘ü╪╣╪⌐ *</label>
+            <input type="number" id="repayment-input-amount" class="form-control" min="1" step="any" placeholder="e.g. 5000" required="">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="repayment-input-date">Repayment Date / ╪¬╪º╪▒┘è╪« ╪º┘ä╪│╪»╪º╪» *</label>
+            <input type="date" id="repayment-input-date" class="form-control" required="">
+          </div>
+          <div class="form-group">
+            <label for="repayment-input-method">Payment Method / ╪╖╪▒┘è┘é╪⌐ ╪º┘ä╪»┘ü╪╣ *</label>
+            <select id="repayment-input-method" class="form-control" required="">
+              <option value="cash">Cash / ┘å┘é╪»╪º┘ï</option>
+              <option value="baridimob">BaridiMob / ╪¿╪▒┘è╪»┘è ┘à┘ê╪¿</option>
+              <option value="bank_transfer">Bank Transfer / ╪¬╪¡┘ê┘è┘ä ╪¿┘å┘â┘è</option>
+              <option value="other">Other / ╪ú╪«╪▒┘ë</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="repayment-input-notes">Notes &amp; Receipt Reference / ┘à┘ä╪º╪¡╪╕╪º╪¬ ┘ê╪▒┘é┘à ╪º┘ä╪Ñ┘è╪╡╪º┘ä</label>
+          <textarea id="repayment-input-notes" class="form-control" placeholder="Receipt number, transfer reference, notes..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeModal('modal-add-repayment')">Cancel / ╪Ñ┘ä╪║╪º╪í</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-save"></i> Save Repayment / ╪¬╪│╪¼┘è┘ä ╪º┘ä╪│╪»╪º╪»</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Generic Modal (Order Details & Dialogs) -->
+<div id="generic-modal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 id="modal-title">Details</h3>
+      <button class="modal-close" onclick="closeGenericModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="modal-body" class="modal-body">
+      <!-- Injected dynamically -->
+    </div>
+  </div>
+</div>
+
+<!-- ==================================================================
+     6. EXCEL WORKBOOK IMPORTER MODAL (Gentle_Readers_Inventory_Starter.xlsx)
+     ================================================================== -->
+<div id="modal-excel-import" class="modal-overlay">
+  <div class="modal-card importer-modal-card">
+    <div class="modal-header">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <i class="fa-solid fa-file-excel" style="font-size: 1.5rem; color: #1D6F42;"></i>
+        <div>
+          <h3 style="margin: 0; font-size: 1.2rem;">Import Bookstore Excel Workbook</h3>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0;">╪º╪│╪¬┘è╪▒╪º╪» ╪│╪¼┘ä╪º╪¬ ╪º┘ä┘à╪«╪▓┘ê┘å ┘ê╪º┘ä╪»┘è┘ê┘å ┘à┘å ┘à┘ä┘ü ╪º┘ä╪Ñ┘â╪│┘è┘ä</p>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal('modal-excel-import')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="modal-body importer-modal-body">
+      
+      <!-- Step 1: File Dropzone & Selection -->
+      <div id="importer-step-upload">
+        <div id="excel-dropzone" class="dropzone-box" onclick="document.getElementById('excel-file-input').click()">
+          <input type="file" id="excel-file-input" accept=".xlsx, .xls" style="display: none;" onchange="handleExcelFileSelect(event)">
+          <div class="dropzone-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+          <div class="dropzone-title">Click or drag &amp; drop <code>Gentle_Readers_Inventory_Starter.xlsx</code></div>
+          <div class="dropzone-sub">Supports sheets: NEW BATCH, OLD STOCK, DEBTS, OPENING POSITION</div>
+        </div>
+      </div>
+
+      <!-- Step 2: Sheet Preview & Validation (Shown after file selected) -->
+      <div id="importer-step-preview" style="display: none;">
+        
+        <!-- File picked info pill -->
+        <div class="file-picked-card">
+          <div class="file-picked-info">
+            <i class="fa-solid fa-file-excel"></i>
+            <div>
+              <strong id="picked-file-name">workbook.xlsx</strong>
+              <div id="picked-file-size" style="font-size: 0.78rem; color: var(--text-muted);">0 KB</div>
+            </div>
+          </div>
+          <button type="button" class="btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="resetExcelImporter()">
+            <i class="fa-solid fa-rotate-left"></i> Change File
+          </button>
+        </div>
+
+        <!-- Dynamic Sheet selection tabs (Generated from workbook.SheetNames) -->
+        <div id="importer-tabs-container" class="importer-tabs">
+          <!-- Dynamically populated on Excel upload -->
+        </div>
+
+        <!-- Sheet Warnings Banner (Alerts if rows are missing cost, price, or quantity) -->
+        <div id="importer-warning-banner" style="display: none; margin-bottom: 12px; padding: 10px 14px; border-radius: 6px; background: #FFFBEB; border: 1px solid #FCD34D; color: #92400E; font-size: 0.84rem; line-height: 1.5;"></div>
+
+        <!-- Sheet Controls & Row Count Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+          <div id="importer-sheet-info" style="font-size: 0.88rem; font-weight: 600; color: var(--vintage-blue);"></div>
+          <label style="font-size: 0.82rem; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            <input type="checkbox" id="chk-show-empty-rows" onchange="toggleShowEmptyRows()">
+            <span>Show empty template rows (╪Ñ╪╕┘ç╪º╪▒ ╪º┘ä╪╡┘ü┘ê┘ü ╪º┘ä┘ü╪º╪▒╪║╪⌐ ┘ü┘è ╪º┘ä┘é╪º┘ä╪¿)</span>
+          </label>
+        </div>
+
+        <!-- Sheet Summary Metrics -->
+        <div class="importer-summary-grid">
+          <div class="importer-stat-box">
+            <div id="stat-import-total-rows" class="stat-val">0</div>
+            <div class="stat-lbl">Total Sheet Rows</div>
+          </div>
+          <div class="importer-stat-box">
+            <div id="stat-import-valid-items" class="stat-val" style="color: var(--success);">0</div>
+            <div class="stat-lbl">Valid Items to Import</div>
+          </div>
+          <div class="importer-stat-box">
+            <div id="stat-import-duplicates" class="stat-val" style="color: var(--warning);">0</div>
+            <div class="stat-lbl">Duplicate Titles</div>
+          </div>
+          <div class="importer-stat-box">
+            <div id="stat-import-skipped" class="stat-val" style="color: var(--text-muted);">0</div>
+            <div class="stat-lbl">Empty Template Rows</div>
+          </div>
+          <div class="importer-stat-box">
+            <div id="stat-import-unknown-costs" class="stat-val" style="color: #B45309;">0</div>
+            <div class="stat-lbl">Unknown Costs (NULL)</div>
+          </div>
+        </div>
+
+        <!-- Table Preview Scroll Area -->
+        <div class="importer-preview-scroll">
+          <table class="vintage-table" style="font-size: 0.82rem;">
+            <thead id="importer-preview-thead">
+              <!-- Injected dynamically based on selected sheet -->
+            </thead>
+            <tbody id="importer-preview-tbody">
+              <!-- Injected dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Import Options & Checkboxes -->
+        <div class="importer-options-box">
+          <h5><i class="fa-solid fa-sliders"></i> Import &amp; Reconciliation Options</h5>
+          
+          <label class="importer-checkbox-row">
+            <input type="checkbox" id="chk-allow-overwrite" checked="">
+            <span><strong>Update &amp; Upsert matching records (╪¬╪¡╪»┘è╪½ ╪º┘ä╪¿┘è╪º┘å╪º╪¬ ╪º┘ä╪¡╪º┘ä┘è╪⌐)</strong>: Refresh existing titles with latest quantities, costs, and selling prices from this workbook.</span>
+          </label>
+
+          <label class="importer-checkbox-row">
+            <input type="checkbox" id="chk-import-new-batch" checked="">
+            <span>Import <strong>NEW BATCH</strong> into New Stock inventory (assigned to Book Fair 2026 batch).</span>
+          </label>
+
+          <label class="importer-checkbox-row">
+            <input type="checkbox" id="chk-import-old-stock" checked="">
+            <span>Import <strong>OLD STOCK</strong> into Old Stock inventory (tracked separately for gross profit).</span>
+          </label>
+
+          <label class="importer-checkbox-row">
+            <input type="checkbox" id="chk-import-accessories" checked="">
+            <span>Import <strong>ACCESSORIES</strong> (Bookmarks, packaging materials, merchandise) into separate accessories inventory.</span>
+          </label>
+
+          <label class="importer-checkbox-row">
+            <input type="checkbox" id="chk-import-debts" checked="">
+            <span>Import <strong>DEBTS</strong> sheet into liabilities ledger.</span>
+          </label>
+
+          <label class="importer-checkbox-row">
+            <input type="checkbox" id="chk-import-opening" checked="">
+            <span>Import <strong>OPENING POSITION</strong> (Cash available balance). Note: hardcoded batch figures are ignored; batch totals are calculated directly from inventory rows.</span>
+          </label>
+        </div>
+
+      </div>
+
+      <!-- Step 3: Import Execution Report -->
+      <div id="importer-step-report" style="display: none;">
+        <div class="importer-report-card">
+          <div style="text-align: center; margin-bottom: 18px;">
+            <i class="fa-solid fa-circle-check" style="font-size: 2.8rem; color: var(--success);"></i>
+            <h4 style="font-family: var(--font-serif); margin-top: 8px;">Excel Import Completed Successfully</h4>
+            <p style="font-size: 0.88rem; color: var(--text-muted);">Schedules and calculations have been saved locally in IndexedDB and queued for Supabase synchronization.</p>
+          </div>
+
+          <div class="importer-summary-grid">
+            <div class="importer-stat-box">
+              <div id="report-new-stock-count" class="stat-val" style="color: var(--vintage-blue);">0</div>
+              <div class="stat-lbl">New Stock Titles</div>
+            </div>
+            <div class="importer-stat-box">
+              <div id="report-old-stock-count" class="stat-val" style="color: #8C5523;">0</div>
+              <div class="stat-lbl">Old Stock Titles</div>
+            </div>
+            <div class="importer-stat-box">
+              <div id="report-accessories-count" class="stat-val" style="color: #6D28D9;">0</div>
+              <div class="stat-lbl">Accessories &amp; Bookmarks</div>
+            </div>
+            <div class="importer-stat-box">
+              <div id="report-debts-count" class="stat-val">0</div>
+              <div class="stat-lbl">Debts Recorded</div>
+            </div>
+            <div class="importer-stat-box">
+              <div id="report-skipped-count" class="stat-val" style="color: var(--text-muted);">0</div>
+              <div class="stat-lbl">Template Rows Skipped</div>
+            </div>
+            <div class="importer-stat-box">
+              <div id="report-duplicates-skipped" class="stat-val" style="color: var(--warning);">0</div>
+              <div class="stat-lbl">Duplicates Skipped</div>
+            </div>
+            <div class="importer-stat-box">
+              <div id="report-null-costs-count" class="stat-val" style="color: #B45309;">0</div>
+              <div class="stat-lbl">Unknown Costs (NULL)</div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
+            <button type="button" class="btn-primary" onclick="closeModal('modal-excel-import'); switchSection('inventory');">
+              <i class="fa-solid fa-boxes-stacked"></i> View Inventory
+            </button>
+            <button type="button" class="btn-secondary" onclick="closeModal('modal-excel-import'); switchSection('finance');">
+              <i class="fa-solid fa-coins"></i> View Financial Report
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer" id="importer-modal-footer">
+      <button type="button" class="btn-secondary" onclick="closeModal('modal-excel-import')">Close / ╪Ñ╪║┘ä╪º┘é</button>
+      <button type="button" id="btn-execute-excel-import" class="btn-primary" style="display: none;" onclick="executeExcelImport()">
+        <i class="fa-solid fa-file-import"></i> Confirm &amp; Import All Records
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Local SheetJS with CDN fallback for offline Excel parsing -->
+<script src="vendor/xlsx.full.min.js"></script>
+<script>
+  if (typeof XLSX === 'undefined') {
+    document.write('<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"><\/script>');
+  }
+</script>
+
+<!-- Official Supabase Client SDK (Local UMD with CDN fallback) -->
+<script src="vendor/supabase.js"></script>
+<script>
+  if (typeof window.supabase === 'undefined') {
+    document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>');
+  }
+</script>
+<script src="manager.js?v=12"></script>
+
+
+</body></html>

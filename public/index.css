@@ -2747,4 +2747,41 @@ body[lang="en"] {
   gap: 4px !important;
 }
 
+/* ==========================================================================
+   SUBTLE LITERARY CARD ANIMATIONS & TRANSITIONS (Accessible & Smooth)
+   ========================================================================== */
+@keyframes gentleCardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .slider .list .item:not(.hidden) {
+    animation: gentleCardFadeIn 0.35s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
+  }
+
+  .slider .list .item .card {
+    transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.4, 1), box-shadow 0.28s ease;
+  }
+
+  .slider .list .item .card:hover {
+    transform: translateY(-4px);
+  }
+
+  .pagination-button {
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  }
+
+  .pagination-button:not(.disabled):hover {
+    transform: translateY(-1px);
+  }
+}
+
+
 
