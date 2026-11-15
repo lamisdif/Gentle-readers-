@@ -164,7 +164,7 @@
         let books = {};
 
         // Merge CMS books from cms-books.json, then process the book page
-        fetch('cms-books.json')
+        fetch('cms-books.json?v=' + Date.now())
           .then(function (res) {
             if (!res.ok) return null;
             return res.json();

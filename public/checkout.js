@@ -9,7 +9,7 @@ let books = {};
 // Load CMS books into checkout
 async function mergeCmsBooksIntoCheckout() {
   try {
-    const response = await fetch('cms-books.json');
+    const response = await fetch('cms-books.json?v=' + Date.now());
     if (!response.ok) throw new Error('Failed to load books');
     const data = await response.json();
     

@@ -1052,8 +1052,8 @@
       }
 
       Promise.all([
-        fetch('cms-books.json').then(function(r) { return r.json(); }).catch(function() { return null; }),
-        fetch('settings.json').then(function(r)  { return r.json(); }).catch(function() { return null; })
+        fetch('cms-books.json?v=' + Date.now()).then(function(r) { return r.json(); }).catch(function() { return null; }),
+        fetch('settings.json?v=' + Date.now()).then(function(r)  { return r.json(); }).catch(function() { return null; })
       ]).then(function(results) {
         render(results[0], results[1]);
       }).catch(function() {
@@ -2436,7 +2436,7 @@
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 6000);
 
-          fetch('cms-books.json', { signal: controller.signal })
+          fetch('cms-books.json?v=' + Date.now(), { signal: controller.signal })
             .then(res => {
               clearTimeout(timeoutId);
               if (!res.ok) throw new Error('HTTP ' + res.status);

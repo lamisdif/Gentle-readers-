@@ -167,7 +167,7 @@ function updateCartCounter() {
 // ── Boot: fetch CMS books, bookmarks, and accessories then render ───────────
 window.addEventListener('load', function () {
   Promise.all([
-    fetch('cms-books.json').then(res => res.ok ? res.json() : []).catch(() => []),
+    fetch('cms-books.json?v=' + Date.now()).then(res => res.ok ? res.json() : []).catch(() => []),
     fetch('cms-bookmarks.json').then(res => res.ok ? res.json() : []).catch(() => []),
     fetch('cms-accessories.json').then(res => res.ok ? res.json() : []).catch(() => [])
   ])
