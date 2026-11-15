@@ -21,7 +21,8 @@ async function mergeCmsBooksIntoCheckout() {
         const originalPrice = hasDiscount ? (b.original_price || b.price) : b.price;
         const discountLabel = hasDiscount ? (b.discount_label || (b.discount_percentage ? '-' + b.discount_percentage + '%' : '')) : '';
 
-        books[id] = {
+        const inStock = (b.status || 'available').toLowerCase() !== 'out of stock' || (b.stock !== undefined && Number(b.stock) > 0);
+        const itemObj = {
           title:          b.title          || '',
           author:         b.author         || '',
           price:          effectivePrice   ? String(effectivePrice) : '',
@@ -29,8 +30,19 @@ async function mergeCmsBooksIntoCheckout() {
           discount_price: effectivePrice,
           has_discount:   hasDiscount,
           discount_label: discountLabel,
-          inStock:        (b.status || 'available').toLowerCase() !== 'out of stock'
+          inStock:        inStock
         };
+
+        books[id] = itemObj;
+        if (b.slug) books[b.slug] = itemObj;
+        if (b.title) books[b.title] = itemObj;
+
+        // Common title variations (e.g. with/without 'من ديوان')
+        if (b.title && b.title.includes('شمس التبريزي')) {
+          books['مختارات شمس التبريزي'] = itemObj;
+          books['cms_مختارات-شمس-التبريزي'] = itemObj;
+          books['مختارات-شمس-التبريزي'] = itemObj;
+        }
       });
     }
   } catch (err) {

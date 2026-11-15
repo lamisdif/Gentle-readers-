@@ -909,7 +909,12 @@ class SyncCoordinator {
     if (res && res.ok) {
       const remoteOrders = await res.json();
       if (Array.isArray(remoteOrders) && remoteOrders.length > 0) {
-        const processed = remoteOrders.map(o => ({
+        // Purge automated test probe records (firstName 'Test' and familyName 'Test')
+        const testOrderIds = remoteOrders.filter(o => o.firstName === 'Test' && o.familyName === 'Test').map(o => o.id);
+        testOrderIds.forEach(tId => idb.delete('orders', tId).catch(() => {}));
+        const realOrders = remoteOrders.filter(o => !(o.firstName === 'Test' && o.familyName === 'Test'));
+
+        const processed = realOrders.map(o => ({
           ...o,
           is_historical: o.is_historical !== undefined ? o.is_historical : (Number(o.id) <= 139),
           read_only: o.read_only !== undefined ? o.read_only : (Number(o.id) <= 139)
@@ -1143,7 +1148,8 @@ function initSyncTriggers() {
 }
 
 async function loadLocalData() {
-  state.orders = await idb.getAll('orders');
+  const allCachedOrders = await idb.getAll('orders');
+  state.orders = (allCachedOrders || []).filter(o => !(o.firstName === 'Test' && o.familyName === 'Test'));
   const rawInventory = await idb.getAll('inventory');
 
   // Deduplicate inventory by normalized title and stock group / accessory role
