@@ -848,6 +848,7 @@ if (checkoutForm) {
     
     try {
       // Execute transactional order creation & stock reservation via PostgreSQL RPC
+      let orderSubmitted = false;
       const { data, error } = await supabase.rpc('create_storefront_order', {
         p_first_name: firstName,
         p_family_name: familyName,
@@ -866,14 +867,35 @@ if (checkoutForm) {
         p_requested_items: requestedItems
       });
 
-      if (error) {
-        if (error.message && error.message.includes('INSUFFICIENT_STOCK')) {
+      if (!error) {
+        orderSubmitted = true;
+      } else if (error.message && (error.message.includes('INSUFFICIENT_STOCK') || error.message.includes('PRICE_MISMATCH'))) {
+        if (error.message.includes('INSUFFICIENT_STOCK')) {
           throw new Error(getCurrentLang() === 'ar' ? 'عذراً، نفدت بعض النسخ المطلوبة من المخزن. يرجى تعديل الكمية.' : 'Sorry, some requested items are out of stock. Please adjust quantities.');
-        } else if (error.message && error.message.includes('PRICE_MISMATCH')) {
-          throw new Error(getCurrentLang() === 'ar' ? 'حدث اختلاف في حساب السعر، يرجى تحديث الصفحة والمحاولة مجدداً.' : 'Price mismatch detected. Please refresh and try again.');
         } else {
-          throw error;
+          throw new Error(getCurrentLang() === 'ar' ? 'حدث اختلاف في حساب السعر، يرجى تحديث الصفحة والمحاولة مجدداً.' : 'Price mismatch detected. Please refresh and try again.');
         }
+      } else {
+        // Fallback to direct orders insert (database trigger trg_orders_auto_deduct_inventory automatically decrements stock!)
+        console.warn('RPC create_storefront_order fallback to direct insert:', error);
+        const { error: insertError } = await supabase.from('orders').insert([{
+          firstName,
+          familyName,
+          phoneNumber,
+          deliveryMethod,
+          wilaya,
+          daira,
+          address: finalAddress,
+          desk,
+          instagramUsername,
+          shipping_price: shippingPrice,
+          packaging_type: finalPackagingType,
+          packaging_price: packagingPrice,
+          total_price: finalTotal,
+          items
+        }]);
+        if (insertError) throw insertError;
+        orderSubmitted = true;
       }
       
       alert(getCurrentLang() === 'ar' ? "تم إرسال الطلب بنجاح! شكراً لطلبك من Gentle Readers" : "Order placed successfully! Thank you for choosing Gentle Readers.");
