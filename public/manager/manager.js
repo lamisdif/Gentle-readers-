@@ -916,6 +916,7 @@ class SyncCoordinator {
         }));
         await idb.putBatch('orders', processed);
         state.orders = processed;
+        applyLiveOrdersToInventory();
         console.log(`[Sync] Stored ${processed.length} orders in local IndexedDB.`);
       }
     } else {
@@ -1174,6 +1175,13 @@ async function loadLocalData() {
     }
   });
   state.inventory = Array.from(dedupMap.values());
+  // Fix Mathnawi selling price to 10,000 DA
+  state.inventory.forEach(inv => {
+    if (inv.title && (inv.title.includes('مثنوي') || inv.title.includes('المثنوي'))) {
+      inv.selling_price_da = 10000;
+    }
+  });
+  applyLiveOrdersToInventory();
   if (prunedDuplicateIds.length > 0) {
     prunedDuplicateIds.forEach(pId => idb.delete('inventory', pId).catch(() => {}));
   }
@@ -1275,6 +1283,22 @@ function parseOrderItem(rawItem) {
 }
 window.parseOrderItem = parseOrderItem;
 
+function extractSignificantTokens(s) {
+  if (!s) return new Set();
+  const clean = String(s)
+    .toLowerCase()
+    .replace(/[أإآ]/g, 'ا')
+    .replace(/ة/g, 'ه')
+    .replace(/ى/g, 'ي')
+    .replace(/[^\w\s\u0600-\u06FF]/g, ' ')
+    .replace(/\b(ج\d+|\d+|الى|الي|جزء|ج|دار|ديوان|مختارات|وقصص|قصص|اخرى|لعقد|قران)\b/g, ' ')
+    .replace(/\bال([^\s]{3,})\b/g, '$1')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return new Set(clean.split(' ').filter(w => w.length >= 3));
+}
+window.extractSignificantTokens = extractSignificantTokens;
+
 function findInventoryItem(title) {
   if (!title || !state.inventory) return null;
   const normTarget = normalizeText(title);
@@ -1289,11 +1313,94 @@ function findInventoryItem(title) {
     const ni = normalizeText(i.title);
     return ni && (ni.includes(normTarget) || normTarget.includes(ni));
   });
-  return match || null;
+  if (match) return match;
+
+  // 3. Significant Arabic token match (handles Al-, volume labels like 1-6 / ج1 الى 6)
+  const targetTokens = extractSignificantTokens(title);
+  if (targetTokens.size > 0) {
+    let bestMatch = null;
+    let maxIntersection = 0;
+    for (const inv of state.inventory) {
+      const invTokens = extractSignificantTokens(inv.title);
+      let intersection = 0;
+      for (const t of targetTokens) {
+        if (invTokens.has(t)) intersection++;
+      }
+      if (intersection > maxIntersection) {
+        maxIntersection = intersection;
+        bestMatch = inv;
+      }
+    }
+    if (bestMatch && maxIntersection >= 1) {
+      return bestMatch;
+    }
+  }
+
+  return null;
 }
 window.findInventoryItem = findInventoryItem;
 
+function applyLiveOrdersToInventory() {
+  if (!state.orders || !state.inventory) return;
+
+  // 1. Ensure Mathnawi selling price is fixed to 10,000 DA
+  state.inventory.forEach(inv => {
+    if (inv.title && (inv.title.includes('مثنوي') || inv.title.includes('المثنوي'))) {
+      inv.selling_price_da = 10000;
+    }
+  });
+
+  // 2. Map dynamic deductions for all live orders (> 139)
+  const liveOrderDeductions = new Map();
+
+  const liveOrders = state.orders.filter(o => !o.is_historical && Number(o.id) > 139);
+  liveOrders.forEach(order => {
+    const meta = state.orderMeta ? state.orderMeta.find(m => String(m.order_id) === String(order.id)) : null;
+    const status = meta ? meta.fulfillment_status : (order.status || 'pending');
+    if (status === 'cancelled' || status === 'rejected') return;
+
+    let rawItems = [];
+    try {
+      rawItems = typeof order.items === 'string' ? JSON.parse(order.items) : (Array.isArray(order.items) ? order.items : []);
+    } catch (e) {
+      rawItems = Array.isArray(order.items) ? order.items : (order.items ? [order.items] : []);
+    }
+    if (!Array.isArray(rawItems)) rawItems = [rawItems];
+
+    rawItems.forEach(rawItem => {
+      const itm = parseOrderItem(rawItem);
+      const inv = findInventoryItem(itm.title);
+      if (inv) {
+        const invId = inv.id;
+        if (!liveOrderDeductions.has(invId)) {
+          liveOrderDeductions.set(invId, { sold: 0, reserved: 0 });
+        }
+        const d = liveOrderDeductions.get(invId);
+        if (status === 'delivered') {
+          d.sold += itm.qty;
+        } else {
+          d.reserved += itm.qty;
+        }
+      }
+    });
+  });
+
+  // 3. Apply live deductions directly to state.inventory
+  state.inventory.forEach(inv => {
+    const d = liveOrderDeductions.get(inv.id);
+    if (d) {
+      inv.quantity_sold = d.sold;
+      inv.quantity_reserved = d.reserved;
+    } else {
+      inv.quantity_sold = 0;
+      inv.quantity_reserved = 0;
+    }
+  });
+}
+window.applyLiveOrdersToInventory = applyLiveOrdersToInventory;
+
 function calculateFinancialMetrics() {
+  applyLiveOrdersToInventory();
 
   // 1. Build lookup maps for inventory by normalized title and calculate catalog unit economics
   const normTitleMap = new Map();
@@ -1378,12 +1485,16 @@ function calculateFinancialMetrics() {
         salesByTitle.set(normKey, {
           rawTitle: pi.title,
           quantitySold: 0,
-          revenue: 0
+          revenue: 0,
+          hasLiveSales: false
         });
       }
       const entry = salesByTitle.get(normKey);
       entry.quantitySold += pi.qty;
       entry.revenue += (unitPrice * pi.qty);
+      if (!order.is_historical && Number(order.id) > 139) {
+        entry.hasLiveSales = true;
+      }
     });
   });
 
@@ -1418,11 +1529,11 @@ function calculateFinancialMetrics() {
     handledKeys.add(normKey);
     const matchingLots = normTitleMap.get(normKey) || [];
 
-    // Prioritize OLD_STOCK lots first (FIFO consumption)
-    // CRITICAL: The NEW BATCH (November 2026 Book Fair) arrived on Nov 4, 2026 and ZERO COPIES HAVE BEEN SOLD YET.
-    // All 139 customer orders in the database predate/are outside this new batch.
-    // Historical orders must strictly consume OLD_STOCK lots, NEVER new batch lots.
-    const eligibleLots = matchingLots.filter(l => !isNewBatchLot(l));
+    // For live customer orders (id > 139), allow consuming from both OLD_STOCK and NEW_BATCH
+    // For historical orders (id <= 139), only consume OLD_STOCK
+    const eligibleLots = saleData.hasLiveSales 
+      ? matchingLots 
+      : matchingLots.filter(l => !isNewBatchLot(l));
 
     eligibleLots.sort((a, b) => {
       const aIsOld = (a.stock_group || '').toUpperCase() === 'OLD_STOCK';
@@ -1605,8 +1716,8 @@ function calculateFinancialMetrics() {
     const isNew = !isAcc && isNewBatchLot(item);
     const isOld = !isAcc && !isNew;
     const rec = Number(item.quantity_received) || 0;
-    // Strictly 0 sold from current physically counted lot (historical customer orders do not deduct shelf counts)
-    const sold = 0;
+    // Real quantity sold and reserved from actual live bookstore orders
+    const sold = Number(item.quantity_sold) || 0;
     const res = Number(item.quantity_reserved) || 0;
     const dmg = Number(item.quantity_damaged) || 0;
     const avail = Math.max(0, rec - sold - res - dmg);
@@ -4518,7 +4629,7 @@ window.executeExcelImport = async function() {
         quantity_damaged: qtyDamaged,
         quantity_reserved: existing ? (existing.quantity_reserved || 0) : 0,
         unit_purchase_cost_da: cost !== null ? Math.round(cost * 100) / 100 : null,
-        selling_price_da: price !== null ? Math.round(price) : null,
+        selling_price_da: (title && (title.includes('مثنوي') || title.includes('المثنوي'))) ? 10000 : (price !== null ? Math.round(price) : null),
         supplier_name: suppName,
         acquisition_date: getRowColumn(r, ['Date received', 'Date', 'Purchase Date', 'acquisition_date']) || new Date().toISOString().slice(0, 10),
         notes: safeCellString(getRowColumn(r, ['Notes', 'ملاحظات', 'remarques'])) || null,
@@ -4710,7 +4821,7 @@ window.executeExcelImport = async function() {
         quantity_damaged: 0,
         quantity_reserved: existing ? (existing.quantity_reserved || 0) : 0,
         unit_purchase_cost_da: cost !== null ? Math.round(cost * 100) / 100 : null,
-        selling_price_da: price !== null ? Math.round(price) : null,
+        selling_price_da: (title && (title.includes('مثنوي') || title.includes('المثنوي'))) ? 10000 : (price !== null ? Math.round(price) : null),
         supplier_name: suppName,
         condition: 'New',
         acquisition_date: getRowColumn(r, ['Date received', 'Date', 'Purchase Date', 'acquisition_date']) || new Date().toISOString().slice(0, 10),
@@ -4934,6 +5045,7 @@ function initRealtimeOrderListeners() {
           if (!state.orders.some(o => String(o.id) === String(newOrder.id))) {
             state.orders.unshift(newOrder);
             await idb.put('orders', newOrder);
+            applyLiveOrdersToInventory();
             showOrderNotificationBanner(newOrder);
             renderAppViews();
           }
