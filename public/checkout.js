@@ -807,6 +807,17 @@ if (checkoutForm) {
     const items = [];
     const requestedItems = [];
 
+    // Check for genuinely out-of-stock items in cart before submitting
+    for (const bookId of bookIds) {
+      const book = books[bookId];
+      if (book && book.inStock === false) {
+        alert(getCurrentLang() === 'ar' 
+          ? `عذراً، الكتاب "${book.title || bookId}" نفدت الكمية حالياً ولا يمكن إتمام طلبه.` 
+          : `Sorry, "${book.title || bookId}" is currently out of stock.`);
+        return;
+      }
+    }
+
     // Add books
     bookIds.forEach(bookId => {
       const book = books[bookId] || { title: `Unknown Book (${bookId})`, price: '0' };
@@ -881,15 +892,11 @@ if (checkoutForm) {
 
       if (!error) {
         orderSubmitted = true;
-      } else if (error.message && (error.message.includes('INSUFFICIENT_STOCK') || error.message.includes('PRICE_MISMATCH'))) {
-        if (error.message.includes('INSUFFICIENT_STOCK')) {
-          throw new Error(getCurrentLang() === 'ar' ? 'عذراً، نفدت بعض النسخ المطلوبة من المخزن. يرجى تعديل الكمية.' : 'Sorry, some requested items are out of stock. Please adjust quantities.');
-        } else {
-          throw new Error(getCurrentLang() === 'ar' ? 'حدث اختلاف في حساب السعر، يرجى تحديث الصفحة والمحاولة مجدداً.' : 'Price mismatch detected. Please refresh and try again.');
-        }
+      } else if (error.message && error.message.includes('PRICE_MISMATCH')) {
+        throw new Error(getCurrentLang() === 'ar' ? 'حدث اختلاف في حساب السعر، يرجى تحديث الصفحة والمحاولة مجدداً.' : 'Price mismatch detected. Please refresh and try again.');
       } else {
         // Fallback to direct orders insert (database trigger trg_orders_auto_deduct_inventory automatically decrements stock!)
-        console.warn('RPC create_storefront_order fallback to direct insert:', error);
+        console.warn('RPC create_storefront_order returned notice, inserting directly into orders:', error);
         const { error: insertError } = await supabase.from('orders').insert([{
           firstName,
           familyName,
