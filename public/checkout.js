@@ -793,6 +793,7 @@ if (checkoutForm) {
     // Calculate Subtotal and Shipping Price
     let subtotal = 0;
     const items = [];
+    const requestedItems = [];
 
     // Add books
     bookIds.forEach(bookId => {
@@ -802,6 +803,11 @@ if (checkoutForm) {
       if (book.price) price = parseFloat(String(book.price).replace(/[^\d.]/g, ""));
       subtotal += price * qty;
       items.push(`${book.title} × ${qty}`);
+      requestedItems.push({
+        title: book.title,
+        quantity: qty,
+        type: 'book'
+      });
     });
 
     // Add selected bookmarks and accessories
@@ -814,6 +820,11 @@ if (checkoutForm) {
       const price = Number(item.price) || 0;
       subtotal += price * qty;
       items.push(`${item.name} [Accessory] × ${qty}`);
+      requestedItems.push({
+        title: item.name,
+        quantity: qty,
+        type: 'accessory'
+      });
     });
 
     const shippingPrice = getShippingPrice(wilaya, deliveryMethod);
@@ -836,26 +847,34 @@ if (checkoutForm) {
     console.log('Submitting order. Books:', bookIds.length, 'Addons:', activeAddonKeys.length, 'Packaging:', finalPackagingType, 'Total:', finalTotal);
     
     try {
-      const { data, error } = await supabase
-        .from('orders')
-        .insert([{ 
-          firstName, 
-          familyName, 
-          phoneNumber, 
-          instagramUsername, 
-          deliveryMethod, 
-          wilaya, 
-          daira, 
-          address: finalAddress,
-          desk,
-          items, 
-          shipping_price: shippingPrice,
-          packaging_type: finalPackagingType,
-          packaging_price: packagingPrice,
-          total_price: finalTotal 
-        }]);
+      // Execute transactional order creation & stock reservation via PostgreSQL RPC
+      const { data, error } = await supabase.rpc('create_storefront_order', {
+        p_first_name: firstName,
+        p_family_name: familyName,
+        p_phone_number: phoneNumber,
+        p_delivery_method: deliveryMethod,
+        p_wilaya: wilaya,
+        p_daira: daira,
+        p_address: finalAddress,
+        p_desk: desk,
+        p_instagram_username: instagramUsername,
+        p_shipping_price: shippingPrice,
+        p_packaging_type: finalPackagingType,
+        p_packaging_price: packagingPrice,
+        p_total_price: finalTotal,
+        p_legacy_items: items,
+        p_requested_items: requestedItems
+      });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message && error.message.includes('INSUFFICIENT_STOCK')) {
+          throw new Error(getCurrentLang() === 'ar' ? 'عذراً، نفدت بعض النسخ المطلوبة من المخزن. يرجى تعديل الكمية.' : 'Sorry, some requested items are out of stock. Please adjust quantities.');
+        } else if (error.message && error.message.includes('PRICE_MISMATCH')) {
+          throw new Error(getCurrentLang() === 'ar' ? 'حدث اختلاف في حساب السعر، يرجى تحديث الصفحة والمحاولة مجدداً.' : 'Price mismatch detected. Please refresh and try again.');
+        } else {
+          throw error;
+        }
+      }
       
       alert(getCurrentLang() === 'ar' ? "تم إرسال الطلب بنجاح! شكراً لطلبك من Gentle Readers" : "Order placed successfully! Thank you for choosing Gentle Readers.");
       localStorage.removeItem("cart");

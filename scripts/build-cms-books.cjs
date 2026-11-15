@@ -18,10 +18,33 @@ function safeReadJson(filePath) {
 }
 
 // Bulk fetch git commit timestamps for all book files in ONE single git call
+function decodeGitPath(p) {
+  if (!p) return '';
+  let s = p.trim();
+  if (s.startsWith('"') && s.endsWith('"')) {
+    s = s.slice(1, -1);
+  }
+  if (/\\\d{3}/.test(s)) {
+    try {
+      const bytes = [];
+      for (let i = 0; i < s.length; i++) {
+        if (s[i] === '\\' && i + 3 < s.length && /^[0-7]{3}$/.test(s.substr(i + 1, 3))) {
+          bytes.push(parseInt(s.substr(i + 1, 3), 8));
+          i += 3;
+        } else {
+          bytes.push(s.charCodeAt(i));
+        }
+      }
+      s = Buffer.from(bytes).toString('utf8');
+    } catch (e) {}
+  }
+  return s;
+}
+
 function getGitTimestampsMap() {
   const map = {};
   try {
-    const output = execSync('git log --format="COMMIT:%ct" --name-only -- "src/data/books/*.json"', {
+    const output = execSync('git -c core.quotepath=false log --format="COMMIT:%ct" --name-only -- "src/data/books/*.json"', {
       cwd: ROOT,
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'ignore']
@@ -34,10 +57,13 @@ function getGitTimestampsMap() {
       if (!trimmed) continue;
       if (trimmed.startsWith('COMMIT:')) {
         currentTs = parseInt(trimmed.substring(7), 10) * 1000 || 0;
-      } else if (currentTs > 0 && trimmed.endsWith('.json')) {
-        const basename = path.basename(trimmed);
-        if (!map[basename]) {
-          map[basename] = currentTs; // First time seen = latest commit time
+      } else if (currentTs > 0) {
+        const decoded = decodeGitPath(trimmed);
+        if (decoded.endsWith('.json')) {
+          const basename = path.basename(decoded);
+          if (!map[basename]) {
+            map[basename] = currentTs; // First time seen = latest commit time
+          }
         }
       }
     }

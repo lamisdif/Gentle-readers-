@@ -911,8 +911,8 @@ class SyncCoordinator {
       if (Array.isArray(remoteOrders) && remoteOrders.length > 0) {
         const processed = remoteOrders.map(o => ({
           ...o,
-          is_historical: true,
-          read_only: true
+          is_historical: o.is_historical !== undefined ? o.is_historical : (Number(o.id) <= 139),
+          read_only: o.read_only !== undefined ? o.read_only : (Number(o.id) <= 139)
         }));
         await idb.putBatch('orders', processed);
         state.orders = processed;
@@ -1035,6 +1035,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (auth.isAuthenticated() && navigator.onLine) {
     sync.sync();
   }
+
+  // 8. Initialize Supabase Realtime for instant order detection (Phase 3)
+  initRealtimeOrderListeners();
+
+  // 9. Initialize Web Push listener & notification click handler (Phase 3)
+  initWebPushManager();
 });
 
 function setupAuthUI(isAuth) {
@@ -1231,17 +1237,63 @@ function isAccessoryItem(item) {
 }
 window.isAccessoryItem = isAccessoryItem;
 
-function calculateFinancialMetrics() {
-  function normalizeText(s) {
-    return String(s || '')
-      .toLowerCase()
-      .replace(/[أإآ]/g, 'ا')
-      .replace(/ة/g, 'ه')
-      .replace(/ى/g, 'ي')
-      .replace(/[^\w\s\u0600-\u06FF]/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
+function normalizeText(s) {
+  return String(s || '')
+    .toLowerCase()
+    .replace(/[أإآ]/g, 'ا')
+    .replace(/ة/g, 'ه')
+    .replace(/ى/g, 'ي')
+    .replace(/[^\w\s\u0600-\u06FF]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+window.normalizeText = normalizeText;
+
+function parseOrderItem(rawItem) {
+  let title = '';
+  let qty = 1;
+  let type = 'book';
+  let rawStr = '';
+
+  if (typeof rawItem === 'object' && rawItem !== null) {
+    title = String(rawItem.title || rawItem.name || rawItem.book_title || '').trim();
+    qty = Number(rawItem.quantity || rawItem.qty) || 1;
+    type = rawItem.type || (rawItem.category ? 'accessory' : 'book');
+  } else {
+    rawStr = String(rawItem || '').trim();
+    const m = rawStr.match(/^(.*?)(?:\s*\[(Accessory|Packaging|Book)\])?(?:\s*[×x*]\s*(\d+))?$/i);
+    if (m) {
+      title = m[1].trim();
+      if (m[2]) type = m[2].toLowerCase();
+      if (m[3]) qty = parseInt(m[3], 10) || 1;
+    } else {
+      title = rawStr;
+    }
   }
+
+  return { title, qty, type, raw: rawStr || title };
+}
+window.parseOrderItem = parseOrderItem;
+
+function findInventoryItem(title) {
+  if (!title || !state.inventory) return null;
+  const normTarget = normalizeText(title);
+  if (!normTarget) return null;
+
+  // 1. Exact match on normalized title
+  let match = state.inventory.find(i => normalizeText(i.title) === normTarget);
+  if (match) return match;
+
+  // 2. Fuzzy / contains match
+  match = state.inventory.find(i => {
+    const ni = normalizeText(i.title);
+    return ni && (ni.includes(normTarget) || normTarget.includes(ni));
+  });
+  return match || null;
+}
+window.findInventoryItem = findInventoryItem;
+
+function calculateFinancialMetrics() {
 
   // 1. Build lookup maps for inventory by normalized title and calculate catalog unit economics
   const normTitleMap = new Map();
@@ -3315,8 +3367,14 @@ window.updateOrderStatus = async function(orderId, newStatus) {
   if (!order) return;
 
   const orderNumId = Number(orderId);
+  const isHistorical = !!(order.is_historical || orderNumId <= 139);
+  if (isHistorical) {
+    alert('Historical orders (Order #1 to #139) are archived and read-only. Their fulfillment status and inventory cannot be modified.');
+    return;
+  }
+
   let meta = state.orderMeta ? state.orderMeta.find(m => String(m.order_id) === String(orderId)) : null;
-  const currentStatus = meta ? meta.fulfillment_status : (order.is_historical ? 'delivered' : 'pending');
+  const currentStatus = meta ? meta.fulfillment_status : 'pending';
 
   if (currentStatus === newStatus) {
     alert(`Order is already marked as ${newStatus}.`);
@@ -3333,29 +3391,30 @@ window.updateOrderStatus = async function(orderId, newStatus) {
     return;
   }
 
-  // Parse items
-  let items = [];
+  // Parse items safely using robust parseOrderItem helper
+  let rawItems = [];
   try {
-    items = typeof order.items === 'string' ? JSON.parse(order.items) : (Array.isArray(order.items) ? order.items : []);
+    rawItems = typeof order.items === 'string' ? JSON.parse(order.items) : (Array.isArray(order.items) ? order.items : []);
   } catch (e) {
-    items = [];
+    rawItems = Array.isArray(order.items) ? order.items : (order.items ? [order.items] : []);
   }
+  if (!Array.isArray(rawItems)) rawItems = [rawItems];
+  const items = rawItems.map(parseOrderItem);
 
-  // 1. Transition to Cancelled: Release reserved stock
-  if (newStatus === 'cancelled') {
-    if (!confirm('Are you sure you want to cancel this order? Any reserved stock will be released back to available inventory.')) return;
+  // 1. Transition to Cancelled or Rejected: Release reserved stock
+  if (newStatus === 'cancelled' || newStatus === 'rejected') {
+    const actionLabel = newStatus === 'rejected' ? 'reject' : 'cancel';
+    if (!confirm(`Are you sure you want to ${actionLabel} this order? Any reserved stock will be safely released.`)) return;
 
     for (const itm of items) {
-      const title = (itm.title || itm.book_title || '').trim().toLowerCase();
-      const qty = Number(itm.quantity) || 1;
-      const inv = state.inventory.find(i => (i.title || '').trim().toLowerCase() === title);
+      const inv = findInventoryItem(itm.title);
       if (inv) {
-        if ((Number(inv.quantity_reserved) || 0) < qty) {
-          alert(`Inventory underflow on "${inv.title}": reserved count is less than order quantity.`);
-          return;
+        const reservedCount = Number(inv.quantity_reserved) || 0;
+        const releaseQty = Math.min(reservedCount, itm.qty);
+        if (releaseQty > 0) {
+          inv.quantity_reserved = reservedCount - releaseQty;
+          await idb.put('inventory', inv);
         }
-        inv.quantity_reserved = Number(inv.quantity_reserved) - qty;
-        await idb.put('inventory', inv);
       }
     }
 
@@ -3373,13 +3432,17 @@ window.updateOrderStatus = async function(orderId, newStatus) {
     if (!confirm('Mark order as delivered? This will convert reserved stock to permanently sold.')) return;
 
     for (const itm of items) {
-      const title = (itm.title || itm.book_title || '').trim().toLowerCase();
-      const qty = Number(itm.quantity) || 1;
-      const inv = state.inventory.find(i => (i.title || '').trim().toLowerCase() === title);
+      const inv = findInventoryItem(itm.title);
       if (inv) {
-        inv.quantity_reserved = Math.max(0, (Number(inv.quantity_reserved) || 0) - qty);
-        inv.quantity_sold = (Number(inv.quantity_sold) || 0) + qty;
-        await idb.put('inventory', inv);
+        const reservedCount = Number(inv.quantity_reserved) || 0;
+        const convertQty = Math.min(reservedCount, itm.qty);
+        if (convertQty > 0) {
+          inv.quantity_reserved = Math.max(0, reservedCount - convertQty);
+          inv.quantity_sold = (Number(inv.quantity_sold) || 0) + convertQty;
+          await idb.put('inventory', inv);
+        } else {
+          console.warn(`[Inventory] Order #${orderId} item "${itm.title}" has 0 reserved quantity. Sold count was not incremented to prevent unallocated phantom sales.`);
+        }
       }
     }
 
@@ -3416,7 +3479,6 @@ window.updateOrderStatus = async function(orderId, newStatus) {
   }
 
   await idb.put('order_meta', meta);
-  // NOTE: Direct mutation on order_meta is NOT queued; mutations occur exclusively via RPCs.
 
   closeGenericModal();
   renderAppViews();
@@ -3427,12 +3489,14 @@ window.openOrderReturnModal = function(orderId) {
   const order = state.orders.find(o => String(o.id) === String(orderId));
   if (!order) return;
 
-  let items = [];
+  let rawItems = [];
   try {
-    items = typeof order.items === 'string' ? JSON.parse(order.items) : (Array.isArray(order.items) ? order.items : []);
+    rawItems = typeof order.items === 'string' ? JSON.parse(order.items) : (Array.isArray(order.items) ? order.items : []);
   } catch (e) {
-    items = [];
+    rawItems = Array.isArray(order.items) ? order.items : (order.items ? [order.items] : []);
   }
+  if (!Array.isArray(rawItems)) rawItems = [rawItems];
+  const items = rawItems.map(parseOrderItem);
 
   const modal = document.getElementById('generic-modal');
   const title = document.getElementById('modal-title');
@@ -3447,8 +3511,8 @@ window.openOrderReturnModal = function(orderId) {
 
       <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
         ${items.map((itm, idx) => {
-          const itmTitle = itm.title || itm.book_title || 'Book';
-          const itmQty = Number(itm.quantity) || 1;
+          const itmTitle = itm.title || 'Book';
+          const itmQty = itm.qty || 1;
           return `
             <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; align-items: center; background: #FFF; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px;">
               <div><strong>${escapeHtml(itmTitle)}</strong> <small>(Sold: ${itmQty})</small></div>
@@ -3515,13 +3579,11 @@ window.handleRecordCustomerReturn = async function(event, orderId) {
 
   // Process inventory adjustment
   for (const ret of returnRecords) {
-    const inv = state.inventory.find(i => (i.title || '').trim().toLowerCase() === ret.title.trim().toLowerCase());
+    const inv = findInventoryItem(ret.title);
     if (inv) {
-      if ((Number(inv.quantity_sold) || 0) < ret.quantity) {
-        alert(`Cannot return: Inventory underflow on "${inv.title}". Sold count is less than returned quantity.`);
-        return;
-      }
-      inv.quantity_sold = Number(inv.quantity_sold) - ret.quantity;
+      const soldCount = Number(inv.quantity_sold) || 0;
+      const decQty = Math.min(soldCount, ret.quantity);
+      inv.quantity_sold = Math.max(0, soldCount - decQty);
       if (ret.condition === 'damaged') {
         inv.quantity_damaged = (Number(inv.quantity_damaged) || 0) + ret.quantity;
       }
@@ -4808,4 +4870,162 @@ window.setProfitFilter = function(filter) {
     b.classList.toggle('active', b.getAttribute('data-profit-filter') === filter);
   });
   renderFinanceSection();
+};
+
+// ============================================================================
+// PHASE 3 — SUPABASE REALTIME & WEB PUSH NOTIFICATIONS
+// ============================================================================
+const VAPID_PUBLIC_KEY = 'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZ_W9Zs0QT70pGuv3UnSTBlwOjV6Z98iTCgk64U';
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+function showOrderNotificationBanner(order) {
+  let container = document.getElementById('order-notification-toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'order-notification-toast-container';
+    container.style.cssText = 'position:fixed; bottom:20px; right:20px; z-index:99999; display:flex; flex-direction:column; gap:10px; max-width:340px; pointer-events:none;';
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  toast.style.cssText = 'background:var(--bg-card); color:var(--text-main); border:1px solid var(--primary); border-left:4px solid var(--primary); padding:12px 16px; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,0.15); pointer-events:auto; cursor:pointer; font-family:inherit; animation:slideIn 0.3s ease;';
+  toast.innerHTML = `
+    <div style="display:flex; align-items:center; gap:12px;">
+      <i class="fa-solid fa-bell" style="color:var(--primary); font-size:20px;"></i>
+      <div>
+        <strong style="display:block; font-size:14px;">طلب جديد #${order.id} 📚</strong>
+        <span style="font-size:12px; color:var(--text-muted);">${escapeHtml(order.firstName || '')} ${escapeHtml(order.familyName || '')} • ${Number(order.total_price || 0).toLocaleString()} دج</span>
+      </div>
+    </div>
+  `;
+  toast.onclick = () => {
+    openOrderDetailsModal(order.id);
+    toast.remove();
+  };
+  container.appendChild(toast);
+  setTimeout(() => { if (toast.parentNode) toast.remove(); }, 8000);
+}
+window.showOrderNotificationBanner = showOrderNotificationBanner;
+
+function initRealtimeOrderListeners() {
+  if (!supabaseClient || typeof supabaseClient.channel !== 'function') return;
+
+  try {
+    supabaseClient.channel('realtime:storefront_orders')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, async (payload) => {
+        console.log('[Realtime] New order arrived from storefront:', payload.new);
+        if (payload.new && payload.new.id) {
+          const newOrder = {
+            ...payload.new,
+            is_historical: false,
+            read_only: false
+          };
+          if (!state.orders) state.orders = [];
+          if (!state.orders.some(o => String(o.id) === String(newOrder.id))) {
+            state.orders.unshift(newOrder);
+            await idb.put('orders', newOrder);
+            showOrderNotificationBanner(newOrder);
+            renderAppViews();
+          }
+        }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'order_meta' }, async (payload) => {
+        console.log('[Realtime] Order meta updated:', payload.new);
+        if (payload.new && payload.new.order_id) {
+          if (!state.orderMeta) state.orderMeta = [];
+          const idx = state.orderMeta.findIndex(m => String(m.order_id) === String(payload.new.order_id));
+          if (idx >= 0) state.orderMeta[idx] = payload.new;
+          else state.orderMeta.push(payload.new);
+          await idb.put('order_meta', payload.new);
+          renderAppViews();
+        }
+      })
+      .subscribe((status) => {
+        console.log('[Realtime] Orders channel subscription status:', status);
+      });
+  } catch (err) {
+    console.warn('[Realtime] Failed to initialize Realtime listener:', err);
+  }
+}
+window.initRealtimeOrderListeners = initRealtimeOrderListeners;
+
+function initWebPushManager() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'OPEN_ORDER' && event.data.order_id) {
+        openOrderDetailsModal(event.data.order_id);
+      }
+    });
+  }
+
+  // Handle direct navigation hash like #order-140
+  if (window.location.hash && window.location.hash.startsWith('#order-')) {
+    const targetOrderId = window.location.hash.replace('#order-', '');
+    setTimeout(() => {
+      if (typeof openOrderDetailsModal === 'function') {
+        openOrderDetailsModal(targetOrderId);
+      }
+    }, 1000);
+  }
+}
+window.initWebPushManager = initWebPushManager;
+
+window.enablePushNotifications = async function() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    alert('Web Push notifications are not supported on this browser or platform. On iPhone, make sure you installed the PWA via "Add to Home Screen" on iOS 16.4+.');
+    return;
+  }
+
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      alert('Notification permission was not granted. Please enable notifications in your browser or iOS settings.');
+      return;
+    }
+
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+
+    const subJson = sub.toJSON();
+    const token = await auth.getValidToken();
+
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/push_subscriptions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${token || SUPABASE_ANON_KEY}`,
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify({
+        endpoint: subJson.endpoint,
+        p256dh: subJson.keys ? subJson.keys.p256dh : '',
+        auth: subJson.keys ? subJson.keys.auth : '',
+        user_agent: navigator.userAgent
+      })
+    });
+
+    if (res.ok) {
+      alert('Order notifications are now enabled on this device! You will receive push alerts when a customer places an order.');
+    } else {
+      console.warn('Subscription registered on device (notice:', await res.text(), ')');
+      alert('Notification subscription active.');
+    }
+  } catch (err) {
+    console.error('Push registration error:', err);
+    alert('Push notification setup: ' + err.message);
+  }
 };

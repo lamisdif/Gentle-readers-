@@ -33,7 +33,7 @@ collections:
       - { label: "Stock Quantity / الكمية في المخزن", name: "stock", widget: "number", valueType: "int", default: 10 }
       - { label: "Show in Showcase / عرض في الشريط المتحرك", name: "featured", widget: "boolean", default: false }
       - { label: "Status / الحالة", name: "status", widget: "select", options: ["available", "out of stock"], default: "available" }
-      - { label: "Date Added / تاريخ الإضافة", name: "date", widget: "datetime", required: false }
+      - { label: "Date Added / تاريخ الإضافة", name: "date", widget: "datetime", default: "{{now}}", date_format: "YYYY-MM-DD", time_format: "HH:mm:ss", format: "YYYY-MM-DDTHH:mm:ssZ", required: false }
       - { label: "Description / الوصف", name: "description", widget: "text" }
       - { label: "Image / صورة الغلاف", name: "image", widget: "image", required: false }
       - { label: "Draft / مسودة", name: "draft", widget: "boolean", default: false }

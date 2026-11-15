@@ -82,6 +82,26 @@ function Parse-Discount($data) {
     }
 }
 
+$gitMap = @{}
+try {
+    $gitOutput = git -c core.quotepath=false log --format="COMMIT:%ct" --name-only -- "src/data/books/*.json"
+    $curTs = 0
+    foreach ($line in $gitOutput) {
+        $trimmed = "$line".Trim()
+        if (-not $trimmed) { continue }
+        if ($trimmed.StartsWith("COMMIT:")) {
+            $curTs = [int64]::Parse($trimmed.Substring(7)) * 1000
+        } elseif ($curTs -gt 0 -and $trimmed.EndsWith(".json")) {
+            $bName = [System.IO.Path]::GetFileName($trimmed.Trim('"'))
+            if (-not $gitMap.ContainsKey($bName)) {
+                $gitMap[$bName] = $curTs
+            }
+        }
+    }
+} catch {
+    Write-Warning "Failed to fetch Git commit timestamps: $_"
+}
+
 $files = Get-ChildItem -Path $SrcDir -Filter "*.json" | Where-Object { $_.Name.ToLower() -ne "index.json" }
 $books = [System.Collections.Generic.List[PSCustomObject]]::new()
 
@@ -100,6 +120,9 @@ foreach ($f in $files) {
         try {
             $createdTime = [DateTimeOffset]::Parse($data.date).ToUnixTimeMilliseconds()
         } catch {}
+    }
+    if (-not $createdTime -and $gitMap.ContainsKey($f.Name)) {
+        $createdTime = $gitMap[$f.Name]
     }
     if (-not $createdTime) {
         $createdTime = [DateTimeOffset]::new($f.LastWriteTimeUtc).ToUnixTimeMilliseconds()
