@@ -4875,7 +4875,7 @@ window.setProfitFilter = function(filter) {
 // ============================================================================
 // PHASE 3 — SUPABASE REALTIME & WEB PUSH NOTIFICATIONS
 // ============================================================================
-const VAPID_PUBLIC_KEY = 'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZ_W9Zs0QT70pGuv3UnSTBlwOjV6Z98iTCgk64U';
+const VAPID_PUBLIC_KEY = 'BNikz7cow1jn_DxcfgXgE2l9mwYiHrIH6MdPbe-8lQ074jsVyGgL4zyUJRtJCCK71wUJgC1J7utgG_fq8sjbh-Q';
 
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);

@@ -10,8 +10,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-const VAPID_PUBLIC_KEY = Deno.env.get("VAPID_PUBLIC_KEY") || "BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZ_W9Zs0QT70pGuv3UnSTBlwOjV6Z98iTCgk64U";
-const VAPID_PRIVATE_KEY = Deno.env.get("VAPID_PRIVATE_KEY") || "";
+const VAPID_PUBLIC_KEY = Deno.env.get("VAPID_PUBLIC_KEY") || "BNikz7cow1jn_DxcfgXgE2l9mwYiHrIH6MdPbe-8lQ074jsVyGgL4zyUJRtJCCK71wUJgC1J7utgG_fq8sjbh-Q";
+const VAPID_PRIVATE_KEY = Deno.env.get("VAPID_PRIVATE_KEY") || "xR1LDRWm2ycvwMSJR-b34yMe1r_XI1fraUaA7vp86ZQ";
 const VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT") || "mailto:contact@gentlereaders.dz";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
