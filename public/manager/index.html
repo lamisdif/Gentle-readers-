@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <!-- Bespoke Vintage Stylesheet -->
-  <link rel="stylesheet" href="manager.css?v=20" />
+  <link rel="stylesheet" href="manager.css?v=23" />
   <style>
     /* Critical shell protection: prevent unstyled modal flash before CSS finishes parsing */
     .modal-overlay { display: none !important; }
@@ -113,6 +113,12 @@
         <span id="orders-nav-badge" class="nav-badge">-</span>
       </a>
 
+      <a class="nav-item" data-section="paid-orders">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>Paid Orders / المدفوعة</span>
+        <span id="paid-orders-nav-badge" class="nav-badge">-</span>
+      </a>
+
       <a class="nav-item" data-section="purchases">
         <i class="fa-solid fa-boxes-packing"></i>
         <span>Purchases / المشتريات</span>
@@ -150,7 +156,7 @@
         <div class="owner-avatar">LD</div>
         <div class="owner-info">
           <span class="owner-name">Lamis Dif</span>
-          <span class="owner-role">Store Owner & Founder</span>
+          <span class="owner-role">Store Owner & Founder • v23</span>
         </div>
       </div>
       <button id="logout-btn" class="logout-btn" title="Log Out / تسجيل الخروج">
@@ -397,16 +403,17 @@
                   <th>Book Title & Author / العنوان</th>
                   <th>Group / المجموعة</th>
                   <th>Category</th>
-                  <th>Physical Count</th>
+                  <th>Orig. Qty / الأصل</th>
+                  <th>Sold / المباع</th>
                   <th>Reserved</th>
-                  <th>Available</th>
+                  <th>Available / المتاح</th>
                   <th>Unit Cost (DA)</th>
                   <th>Selling Price (DA)</th>
                   <th>Actions / إجراءات</th>
                 </tr>
               </thead>
               <tbody id="inventory-table-tbody">
-                <tr><td colspan="9" class="empty-state">Loading catalog inventory...</td></tr>
+                <tr><td colspan="10" class="empty-state">Loading catalog inventory...</td></tr>
               </tbody>
             </table>
           </div>
@@ -457,6 +464,86 @@
               </thead>
               <tbody id="orders-table-tbody">
                 <tr><td colspan="8" class="empty-state">Loading orders from Supabase...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           SECTION 3b: PAID ORDERS & ACTUAL EARNED PROFIT
+           ================================================================== -->
+      <section id="section-paid-orders" class="section-view">
+        <div class="section-toolbar">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" class="search-input" placeholder="Search paid order #, customer, phone, or wilaya..." oninput="handleSearch(this.value)" />
+          </div>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn-secondary" onclick="exportToExcel('paid-orders')">
+              <i class="fa-solid fa-file-arrow-down" style="color: #1D6F42;"></i> Export Paid Orders (.xlsx)
+            </button>
+            <button class="btn-secondary" onclick="triggerManualSync()">
+              <i class="fa-solid fa-rotate"></i> Refresh from Supabase
+            </button>
+          </div>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-top"><span class="metric-label">Paid Orders / الطلبات المدفوعة</span><div class="metric-icon green"><i class="fa-solid fa-circle-check"></i></div></div>
+            <div id="paid-orders-count" class="metric-value">0</div>
+            <div id="paid-orders-count-sub" class="metric-subtext">Confirmed paid customer orders</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-top"><span class="metric-label">Book Revenue (Paid, Excl. Delivery)</span><div class="metric-icon blue"><i class="fa-solid fa-book-open"></i></div></div>
+            <div id="paid-orders-book-rev" class="metric-value">0 DA</div>
+            <div id="paid-orders-gross-paid" class="metric-subtext">Gross Customer Paid: 0 DA</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-top"><span class="metric-label">Delivery Fees Collected (Excluded)</span><div class="metric-icon amber"><i class="fa-solid fa-truck"></i></div></div>
+            <div id="paid-orders-shipping-excluded" class="metric-value">0 DA</div>
+            <div id="paid-orders-carrier-exp" class="metric-subtext">Carrier pass-through — not bookstore revenue</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-top"><span class="metric-label">Actual Net Profit (Paid Orders)</span><div class="metric-icon gold"><i class="fa-solid fa-coins"></i></div></div>
+            <div id="paid-orders-net-profit" class="metric-value">0 DA</div>
+            <div id="paid-orders-profit-sub" class="metric-subtext">Book Revenue − Book COGS − Packaging</div>
+          </div>
+        </div>
+
+        <div class="tabs-nav">
+          <button class="tab-btn active" data-paid-filter="all" onclick="setPaidOrdersFilter('all')">All Paid Orders</button>
+          <button class="tab-btn" data-paid-filter="live" onclick="setPaidOrdersFilter('live')">Live Confirmed Paid</button>
+          <button class="tab-btn" data-paid-filter="historical" onclick="setPaidOrdersFilter('historical')">Historical Paid (&le; #170)</button>
+          <button class="tab-btn" data-paid-filter="known_cost" onclick="setPaidOrdersFilter('known_cost')">Complete Cost Known</button>
+          <button class="tab-btn" data-paid-filter="unknown_cost" onclick="setPaidOrdersFilter('unknown_cost')">Unknown Cost (Needs Cost)</button>
+        </div>
+
+        <div class="card-panel">
+          <div class="panel-header">
+            <h4><i class="fa-solid fa-sack-dollar"></i> Confirmed Paid Orders & Earned Profit / سجل الطلبات المدفوعة والأرباح الفعلية</h4>
+            <span id="paid-orders-total-count" style="font-size: 0.85rem; color: var(--text-muted);">-</span>
+          </div>
+          <div class="vintage-table-wrapper">
+            <table class="vintage-table">
+              <thead>
+                <tr>
+                  <th>Order #</th>
+                  <th>Date</th>
+                  <th>Customer / الهاتف</th>
+                  <th>Books & Quantities</th>
+                  <th>Delivery Info</th>
+                  <th>Total Paid</th>
+                  <th>Delivery Fee (Excl.)</th>
+                  <th>Book Revenue</th>
+                  <th>COGS & Packaging</th>
+                  <th>Net Earned Profit</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="paid-orders-table-tbody">
+                <tr><td colspan="11" class="empty-state">Loading paid orders...</td></tr>
               </tbody>
             </table>
           </div>
@@ -609,6 +696,11 @@
             <div class="metric-top"><span class="metric-label">Shipping Fees (Passthrough) / التوصيل</span><div class="metric-icon amber"><i class="fa-solid fa-truck"></i></div></div>
             <div id="finance-shipping-collected" class="metric-value">0 DA</div>
             <div id="finance-shipping-subtext" class="metric-subtext">Excluded from book sales revenue</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-top"><span class="metric-label">Paid Orders Earned Profit / ربح المدفوعة</span><div class="metric-icon green"><i class="fa-solid fa-sack-dollar"></i></div></div>
+            <div id="finance-paid-net-profit" class="metric-value">0 DA</div>
+            <div id="finance-paid-profit-sub" class="metric-subtext">Confirmed paid orders net of COGS &amp; packaging</div>
           </div>
         </div>
 
@@ -966,6 +1058,9 @@
                 </label>
                 <button class="btn-primary" onclick="triggerManualSync()">
                   <i class="fa-solid fa-sync"></i> Test Full Synchronization
+                </button>
+                <button class="btn-secondary" onclick="forceUpdateApp()">
+                  <i class="fa-solid fa-broom"></i> Force App Update / Clear Cache (v23)
                 </button>
               </div>
             </div>
@@ -1695,14 +1790,17 @@
   </div>
 </div>
 
-<!-- 1b. Modal: Edit Existing Inventory Item -->
+<!-- 1b. Modal: Book Details & Edit Existing Inventory Item -->
 <div id="modal-edit-inventory" class="modal-overlay">
   <div class="modal-card">
     <div class="modal-header">
-      <h3><i class="fa-solid fa-pen-to-square"></i> Edit Inventory Item / تعديل بيانات المنتج</h3>
+      <h3><i class="fa-solid fa-book-open-reader"></i> Book Details &amp; Edit / تفاصيل وتعديل الكتاب</h3>
       <button class="modal-close" onclick="closeModal('modal-edit-inventory')"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="modal-body">
+      <div id="edit-inv-stock-summary" style="background: #FFFDF8; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 14px; margin-bottom: 14px;">
+        <!-- Populated dynamically with Original Quantity Received, Quantity Sold, and Current Available -->
+      </div>
       <form id="form-edit-inventory" onsubmit="handleSaveInventoryEdit(event)">
         <input type="hidden" id="edit-inv-id" />
         <div class="form-group">
@@ -1823,6 +1921,6 @@
     document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>');
   }
 </script>
-<script src="manager.js?v=22"></script>
+<script src="manager.js?v=23"></script>
 </body>
 </html>

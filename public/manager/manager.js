@@ -476,6 +476,7 @@ const state = {
   searchQuery: '',
   inventoryFilter: 'all',
   ordersFilter: 'all',
+  paidOrdersFilter: 'all',
   debtsFilter: 'all',
   profitFilter: 'all',
   openingPosition: { cash_balance_da: 0, notes: 'Opening' },
@@ -1161,10 +1162,21 @@ const sync = new SyncCoordinator();
 // 4. APP INITIALIZATION & VIEW CONTROLLER
 // ============================================================================
 document.addEventListener('DOMContentLoaded', async () => {
-  // 1. Initialize Service Worker for PWA Offline Caching
+  // 1. Initialize Service Worker with immediate update checks for PWA cache freshness
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').then(() => {
+    const hadController = !!navigator.serviceWorker.controller;
+    let refreshingOnUpdate = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (hadController && !refreshingOnUpdate) {
+        refreshingOnUpdate = true;
+        console.log('[SW] New version activated — reloading page cleanly.');
+        window.location.reload();
+      }
+    });
+
+    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then((reg) => {
       console.log('[SW] Service Worker registered successfully.');
+      if (typeof reg.update === 'function') reg.update().catch(() => {});
     }).catch(err => {
       console.warn('[SW] Registration failed:', err);
     });
@@ -1320,9 +1332,12 @@ async function loadLocalData() {
       dedupMap.set(key, item);
     } else {
       const existing = dedupMap.get(key);
-      const itemHasCost = item.unit_purchase_cost_da !== null && item.unit_purchase_cost_da !== undefined;
-      const existingHasCost = existing.unit_purchase_cost_da !== null && existing.unit_purchase_cost_da !== undefined;
-      if (itemHasCost && !existingHasCost) {
+      const scoreLot = (rec) => {
+        const hasMovements = ((Number(rec.quantity_sold) || 0) + (Number(rec.quantity_reserved) || 0)) > 0 ? 10 : 0;
+        const hasCost = (rec.unit_purchase_cost_da !== null && rec.unit_purchase_cost_da !== undefined && !isNaN(rec.unit_purchase_cost_da)) ? 5 : 0;
+        return hasMovements + hasCost;
+      };
+      if (scoreLot(item) > scoreLot(existing)) {
         prunedDuplicateIds.push(existing.id);
         dedupMap.set(key, item);
       } else {
@@ -1331,9 +1346,9 @@ async function loadLocalData() {
     }
   });
   state.inventory = Array.from(dedupMap.values());
-  // Fix Mathnawi selling price to 10,000 DA
+  // Preserve real catalog/edited selling prices; default unset Mathnawi price only if null
   state.inventory.forEach(inv => {
-    if (inv.title && (inv.title.includes('مثنوي') || inv.title.includes('المثنوي'))) {
+    if ((inv.selling_price_da === null || inv.selling_price_da === undefined) && inv.title && (inv.title.includes('مثنوي') || inv.title.includes('المثنوي'))) {
       inv.selling_price_da = 10000;
     }
   });
@@ -1378,6 +1393,7 @@ function renderAppViews() {
   renderRecentOrders();
   renderInventoryTable();
   renderOrdersTable();
+  if (typeof renderPaidOrdersSection === 'function') renderPaidOrdersSection();
   renderPurchasesSection();
   renderExpensesSection();
   renderFinanceSection();
@@ -1520,129 +1536,135 @@ function findInventoryItem(title) {
 }
 window.findInventoryItem = findInventoryItem;
 
-function applyLiveOrdersToInventory() {
-  if (!state.orders || !state.inventory) return;
+function isNewBatchLot(lot) {
+  if (!lot) return false;
+  const grp = String(lot.stock_group || '').toUpperCase();
+  const bId = String(lot.batch_id || '').toLowerCase();
+  const bName = String(lot.batch || '').toLowerCase();
+  return grp === 'NEW_STOCK' || grp === 'NEW_BATCH' || bId.includes('nov') || bName.includes('fair') || bName.includes('معرض');
+}
 
-  // 1. Ensure Mathnawi selling price is fixed to 10,000 DA
-  state.inventory.forEach(inv => {
-    if (inv.title && (inv.title.includes('مثنوي') || inv.title.includes('المثنوي'))) {
-      inv.selling_price_da = 10000;
+function parseOrderItemsSafe(order) {
+  if (!order) return [];
+  let rawItems = [];
+  if (Array.isArray(order.items)) {
+    rawItems = order.items;
+  } else if (typeof order.items === 'string') {
+    try {
+      const parsed = JSON.parse(order.items);
+      rawItems = Array.isArray(parsed) ? parsed : [order.items];
+    } catch {
+      rawItems = [order.items];
     }
+  } else if (order.items) {
+    rawItems = [order.items];
+  }
+  return Array.isArray(rawItems) ? rawItems : [rawItems];
+}
+
+function resolveEffectiveOrderPricing(order, meta) {
+  const orderTotal = Number(order?.total_price) || 0;
+  // Use positive order_meta override if entered; otherwise fall back to order.shipping_price
+  const shippingFee = (Number(meta?.shipping_fee_da) > 0)
+    ? Number(meta.shipping_fee_da)
+    : (Number(order?.shipping_price) || 0);
+  const actualShippingCost = Number(meta?.actual_shipping_cost_da) || 0;
+  const packagingCost = Number(meta?.packaging_cost_da) || 0;
+  const packagingFeeCharged = Number(order?.packaging_price) || 0;
+  const bookRevenue = Math.max(0, orderTotal - shippingFee);
+  return { orderTotal, shippingFee, actualShippingCost, packagingCost, packagingFeeCharged, bookRevenue };
+}
+
+function resolveCandidateLotsForTitle(title, isHist, normTitleMap) {
+  if (!title) return [];
+  const normKey = normalizeText(title);
+  let matchingLots = (normTitleMap && normTitleMap.get(normKey)) || [];
+  if (matchingLots.length === 0) {
+    const fallback = findInventoryItem(title);
+    if (fallback) matchingLots = [fallback];
+  }
+  let eligible = !isHist ? [...matchingLots] : matchingLots.filter(l => !isNewBatchLot(l));
+  if (eligible.length === 0) eligible = [...matchingLots];
+  eligible.sort((a, b) => {
+    const aIsOld = (a.stock_group || '').toUpperCase() === 'OLD_STOCK' ? 0 : 1;
+    const bIsOld = (b.stock_group || '').toUpperCase() === 'OLD_STOCK' ? 0 : 1;
+    if (aIsOld !== bIsOld) return aIsOld - bIsOld;
+    return String(a.acquisition_date || '9999').localeCompare(String(b.acquisition_date || '9999'));
   });
+  return eligible;
+}
 
-  // 2. Reset live allocation counters
-  const liveOrderDeductions = new Map();
-  state.inventory.forEach(inv => {
-    liveOrderDeductions.set(inv.id, { sold: 0, reserved: 0 });
-  });
+function computePaidOrderDetails(order, normTitleMap) {
+  const meta = state.orderMeta ? state.orderMeta.find(m => String(m.order_id) === String(order.id)) : null;
+  const isHist = !!(order.is_historical || Number(order.id) <= 170);
+  const status = meta ? (meta.fulfillment_status || 'pending') : (isHist ? 'delivered' : (order.status || 'pending'));
+  const paymentStatus = meta ? (meta.payment_status || 'unpaid') : (isHist ? 'paid' : (order.payment_status || 'unpaid'));
+  const pricing = resolveEffectiveOrderPricing(order, meta);
+  const rawItems = parseOrderItemsSafe(order);
+  const parsedItems = rawItems.map(parseOrderItem);
 
-  // Helper to find all candidate inventory lots for a title sorted by strict FIFO (OLD_STOCK first)
-  function findMatchingLotsFIFO(title) {
-    if (!title) return [];
-    const norm = normalizeText(title);
-    const tokens = extractSignificantTokens(norm);
-    const matches = [];
+  let knownCogsSum = 0;
+  let allCostsKnown = parsedItems.length > 0;
+  const unknownTitles = [];
+  const itemBreakdowns = [];
 
-    for (const inv of state.inventory) {
-      if (!inv.title) continue;
-      const invNorm = normalizeText(inv.title);
-      if (invNorm === norm || invNorm.includes(norm) || norm.includes(invNorm)) {
-        matches.push(inv);
-        continue;
-      }
-      const invTokens = extractSignificantTokens(invNorm);
-      let intersectionCount = 0;
-      for (const t of tokens) {
-        if (invTokens.has(t)) intersectionCount++;
-      }
-      if (tokens.size > 0 && invTokens.size > 0 && intersectionCount >= 1 && intersectionCount >= Math.min(tokens.size, invTokens.size)) {
-        matches.push(inv);
-      }
-    }
-
-    // Sort: OLD_STOCK first, then oldest acquisition_date, then created_at, then ID
-    matches.sort((a, b) => {
-      const aIsOld = (a.stock_group || '').toUpperCase() === 'OLD_STOCK' ? 0 : 1;
-      const bIsOld = (b.stock_group || '').toUpperCase() === 'OLD_STOCK' ? 0 : 1;
-      if (aIsOld !== bIsOld) return aIsOld - bIsOld;
-      const dateA = a.acquisition_date || '9999';
-      const dateB = b.acquisition_date || '9999';
-      if (dateA !== dateB) return dateA.localeCompare(dateB);
-      return String(a.id).localeCompare(String(b.id));
-    });
-
-    return matches;
+  if (parsedItems.length === 0) {
+    allCostsKnown = false;
+    unknownTitles.push(`Order #${order.id} (unitemized)`);
   }
 
-  // 3. Process Live Orders (> 170)
-  const liveOrders = state.orders.filter(o => !o.is_historical && Number(o.id) > 170);
-  liveOrders.sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));
+  parsedItems.forEach(pi => {
+    const lots = resolveCandidateLotsForTitle(pi.title, isHist, normTitleMap);
+    const primaryLot = lots[0] || null;
+    const unitCost = (primaryLot && primaryLot.unit_purchase_cost_da !== null && primaryLot.unit_purchase_cost_da !== undefined && primaryLot.unit_purchase_cost_da !== '' && !isNaN(primaryLot.unit_purchase_cost_da))
+      ? Number(primaryLot.unit_purchase_cost_da)
+      : null;
 
-  liveOrders.forEach(order => {
-    const meta = state.orderMeta ? state.orderMeta.find(m => String(m.order_id) === String(order.id)) : null;
-    const status = meta ? meta.fulfillment_status : (order.status || 'pending');
-    if (status === 'cancelled' || status === 'rejected') return;
-
-    let rawItems = [];
-    try {
-      rawItems = typeof order.items === 'string' ? JSON.parse(order.items) : (Array.isArray(order.items) ? order.items : []);
-    } catch (e) {
-      rawItems = Array.isArray(order.items) ? order.items : (order.items ? [order.items] : []);
+    if (unitCost === null) {
+      allCostsKnown = false;
+      unknownTitles.push(pi.title || 'Unknown Title');
+    } else {
+      knownCogsSum += (pi.qty * unitCost);
     }
-    if (!Array.isArray(rawItems)) rawItems = [rawItems];
 
-    rawItems.forEach(rawItem => {
-      const itm = parseOrderItem(rawItem);
-      let needed = itm.qty;
-      const matchingLots = findMatchingLotsFIFO(itm.title);
-
-      for (const lot of matchingLots) {
-        if (needed <= 0) break;
-        const d = liveOrderDeductions.get(lot.id);
-        const netBase = Math.max(0, getInventoryOnHandQty({ ...lot, quantity_sold: 0 }));
-        const alreadyAlloc = (d ? (d.sold + d.reserved) : 0);
-        const availInLot = Math.max(0, netBase - alreadyAlloc);
-
-        const take = Math.min(availInLot, needed);
-        if (take > 0) {
-          if (status === 'delivered') {
-            d.sold += take;
-          } else {
-            d.reserved += take;
-          }
-          needed -= take;
-        }
-      }
-
-      if (needed > 0 && matchingLots.length > 0) {
-        const d = liveOrderDeductions.get(matchingLots[0].id);
-        if (d) {
-          if (status === 'delivered') d.sold += needed;
-          else d.reserved += needed;
-        }
-      }
+    itemBreakdowns.push({
+      title: pi.title,
+      qty: pi.qty,
+      unitCost,
+      lineCogs: unitCost !== null ? (pi.qty * unitCost) : null
     });
   });
 
-  // 4. Subtract Restocked Customer Returns for Delivered Orders
-  (state.orderReturns || []).forEach(ret => {
-    if (ret.inventory_item_id && ret.restocked_to_inventory !== false && ret.condition !== 'damaged') {
-      const d = liveOrderDeductions.get(ret.inventory_item_id);
-      if (d) {
-        d.sold = Math.max(0, d.sold - (Number(ret.quantity) || 0));
-      }
-    }
-  });
+  const cogs = allCostsKnown ? Math.round(knownCogsSum) : null;
+  const netProfit = allCostsKnown ? Math.round(pricing.bookRevenue - knownCogsSum - pricing.packagingCost) : null;
 
-  // 5. Apply live deductions directly to state.inventory
+  return {
+    order,
+    meta,
+    isHist,
+    status,
+    paymentStatus,
+    carrier: meta?.carrier || '',
+    trackingNumber: meta?.tracking_number || '',
+    paymentMethod: meta?.payment_method || '',
+    ...pricing,
+    parsedItems,
+    itemBreakdowns,
+    allCostsKnown,
+    unknownTitles,
+    knownCogsPartial: Math.round(knownCogsSum),
+    cogs,
+    netProfit
+  };
+}
+
+function applyLiveOrdersToInventory() {
+  if (!state.inventory) return;
+  // Preserve original quantity_received, real DB quantity_sold, and quantity_reserved intact.
+  // Never overwrite DB stock movements or invent defaults when user has edited selling prices.
   state.inventory.forEach(inv => {
-    const d = liveOrderDeductions.get(inv.id);
-    if (d) {
-      inv.quantity_sold = d.sold;
-      inv.quantity_reserved = d.reserved;
-    } else {
-      inv.quantity_sold = 0;
-      inv.quantity_reserved = 0;
+    if ((inv.selling_price_da === null || inv.selling_price_da === undefined) && inv.title && (inv.title.includes('مثنوي') || inv.title.includes('المثنوي'))) {
+      inv.selling_price_da = 10000;
     }
   });
 }
@@ -1651,11 +1673,8 @@ window.applyLiveOrdersToInventory = applyLiveOrdersToInventory;
 function calculateFinancialMetrics() {
   applyLiveOrdersToInventory();
 
-  // 1. Build lookup maps for inventory by normalized title and compute catalog average cost ratio (for provisional estimates ONLY)
+  // 1. Build lookup maps for inventory by normalized title (NEVER fabricate missing unit costs)
   const normTitleMap = new Map();
-  let catalogCostSum = 0;
-  let catalogPriceSum = 0;
-
   state.inventory.forEach(item => {
     if (item.title) {
       const normKey = normalizeText(item.title);
@@ -1663,73 +1682,106 @@ function calculateFinancialMetrics() {
         normTitleMap.set(normKey, []);
       }
       normTitleMap.get(normKey).push(item);
-
-      if (item.unit_purchase_cost_da !== null && item.unit_purchase_cost_da !== undefined && !isNaN(item.unit_purchase_cost_da) && item.selling_price_da > 0) {
-        catalogCostSum += Number(item.unit_purchase_cost_da);
-        catalogPriceSum += Number(item.selling_price_da);
-      }
     }
   });
 
-  const catalogCostRatio = catalogPriceSum > 0 ? (catalogCostSum / catalogPriceSum) : 0;
-
-  // 2. Aggregate sales per title from customer orders (excluding cancelled) with STRICT shipping fee separation
+  // 2. Aggregate sales across non-cancelled orders + build Confirmed Paid Orders Profit Ledger
   let totalGrossOrderValue = 0;
   let totalShippingCollected = 0;
   let totalPackagingFees = 0;
-  let totalSalesRevenue = 0; // Book + Product revenue net of shipping passthrough
+  let totalOrderPackagingCosts = 0;
+  let totalSalesRevenue = 0; // Book & Merchandise revenue strictly net of delivery fees
   let historicalOrdersRevenue = 0;
   let liveOrdersRevenue = 0;
-  let totalCashInflowsFromSales = 0; // Post-opening paid live orders cash collected
+  let totalCashInflowsFromSales = 0; // Paid live orders book revenue (delivery excluded!)
   const salesByTitle = new Map();
+
+  const paidOrders = [];
+  let paidGrossCustomerPaid = 0;
+  let paidDeliveryFeesExcluded = 0;
+  let paidActualShippingCostsRecorded = 0;
+  let paidBookRevenue = 0;
+  let paidKnownBookCogs = 0;
+  let paidPackagingCosts = 0;
+  let paidConfirmedOrdersBookRevenue = 0;
+  let paidConfirmedOrdersCogs = 0;
+  let paidConfirmedOrdersPackagingCosts = 0;
+  let paidKnownCostCount = 0;
+  let paidUnknownCostCount = 0;
+  let paidLiveCount = 0;
+  let paidHistoricalCount = 0;
+  let paidLiveBookRevenue = 0;
+  let paidLiveKnownNetProfit = 0;
+  let paidLiveKnownCostCount = 0;
+  let paidLiveUnknownCostCount = 0;
 
   state.orders.forEach(order => {
     const meta = state.orderMeta ? state.orderMeta.find(m => String(m.order_id) === String(order.id)) : null;
     const isHist = !!(order.is_historical || Number(order.id) <= 170);
-    const fulfillmentStatus = meta ? meta.fulfillment_status : (isHist ? 'delivered' : (order.status || 'pending'));
-    const isPaid = meta ? (meta.payment_status === 'paid') : (isHist ? true : (order.payment_status === 'paid'));
+    const fulfillmentStatus = meta ? (meta.fulfillment_status || 'pending') : (isHist ? 'delivered' : (order.status || 'pending'));
+    const paymentStatus = meta ? (meta.payment_status || 'unpaid') : (isHist ? 'paid' : (order.payment_status || 'unpaid'));
+    const isPaid = paymentStatus === 'paid';
 
-    if (fulfillmentStatus === 'cancelled') return;
+    if (fulfillmentStatus === 'cancelled' || fulfillmentStatus === 'rejected') return;
 
-    const orderTotal = Number(order.total_price) || 0;
-    const shippingFee = Number(meta?.shipping_fee_da ?? order.shipping_price) || 0;
-    const packagingFee = Number(order.packaging_price) || 0;
-    const productRevenue = Math.max(0, orderTotal - shippingFee);
+    const pricing = resolveEffectiveOrderPricing(order, meta);
+    const { orderTotal, shippingFee, actualShippingCost, packagingCost, packagingFeeCharged, bookRevenue } = pricing;
 
     totalGrossOrderValue += orderTotal;
     totalShippingCollected += shippingFee;
-    totalPackagingFees += packagingFee;
-    totalSalesRevenue += productRevenue;
+    totalPackagingFees += packagingFeeCharged;
+    totalOrderPackagingCosts += packagingCost;
+    totalSalesRevenue += bookRevenue;
 
     if (isHist) {
-      historicalOrdersRevenue += productRevenue;
+      historicalOrdersRevenue += bookRevenue;
     } else {
-      liveOrdersRevenue += productRevenue;
+      liveOrdersRevenue += bookRevenue;
       if (isPaid) {
-        totalCashInflowsFromSales += productRevenue;
+        totalCashInflowsFromSales += bookRevenue;
       }
     }
 
-    let itemsList = [];
-    if (Array.isArray(order.items)) {
-      itemsList = order.items;
-    } else if (typeof order.items === 'string') {
-      try {
-        const parsed = JSON.parse(order.items);
-        itemsList = Array.isArray(parsed) ? parsed : [order.items];
-      } catch {
-        itemsList = [order.items];
+    if (isPaid) {
+      const paidDetail = computePaidOrderDetails(order, normTitleMap);
+      paidOrders.push(paidDetail);
+      paidGrossCustomerPaid += orderTotal;
+      paidDeliveryFeesExcluded += shippingFee;
+      paidActualShippingCostsRecorded += actualShippingCost;
+      paidBookRevenue += bookRevenue;
+      paidKnownBookCogs += paidDetail.knownCogsPartial;
+      paidPackagingCosts += packagingCost;
+
+      if (isHist) paidHistoricalCount++;
+      else {
+        paidLiveCount++;
+        paidLiveBookRevenue += bookRevenue;
+      }
+
+      if (paidDetail.allCostsKnown) {
+        paidKnownCostCount++;
+        paidConfirmedOrdersBookRevenue += bookRevenue;
+        paidConfirmedOrdersCogs += paidDetail.cogs;
+        paidConfirmedOrdersPackagingCosts += packagingCost;
+        if (!isHist) {
+          paidLiveKnownCostCount++;
+          paidLiveKnownNetProfit += paidDetail.netProfit;
+        }
+      } else {
+        paidUnknownCostCount++;
+        if (!isHist) paidLiveUnknownCostCount++;
       }
     }
-    if (!Array.isArray(itemsList)) itemsList = [itemsList];
-    if (itemsList.length === 0 && productRevenue > 0) {
+
+    let itemsList = parseOrderItemsSafe(order);
+    if (itemsList.length === 0 && bookRevenue > 0) {
       itemsList = [`Order #${order.id || 'N/A'}`];
     }
 
     let totalItemsInOrder = 0;
     let totalCatalogWeighted = 0;
     const parsedItems = [];
-    const merchandisePool = Math.max(0, productRevenue - packagingFee);
+    const merchandisePool = Math.max(0, bookRevenue - packagingFeeCharged);
 
     itemsList.forEach(rawItem => {
       const pi = parseOrderItem(rawItem);
@@ -1767,7 +1819,7 @@ function calculateFinancialMetrics() {
     });
   });
 
-  // 3. True FIFO Stock Allocation & Profit Engine (OLD_STOCK before NEW_STOCK; NULL costs stay NULL/provisional)
+  // 3. True FIFO Stock Cost & Profit Engine (NULL purchase cost stays NULL/unknown; NEVER treated as 0)
   let confirmedCogsOld = 0;
   let confirmedProfitOld = 0;
   let revenueOld = 0;
@@ -1783,38 +1835,20 @@ function calculateFinancialMetrics() {
   let soldQtyAcc = 0;
 
   let totalConfirmedCogs = 0;
-  let totalProvisionalCogs = 0;
+  let confirmedSalesRevenue = 0;
   let totalConfirmedProfit = 0;
-  let totalProvisionalProfit = 0;
+  let unknownCostSalesCount = 0;
+  let unknownCostRevenueTotal = 0;
 
   const titleProfits = [];
   const handledLotIds = new Set();
 
-  function isNewBatchLot(lot) {
-    if (!lot) return false;
-    const grp = String(lot.stock_group || '').toUpperCase();
-    const bId = String(lot.batch_id || '').toLowerCase();
-    const bName = String(lot.batch || '').toLowerCase();
-    return grp === 'NEW_STOCK' || grp === 'NEW_BATCH' || bId.includes('nov') || bName.includes('fair') || bName.includes('معرض');
-  }
-
   salesByTitle.forEach((saleData, normKey) => {
-    const matchingLots = normTitleMap.get(normKey) || [];
-    const eligibleLots = (saleData.hasLiveSales
-      ? [...matchingLots]
-      : matchingLots.filter(l => !isNewBatchLot(l)));
-
-    eligibleLots.sort((a, b) => {
-      const aIsOld = (a.stock_group || '').toUpperCase() === 'OLD_STOCK' ? 0 : 1;
-      const bIsOld = (b.stock_group || '').toUpperCase() === 'OLD_STOCK' ? 0 : 1;
-      if (aIsOld !== bIsOld) return aIsOld - bIsOld;
-      return String(a.acquisition_date || '9999').localeCompare(String(b.acquisition_date || '9999'));
-    });
-
+    const eligibleLots = resolveCandidateLotsForTitle(saleData.rawTitle, !saleData.hasLiveSales, normTitleMap);
     eligibleLots.forEach(l => handledLotIds.add(l.id));
 
     const unitPrice = saleData.quantitySold > 0 ? (saleData.revenue / saleData.quantitySold) : 0;
-    let titleCogs = 0;
+    let titleCogs = null;
     let isTitleConfirmed = false;
     let primaryStockGroup = 'HISTORICAL';
     let primaryAuthor = '-';
@@ -1828,12 +1862,13 @@ function calculateFinancialMetrics() {
       primaryStockGroup = isAccLot ? 'ACCESSORIES' : (primaryLot.stock_group || 'OLD_STOCK');
       displayPrice = Number(primaryLot.selling_price_da) || unitPrice;
 
-      if (primaryLot.unit_purchase_cost_da !== null && primaryLot.unit_purchase_cost_da !== undefined && !isNaN(primaryLot.unit_purchase_cost_da)) {
+      if (primaryLot.unit_purchase_cost_da !== null && primaryLot.unit_purchase_cost_da !== undefined && primaryLot.unit_purchase_cost_da !== '' && !isNaN(primaryLot.unit_purchase_cost_da)) {
         displayCost = Number(primaryLot.unit_purchase_cost_da);
         titleCogs = saleData.quantitySold * displayCost;
         isTitleConfirmed = true;
 
         totalConfirmedCogs += titleCogs;
+        confirmedSalesRevenue += saleData.revenue;
         const profit = saleData.revenue - titleCogs;
         totalConfirmedProfit += profit;
 
@@ -1854,24 +1889,24 @@ function calculateFinancialMetrics() {
         }
       } else {
         displayCost = null;
-        titleCogs = catalogCostRatio > 0 ? (saleData.revenue * catalogCostRatio) : 0;
+        titleCogs = null;
         isTitleConfirmed = false;
-        totalProvisionalCogs += titleCogs;
-        totalProvisionalProfit += (saleData.revenue - titleCogs);
+        unknownCostSalesCount++;
+        unknownCostRevenueTotal += saleData.revenue;
         soldQtyOld += saleData.quantitySold;
         revenueOld += saleData.revenue;
       }
     } else {
       displayCost = null;
-      titleCogs = catalogCostRatio > 0 ? (saleData.revenue * catalogCostRatio) : 0;
+      titleCogs = null;
       isTitleConfirmed = false;
-      totalProvisionalCogs += titleCogs;
-      totalProvisionalProfit += (saleData.revenue - titleCogs);
+      unknownCostSalesCount++;
+      unknownCostRevenueTotal += saleData.revenue;
       soldQtyOld += saleData.quantitySold;
       revenueOld += saleData.revenue;
     }
 
-    const titleProfit = isTitleConfirmed ? (saleData.revenue - titleCogs) : (catalogCostRatio > 0 ? (saleData.revenue - titleCogs) : null);
+    const titleProfit = isTitleConfirmed ? (saleData.revenue - titleCogs) : null;
     const marginPct = (titleProfit !== null && saleData.revenue > 0) ? Math.round((titleProfit / saleData.revenue) * 100) : null;
     const targetUnitMargin = displayCost !== null ? (displayPrice - displayCost) : null;
 
@@ -1888,7 +1923,7 @@ function calculateFinancialMetrics() {
       sellingPrice: Math.round(displayPrice),
       targetUnitMargin: targetUnitMargin !== null ? Math.round(targetUnitMargin) : null,
       revenue: Math.round(saleData.revenue),
-      cogs: isTitleConfirmed ? Math.round(titleCogs) : (catalogCostRatio > 0 ? Math.round(titleCogs) : null),
+      cogs: isTitleConfirmed ? Math.round(titleCogs) : null,
       grossProfit: titleProfit !== null ? Math.round(titleProfit) : null,
       marginPct: marginPct,
       isConfirmed: isTitleConfirmed
@@ -1899,7 +1934,7 @@ function calculateFinancialMetrics() {
   state.inventory.forEach(lot => {
     if (handledLotIds.has(lot.id)) return;
     const onHand = getInventoryOnHandQty(lot);
-    const cost = (lot.unit_purchase_cost_da !== null && lot.unit_purchase_cost_da !== undefined && !isNaN(lot.unit_purchase_cost_da)) ? Number(lot.unit_purchase_cost_da) : null;
+    const cost = (lot.unit_purchase_cost_da !== null && lot.unit_purchase_cost_da !== undefined && lot.unit_purchase_cost_da !== '' && !isNaN(lot.unit_purchase_cost_da)) ? Number(lot.unit_purchase_cost_da) : null;
     const price = Number(lot.selling_price_da) || 0;
     const targetMargin = (cost !== null && price > 0) ? (price - cost) : null;
     const marginPct = (cost !== null && price > 0) ? Math.round(((price - cost) / price) * 100) : null;
@@ -2084,6 +2119,9 @@ function calculateFinancialMetrics() {
   };
 
   const totalOperatingExpenses = (state.expenses || []).reduce((sum, e) => sum + (Number(e.amount_da) || 0), 0);
+  const totalTransportationExpenses = (state.expenses || []).reduce((sum, e) => {
+    return String(e.category || '').toLowerCase() === 'transportation' ? sum + (Number(e.amount_da) || 0) : sum;
+  }, 0);
   const postOpeningOperatingExpenses = (state.expenses || []).reduce((sum, e) => {
     const d = e.expense_date || e.date || e.created_at;
     return isOnOrAfterOpening(d) ? sum + (Number(e.amount_da) || 0) : sum;
@@ -2115,7 +2153,6 @@ function calculateFinancialMetrics() {
     totalDebtsRepaid += repaid;
     outstandingDebtsDa += remaining;
 
-    // Maintain in-memory synchronization
     d.amount_repaid_da = repaid;
     d.remaining_balance_da = remaining;
   });
@@ -2129,14 +2166,38 @@ function calculateFinancialMetrics() {
     postOpeningDebtsRepaid = totalDebtsRepaid;
   }
 
-  // 7. Reconciled Financial Figures (Gross Profit = Revenue - COGS; Net Profit = Gross Profit - Expenses)
-  const totalCogs = totalConfirmedCogs + totalProvisionalCogs;
-  const totalGrossProfit = totalSalesRevenue - totalCogs;
+  // 7. Reconciled Financial Figures (Strictly confirmed costs only; NULL costs NEVER counted as 0)
+  const totalCogs = Math.round(totalConfirmedCogs);
+  const totalGrossProfit = confirmedSalesRevenue - totalConfirmedCogs;
   const netProfit = totalGrossProfit - totalOperatingExpenses;
 
-  const isProfitReconciled = (catalogCostRatio > 0 || totalProvisionalCogs === 0);
+  const isProfitReconciled = (unknownCostSalesCount === 0);
   const totalConfirmedProfitResult = Math.round(totalGrossProfit);
   const netConfirmedProfitResult = Math.round(netProfit);
+
+  // Paid Orders Earned Profit summary (Book Revenue net of Delivery − Known COGS − Order Packaging Costs)
+  const paidSummary = {
+    allCount: paidOrders.length,
+    liveCount: paidLiveCount,
+    historicalCount: paidHistoricalCount,
+    knownCostCount: paidKnownCostCount,
+    unknownCostCount: paidUnknownCostCount,
+    grossCustomerPaid: Math.round(paidGrossCustomerPaid),
+    deliveryFeesExcluded: Math.round(paidDeliveryFeesExcluded),
+    actualShippingCostsRecorded: Math.round(paidActualShippingCostsRecorded),
+    transportationOperatingExpenses: Math.round(totalTransportationExpenses),
+    bookRevenue: Math.round(paidBookRevenue),
+    knownBookCogs: Math.round(paidKnownBookCogs),
+    packagingCosts: Math.round(paidPackagingCosts),
+    confirmedOrdersBookRevenue: Math.round(paidConfirmedOrdersBookRevenue),
+    confirmedOrdersCogs: Math.round(paidConfirmedOrdersCogs),
+    confirmedOrdersPackagingCosts: Math.round(paidConfirmedOrdersPackagingCosts),
+    confirmedNetProfit: Math.round(paidConfirmedOrdersBookRevenue - paidConfirmedOrdersCogs - paidConfirmedOrdersPackagingCosts),
+    liveBookRevenue: Math.round(paidLiveBookRevenue),
+    liveKnownCostCount: paidLiveKnownCostCount,
+    liveUnknownCostCount: paidLiveUnknownCostCount,
+    liveKnownNetProfit: Math.round(paidLiveKnownNetProfit)
+  };
 
   // 8. Reconciled Cash Position (anchored to opening_position.as_of_date)
   const openingCash = Number(state.openingPosition?.cash_balance_da) || 0;
@@ -2160,17 +2221,20 @@ function calculateFinancialMetrics() {
   return {
     totalGrossOrderValue: Math.round(totalGrossOrderValue),
     totalShippingCollected: Math.round(totalShippingCollected),
+    totalTransportationExpenses: Math.round(totalTransportationExpenses),
     totalPackagingFees: Math.round(totalPackagingFees),
+    totalOrderPackagingCosts: Math.round(totalOrderPackagingCosts),
     totalSalesRevenue: Math.round(totalSalesRevenue),
+    confirmedSalesRevenue: Math.round(confirmedSalesRevenue),
+    unknownCostSalesCount,
+    unknownCostRevenueTotal: Math.round(unknownCostRevenueTotal),
     historicalOrdersRevenue: Math.round(historicalOrdersRevenue),
     liveOrdersRevenue: Math.round(liveOrdersRevenue),
     totalCashInflowsFromSales: Math.round(totalCashInflowsFromSales),
-    totalCogs: Math.round(totalCogs),
+    totalCogs,
     totalConfirmedCogs: Math.round(totalConfirmedCogs),
-    totalProvisionalCogs: Math.round(totalProvisionalCogs),
     totalGrossProfit: totalConfirmedProfitResult,
     totalConfirmedProfit: totalConfirmedProfitResult,
-    provisionalProfitTotal: Math.round(totalProvisionalProfit),
     totalOperatingExpenses: Math.round(totalOperatingExpenses),
     postOpeningOperatingExpenses: Math.round(postOpeningOperatingExpenses),
     totalBatchPaidAll: Math.round(totalBatchPaidAll),
@@ -2180,6 +2244,8 @@ function calculateFinancialMetrics() {
     netProfit: netConfirmedProfitResult,
     netConfirmedProfit: netConfirmedProfitResult,
     isProfitReconciled,
+    paidOrders,
+    paidSummary,
     remainingInventoryValueDa: finalRemainingInventoryValue,
     unpricedTitlesCount,
     totalCountedPhysical,
@@ -2284,7 +2350,7 @@ function calculateFinancialMetrics() {
     historicalSales: {
       orderCount: state.orders.length,
       revenue: Math.round(totalSalesRevenue),
-      cogs: Math.round(totalCogs),
+      cogs: totalCogs,
       grossProfit: totalConfirmedProfitResult
     },
     titleProfits
@@ -2295,7 +2361,7 @@ function calculateFinancialMetrics() {
 // 6. VIEW RENDERERS & DATA BINDING
 // ============================================================================
 function getEffectiveOrderStatus(order) {
-  if (!order) return { isHist: false, status: 'pending', paymentStatus: 'unpaid', shippingFee: 0, meta: null };
+  if (!order) return { isHist: false, status: 'pending', paymentStatus: 'unpaid', shippingFee: 0, packagingCost: 0, bookRevenue: 0, orderTotal: 0, meta: null };
   const isHist = !!(order.is_historical || Number(order.id) <= 170);
   const meta = state.orderMeta ? state.orderMeta.find(m => String(m.order_id) === String(order.id)) : null;
   const status = meta
@@ -2304,8 +2370,8 @@ function getEffectiveOrderStatus(order) {
   const paymentStatus = meta
     ? (meta.payment_status || 'unpaid')
     : (isHist ? 'paid' : (order.payment_status || 'unpaid'));
-  const shippingFee = Number(meta?.shipping_fee_da ?? order.shipping_price) || 0;
-  return { isHist, status, paymentStatus, shippingFee, meta };
+  const pricing = resolveEffectiveOrderPricing(order, meta);
+  return { isHist, status, paymentStatus, ...pricing, meta };
 }
 
 function getOrderStatusBadgeHtml(status, isHist) {
@@ -2497,6 +2563,134 @@ function renderOrdersTable() {
   }).join('');
 }
 
+function renderPaidOrdersSection() {
+  const fin = calculateFinancialMetrics();
+  const ps = fin.paidSummary;
+  const navBadge = document.getElementById('paid-orders-nav-badge');
+  if (navBadge) navBadge.textContent = ps.allCount;
+
+  const countEl = document.getElementById('paid-orders-count');
+  const countSubEl = document.getElementById('paid-orders-count-sub');
+  const bookRevEl = document.getElementById('paid-orders-book-rev');
+  const grossPaidEl = document.getElementById('paid-orders-gross-paid');
+  const shipExclEl = document.getElementById('paid-orders-shipping-excluded');
+  const carrierExpEl = document.getElementById('paid-orders-carrier-exp');
+  const netProfitEl = document.getElementById('paid-orders-net-profit');
+  const profitSubEl = document.getElementById('paid-orders-profit-sub');
+
+  let filtered = fin.paidOrders || [];
+  const filter = state.paidOrdersFilter || 'all';
+  if (filter === 'live') filtered = filtered.filter(p => !p.isHist);
+  else if (filter === 'historical') filtered = filtered.filter(p => p.isHist);
+  else if (filter === 'known_cost') filtered = filtered.filter(p => p.allCostsKnown);
+  else if (filter === 'unknown_cost') filtered = filtered.filter(p => !p.allCostsKnown);
+
+  if (state.searchQuery) {
+    const q = state.searchQuery.toLowerCase();
+    filtered = filtered.filter(p => {
+      const o = p.order;
+      return String(o.id).includes(q) ||
+        (o.firstName && o.firstName.toLowerCase().includes(q)) ||
+        (o.familyName && o.familyName.toLowerCase().includes(q)) ||
+        (o.phoneNumber && o.phoneNumber.includes(q)) ||
+        (o.wilaya && o.wilaya.toLowerCase().includes(q));
+    });
+  }
+
+  // Scope KPIs dynamically to the active filter when filtered, or full paid summary on 'all'
+  const viewGrossPaid = filtered.reduce((s, p) => s + p.orderTotal, 0);
+  const viewShipExcl = filtered.reduce((s, p) => s + p.shippingFee, 0);
+  const viewBookRev = filtered.reduce((s, p) => s + p.bookRevenue, 0);
+  const viewPkgCost = filtered.reduce((s, p) => s + p.packagingCost, 0);
+  const viewActShip = filtered.reduce((s, p) => s + p.actualShippingCost, 0);
+  const viewKnownOrders = filtered.filter(p => p.allCostsKnown);
+  const viewUnknownCount = filtered.length - viewKnownOrders.length;
+  const viewConfirmedProfit = viewKnownOrders.reduce((s, p) => s + p.netProfit, 0);
+  const viewConfirmedCogs = viewKnownOrders.reduce((s, p) => s + p.cogs, 0);
+
+  if (countEl) countEl.textContent = String(filtered.length);
+  if (countSubEl) countSubEl.textContent = `Live: ${filtered.filter(p => !p.isHist).length} • Historical: ${filtered.filter(p => p.isHist).length}`;
+  if (bookRevEl) bookRevEl.textContent = `${Math.round(viewBookRev).toLocaleString('fr-DZ')} DA`;
+  if (grossPaidEl) grossPaidEl.textContent = `Customer Paid: ${Math.round(viewGrossPaid).toLocaleString('fr-DZ')} DA (Excl. Delivery)`;
+  if (shipExclEl) shipExclEl.textContent = `${Math.round(viewShipExcl).toLocaleString('fr-DZ')} DA`;
+  if (carrierExpEl) {
+    carrierExpEl.textContent = `Carrier Paid Audit: ${Math.round(viewActShip).toLocaleString('fr-DZ')} DA • Store Transport Exp: ${ps.transportationOperatingExpenses.toLocaleString('fr-DZ')} DA (Not Revenue)`;
+  }
+
+  if (netProfitEl) {
+    if (viewKnownOrders.length === 0 && filtered.length > 0) {
+      netProfitEl.textContent = 'Unknown Cost';
+      netProfitEl.style.fontSize = '1.1rem';
+    } else {
+      netProfitEl.textContent = `${Math.round(viewConfirmedProfit).toLocaleString('fr-DZ')} DA`;
+      netProfitEl.style.fontSize = '';
+    }
+  }
+  if (profitSubEl) {
+    if (filtered.length === 0) {
+      profitSubEl.textContent = 'No paid orders in this view yet';
+    } else if (viewUnknownCount > 0) {
+      profitSubEl.innerHTML = `<span style="color: var(--warning); font-weight: 600;"><i class="fa-solid fa-clock"></i> ${viewKnownOrders.length} costed (${Math.round(viewConfirmedCogs).toLocaleString('fr-DZ')} COGS, ${Math.round(viewPkgCost).toLocaleString('fr-DZ')} pkg) • ${viewUnknownCount} order(s) have Unknown Cost</span>`;
+    } else {
+      profitSubEl.innerHTML = `<span style="color: var(--success);"><i class="fa-solid fa-circle-check"></i> All ${viewKnownOrders.length} paid orders costed (${Math.round(viewConfirmedCogs).toLocaleString('fr-DZ')} COGS + ${Math.round(viewPkgCost).toLocaleString('fr-DZ')} pkg deducted)</span>`;
+    }
+  }
+
+  const totalCountEl = document.getElementById('paid-orders-total-count');
+  if (totalCountEl) totalCountEl.textContent = `${filtered.length} Paid Orders (${ps.allCount} total paid)`;
+
+  const tbody = document.getElementById('paid-orders-table-tbody');
+  if (!tbody) return;
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="11" class="empty-state"><i class="fa-solid fa-circle-check"></i><p>No confirmed paid orders match this filter. Mark an order as Paid or Confirm Delivery in Order Details.</p></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(p => {
+    const o = p.order;
+    const costHtml = p.allCostsKnown
+      ? `<div><strong>${p.cogs.toLocaleString('fr-DZ')} DA</strong> COGS</div>
+         <div style="font-size: 0.74rem; color: var(--text-muted);">Pkg Cost: ${p.packagingCost.toLocaleString('fr-DZ')} DA</div>`
+      : `<div><span class="badge badge-provisional"><i class="fa-solid fa-clock"></i> Unknown Cost</span></div>
+         <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">${escapeHtml(p.unknownTitles.slice(0, 2).join(', '))}${p.unknownTitles.length > 2 ? '…' : ''}</div>`;
+
+    const profitHtml = p.allCostsKnown
+      ? `<strong style="color: ${p.netProfit >= 0 ? 'var(--success)' : 'var(--danger)'}; font-size: 0.98rem;">${p.netProfit.toLocaleString('fr-DZ')} DA</strong>`
+      : `<span class="badge badge-amber" title="Purchase cost missing — never treated as 0 DA">Pending Cost</span>`;
+
+    return `
+      <tr>
+        <td>
+          <strong>#${o.id}</strong>
+          <div><span class="badge ${p.isHist ? 'badge-neutral' : 'badge-green'}" style="font-size: 0.68rem;">${p.isHist ? 'HIST PAID' : 'LIVE PAID'}</span></div>
+        </td>
+        <td style="white-space: nowrap; font-size: 0.84rem;">${formatDate(o.created_at)}</td>
+        <td>
+          <div style="font-weight: 600;">${escapeHtml(o.firstName || '')} ${escapeHtml(o.familyName || '')}</div>
+          <div style="font-size: 0.78rem; color: var(--text-muted);">${escapeHtml(o.phoneNumber || '')}</div>
+        </td>
+        <td style="font-size: 0.84rem; max-width: 260px;">${formatOrderItems(o.items)}</td>
+        <td style="white-space: nowrap;">
+          <span class="badge ${o.deliveryMethod === 'home' ? 'badge-blue' : 'badge-neutral'}">${(o.deliveryMethod || 'Desk').toUpperCase()}</span>
+          <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">${escapeHtml(o.wilaya || '')}${p.carrier ? ` • ${escapeHtml(p.carrier)}` : ''}</div>
+          ${p.trackingNumber ? `<div style="font-size: 0.72rem; color: var(--vintage-blue);">#${escapeHtml(p.trackingNumber)}</div>` : ''}
+        </td>
+        <td><strong>${p.orderTotal.toLocaleString('fr-DZ')} DA</strong></td>
+        <td style="color: var(--text-muted);">${p.shippingFee.toLocaleString('fr-DZ')} DA</td>
+        <td><strong style="color: var(--vintage-blue);">${p.bookRevenue.toLocaleString('fr-DZ')} DA</strong></td>
+        <td>${costHtml}</td>
+        <td>${profitHtml}</td>
+        <td>
+          <button class="btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="viewOrderDetails(${o.id})">
+            <i class="fa-regular fa-eye"></i> Manage
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
 function renderInventoryTable() {
   const tbody = document.getElementById('inventory-table-tbody');
   const countEl = document.getElementById('inventory-total-count');
@@ -2539,12 +2733,13 @@ function renderInventoryTable() {
   if (countEl) countEl.textContent = `${items.length} titles in view (${state.inventory.length} total in store)`;
 
   if (items.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="9" class="empty-state"><i class="fa-solid fa-book-open"></i><p>No inventory items found matching this filter. Use <strong>"Import Excel"</strong> or click <strong>"Add Item"</strong>.</p></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10" class="empty-state"><i class="fa-solid fa-book-open"></i><p>No inventory items found matching this filter. Use <strong>"Import Excel"</strong> or click <strong>"Add Item"</strong>.</p></td></tr>`;
     return;
   }
 
   tbody.innerHTML = items.map(item => {
-    const onHand = getInventoryOnHandQty(item);
+    const origReceived = Number(item.quantity_received) || 0;
+    const sold = Number(item.quantity_sold) || 0;
     const reserved = Number(item.quantity_reserved) || 0;
     const available = getInventoryAvailableQty(item);
     const isLow = available <= 2;
@@ -2553,7 +2748,7 @@ function renderInventoryTable() {
 
     const costBadge = (item.unit_purchase_cost_da !== null && item.unit_purchase_cost_da !== undefined && item.unit_purchase_cost_da !== '' && !isNaN(item.unit_purchase_cost_da))
       ? `<span class="badge-confirmed">${Number(item.unit_purchase_cost_da).toLocaleString('fr-DZ')} DA</span>`
-      : `<span class="badge-provisional"><i class="fa-solid fa-clock"></i> Pending (NULL)</span>`;
+      : `<span class="badge-provisional"><i class="fa-solid fa-clock"></i> Unknown (NULL)</span>`;
 
     const groupBadge = isAcc
       ? `<span class="badge" style="background: #EDE9FE; color: #5B21B6; border: 1px solid #DDD6FE;"><i class="fa-solid fa-gem"></i> ACCESSORIES</span>`
@@ -2562,7 +2757,7 @@ function renderInventoryTable() {
     return `
       <tr>
         <td>
-          <div style="font-weight: 600; font-family: var(--font-serif); font-size: 0.96rem;">${escapeHtml(item.title)}</div>
+          <div style="font-weight: 600; font-family: var(--font-serif); font-size: 0.96rem; cursor: pointer;" onclick="openEditInventoryModal('${escapeHtml(String(item.id))}')">${escapeHtml(item.title)}</div>
           <div style="font-size: 0.82rem; color: var(--text-muted);">${escapeHtml(item.author || '-')} ${item.isbn ? `• ISBN: ${escapeHtml(item.isbn)}` : ''}</div>
           <div style="font-size: 0.78rem; color: var(--text-muted);"><i class="fa-solid fa-boxes-packing"></i> ${escapeHtml(item.supplier_name || (isAcc ? 'Accessories' : 'Book Fair'))}</div>
         </td>
@@ -2570,18 +2765,19 @@ function renderInventoryTable() {
           ${groupBadge}
         </td>
         <td><span class="badge badge-neutral">${escapeHtml(item.category || item.item_type || (isAcc ? 'Accessory' : 'Book'))}</span></td>
-        <td><strong>${onHand}</strong></td>
+        <td><strong title="Preserved original quantity received">${origReceived}</strong></td>
+        <td><strong style="color: ${sold > 0 ? 'var(--vintage-blue)' : 'var(--text-muted)'};">${sold}</strong></td>
         <td><strong>${reserved}</strong></td>
         <td>
           <span class="badge ${isLow ? 'badge-rose' : 'badge-green'}">
-            ${available} ${isLow ? '(Low Stock)' : 'Available'}
+            ${available} ${isLow ? '(Low)' : 'Avail'}
           </span>
         </td>
         <td>${costBadge}</td>
         <td><strong style="color: var(--vintage-blue); font-size: 1rem;">${item.selling_price_da ? Number(item.selling_price_da).toLocaleString('fr-DZ') + ' DA' : '-'}</strong></td>
         <td style="white-space: nowrap;">
-          <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.78rem;" onclick="openEditInventoryModal('${escapeHtml(String(item.id))}')" title="Edit Title / Price / Cost">
-            <i class="fa-solid fa-pen"></i> Edit
+          <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.78rem;" onclick="openEditInventoryModal('${escapeHtml(String(item.id))}')" title="View Book Details & Edit">
+            <i class="fa-solid fa-eye"></i> Details / Edit
           </button>
           <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.78rem; margin-left: 4px;" onclick="openStockAdjustmentModal('${escapeHtml(String(item.id))}')" title="Adjust Stock / تسوية">
             <i class="fa-solid fa-sliders"></i>
@@ -2747,41 +2943,25 @@ function renderFinanceSection() {
   const grossEl = document.getElementById('finance-gross-profit');
   const grossSubEl = document.getElementById('finance-gross-subtext');
   if (grossEl) {
-    if (fin.isProfitReconciled && fin.totalConfirmedProfit !== null) {
-      grossEl.textContent = `${fin.totalConfirmedProfit.toLocaleString('fr-DZ')} DA`;
-      grossEl.style.fontSize = '';
-      if (grossSubEl) {
-        grossSubEl.className = 'metric-subtext confirmed';
-        const marginPct = fin.totalSalesRevenue > 0 ? Math.round((fin.totalConfirmedProfit / fin.totalSalesRevenue) * 100) : 0;
-        grossSubEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> Book Sales (${fin.totalSalesRevenue.toLocaleString('fr-DZ')} DA) − COGS (${(fin.totalCogs || 0).toLocaleString('fr-DZ')} DA) • ${marginPct}% Margin`;
-      }
-    } else {
-      grossEl.textContent = 'Not reconciled / غير محسوبة بعد';
-      grossEl.style.fontSize = '1.05rem';
-      if (grossSubEl) {
-        grossSubEl.className = 'metric-subtext';
-        grossSubEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Historical COGS unallocated`;
-      }
+    grossEl.textContent = `${(fin.totalConfirmedProfit || 0).toLocaleString('fr-DZ')} DA`;
+    grossEl.style.fontSize = '';
+    if (grossSubEl) {
+      grossSubEl.className = fin.unknownCostSalesCount > 0 ? 'metric-subtext' : 'metric-subtext confirmed';
+      const baseText = `Costed Sales (${(fin.confirmedSalesRevenue || 0).toLocaleString('fr-DZ')} DA) − COGS (${(fin.totalCogs || 0).toLocaleString('fr-DZ')} DA)`;
+      grossSubEl.innerHTML = fin.unknownCostSalesCount > 0
+        ? `<i class="fa-solid fa-clock"></i> ${baseText} • Excl. ${fin.unknownCostSalesCount} title(s) with Unknown Cost`
+        : `<i class="fa-solid fa-circle-check"></i> ${baseText}`;
     }
   }
 
   const netEl = document.getElementById('finance-net-profit');
   const netSubEl = document.getElementById('finance-net-subtext');
   if (netEl) {
-    if (fin.isProfitReconciled && fin.netConfirmedProfit !== null) {
-      netEl.textContent = `${fin.netConfirmedProfit.toLocaleString('fr-DZ')} DA`;
-      netEl.style.fontSize = '';
-      if (netSubEl) {
-        netSubEl.className = 'metric-subtext confirmed';
-        netSubEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> Gross Profit − Operating Expenses (${fin.totalOperatingExpenses.toLocaleString('fr-DZ')} DA)`;
-      }
-    } else {
-      netEl.textContent = 'Not reconciled / غير محسوبة بعد';
-      netEl.style.fontSize = '1.05rem';
-      if (netSubEl) {
-        netSubEl.className = 'metric-subtext';
-        netSubEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Historical COGS unallocated`;
-      }
+    netEl.textContent = `${(fin.netConfirmedProfit || 0).toLocaleString('fr-DZ')} DA`;
+    netEl.style.fontSize = '';
+    if (netSubEl) {
+      netSubEl.className = fin.unknownCostSalesCount > 0 ? 'metric-subtext' : 'metric-subtext confirmed';
+      netSubEl.innerHTML = `<i class="fa-solid ${fin.unknownCostSalesCount > 0 ? 'fa-clock' : 'fa-circle-check'}"></i> Confirmed Gross Profit − Expenses (${fin.totalOperatingExpenses.toLocaleString('fr-DZ')} DA)${fin.unknownCostSalesCount > 0 ? ' • Partial (Unknown Costs)' : ''}`;
     }
   }
 
@@ -2789,7 +2969,19 @@ function renderFinanceSection() {
   if (shipEl) shipEl.textContent = `${fin.totalShippingCollected.toLocaleString('fr-DZ')} DA`;
   const shipSubEl = document.getElementById('finance-shipping-subtext');
   if (shipSubEl) {
-    shipSubEl.textContent = `Excluded from ${fin.totalSalesRevenue.toLocaleString('fr-DZ')} DA book sales (Gross Customer Paid: ${fin.totalGrossOrderValue.toLocaleString('fr-DZ')} DA)`;
+    shipSubEl.textContent = `Excluded from ${fin.totalSalesRevenue.toLocaleString('fr-DZ')} DA book sales • Transport Exp: ${(fin.totalTransportationExpenses || 0).toLocaleString('fr-DZ')} DA (No Double-Count)`;
+  }
+
+  const paidNetEl = document.getElementById('finance-paid-net-profit');
+  const paidSubEl = document.getElementById('finance-paid-profit-sub');
+  if (paidNetEl && fin.paidSummary) {
+    const ps = fin.paidSummary;
+    paidNetEl.textContent = (ps.knownCostCount === 0 && ps.allCount > 0)
+      ? 'Unknown Cost'
+      : `${ps.confirmedNetProfit.toLocaleString('fr-DZ')} DA`;
+    if (paidSubEl) {
+      paidSubEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${ps.knownCostCount}/${ps.allCount} paid costed (${ps.bookRevenue.toLocaleString('fr-DZ')} book rev, ${ps.deliveryFeesExcluded.toLocaleString('fr-DZ')} ship excl.)${ps.unknownCostCount > 0 ? ` • ${ps.unknownCostCount} Unknown` : ''}`;
+    }
   }
 
   // 2. New Stock Breakdown Card
@@ -2951,7 +3143,7 @@ function renderFinanceSection() {
             <td>
               <span class="${tp.isConfirmed ? 'badge-confirmed' : 'badge-provisional'}">
                 <i class="fa-solid ${tp.isConfirmed ? 'fa-circle-check' : 'fa-clock'}"></i>
-                ${tp.isConfirmed ? `Cost Confirmed (${tp.quantitySold} Sold)` : 'Provisional (NULL Cost)'}
+                ${tp.isConfirmed ? `Cost Confirmed (${tp.quantitySold} Sold)` : 'Unknown Cost (NULL)'}
               </span>
             </td>
           </tr>
@@ -3494,6 +3686,7 @@ function switchSection(sectionId) {
     dashboard: 'Dashboard <span>لوحة القيادة</span>',
     inventory: 'Inventory & Stock <span>المخزون والمنتجات</span>',
     orders: 'Orders Management <span>إدارة الطلبات</span>',
+    'paid-orders': 'Paid Orders & Profit <span>الطلبات المدفوعة والأرباح</span>',
     purchases: 'Purchases & Suppliers <span>المشتريات والموردين</span>',
     expenses: 'Operating Expenses <span>المصاريف التشغيلية</span>',
     finance: 'Financial Management <span>الإدارة المالية والأرباح</span>',
@@ -3511,6 +3704,30 @@ function switchSection(sectionId) {
 }
 
 window.switchSection = switchSection;
+
+window.setPaidOrdersFilter = function(filter) {
+  state.paidOrdersFilter = filter;
+  document.querySelectorAll('.tab-btn[data-paid-filter]').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('data-paid-filter') === filter);
+  });
+  renderPaidOrdersSection();
+};
+
+window.forceUpdateApp = async function() {
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    }
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+  } catch (err) {
+    console.warn('[PWA] Cache clear warning:', err);
+  }
+  window.location.reload();
+};
 
 window.triggerManualSync = function() {
   sync.sync();
@@ -3689,7 +3906,7 @@ window.handleSaveInventoryItem = async function(event) {
   if (state.online && auth.isAuthenticated()) sync.sync();
 };
 
-// 1b. Edit Existing Inventory Item Metadata / Price / Cost (never mutates historical quantities)
+// 1b. Book Details & Edit Existing Inventory Item Metadata / Price / Cost (never mutates historical quantities)
 window.openEditInventoryModal = function(itemId) {
   const item = (state.inventory || []).find(i => String(i.id) === String(itemId));
   if (!item) return;
@@ -3698,6 +3915,56 @@ window.openEditInventoryModal = function(itemId) {
     const el = document.getElementById(id);
     if (el) el.value = (val === null || val === undefined) ? '' : String(val);
   };
+
+  const origQty = Number(item.quantity_received) || 0;
+  const soldQty = Number(item.quantity_sold) || 0;
+  const availQty = getInventoryAvailableQty(item);
+  const onHandQty = getInventoryOnHandQty(item);
+  const resQty = Number(item.quantity_reserved) || 0;
+  const dmgQty = Number(item.quantity_damaged) || 0;
+  const lostQty = Number(item.quantity_lost) || 0;
+  const promoQty = Number(item.quantity_promotional) || 0;
+  const retSuppQty = Number(item.quantity_returned_to_supplier) || 0;
+  const countAdjQty = Number(item.quantity_count_adjustment) || 0;
+  const batchObj = (state.batches || []).find(b => String(b.id) === String(item.batch_id));
+  const batchLabel = batchObj ? batchObj.batch_name : (item.batch_name || item.batch_id || 'Opening / Fair Lot');
+
+  const summaryEl = document.getElementById('edit-inv-stock-summary');
+  if (summaryEl) {
+    summaryEl.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+        <span style="font-weight: 700; font-size: 0.86rem; color: var(--vintage-blue);">
+          <i class="fa-solid fa-boxes-stacked"></i> Inventory Quantity History (Preserved)
+        </span>
+        <span style="font-size: 0.78rem; color: var(--text-muted);">
+          Lot: <strong>${escapeHtml(batchLabel)}</strong>${item.acquisition_date ? ` • Acquired: ${escapeHtml(String(item.acquisition_date).slice(0, 10))}` : ''}
+        </span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px;">
+        <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; text-align: center;">
+          <div style="font-size: 0.72rem; color: var(--text-muted);">Original Qty Received</div>
+          <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-primary);">${origQty}</div>
+        </div>
+        <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 6px; padding: 8px; text-align: center;">
+          <div style="font-size: 0.72rem; color: #1E40AF;">Quantity Sold</div>
+          <div style="font-size: 1.2rem; font-weight: 700; color: var(--vintage-blue);">${soldQty}</div>
+        </div>
+        <div style="background: ${availQty <= 2 ? '#FFF1F2' : '#F0FDF4'}; border: 1px solid ${availQty <= 2 ? '#FECDD3' : '#BBF7D0'}; border-radius: 6px; padding: 8px; text-align: center;">
+          <div style="font-size: 0.72rem; color: ${availQty <= 2 ? '#9F1239' : '#166534'};">Current Available</div>
+          <div style="font-size: 1.2rem; font-weight: 700; color: ${availQty <= 2 ? 'var(--danger)' : 'var(--success)'};">${availQty}</div>
+        </div>
+        <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; text-align: center;">
+          <div style="font-size: 0.72rem; color: var(--text-muted);">On Hand / Reserved</div>
+          <div style="font-size: 1.05rem; font-weight: 700;">${onHandQty} / ${resQty}</div>
+        </div>
+      </div>
+      ${(dmgQty || lostQty || promoQty || retSuppQty || countAdjQty) ? `
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">
+          Audit adjustments: Damaged: ${dmgQty} • Lost: ${lostQty} • Promo/Gift: ${promoQty} • Returned to Supplier: ${retSuppQty} • Count Adj: ${countAdjQty >= 0 ? '+' + countAdjQty : countAdjQty}
+        </div>
+      ` : ''}
+    `;
+  }
 
   setVal('edit-inv-id', item.id);
   setVal('edit-inv-title', item.title || '');
@@ -4388,19 +4655,57 @@ window.exportToExcel = function(scope) {
   }
 
   const fin = calculateFinancialMetrics();
+
+  if (scope === 'paid-orders') {
+    const rows = (fin.paidOrders || []).map(p => ({
+      OrderId: p.order.id,
+      Date: p.order.created_at || '',
+      Segment: p.isHist ? 'Historical' : 'Live',
+      Customer: `${p.order.firstName || ''} ${p.order.familyName || ''}`.trim(),
+      Phone: p.order.phoneNumber || '',
+      Wilaya: p.order.wilaya || '',
+      DeliveryMethod: p.order.deliveryMethod || '',
+      Carrier: p.carrier || '',
+      TrackingNumber: p.trackingNumber || '',
+      Items: p.parsedItems.map(i => `${i.title} (x${i.qty})`).join(' | '),
+      TotalCustomerPaidDA: p.orderTotal,
+      DeliveryFeeExcludedDA: p.shippingFee,
+      BookRevenueDA: p.bookRevenue,
+      BookCOGS_DA: p.allCostsKnown ? p.cogs : null,
+      PackagingCostDA: p.packagingCost,
+      ActualCarrierCostAuditDA: p.actualShippingCost,
+      NetProfitEarnedDA: p.allCostsKnown ? p.netProfit : null,
+      CostStatus: p.allCostsKnown ? 'Confirmed' : `Unknown Cost (${p.unknownTitles.join(', ')})`,
+      PaymentStatus: p.paymentStatus,
+      PaymentMethod: p.paymentMethod || ''
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    XLSX.utils.book_append_sheet(wb, ws, 'Paid Orders Profit');
+    XLSX.writeFile(wb, `Gentle_Readers_Paid_Orders_${todayStr}.xlsx`);
+    return;
+  }
+
+  const ps = fin.paidSummary;
   const summaryRows = [
     { Metric: 'Report Date', Value: todayStr },
     { Metric: 'Opening Cash Balance (DA)', Value: fin.openingCash },
     { Metric: 'Opening Position As-Of Date', Value: fin.openingDate || 'Not set' },
     { Metric: 'Current Reconciled Cash (DA)', Value: fin.currentCashBalance },
-    { Metric: 'Book Sales Revenue Net of Shipping (DA)', Value: fin.totalSalesRevenue },
-    { Metric: 'Delivery / Shipping Fees Collected (DA)', Value: fin.totalShippingCollected },
-    { Metric: 'Gross Customer Order Totals (DA)', Value: fin.totalGrossOrderValue },
-    { Metric: 'Cost of Goods Sold - Confirmed + Provisional (DA)', Value: fin.totalCogs },
-    { Metric: 'Gross Profit (DA)', Value: fin.totalGrossProfit },
-    { Metric: 'Operating Expenses (DA)', Value: fin.totalOperatingExpenses },
-    { Metric: 'Net Profit (DA)', Value: fin.netProfit },
-    { Metric: 'Remaining Inventory Asset Value at Cost (DA)', Value: fin.remainingInventoryValueDa },
+    { Metric: 'Paid Orders Count (Total / Live)', Value: `${ps.allCount} (${ps.liveCount} live)` },
+    { Metric: 'Paid Orders Book Revenue Net of Delivery (DA)', Value: ps.bookRevenue },
+    { Metric: 'Paid Orders Delivery Fees Excluded (DA)', Value: ps.deliveryFeesExcluded },
+    { Metric: 'Paid Orders Known COGS (DA)', Value: ps.confirmedOrdersCogs },
+    { Metric: 'Paid Orders Packaging Costs (DA)', Value: ps.confirmedOrdersPackagingCosts },
+    { Metric: 'Paid Orders Confirmed Net Profit (DA)', Value: ps.confirmedNetProfit },
+    { Metric: 'Paid Orders Awaiting Unit Cost Count', Value: ps.unknownCostCount },
+    { Metric: 'All Orders Book Revenue Net of Shipping (DA)', Value: fin.totalSalesRevenue },
+    { Metric: 'All Orders Delivery Fees Excluded (DA)', Value: fin.totalShippingCollected },
+    { Metric: 'Transportation Operating Expenses (Separate)', Value: fin.totalTransportationExpenses },
+    { Metric: 'Confirmed Book COGS - Costed Sales Only (DA)', Value: fin.totalCogs },
+    { Metric: 'Confirmed Gross Profit (DA)', Value: fin.totalGrossProfit },
+    { Metric: 'Total Operating Expenses (DA)', Value: fin.totalOperatingExpenses },
+    { Metric: 'Confirmed Net Profit After Expenses (DA)', Value: fin.netProfit },
+    { Metric: 'Remaining Inventory Asset Value at Known Cost (DA)', Value: fin.remainingInventoryValueDa },
     { Metric: 'Outstanding Debts (DA)', Value: fin.outstandingDebtsDa },
     { Metric: 'Owner Capital Contributed (DA)', Value: fin.totalCapitalInjected },
     { Metric: 'Owner Withdrawals (DA)', Value: fin.totalOwnerWithdrawals }
@@ -4455,31 +4760,37 @@ window.viewOrderDetails = function(orderId) {
   const title = document.getElementById('modal-title');
   const body = document.getElementById('modal-body');
 
-  const meta = state.orderMeta ? state.orderMeta.find(m => String(m.order_id) === String(orderId)) : null;
-  const status = meta ? meta.fulfillment_status : (order.is_historical ? 'delivered' : (order.status || 'pending'));
-  const isHistorical = !!order.is_historical;
+  const eff = getEffectiveOrderStatus(order);
+  const meta = eff.meta;
+  const status = eff.status;
+  const paymentStatus = eff.paymentStatus;
+  const isHistorical = !!(order.is_historical || Number(order.id) <= 170);
+  const paymentMethod = meta?.payment_method || '';
 
   const allocs = state.orderAllocations ? state.orderAllocations.filter(a => String(a.order_id) === String(orderId)) : [];
 
   title.textContent = `Order Details #${order.id} — تفاصيل الطلب`;
   body.innerHTML = `
     <div style="display: flex; flex-direction: column; gap: 16px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; background: #F8F5EE; padding: 10px 14px; border-radius: 8px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; background: #F8F5EE; padding: 10px 14px; border-radius: 8px; flex-wrap: wrap; gap: 8px;">
         <div>
-          <span style="font-size: 0.85rem; color: var(--text-muted);">Fulfillment Status:</span>
+          <span style="font-size: 0.85rem; color: var(--text-muted);">Fulfillment:</span>
           <span class="badge ${status === 'delivered' ? 'badge-green' : (status === 'cancelled' ? 'badge-rose' : 'badge-gold')}" style="margin-left: 6px; font-weight: bold;">
-            ${status.toUpperCase()}
+            ${escapeHtml(status.toUpperCase())}
+          </span>
+          <span class="badge ${paymentStatus === 'paid' ? 'badge-green' : (paymentStatus === 'refunded' ? 'badge-rose' : 'badge-amber')}" style="margin-left: 6px; font-weight: bold;">
+            ${escapeHtml(paymentStatus.toUpperCase())}
           </span>
         </div>
         <div>
           <span style="font-size: 0.85rem; color: var(--text-muted);">Type:</span>
           <span class="badge ${isHistorical ? 'badge-neutral' : 'badge-blue'}" style="margin-left: 6px;">
-            ${isHistorical ? 'Historical (Read-only)' : 'New Customer Order'}
+            ${isHistorical ? 'Historical (Read-only)' : 'Live Customer Order'}
           </span>
         </div>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: var(--bg-card-subtle); padding: 14px; border-radius: 8px;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; background: var(--bg-card-subtle); padding: 14px; border-radius: 8px;">
         <div><strong>Customer:</strong> ${escapeHtml(order.firstName || '')} ${escapeHtml(order.familyName || '')}</div>
         <div><strong>Phone:</strong> ${escapeHtml(order.phoneNumber || '')}</div>
         <div><strong>Instagram:</strong> ${order.instagramUsername ? '@' + escapeHtml(order.instagramUsername) : 'None'}</div>
@@ -4528,48 +4839,79 @@ window.viewOrderDetails = function(orderId) {
       ` : ''}
 
       <div style="border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 10px;">
-        <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Shipping & Operational Metadata:</div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 10px;">
+        <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Payment, Shipping &amp; Operational Metadata:</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 10px; margin-bottom: 10px;">
+          <div>
+            <label style="font-size: 0.75rem; color: var(--text-muted);">Payment Status / حالة الدفع</label>
+            <select id="modal-meta-payment-status" class="input" style="padding: 6px 10px; font-size: 0.85rem;" ${isHistorical ? 'disabled' : ''}>
+              <option value="unpaid" ${paymentStatus === 'unpaid' ? 'selected' : ''}>Unpaid / غير مدفوع</option>
+              <option value="paid" ${paymentStatus === 'paid' ? 'selected' : ''}>Paid / مدفوع</option>
+              <option value="refunded" ${paymentStatus === 'refunded' ? 'selected' : ''}>Refunded / مسترجع</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size: 0.75rem; color: var(--text-muted);">Payment Method</label>
+            <select id="modal-meta-payment-method" class="input" style="padding: 6px 10px; font-size: 0.85rem;" ${isHistorical ? 'disabled' : ''}>
+              <option value="" ${!paymentMethod ? 'selected' : ''}>Select method...</option>
+              <option value="cod" ${paymentMethod === 'cod' ? 'selected' : ''}>Cash on Delivery</option>
+              <option value="cash" ${paymentMethod === 'cash' ? 'selected' : ''}>Cash / نقداً</option>
+              <option value="baridimob" ${paymentMethod === 'baridimob' ? 'selected' : ''}>Baridimob</option>
+              <option value="ccp" ${paymentMethod === 'ccp' ? 'selected' : ''}>CCP / Bank Transfer</option>
+              <option value="other" ${paymentMethod === 'other' ? 'selected' : ''}>Other</option>
+            </select>
+          </div>
           <div>
             <label style="font-size: 0.75rem; color: var(--text-muted);">Carrier</label>
-            <input type="text" id="modal-meta-carrier" class="input" value="${escapeHtml(meta?.carrier || '')}" placeholder="e.g. Yalidine, ZR Express" style="padding: 6px 10px; font-size: 0.85rem;">
+            <input type="text" id="modal-meta-carrier" class="input" value="${escapeHtml(meta?.carrier || '')}" placeholder="e.g. Yalidine, ZR Express" style="padding: 6px 10px; font-size: 0.85rem;" ${isHistorical ? 'disabled' : ''}>
           </div>
           <div>
             <label style="font-size: 0.75rem; color: var(--text-muted);">Tracking #</label>
-            <input type="text" id="modal-meta-tracking" class="input" value="${escapeHtml(meta?.tracking_number || '')}" placeholder="Tracking number" style="padding: 6px 10px; font-size: 0.85rem;">
+            <input type="text" id="modal-meta-tracking" class="input" value="${escapeHtml(meta?.tracking_number || '')}" placeholder="Tracking number" style="padding: 6px 10px; font-size: 0.85rem;" ${isHistorical ? 'disabled' : ''}>
           </div>
           <div>
             <label style="font-size: 0.75rem; color: var(--text-muted);">Packaging Used</label>
-            <input type="text" id="modal-meta-packaging" class="input" value="${escapeHtml(meta?.packaging_used || '')}" placeholder="e.g. Bubble envelope, Box" style="padding: 6px 10px; font-size: 0.85rem;">
+            <input type="text" id="modal-meta-packaging" class="input" value="${escapeHtml(meta?.packaging_used || '')}" placeholder="e.g. Bubble envelope, Box" style="padding: 6px 10px; font-size: 0.85rem;" ${isHistorical ? 'disabled' : ''}>
           </div>
           <div>
             <label style="font-size: 0.75rem; color: var(--text-muted);">Packaging Cost (DA)</label>
-            <input type="number" id="modal-meta-pkg-cost" class="input" min="0" step="10" value="${meta?.packaging_cost_da || 0}" style="padding: 6px 10px; font-size: 0.85rem;">
+            <input type="number" id="modal-meta-pkg-cost" class="input" min="0" step="10" value="${eff.packagingCost || 0}" style="padding: 6px 10px; font-size: 0.85rem;" ${isHistorical ? 'disabled' : ''}>
           </div>
           <div>
-            <label style="font-size: 0.75rem; color: var(--text-muted);">Customer Shipping Fee (DA)</label>
-            <input type="number" id="modal-meta-ship-fee" class="input" min="0" step="50" value="${meta?.shipping_fee_da || 0}" style="padding: 6px 10px; font-size: 0.85rem;">
+            <label style="font-size: 0.75rem; color: var(--text-muted);">Delivery Fee Excluded (DA)</label>
+            <input type="number" id="modal-meta-ship-fee" class="input" min="0" step="50" value="${eff.shippingFee || 0}" style="padding: 6px 10px; font-size: 0.85rem;" ${isHistorical ? 'disabled' : ''}>
           </div>
           <div>
-            <label style="font-size: 0.75rem; color: var(--text-muted);">Actual Shipping Cost (DA)</label>
-            <input type="number" id="modal-meta-act-ship" class="input" min="0" step="50" value="${meta?.actual_shipping_cost_da || 0}" style="padding: 6px 10px; font-size: 0.85rem;">
+            <label style="font-size: 0.75rem; color: var(--text-muted);">Actual Carrier Cost (DA)</label>
+            <input type="number" id="modal-meta-act-ship" class="input" min="0" step="50" value="${eff.actualShippingCost || 0}" style="padding: 6px 10px; font-size: 0.85rem;" ${isHistorical ? 'disabled' : ''}>
           </div>
         </div>
-        <div style="display: flex; gap: 10px; justify-content: flex-end; align-items: center;">
-          <button type="button" class="btn-secondary" style="font-size: 0.8rem; padding: 6px 12px;" onclick="saveOrderOperationalDetails(${order.id})">
-            <i class="fa-solid fa-floppy-disk"></i> Save Operational Details
-          </button>
-        </div>
+        ${!isHistorical ? `
+          <div style="display: flex; gap: 10px; justify-content: flex-end; align-items: center;">
+            <button type="button" class="btn-secondary" style="font-size: 0.82rem; padding: 6px 14px;" onclick="saveOrderOperationalDetails(${order.id})">
+              <i class="fa-solid fa-floppy-disk"></i> Save Payment &amp; Operational Details
+            </button>
+          </div>
+        ` : ''}
       </div>
 
-      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px;">
-        <span style="font-size: 0.95rem; color: var(--text-muted);">Total Order Value:</span>
-        <strong style="font-size: 1.3rem; color: var(--success);">${order.total_price ? order.total_price + ' DA' : '-'}</strong>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; border-top: 1px solid var(--border-color); padding-top: 12px; background: #FFFDF8; padding: 12px; border-radius: 8px;">
+        <div>
+          <div style="font-size: 0.76rem; color: var(--text-muted);">Customer Paid Total</div>
+          <strong style="font-size: 1.1rem;">${eff.orderTotal.toLocaleString('fr-DZ')} DA</strong>
+        </div>
+        <div>
+          <div style="font-size: 0.76rem; color: var(--text-muted);">Delivery Fee (Excluded)</div>
+          <strong style="font-size: 1.1rem; color: var(--text-muted);">− ${eff.shippingFee.toLocaleString('fr-DZ')} DA</strong>
+        </div>
+        <div>
+          <div style="font-size: 0.76rem; color: var(--text-muted);">Book Sales Revenue</div>
+          <strong style="font-size: 1.15rem; color: var(--success);">${eff.bookRevenue.toLocaleString('fr-DZ')} DA</strong>
+        </div>
       </div>
 
       ${!isHistorical ? `
         <div style="border-top: 1px solid var(--border-color); padding-top: 14px; margin-top: 10px;">
-          <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Order Actions & Fulfillment Status:</div>
+          <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Order Actions &amp; Fulfillment Status:</div>
           <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
             ${status === 'pending' ? `
               <button class="btn-secondary" onclick="updateOrderStatus(${order.id}, 'processing')">
@@ -4590,7 +4932,7 @@ window.viewOrderDetails = function(orderId) {
               </button>
             ` : (status === 'shipped' ? `
               <button class="btn-primary" onclick="updateOrderStatus(${order.id}, 'delivered')">
-                <i class="fa-solid fa-check-double"></i> Confirm Delivery (Confirm Sale)
+                <i class="fa-solid fa-check-double"></i> Confirm Delivery &amp; Paid
               </button>
               <button class="btn-secondary" style="color: var(--danger); border-color: var(--danger);" onclick="updateOrderStatus(${order.id}, 'cancelled')">
                 <i class="fa-solid fa-ban"></i> Cancel Order
@@ -4599,9 +4941,9 @@ window.viewOrderDetails = function(orderId) {
               <button class="btn-secondary" onclick="openOrderReturnModal(${order.id})">
                 <i class="fa-solid fa-arrow-rotate-left"></i> Record Return / إرجاع كتاب
               </button>
-              <span style="font-size: 0.85rem; color: var(--text-muted); align-self: center;">Status: <strong>${status}</strong></span>
+              <span style="font-size: 0.85rem; color: var(--text-muted); align-self: center;">Status: <strong>${escapeHtml(status)}</strong></span>
             ` : `
-              <span style="font-size: 0.85rem; color: var(--text-muted);">Order finalized as <strong>${status}</strong>.</span>
+              <span style="font-size: 0.85rem; color: var(--text-muted);">Order finalized as <strong>${escapeHtml(status)}</strong>.</span>
             `)))}
           </div>
         </div>
@@ -4613,6 +4955,8 @@ window.viewOrderDetails = function(orderId) {
 };
 
 window.saveOrderOperationalDetails = async function(orderId) {
+  const paymentStatus = document.getElementById('modal-meta-payment-status')?.value || 'unpaid';
+  const paymentMethod = (document.getElementById('modal-meta-payment-method')?.value || '').trim();
   const carrier = (document.getElementById('modal-meta-carrier')?.value || '').trim();
   const trackingNumber = (document.getElementById('modal-meta-tracking')?.value || '').trim();
   const packagingUsed = (document.getElementById('modal-meta-packaging')?.value || '').trim();
@@ -4626,7 +4970,8 @@ window.saveOrderOperationalDetails = async function(orderId) {
     meta = {
       order_id: orderNumId,
       fulfillment_status: 'pending',
-      payment_status: 'unpaid',
+      payment_status: paymentStatus,
+      payment_method: paymentMethod || null,
       carrier,
       tracking_number: trackingNumber,
       packaging_used: packagingUsed,
@@ -4638,6 +4983,8 @@ window.saveOrderOperationalDetails = async function(orderId) {
     if (!state.orderMeta) state.orderMeta = [];
     state.orderMeta.push(meta);
   } else {
+    meta.payment_status = paymentStatus;
+    meta.payment_method = paymentMethod || null;
     meta.carrier = carrier;
     meta.tracking_number = trackingNumber;
     meta.packaging_used = packagingUsed;
@@ -4656,10 +5003,13 @@ window.saveOrderOperationalDetails = async function(orderId) {
     p_packaging_used: packagingUsed || null,
     p_packaging_cost_da: packagingCost,
     p_shipping_fee_da: shippingFee,
-    p_actual_shipping_cost_da: actualShipping
+    p_actual_shipping_cost_da: actualShipping,
+    p_payment_status: paymentStatus,
+    p_payment_method: paymentMethod || null
   });
 
-  alert('Operational and shipping metadata saved successfully.');
+  renderAppViews();
+  alert('Payment and operational metadata saved successfully.');
   if (state.online && auth.isAuthenticated()) sync.sync();
 };
 
@@ -4769,13 +5119,16 @@ window.updateOrderStatus = async function(orderId, newStatus) {
     meta = {
       order_id: orderNumId,
       fulfillment_status: newStatus,
-      payment_status: 'unpaid',
+      payment_status: newStatus === 'delivered' ? 'paid' : 'unpaid',
       updated_at: new Date().toISOString()
     };
     if (!state.orderMeta) state.orderMeta = [];
     state.orderMeta.push(meta);
   } else {
     meta.fulfillment_status = newStatus;
+    if (newStatus === 'delivered') {
+      meta.payment_status = 'paid';
+    }
     meta.updated_at = new Date().toISOString();
   }
 

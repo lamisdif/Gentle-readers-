@@ -4,14 +4,14 @@
  * Provides full offline resilience for Windows laptop and iPhone Safari PWA.
  */
 
-const CACHE_NAME = 'gentle-readers-manager-v22';
+const CACHE_NAME = 'gentle-readers-manager-v23';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manager.css',
-  './manager.css?v=20',
+  './manager.css?v=23',
   './manager.js',
-  './manager.js?v=22',
+  './manager.js?v=23',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -70,7 +70,7 @@ self.addEventListener('fetch', (event) => {
 
   if (isAppCode) {
     event.respondWith(
-      fetch(event.request).then((networkResponse) => {
+      fetch(new Request(event.request, { cache: 'no-cache' })).then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200) {
           const clone = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
