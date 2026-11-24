@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <!-- Bespoke Vintage Stylesheet -->
-  <link rel="stylesheet" href="manager.css?v=24" />
+  <link rel="stylesheet" href="manager.css?v=25" />
   <style>
     /* Critical shell protection: prevent unstyled modal flash before CSS finishes parsing */
     .modal-overlay { display: none !important; }
@@ -156,7 +156,7 @@
         <div class="owner-avatar">LD</div>
         <div class="owner-info">
           <span class="owner-name">Lamis Dif</span>
-          <span class="owner-role">Store Owner & Founder • v24</span>
+          <span class="owner-role">Store Owner & Founder • v25</span>
         </div>
       </div>
       <button id="logout-btn" class="logout-btn" title="Log Out / تسجيل الخروج">
@@ -672,14 +672,14 @@
             <div id="finance-inventory-subtext" class="metric-subtext"><i class="fa-solid fa-calculator"></i> Valued at unit cost</div>
           </div>
           <div class="metric-card">
-            <div class="metric-top"><span class="metric-label">Gross Profit / إجمالي الربح</span><div class="metric-icon green"><i class="fa-solid fa-chart-line"></i></div></div>
+            <div class="metric-top"><span class="metric-label">Earned Gross Profit (Paid Orders) / ربح المدفوعة</span><div class="metric-icon green"><i class="fa-solid fa-chart-line"></i></div></div>
             <div id="finance-gross-profit" class="metric-value">0 DA</div>
-            <div id="finance-gross-subtext" class="metric-subtext">Calculating from ledger...</div>
+            <div id="finance-gross-subtext" class="metric-subtext">Calculating from paid ledger...</div>
           </div>
           <div class="metric-card">
-            <div class="metric-top"><span class="metric-label">Net Profit / صافي الربح</span><div class="metric-icon green"><i class="fa-solid fa-scale-balanced"></i></div></div>
+            <div class="metric-top"><span class="metric-label">Earned Net Profit (Paid Orders) / صافي المدفوعة</span><div class="metric-icon green"><i class="fa-solid fa-scale-balanced"></i></div></div>
             <div id="finance-net-profit" class="metric-value">0 DA</div>
-            <div id="finance-net-subtext" class="metric-subtext">Gross Profit − Operating Expenses</div>
+            <div id="finance-net-subtext" class="metric-subtext">Paid Gross Profit − Operating Expenses</div>
           </div>
           <div class="metric-card">
             <div class="metric-top"><span class="metric-label">Shipping Fees (Passthrough) / التوصيل</span><div class="metric-icon amber"><i class="fa-solid fa-truck"></i></div></div>
@@ -1971,6 +1971,6 @@
     document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>');
   }
 </script>
-<script src="manager.js?v=24"></script>
+<script src="manager.js?v=25"></script>
 </body>
 </html>

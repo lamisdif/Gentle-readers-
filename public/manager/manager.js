@@ -461,7 +461,7 @@ const auth = new AuthManager();
 // 3. GLOBAL APPLICATION STATE & SYNC ENGINE
 // ============================================================================
 const DEFAULT_STOCK_BASELINE = {
-  oldStock: { retailValueDa: 110870, paidCostDa: 68983, expectedProfitDa: 41887 },
+  oldStock: { retailValueDa: 110878, paidCostDa: 68983, expectedProfitDa: 41895 },
   newStock: { retailValueDa: 195200, paidCostDa: 96954.5, expectedProfitDa: 98245.5 }
 };
 
@@ -1566,7 +1566,8 @@ function findInventoryItem(title) {
         bestMatch = inv;
       }
     }
-    if (bestMatch && maxIntersection >= 1) {
+    const minRequired = targetTokens.size >= 4 ? 2 : 1;
+    if (bestMatch && maxIntersection >= minRequired) {
       return bestMatch;
     }
   }
@@ -1614,13 +1615,31 @@ function resolveEffectiveOrderPricing(order, meta) {
   return { orderTotal, shippingFee, actualShippingCost, packagingCost, packagingFeeCharged, bookRevenue };
 }
 
+function buildInventoryNormTitleMap(inventoryList) {
+  const normTitleMap = new Map();
+  (inventoryList || []).forEach(item => {
+    if (item && item.title) {
+      const normKey = normalizeText(item.title);
+      if (!normTitleMap.has(normKey)) {
+        normTitleMap.set(normKey, []);
+      }
+      normTitleMap.get(normKey).push(item);
+    }
+  });
+  return normTitleMap;
+}
+
 function resolveCandidateLotsForTitle(title, isHist, normTitleMap) {
   if (!title) return [];
   const normKey = normalizeText(title);
   let matchingLots = (normTitleMap && normTitleMap.get(normKey)) || [];
   if (matchingLots.length === 0) {
     const fallback = findInventoryItem(title);
-    if (fallback) matchingLots = [fallback];
+    if (fallback) {
+      const fbKey = normalizeText(fallback.title);
+      const fbLots = (normTitleMap && fbKey && normTitleMap.get(fbKey)) || [];
+      matchingLots = fbLots.length > 0 ? fbLots : [fallback];
+    }
   }
   let eligible = !isHist ? [...matchingLots] : matchingLots.filter(l => !isNewBatchLot(l));
   if (eligible.length === 0) eligible = [...matchingLots];
@@ -1631,6 +1650,54 @@ function resolveCandidateLotsForTitle(title, isHist, normTitleMap) {
     return String(a.acquisition_date || '9999').localeCompare(String(b.acquisition_date || '9999'));
   });
   return eligible;
+}
+
+function ensureInventoryDbBaseline(inv) {
+  if (!inv) return;
+  if (!Object.prototype.hasOwnProperty.call(inv, '_dbRawSold')) {
+    Object.defineProperty(inv, '_dbRawSold', {
+      value: Number(inv.quantity_sold) || 0,
+      writable: true,
+      configurable: true,
+      enumerable: false
+    });
+  }
+  if (!Object.prototype.hasOwnProperty.call(inv, '_dbRawReserved')) {
+    Object.defineProperty(inv, '_dbRawReserved', {
+      value: Number(inv.quantity_reserved) || 0,
+      writable: true,
+      configurable: true,
+      enumerable: false
+    });
+  }
+}
+
+function syncInventoryDbBaseline(inv) {
+  if (!inv) return;
+  Object.defineProperty(inv, '_dbRawSold', {
+    value: Number(inv.quantity_sold) || 0,
+    writable: true,
+    configurable: true,
+    enumerable: false
+  });
+  Object.defineProperty(inv, '_dbRawReserved', {
+    value: Number(inv.quantity_reserved) || 0,
+    writable: true,
+    configurable: true,
+    enumerable: false
+  });
+}
+
+function toRawIdbInventoryCopy(inv) {
+  if (!inv) return inv;
+  const copy = { ...inv };
+  if (Object.prototype.hasOwnProperty.call(inv, '_dbRawSold')) {
+    copy.quantity_sold = Number(inv._dbRawSold) || 0;
+  }
+  if (Object.prototype.hasOwnProperty.call(inv, '_dbRawReserved')) {
+    copy.quantity_reserved = Number(inv._dbRawReserved) || 0;
+  }
+  return copy;
 }
 
 function computePaidOrderDetails(order, normTitleMap) {
@@ -1697,14 +1764,114 @@ function computePaidOrderDetails(order, normTitleMap) {
   };
 }
 
+function computeLiveOrderInventoryEffects(providedNormTitleMap) {
+  const normTitleMap = providedNormTitleMap || buildInventoryNormTitleMap(state.inventory);
+  const liveSoldByLotId = new Map();
+  const matchedOrdersByLotId = new Map();
+  const remainingCapacityByLotId = new Map();
+
+  (state.inventory || []).forEach(inv => {
+    const dmgLossPromoRet = (Number(inv.quantity_damaged) || 0)
+      + (Number(inv.quantity_lost) || 0)
+      + (Number(inv.quantity_promotional) || 0)
+      + (Number(inv.quantity_returned_to_supplier) || 0);
+    const countAdj = Number(inv.quantity_count_adjustment) || 0;
+    const cap = Math.max(0, (Number(inv.quantity_received) || 0) + countAdj - dmgLossPromoRet);
+    remainingCapacityByLotId.set(String(inv.id), cap);
+  });
+
+  // Subtract good-condition / restocked customer returns on live orders
+  const returnedQtyByOrderTitle = new Map();
+  (state.orderReturns || []).forEach(ret => {
+    if (ret && ret.condition !== 'damaged' && ret.restocked_to_inventory !== false) {
+      const k = `${String(ret.order_id)}::${normalizeText(ret.title)}`;
+      returnedQtyByOrderTitle.set(k, (returnedQtyByOrderTitle.get(k) || 0) + (Number(ret.quantity) || 0));
+    }
+  });
+
+  const sortedOrders = [...(state.orders || [])].sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));
+  sortedOrders.forEach(order => {
+    const meta = state.orderMeta ? state.orderMeta.find(m => String(m.order_id) === String(order.id)) : null;
+    const isHist = !!(order.is_historical || Number(order.id) <= 170);
+    const fulfillmentStatus = meta ? (meta.fulfillment_status || 'pending') : (isHist ? 'delivered' : (order.status || 'pending'));
+    const paymentStatus = meta ? (meta.payment_status || 'unpaid') : (isHist ? 'paid' : (order.payment_status || 'unpaid'));
+
+    if (fulfillmentStatus === 'cancelled' || fulfillmentStatus === 'rejected' || fulfillmentStatus === 'returned') return;
+
+    const isConfirmedLiveSale = !isHist && (paymentStatus === 'paid' || fulfillmentStatus === 'delivered');
+    const rawItems = parseOrderItemsSafe(order);
+    const parsedItems = rawItems.map(parseOrderItem);
+
+    parsedItems.forEach(pi => {
+      const candidateLots = resolveCandidateLotsForTitle(pi.title, isHist, normTitleMap);
+      if (candidateLots.length === 0) return;
+
+      const returnKey = `${String(order.id)}::${normalizeText(pi.title)}`;
+      const availableReturnDeduction = returnedQtyByOrderTitle.get(returnKey) || 0;
+      const deductedReturn = Math.min(pi.qty, availableReturnDeduction);
+      if (deductedReturn > 0) {
+        returnedQtyByOrderTitle.set(returnKey, availableReturnDeduction - deductedReturn);
+      }
+      const netQty = Math.max(0, pi.qty - deductedReturn);
+
+      // Record order provenance against the FIFO primary lot (even for unpaid live/historical views)
+      const provenanceLotId = String(candidateLots[0].id);
+      if (!matchedOrdersByLotId.has(provenanceLotId)) matchedOrdersByLotId.set(provenanceLotId, []);
+      matchedOrdersByLotId.get(provenanceLotId).push({
+        orderId: order.id,
+        customerName: `${order.firstName || ''} ${order.familyName || ''}`.trim() || 'Customer',
+        createdAt: order.created_at,
+        qty: pi.qty,
+        netQty,
+        isHist,
+        fulfillmentStatus,
+        paymentStatus,
+        isConfirmedLiveSale
+      });
+
+      if (!isConfirmedLiveSale || netQty <= 0) return;
+
+      // FIFO allocate confirmed live sale quantity across eligible lots without modifying quantity_received
+      let remainingNeed = netQty;
+      for (const lot of candidateLots) {
+        if (remainingNeed <= 0) break;
+        const lotKey = String(lot.id);
+        const cap = remainingCapacityByLotId.get(lotKey) || 0;
+        const take = Math.min(cap, remainingNeed);
+        if (take > 0) {
+          liveSoldByLotId.set(lotKey, (liveSoldByLotId.get(lotKey) || 0) + take);
+          remainingCapacityByLotId.set(lotKey, cap - take);
+          remainingNeed -= take;
+        }
+      }
+      if (remainingNeed > 0) {
+        const fallbackKey = String(candidateLots[0].id);
+        liveSoldByLotId.set(fallbackKey, (liveSoldByLotId.get(fallbackKey) || 0) + remainingNeed);
+      }
+    });
+  });
+
+  return { liveSoldByLotId, matchedOrdersByLotId };
+}
+
 function applyLiveOrdersToInventory() {
   if (!state.inventory) return;
-  // Preserve original quantity_received, real DB quantity_sold, and quantity_reserved intact.
-  // Never overwrite DB stock movements or invent defaults when user has edited selling prices.
+  const normTitleMap = buildInventoryNormTitleMap(state.inventory);
   state.inventory.forEach(inv => {
     if ((inv.selling_price_da === null || inv.selling_price_da === undefined) && inv.title && (inv.title.includes('مثنوي') || inv.title.includes('المثنوي'))) {
       inv.selling_price_da = 10000;
     }
+    ensureInventoryDbBaseline(inv);
+  });
+
+  const { liveSoldByLotId, matchedOrdersByLotId } = computeLiveOrderInventoryEffects(normTitleMap);
+  state._lotMatchedOrders = matchedOrdersByLotId;
+
+  // Preserve original quantity_received intact; take max(DB raw sold, confirmed paid/delivered FIFO demand)
+  state.inventory.forEach(inv => {
+    const dbRawSold = Number(inv._dbRawSold) || 0;
+    const confirmedLiveSold = liveSoldByLotId.get(String(inv.id)) || 0;
+    inv.quantity_sold = Math.max(dbRawSold, confirmedLiveSold);
   });
 }
 window.applyLiveOrdersToInventory = applyLiveOrdersToInventory;
@@ -1713,26 +1880,22 @@ function calculateFinancialMetrics() {
   applyLiveOrdersToInventory();
 
   // 1. Build lookup maps for inventory by normalized title (NEVER fabricate missing unit costs)
-  const normTitleMap = new Map();
-  state.inventory.forEach(item => {
-    if (item.title) {
-      const normKey = normalizeText(item.title);
-      if (!normTitleMap.has(normKey)) {
-        normTitleMap.set(normKey, []);
-      }
-      normTitleMap.get(normKey).push(item);
-    }
-  });
+  const normTitleMap = buildInventoryNormTitleMap(state.inventory);
 
-  // 2. Aggregate sales across non-cancelled orders + build Confirmed Paid Orders Profit Ledger
+  // 2. Aggregate PAID confirmed sales strictly (unpaid orders & delivery fees excluded from revenue/profit!)
   let totalGrossOrderValue = 0;
   let totalShippingCollected = 0;
   let totalPackagingFees = 0;
   let totalOrderPackagingCosts = 0;
-  let totalSalesRevenue = 0; // Book & Merchandise revenue strictly net of delivery fees
+  let totalSalesRevenue = 0; // Book & Merchandise PAID revenue strictly net of delivery fees
   let historicalOrdersRevenue = 0;
   let liveOrdersRevenue = 0;
   let totalCashInflowsFromSales = 0; // Paid live orders book revenue (delivery excluded!)
+  let unpaidOrdersCount = 0;
+  let unpaidLiveCount = 0;
+  let unpaidBookRevenue = 0;
+  let unpaidDeliveryFees = 0;
+  let unpaidGrossOrderValue = 0;
   const salesByTitle = new Map();
 
   const paidOrders = [];
@@ -1766,6 +1929,16 @@ function calculateFinancialMetrics() {
     const pricing = resolveEffectiveOrderPricing(order, meta);
     const { orderTotal, shippingFee, actualShippingCost, packagingCost, packagingFeeCharged, bookRevenue } = pricing;
 
+    if (!isPaid) {
+      // Track unpaid live/pending orders separately; NEVER count them as earned revenue or earned profit
+      unpaidOrdersCount++;
+      if (!isHist) unpaidLiveCount++;
+      unpaidBookRevenue += bookRevenue;
+      unpaidDeliveryFees += shippingFee;
+      unpaidGrossOrderValue += orderTotal;
+      return;
+    }
+
     totalGrossOrderValue += orderTotal;
     totalShippingCollected += shippingFee;
     totalPackagingFees += packagingFeeCharged;
@@ -1776,40 +1949,36 @@ function calculateFinancialMetrics() {
       historicalOrdersRevenue += bookRevenue;
     } else {
       liveOrdersRevenue += bookRevenue;
-      if (isPaid) {
-        totalCashInflowsFromSales += bookRevenue;
-      }
+      totalCashInflowsFromSales += bookRevenue;
     }
 
-    if (isPaid) {
-      const paidDetail = computePaidOrderDetails(order, normTitleMap);
-      paidOrders.push(paidDetail);
-      paidGrossCustomerPaid += orderTotal;
-      paidDeliveryFeesExcluded += shippingFee;
-      paidActualShippingCostsRecorded += actualShippingCost;
-      paidBookRevenue += bookRevenue;
-      paidKnownBookCogs += paidDetail.knownCogsPartial;
-      paidPackagingCosts += packagingCost;
+    const paidDetail = computePaidOrderDetails(order, normTitleMap);
+    paidOrders.push(paidDetail);
+    paidGrossCustomerPaid += orderTotal;
+    paidDeliveryFeesExcluded += shippingFee;
+    paidActualShippingCostsRecorded += actualShippingCost;
+    paidBookRevenue += bookRevenue;
+    paidKnownBookCogs += paidDetail.knownCogsPartial;
+    paidPackagingCosts += packagingCost;
 
-      if (isHist) paidHistoricalCount++;
-      else {
-        paidLiveCount++;
-        paidLiveBookRevenue += bookRevenue;
-      }
+    if (isHist) paidHistoricalCount++;
+    else {
+      paidLiveCount++;
+      paidLiveBookRevenue += bookRevenue;
+    }
 
-      if (paidDetail.allCostsKnown) {
-        paidKnownCostCount++;
-        paidConfirmedOrdersBookRevenue += bookRevenue;
-        paidConfirmedOrdersCogs += paidDetail.cogs;
-        paidConfirmedOrdersPackagingCosts += packagingCost;
-        if (!isHist) {
-          paidLiveKnownCostCount++;
-          paidLiveKnownNetProfit += paidDetail.netProfit;
-        }
-      } else {
-        paidUnknownCostCount++;
-        if (!isHist) paidLiveUnknownCostCount++;
+    if (paidDetail.allCostsKnown) {
+      paidKnownCostCount++;
+      paidConfirmedOrdersBookRevenue += bookRevenue;
+      paidConfirmedOrdersCogs += paidDetail.cogs;
+      paidConfirmedOrdersPackagingCosts += packagingCost;
+      if (!isHist) {
+        paidLiveKnownCostCount++;
+        paidLiveKnownNetProfit += paidDetail.netProfit;
       }
+    } else {
+      paidUnknownCostCount++;
+      if (!isHist) paidLiveUnknownCostCount++;
     }
 
     let itemsList = parseOrderItemsSafe(order);
@@ -2205,10 +2374,10 @@ function calculateFinancialMetrics() {
     postOpeningDebtsRepaid = totalDebtsRepaid;
   }
 
-  // 7. Reconciled Financial Figures (Strictly confirmed costs only; NULL costs NEVER counted as 0)
+  // 7. Reconciled Financial Figures (Strictly confirmed PAID costs only; NULL costs NEVER counted as 0)
   const totalCogs = Math.round(totalConfirmedCogs);
   const totalGrossProfit = confirmedSalesRevenue - totalConfirmedCogs;
-  const netProfit = totalGrossProfit - totalOperatingExpenses;
+  const netProfit = totalGrossProfit - totalOperatingExpenses - paidConfirmedOrdersPackagingCosts;
 
   const isProfitReconciled = (unknownCostSalesCount === 0);
   const totalConfirmedProfitResult = Math.round(totalGrossProfit);
@@ -2365,6 +2534,11 @@ function calculateFinancialMetrics() {
     historicalOrdersRevenue: Math.round(historicalOrdersRevenue),
     liveOrdersRevenue: Math.round(liveOrdersRevenue),
     totalCashInflowsFromSales: Math.round(totalCashInflowsFromSales),
+    unpaidOrdersCount,
+    unpaidLiveCount,
+    unpaidBookRevenue: Math.round(unpaidBookRevenue),
+    unpaidDeliveryFees: Math.round(unpaidDeliveryFees),
+    unpaidGrossOrderValue: Math.round(unpaidGrossOrderValue),
     totalCogs,
     totalConfirmedCogs: Math.round(totalConfirmedCogs),
     totalGrossProfit: totalConfirmedProfitResult,
@@ -3204,10 +3378,11 @@ function renderFinanceSection() {
     grossEl.style.fontSize = '';
     if (grossSubEl) {
       grossSubEl.className = fin.unknownCostSalesCount > 0 ? 'metric-subtext' : 'metric-subtext confirmed';
-      const baseText = `Costed Sales (${(fin.confirmedSalesRevenue || 0).toLocaleString('fr-DZ')} DA) − COGS (${(fin.totalCogs || 0).toLocaleString('fr-DZ')} DA)`;
+      const baseText = `Paid Costed Sales (${(fin.confirmedSalesRevenue || 0).toLocaleString('fr-DZ')} DA) − COGS (${(fin.totalCogs || 0).toLocaleString('fr-DZ')} DA)`;
+      const unpaidNote = fin.unpaidOrdersCount > 0 ? ` • ${fin.unpaidOrdersCount} unpaid excl.` : '';
       grossSubEl.innerHTML = fin.unknownCostSalesCount > 0
-        ? `<i class="fa-solid fa-clock"></i> ${baseText} • Excl. ${fin.unknownCostSalesCount} title(s) with Unknown Cost`
-        : `<i class="fa-solid fa-circle-check"></i> ${baseText}`;
+        ? `<i class="fa-solid fa-clock"></i> ${baseText}${unpaidNote} • Excl. ${fin.unknownCostSalesCount} Unknown Cost`
+        : `<i class="fa-solid fa-circle-check"></i> ${baseText}${unpaidNote}`;
     }
   }
 
@@ -3218,7 +3393,8 @@ function renderFinanceSection() {
     netEl.style.fontSize = '';
     if (netSubEl) {
       netSubEl.className = fin.unknownCostSalesCount > 0 ? 'metric-subtext' : 'metric-subtext confirmed';
-      netSubEl.innerHTML = `<i class="fa-solid ${fin.unknownCostSalesCount > 0 ? 'fa-clock' : 'fa-circle-check'}"></i> Confirmed Gross Profit − Expenses (${fin.totalOperatingExpenses.toLocaleString('fr-DZ')} DA)${fin.unknownCostSalesCount > 0 ? ' • Partial (Unknown Costs)' : ''}`;
+      const pkgCostNote = fin.paidSummary?.confirmedOrdersPackagingCosts > 0 ? ` − Order Pkg (${fin.paidSummary.confirmedOrdersPackagingCosts.toLocaleString('fr-DZ')} DA)` : '';
+      netSubEl.innerHTML = `<i class="fa-solid ${fin.unknownCostSalesCount > 0 ? 'fa-clock' : 'fa-circle-check'}"></i> Paid Gross Profit − Expenses (${fin.totalOperatingExpenses.toLocaleString('fr-DZ')} DA)${pkgCostNote}${fin.unknownCostSalesCount > 0 ? ' • Partial (Unknown Costs)' : ''}`;
     }
   }
 
@@ -3226,7 +3402,8 @@ function renderFinanceSection() {
   if (shipEl) shipEl.textContent = `${fin.totalShippingCollected.toLocaleString('fr-DZ')} DA`;
   const shipSubEl = document.getElementById('finance-shipping-subtext');
   if (shipSubEl) {
-    shipSubEl.textContent = `Excluded from ${fin.totalSalesRevenue.toLocaleString('fr-DZ')} DA book sales • Transport Exp: ${(fin.totalTransportationExpenses || 0).toLocaleString('fr-DZ')} DA (No Double-Count)`;
+    const unpaidShipNote = fin.unpaidDeliveryFees > 0 ? ` (+${fin.unpaidDeliveryFees.toLocaleString('fr-DZ')} DA on unpaid)` : '';
+    shipSubEl.textContent = `Excluded from ${fin.totalSalesRevenue.toLocaleString('fr-DZ')} DA paid book sales${unpaidShipNote} • Transport Exp: ${(fin.totalTransportationExpenses || 0).toLocaleString('fr-DZ')} DA`;
   }
 
   const paidNetEl = document.getElementById('finance-paid-net-profit');
@@ -3264,7 +3441,7 @@ function renderFinanceSection() {
 
   const newFooterEl = document.getElementById('finance-new-batch-footer');
   if (newFooterEl) {
-    newFooterEl.innerHTML = `<span><i class="fa-solid fa-layer-group"></i> Photo: 195,200 / 96,954.5 / 98,245.5 DA</span><span>Live DB Avail Cost: <strong>${fin.newStock.valuationAtCost.toLocaleString('fr-DZ')} DA</strong></span>`;
+    newFooterEl.innerHTML = `<span><i class="fa-solid fa-layer-group"></i> Stock Plan: ${base.newStock.retailValueDa.toLocaleString('fr-DZ')} / ${base.newStock.paidCostDa.toLocaleString('fr-DZ')} / ${base.newStock.expectedProfitDa.toLocaleString('fr-DZ')} DA</span><span>Live DB Avail Cost: <strong>${fin.newStock.valuationAtCost.toLocaleString('fr-DZ')} DA</strong></span>`;
   }
 
   // 3. Old Stock Breakdown Card (Configured Photo Baseline + Live DB Remaining)
@@ -3287,7 +3464,7 @@ function renderFinanceSection() {
 
   const oldFooterEl = document.getElementById('finance-old-stock-footer');
   if (oldFooterEl) {
-    oldFooterEl.innerHTML = `<span><i class="fa-solid fa-layer-group"></i> Photo: 110,870 / 68,983 / 41,887 DA</span><span>Live DB Avail Cost: <strong>${fin.oldStock.valuationAtCost.toLocaleString('fr-DZ')} DA</strong></span>`;
+    oldFooterEl.innerHTML = `<span><i class="fa-solid fa-layer-group"></i> Stock Plan: ${base.oldStock.retailValueDa.toLocaleString('fr-DZ')} / ${base.oldStock.paidCostDa.toLocaleString('fr-DZ')} / ${base.oldStock.expectedProfitDa.toLocaleString('fr-DZ')} DA</span><span>Live DB Avail Cost: <strong>${fin.oldStock.valuationAtCost.toLocaleString('fr-DZ')} DA</strong></span>`;
   }
 
   // 3b. Combined Books Breakdown Card (Photo Baseline Combined + Live DB Remaining)
@@ -3310,7 +3487,7 @@ function renderFinanceSection() {
 
   const combFooterEl = document.getElementById('finance-combined-books-footer');
   if (combFooterEl) {
-    combFooterEl.innerHTML = `<span><i class="fa-solid fa-books"></i> Baseline: 306,070 / 165,937.5 / 140,132.5 DA</span><span>DB Remaining: <strong>${fin.combinedBooks.valuationAtRetail.toLocaleString('fr-DZ')} DA retail</strong></span>`;
+    combFooterEl.innerHTML = `<span><i class="fa-solid fa-books"></i> Baseline: ${base.combined.retailValueDa.toLocaleString('fr-DZ')} / ${base.combined.paidCostDa.toLocaleString('fr-DZ')} / ${base.combined.expectedProfitDa.toLocaleString('fr-DZ')} DA</span><span>DB Remaining: <strong>${fin.combinedBooks.valuationAtRetail.toLocaleString('fr-DZ')} DA retail</strong></span>`;
   }
 
   // 3c. Accessories Breakdown Card (Standalone / Separate)
@@ -4191,6 +4368,7 @@ window.openEditInventoryModal = function(itemId) {
     if (el) el.value = (val === null || val === undefined) ? '' : String(val);
   };
 
+  applyLiveOrdersToInventory();
   const origQty = Number(item.quantity_received) || 0;
   const soldQty = Number(item.quantity_sold) || 0;
   const availQty = getInventoryAvailableQty(item);
@@ -4203,9 +4381,21 @@ window.openEditInventoryModal = function(itemId) {
   const countAdjQty = Number(item.quantity_count_adjustment) || 0;
   const batchObj = (state.batches || []).find(b => String(b.id) === String(item.batch_id));
   const batchLabel = batchObj ? batchObj.batch_name : (item.batch_name || item.batch_id || 'Opening / Fair Lot');
+  const matchedOrders = (state._lotMatchedOrders && state._lotMatchedOrders.get(String(item.id))) || [];
+  const itemAdjustments = (state.stockAdjustments || []).filter(a => String(a.inventory_item_id) === String(item.id));
+  const confirmedMatchedQty = matchedOrders.filter(m => m.isConfirmedLiveSale).reduce((s, m) => s + (m.netQty || 0), 0);
 
   const summaryEl = document.getElementById('edit-inv-stock-summary');
   if (summaryEl) {
+    const ordersHistoryHtml = matchedOrders.length > 0
+      ? matchedOrders.slice().reverse().slice(0, 6).map(mo => `
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px dashed var(--border-subtle); font-size: 0.78rem;">
+            <span><strong>#${escapeHtml(String(mo.orderId))}</strong> • ${escapeHtml(mo.customerName)} (<strong>×${mo.netQty}</strong>)</span>
+            <span class="badge ${mo.paymentStatus === 'paid' ? 'badge-green' : 'badge-amber'}" style="font-size: 0.68rem;">${escapeHtml(String(mo.paymentStatus).toUpperCase())} • ${escapeHtml(String(mo.fulfillmentStatus).toUpperCase())}</span>
+          </div>
+        `).join('')
+      : '';
+    const dbSoldGap = Math.max(0, soldQty - confirmedMatchedQty);
     summaryEl.innerHTML = `
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
         <span style="font-weight: 700; font-size: 0.86rem; color: var(--vintage-blue);">
@@ -4224,18 +4414,27 @@ window.openEditInventoryModal = function(itemId) {
           <div style="font-size: 0.72rem; color: #1E40AF;">Quantity Sold</div>
           <div style="font-size: 1.2rem; font-weight: 700; color: var(--vintage-blue);">${soldQty}</div>
         </div>
-        <div style="background: ${availQty <= 2 ? '#FFF1F2' : '#F0FDF4'}; border: 1px solid ${availQty <= 2 ? '#FECDD3' : '#BBF7D0'}; border-radius: 6px; padding: 8px; text-align: center;">
-          <div style="font-size: 0.72rem; color: ${availQty <= 2 ? '#9F1239' : '#166534'};">Current Available</div>
-          <div style="font-size: 1.2rem; font-weight: 700; color: ${availQty <= 2 ? 'var(--danger)' : 'var(--success)'};">${availQty}</div>
+        <div style="background: ${availQty <= 0 ? '#FFF1F2' : '#F0FDF4'}; border: 1px solid ${availQty <= 0 ? '#FECDD3' : '#BBF7D0'}; border-radius: 6px; padding: 8px; text-align: center;">
+          <div style="font-size: 0.72rem; color: ${availQty <= 0 ? '#9F1239' : '#166534'};">Current Available</div>
+          <div style="font-size: 1.2rem; font-weight: 700; color: ${availQty <= 0 ? 'var(--danger)' : 'var(--success)'};">${availQty}</div>
         </div>
-        <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; text-align: center;">
-          <div style="font-size: 0.72rem; color: var(--text-muted);">On Hand / Reserved</div>
-          <div style="font-size: 1.05rem; font-weight: 700;">${onHandQty} / ${resQty}</div>
+        <div style="background: ${resQty > 0 ? '#FFFBEB' : '#FFFFFF'}; border: 1px solid ${resQty > 0 ? '#FDE68A' : 'var(--border-color)'}; border-radius: 6px; padding: 8px; text-align: center;">
+          <div style="font-size: 0.72rem; color: ${resQty > 0 ? '#92400E' : 'var(--text-muted)'};">Quantity Reserved</div>
+          <div style="font-size: 1.2rem; font-weight: 700; color: ${resQty > 0 ? '#B45309' : 'var(--text-primary)'};">${resQty}</div>
         </div>
       </div>
-      ${(dmgQty || lostQty || promoQty || retSuppQty || countAdjQty) ? `
-        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">
-          Audit adjustments: Damaged: ${dmgQty} • Lost: ${lostQty} • Promo/Gift: ${promoQty} • Returned to Supplier: ${retSuppQty} • Count Adj: ${countAdjQty >= 0 ? '+' + countAdjQty : countAdjQty}
+      <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 8px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
+        <span>Physical On Hand: <strong>${onHandQty}</strong></span>
+        ${(dmgQty || lostQty || promoQty || retSuppQty || countAdjQty) ? `<span>Adjustments: Dmg ${dmgQty} • Lost ${lostQty} • Promo ${promoQty} • Ret ${retSuppQty} • Adj ${countAdjQty >= 0 ? '+' + countAdjQty : countAdjQty}</span>` : ''}
+      </div>
+      ${(ordersHistoryHtml || dbSoldGap > 0 || itemAdjustments.length > 0) ? `
+        <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-color);">
+          <div style="font-size: 0.76rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 4px;">
+            <i class="fa-solid fa-clock-rotate-left"></i> Matching Orders &amp; Movement History
+          </div>
+          ${ordersHistoryHtml}
+          ${dbSoldGap > 0 ? `<div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 4px;"><i class="fa-solid fa-database"></i> ${dbSoldGap} unit(s) deducted in DB stock history prior to live paid sync.</div>` : ''}
+          ${itemAdjustments.slice(0, 3).map(a => `<div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">• Adj (${escapeHtml(a.adjustment_type)}): ${a.quantity_change >= 0 ? '+' + a.quantity_change : a.quantity_change} — ${escapeHtml(a.reason || '')}</div>`).join('')}
         </div>
       ` : ''}
     `;
@@ -4317,7 +4516,7 @@ window.handleSaveInventoryEdit = async function(event) {
     updated_at: nowIso
   };
 
-  await idb.put('inventory', item);
+  await idb.put('inventory', toRawIdbInventoryCopy(item));
   await idb.queueMutation('inventory_items', 'update', updatePayload);
 
   renderAppViews();
@@ -4701,7 +4900,7 @@ window.handleSaveStockAdjustment = async function(event) {
   }
 
   item.updated_at = new Date().toISOString();
-  await idb.put('inventory', item);
+  await idb.put('inventory', toRawIdbInventoryCopy(item));
 
   // Create audit ledger entry
   const adjEntry = {
@@ -5383,7 +5582,8 @@ window.updateOrderStatus = async function(orderId, newStatus) {
         const releaseQty = Math.min(reservedCount, itm.qty);
         if (releaseQty > 0) {
           inv.quantity_reserved = reservedCount - releaseQty;
-          await idb.put('inventory', inv);
+          syncInventoryDbBaseline(inv);
+          await idb.put('inventory', toRawIdbInventoryCopy(inv));
         }
       }
     }
@@ -5409,7 +5609,8 @@ window.updateOrderStatus = async function(orderId, newStatus) {
         if (convertQty > 0) {
           inv.quantity_reserved = Math.max(0, reservedCount - convertQty);
           inv.quantity_sold = (Number(inv.quantity_sold) || 0) + convertQty;
-          await idb.put('inventory', inv);
+          syncInventoryDbBaseline(inv);
+          await idb.put('inventory', toRawIdbInventoryCopy(inv));
         } else {
           console.warn(`[Inventory] Order #${orderId} item "${itm.title}" has 0 reserved quantity. Sold count was not incremented to prevent unallocated phantom sales.`);
         }
@@ -5560,7 +5761,8 @@ window.handleRecordCustomerReturn = async function(event, orderId) {
       if (ret.condition === 'damaged') {
         inv.quantity_damaged = (Number(inv.quantity_damaged) || 0) + ret.quantity;
       }
-      await idb.put('inventory', inv);
+      syncInventoryDbBaseline(inv);
+      await idb.put('inventory', toRawIdbInventoryCopy(inv));
     }
 
     // Record in local order_returns cache
