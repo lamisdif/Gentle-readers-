@@ -19,11 +19,13 @@
         import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js';
 
         // Password protection
-        const pswd = prompt("Enter Admin Password:");
+        let pswd = sessionStorage.getItem('admin_orders_pwd') || prompt("Enter Admin Password:");
         if (pswd !== "gentleadmin") {
+            sessionStorage.removeItem('admin_orders_pwd');
             document.body.innerHTML = "<div class='flex items-center justify-center min-h-screen bg-slate-50'><div class='bg-white p-8 rounded-xl shadow-lg text-center border border-slate-100'><h1 class='text-rose-600 text-3xl font-extrabold mb-4'>Access Denied</h1><p class='text-slate-500'>Incorrect password. Please refresh to try again.</p></div></div>";
             throw new Error("Access Denied");
         }
+        sessionStorage.setItem('admin_orders_pwd', pswd);
 
         const supabaseUrl = "https://fsximdllrhglabxbqvay.supabase.co";
         const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzeGltZGxscmhnbGFieGJxdmF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3NTg0NzgsImV4cCI6MjA3MjMzNDQ3OH0.KiRJdFoW4DtDAPMLqH9Im3-37GhIFmD269iDsY7ih2Q";
@@ -75,14 +77,41 @@
             const tbody = document.getElementById("orders-tbody");
             tbody.innerHTML = "<tr><td colspan='17' class='py-12 text-center text-slate-500 font-medium bg-transparent'><div class='flex justify-center items-center'><svg class='animate-spin -ml-1 mr-3 h-5 w-5 text-indigo-500' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'><circle class='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' stroke-width='4'></circle><path class='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path></svg> Fetching orders securely...</div></td></tr>";
 
-            const { data, error } = await supabase
-                .from('orders')
-                .select('*')
-                .order('created_at', { ascending: false });
+            let data = null;
+            let error = null;
 
-            if (error) {
+            // 1. Try secure RPC with admin password
+            try {
+                const rpcRes = await supabase.rpc('get_admin_orders', { p_admin_password: pswd });
+                if (!rpcRes.error && Array.isArray(rpcRes.data)) {
+                    data = rpcRes.data;
+                } else {
+                    error = rpcRes.error;
+                }
+            } catch (e) {
+                error = e;
+            }
+
+            // 2. Fallback: If authenticated owner session exists, direct select
+            if (!data) {
+                try {
+                    const directRes = await supabase
+                        .from('orders')
+                        .select('*')
+                        .order('created_at', { ascending: false });
+                    if (!directRes.error && Array.isArray(directRes.data)) {
+                        data = directRes.data;
+                        error = null;
+                    }
+                } catch (e) {
+                    // Ignore fallback error if RPC already recorded error
+                }
+            }
+
+            if (error || !data) {
                 console.error("Error fetching orders:", error);
-                tbody.innerHTML = `<tr><td colspan='17' class='p-8 text-center text-rose-500 font-bold bg-white rounded-xl shadow-sm'>Error loading orders: ${error.message}</td></tr>`;
+                const msg = error ? (error.message || JSON.stringify(error)) : 'Unable to load orders';
+                tbody.innerHTML = `<tr><td colspan='17' class='p-8 text-center text-rose-500 font-bold bg-white rounded-xl shadow-sm'>Error loading orders: ${msg}</td></tr>`;
                 return;
             }
 
