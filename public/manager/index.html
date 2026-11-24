@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <!-- Bespoke Vintage Stylesheet -->
-  <link rel="stylesheet" href="manager.css?v=23" />
+  <link rel="stylesheet" href="manager.css?v=24" />
   <style>
     /* Critical shell protection: prevent unstyled modal flash before CSS finishes parsing */
     .modal-overlay { display: none !important; }
@@ -156,7 +156,7 @@
         <div class="owner-avatar">LD</div>
         <div class="owner-info">
           <span class="owner-name">Lamis Dif</span>
-          <span class="owner-role">Store Owner & Founder • v23</span>
+          <span class="owner-role">Store Owner & Founder • v24</span>
         </div>
       </div>
       <button id="logout-btn" class="logout-btn" title="Log Out / تسجيل الخروج">
@@ -220,57 +220,47 @@
             <p>Welcome back, Lamis. Here is your bookstore's live status, real orders history, and book fair batch progress.</p>
           </div>
 
-          <!-- Key Metrics Grid -->
+          <!-- Minimal Key Metrics Grid (4 Core Figures Only) -->
           <div class="metrics-grid">
-            
-            <!-- 1. Cash Balance -->
-            <div class="metric-card">
+
+            <!-- 1. Confirmed Profit from Paid Orders -->
+            <div class="metric-card" style="cursor: pointer;" onclick="switchSection('paid-orders')" title="Open Paid Orders">
               <div class="metric-top">
-                <span class="metric-label">Available Cash / السيولة</span>
-                <div class="metric-icon gold"><i class="fa-solid fa-wallet"></i></div>
+                <span class="metric-label">Confirmed Paid Profit / أرباح المدفوعة</span>
+                <div class="metric-icon green"><i class="fa-solid fa-sack-dollar"></i></div>
               </div>
-              <div id="metric-cash-balance" class="metric-value" style="font-size: 1.05rem;">Not reconciled / غير محسوبة بعد</div>
-              <div id="metric-cash-subtext" class="metric-subtext"><i class="fa-solid fa-triangle-exclamation"></i> Awaiting reconciliation / بانتظار الجرد والتدقيق</div>
+              <div id="metric-paid-profit" class="metric-value">0 DA</div>
+              <div id="metric-paid-profit-sub" class="metric-subtext"><i class="fa-solid fa-circle-check"></i> Net profit from costed paid orders</div>
             </div>
 
-            <!-- 2. Sales Revenue (Books & Products, Excl. Shipping) -->
-            <div class="metric-card">
+            <!-- 2. Current Stock Value (Simple Summary) -->
+            <div class="metric-card" style="cursor: pointer;" onclick="switchSection('finance')" title="View OLD & NEW Stock Details in Finance">
               <div class="metric-top">
-                <span class="metric-label">Book Sales Value / إجمالي مبيعات الكتب</span>
-                <div class="metric-icon green"><i class="fa-solid fa-file-invoice-dollar"></i></div>
-              </div>
-              <div id="metric-total-sales" class="metric-value">0 DA</div>
-              <div id="metric-sales-subtext" class="metric-subtext"><i class="fa-solid fa-book-open"></i> Net of shipping fees (historical + live)</div>
-            </div>
-
-            <!-- 3. Total Customer Orders -->
-            <div class="metric-card">
-              <div class="metric-top">
-                <span class="metric-label">Customer Orders / الطلبات</span>
-                <div class="metric-icon blue"><i class="fa-solid fa-bag-shopping"></i></div>
-              </div>
-              <div id="metric-total-orders" class="metric-value">0</div>
-              <div class="metric-subtext"><i class="fa-solid fa-database"></i> Live in Supabase database</div>
-            </div>
-
-            <!-- 4. Inventory Asset Value -->
-            <div class="metric-card">
-              <div class="metric-top">
-                <span class="metric-label">Inventory Asset / قيمة المخزون</span>
+                <span class="metric-label">Current Stock Value / قيمة المخزون</span>
                 <div class="metric-icon amber"><i class="fa-solid fa-boxes-stacked"></i></div>
               </div>
               <div id="metric-inventory-val" class="metric-value">0 DA</div>
-              <div id="metric-inventory-subtext" class="metric-subtext"><i class="fa-solid fa-calculator"></i> Valued from stock items at cost</div>
+              <div id="metric-inventory-subtext" class="metric-subtext"><i class="fa-solid fa-layer-group"></i> Summary at retail &amp; cost</div>
             </div>
 
-            <!-- 5. Catalog Titles -->
-            <div class="metric-card">
+            <!-- 3. Money on Hand (Strict Audit Protection) -->
+            <div class="metric-card" style="cursor: pointer;" onclick="switchSection('finance')" title="Open Cash Audit in Finance">
               <div class="metric-top">
-                <span class="metric-label">Book Titles / العناوين</span>
-                <div class="metric-icon blue"><i class="fa-solid fa-book"></i></div>
+                <span class="metric-label">Money on Hand / السيولة المتوفرة</span>
+                <div class="metric-icon gold"><i class="fa-solid fa-wallet"></i></div>
               </div>
-              <div id="metric-catalog-count" class="metric-value">150</div>
-              <div class="metric-subtext"><i class="fa-solid fa-list-check"></i> Published in storefront</div>
+              <div id="metric-cash-balance" class="metric-value" style="font-size: 1.05rem;">Unverified / غير مكتمل</div>
+              <div id="metric-cash-subtext" class="metric-subtext"><i class="fa-solid fa-triangle-exclamation"></i> Audit cash transactions in Finance</div>
+            </div>
+
+            <!-- 4. Paid Book Revenue (Excl. Delivery) -->
+            <div class="metric-card" style="cursor: pointer;" onclick="switchSection('paid-orders')" title="View Paid Orders Breakdown">
+              <div class="metric-top">
+                <span class="metric-label">Paid Book Sales / مبيعات المدفوعة</span>
+                <div class="metric-icon blue"><i class="fa-solid fa-book-open"></i></div>
+              </div>
+              <div id="metric-total-sales" class="metric-value">0 DA</div>
+              <div id="metric-sales-subtext" class="metric-subtext"><i class="fa-solid fa-truck"></i> Delivery fees excluded</div>
             </div>
 
           </div>
@@ -304,22 +294,16 @@
               </div>
             </div>
 
-            <!-- Right: Book Fair Batch Alert & Quick Actions -->
+            <!-- Right: Clean Financial Overview & Quick Actions -->
             <div style="display: flex; flex-direction: column; gap: 20px;">
-              
-              <!-- Excel Import & Accounting Quick Card -->
+
+              <!-- Clear Financial Overview -->
               <div class="card-panel" style="border-left: 4px solid var(--vintage-blue);">
                 <div class="panel-header">
-                  <h4 style="color: var(--vintage-blue);"><i class="fa-solid fa-file-excel"></i> Inventory & Accounting Import</h4>
+                  <h4 style="color: var(--vintage-blue);"><i class="fa-solid fa-scale-balanced"></i> Financial Overview / نظرة عامة</h4>
                 </div>
-                <div class="panel-body" style="font-size: 0.9rem; line-height: 1.6;">
-                  <p><strong>Actual Inventory & Batches:</strong> Calculated dynamically from your Excel workbook (<code>Gentle_Readers_Inventory_Starter.xlsx</code>).</p>
-                  <p style="color: var(--text-muted); margin-top: 6px;">
-                    Separates <strong>NEW BATCH</strong> (New Stock) and <strong>OLD STOCK</strong>, records debts, and tracks provisional vs confirmed profit with zero hardcoded estimates.
-                  </p>
-                  <button class="btn-primary" style="margin-top: 14px; width: 100%;" onclick="openExcelImportModal()">
-                    <i class="fa-solid fa-file-import"></i> Open Excel Importer
-                  </button>
+                <div id="dashboard-finance-overview" class="panel-body" style="font-size: 0.9rem; line-height: 1.65;">
+                  <p style="color: var(--text-muted);">Loading financial overview...</p>
                 </div>
               </div>
 
@@ -330,13 +314,13 @@
                 </div>
                 <div class="panel-body">
                   <div class="action-buttons-list">
-                    <button class="action-btn" onclick="openModal('modal-add-inventory')">
-                      <i class="fa-solid fa-book-medical"></i>
-                      <span>Add Inventory Item / إضافة منتج</span>
+                    <button class="action-btn" onclick="switchSection('paid-orders')">
+                      <i class="fa-solid fa-circle-check"></i>
+                      <span>View Paid Orders &amp; Profit / الطلبات المدفوعة</span>
                     </button>
-                    <button class="action-btn" onclick="openModal('modal-add-batch')">
-                      <i class="fa-solid fa-plus-circle"></i>
-                      <span>Record Purchase Batch / دفعة مشتريات</span>
+                    <button class="action-btn" onclick="switchSection('finance')">
+                      <i class="fa-solid fa-coins"></i>
+                      <span>Stock Breakdown &amp; Cash Audit / المالية</span>
                     </button>
                     <button class="action-btn" onclick="openModal('modal-add-expense')">
                       <i class="fa-solid fa-receipt"></i>
@@ -390,6 +374,8 @@
           <button class="tab-btn" data-filter="low_stock" onclick="setInventoryFilter('low_stock')">Low Stock / منخفض</button>
           <button class="tab-btn" data-filter="unknown_cost" onclick="setInventoryFilter('unknown_cost')">Unknown Cost / بدون تكلفة</button>
         </div>
+
+        <div id="inventory-group-summary-banner" class="card-panel" style="display: none; border-left: 4px solid var(--vintage-blue);"></div>
 
         <div class="card-panel">
           <div class="panel-header">
@@ -649,6 +635,9 @@
             <p style="font-size: 0.86rem; color: var(--text-muted);">Strict separation between inventory assets, sales, and operating expenses.</p>
           </div>
           <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn-secondary" onclick="openStockBaselineModal()">
+              <i class="fa-solid fa-sliders"></i> Configure Stock Figures / أرقام المخزون
+            </button>
             <button class="btn-secondary" onclick="openOpeningPositionModal()">
               <i class="fa-solid fa-landmark"></i> Opening Cash / رصيد الافتتاح
             </button>
@@ -701,6 +690,17 @@
             <div class="metric-top"><span class="metric-label">Paid Orders Earned Profit / ربح المدفوعة</span><div class="metric-icon green"><i class="fa-solid fa-sack-dollar"></i></div></div>
             <div id="finance-paid-net-profit" class="metric-value">0 DA</div>
             <div id="finance-paid-profit-sub" class="metric-subtext">Confirmed paid orders net of COGS &amp; packaging</div>
+          </div>
+        </div>
+
+        <!-- Cash Audit & Integrity Panel (Prevents misleading unverified Money on Hand) -->
+        <div id="finance-cash-audit-panel" class="card-panel" style="margin-bottom: 20px;">
+          <div class="panel-header">
+            <h4><i class="fa-solid fa-shield-halved"></i> Money on Hand Audit / تدقيق السيولة</h4>
+            <button class="panel-action-btn" onclick="openOpeningPositionModal()">Verify Opening Cash</button>
+          </div>
+          <div id="finance-cash-audit-body" class="panel-body">
+            <p style="font-size: 0.88rem; color: var(--text-muted);">Auditing cash transactions...</p>
           </div>
         </div>
 
@@ -1893,13 +1893,63 @@
             <input type="date" id="opening-date-input" class="form-control" required />
           </div>
         </div>
-        <div class="form-group" style="margin-bottom: 16px;">
+        <div class="form-group" style="margin-bottom: 12px;">
           <label for="opening-notes-input">Notes / ملاحظات</label>
           <textarea id="opening-notes-input" class="form-control" placeholder="Opening cash drawer verification note..."></textarea>
         </div>
+        <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 0.88rem; cursor: pointer;">
+          <input type="checkbox" id="opening-verified-checkbox" />
+          <span><strong>Confirm opening cash count is audited / تأكيد جرد الرصيد الافتتاحي</strong></span>
+        </label>
         <div class="modal-footer">
           <button type="button" class="btn-secondary" onclick="closeModal('modal-edit-opening')">Cancel / إلغاء</button>
           <button type="submit" class="btn-primary"><i class="fa-solid fa-save"></i> Save Opening Position</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 5g. Modal: Configure Verified Stock Financial Figures (OLD_STOCK & NEW_STOCK) -->
+<div id="modal-stock-baseline" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-boxes-stacked"></i> Stock Financial Baseline / أرقام المخزون المعتمدة</h3>
+      <button class="modal-close" onclick="closeModal('modal-stock-baseline')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="form-stock-baseline" onsubmit="handleSaveStockBaseline(event)">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+          Configured from your OLD_STOCK and NEW_STOCK financial sheets. Changing these configures stock reporting without altering live transaction history or cash records.
+        </p>
+
+        <h4 style="font-family: var(--font-serif); margin: 10px 0 8px; color: #8C5523;">OLD STOCK</h4>
+        <div class="form-row" style="margin-bottom: 10px;">
+          <div class="form-group">
+            <label for="base-old-retail">Total Stock Value (DA) *</label>
+            <input type="number" id="base-old-retail" class="form-control" step="any" min="0" required />
+          </div>
+          <div class="form-group">
+            <label for="base-old-cost">Actual Paid Cost (DA) *</label>
+            <input type="number" id="base-old-cost" class="form-control" step="any" min="0" required />
+          </div>
+        </div>
+
+        <h4 style="font-family: var(--font-serif); margin: 12px 0 8px; color: var(--vintage-blue);">NEW STOCK (New Batch)</h4>
+        <div class="form-row" style="margin-bottom: 14px;">
+          <div class="form-group">
+            <label for="base-new-retail">Total Stock Value (DA) *</label>
+            <input type="number" id="base-new-retail" class="form-control" step="any" min="0" required />
+          </div>
+          <div class="form-group">
+            <label for="base-new-cost">Actual Paid Cost (DA) *</label>
+            <input type="number" id="base-new-cost" class="form-control" step="any" min="0" required />
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeModal('modal-stock-baseline')">Cancel / إلغاء</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-save"></i> Save Stock Figures</button>
         </div>
       </form>
     </div>
@@ -1921,6 +1971,6 @@
     document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>');
   }
 </script>
-<script src="manager.js?v=23"></script>
+<script src="manager.js?v=24"></script>
 </body>
 </html>

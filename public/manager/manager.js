@@ -460,6 +460,45 @@ const auth = new AuthManager();
 // ============================================================================
 // 3. GLOBAL APPLICATION STATE & SYNC ENGINE
 // ============================================================================
+const DEFAULT_STOCK_BASELINE = {
+  oldStock: { retailValueDa: 110870, paidCostDa: 68983, expectedProfitDa: 41887 },
+  newStock: { retailValueDa: 195200, paidCostDa: 96954.5, expectedProfitDa: 98245.5 }
+};
+
+function getStockBaseline() {
+  let saved = null;
+  try {
+    const raw = localStorage.getItem('gr_stock_baseline_v1');
+    if (raw) saved = JSON.parse(raw);
+  } catch (e) {
+    saved = null;
+  }
+  const oldRetail = Number(saved?.oldStock?.retailValueDa ?? DEFAULT_STOCK_BASELINE.oldStock.retailValueDa);
+  const oldPaid = Number(saved?.oldStock?.paidCostDa ?? DEFAULT_STOCK_BASELINE.oldStock.paidCostDa);
+  const newRetail = Number(saved?.newStock?.retailValueDa ?? DEFAULT_STOCK_BASELINE.newStock.retailValueDa);
+  const newPaid = Number(saved?.newStock?.paidCostDa ?? DEFAULT_STOCK_BASELINE.newStock.paidCostDa);
+  return {
+    oldStock: {
+      retailValueDa: oldRetail,
+      paidCostDa: oldPaid,
+      expectedProfitDa: Math.round((oldRetail - oldPaid) * 100) / 100,
+      marginPct: oldRetail > 0 ? Math.round(((oldRetail - oldPaid) / oldRetail) * 1000) / 10 : 0
+    },
+    newStock: {
+      retailValueDa: newRetail,
+      paidCostDa: newPaid,
+      expectedProfitDa: Math.round((newRetail - newPaid) * 100) / 100,
+      marginPct: newRetail > 0 ? Math.round(((newRetail - newPaid) / newRetail) * 1000) / 10 : 0
+    },
+    combined: {
+      retailValueDa: oldRetail + newRetail,
+      paidCostDa: Math.round((oldPaid + newPaid) * 100) / 100,
+      expectedProfitDa: Math.round(((oldRetail - oldPaid) + (newRetail - newPaid)) * 100) / 100,
+      marginPct: (oldRetail + newRetail) > 0 ? Math.round((((oldRetail - oldPaid) + (newRetail - newPaid)) / (oldRetail + newRetail)) * 1000) / 10 : 0
+    }
+  };
+}
+
 const state = {
   activeSection: 'dashboard',
   online: navigator.onLine,
@@ -2199,8 +2238,15 @@ function calculateFinancialMetrics() {
     liveKnownNetProfit: Math.round(paidLiveKnownNetProfit)
   };
 
-  // 8. Reconciled Cash Position (anchored to opening_position.as_of_date)
+  // 8. Reconciled Cash Position & Strict Completeness Audit
+  const stockBaseline = getStockBaseline();
   const openingCash = Number(state.openingPosition?.cash_balance_da) || 0;
+  const openingNotesStr = String(state.openingPosition?.notes || '');
+  const openingVerified = !!(
+    state.openingPosition?.cash_verified === true ||
+    openingNotesStr.includes('[VERIFIED]')
+  );
+
   const totalCapitalInjected = (state.capitalContributions || []).reduce((sum, c) => sum + (Number(c.amount_da) || 0), 0);
   const postOpeningCapitalInjected = (state.capitalContributions || []).reduce((sum, c) => {
     const d = c.contribution_date || c.created_at;
@@ -2216,7 +2262,95 @@ function calculateFinancialMetrics() {
   const totalCashInflows = openingCash + totalCashInflowsFromSales + postOpeningCapitalInjected;
   const totalCashOutflows = postOpeningBatchPaid + postOpeningDebtsRepaid + postOpeningOperatingExpenses + postOpeningOwnerWithdrawals;
   const currentCashBalance = Math.round(totalCashInflows - totalCashOutflows);
-  const isCashReconciled = true;
+
+  // Audit all cash ledger sources before declaring Money on Hand complete
+  const cashIssues = [];
+  if (!openingVerified) {
+    cashIssues.push({
+      key: 'opening',
+      label: `Opening cash (${openingCash.toLocaleString('fr-DZ')} DA${openingDate ? ` as of ${openingDate}` : ''}) has not been audited & verified by owner.`,
+      action: 'openOpeningPositionModal()',
+      btn: 'Verify Opening Cash'
+    });
+  }
+
+  const liveUnpaidOrders = (state.orders || []).filter(o => {
+    const eff = getEffectiveOrderStatus(o);
+    return !eff.isHist && !['cancelled', 'rejected'].includes(eff.status) && eff.paymentStatus !== 'paid';
+  });
+  if (liveUnpaidOrders.length > 0) {
+    const sampleIds = liveUnpaidOrders.slice(0, 4).map(o => `#${o.id}`).join(', ');
+    cashIssues.push({
+      key: 'orders',
+      label: `${liveUnpaidOrders.length} live order(s) (${sampleIds}${liveUnpaidOrders.length > 4 ? '…' : ''}) have unconfirmed payment status.`,
+      action: "switchSection('orders')",
+      btn: 'Review Orders'
+    });
+  }
+
+  const unpaidBatches = (state.batches || []).filter(b => b.payment_status !== 'paid' || ((Number(b.total_cost_da) || 0) > (Number(b.amount_paid_da) || 0)));
+  if (unpaidBatches.length > 0) {
+    cashIssues.push({
+      key: 'batches',
+      label: `${unpaidBatches.length} purchase batch(es) show unpaid/partial balance vs batch cost.`,
+      action: "switchSection('purchases')",
+      btn: 'Review Batches'
+    });
+  }
+
+  if ((state.batches || []).length > 0 && Math.abs(totalBatchPaidAll - stockBaseline.newStock.paidCostDa) > 100) {
+    cashIssues.push({
+      key: 'batch_vs_baseline',
+      label: `Recorded batch payments (${Math.round(totalBatchPaidAll).toLocaleString('fr-DZ')} DA) differ from confirmed NEW_STOCK cost paid (${stockBaseline.newStock.paidCostDa.toLocaleString('fr-DZ')} DA).`,
+      action: "switchSection('purchases')",
+      btn: 'Reconcile Batches'
+    });
+  }
+
+  const debtCreditorCounts = new Map();
+  let hasPlaceholderDebt = false;
+  (state.debts || []).forEach(d => {
+    const cname = String(d.creditor_name || '').trim().toLowerCase();
+    debtCreditorCounts.set(cname, (debtCreditorCounts.get(cname) || 0) + 1);
+    if (!cname || cname === 'me' || debtCreditorCounts.get(cname) > 1) hasPlaceholderDebt = true;
+  });
+  if ((state.debts || []).length > 0 && (hasPlaceholderDebt || ((state.debtRepayments || []).length === 0 && outstandingDebtsDa > 0))) {
+    cashIssues.push({
+      key: 'debts',
+      label: `Debts ledger (${state.debts.length} entries, ${Math.round(outstandingDebtsDa).toLocaleString('fr-DZ')} DA) has unverified/duplicate entries or 0 repayments.`,
+      action: "switchSection('debts')",
+      btn: 'Audit Debts'
+    });
+  }
+
+  if (totalCashOutflows > 0 && openingCash === 0 && postOpeningCapitalInjected === 0 && totalCashInflowsFromSales < totalCashOutflows) {
+    cashIssues.push({
+      key: 'capital',
+      label: `Recorded cash outflows (${Math.round(totalCashOutflows).toLocaleString('fr-DZ')} DA) exceed opening cash + paid sales without capital injections.`,
+      action: "openModal('modal-add-capital')",
+      btn: 'Record Capital'
+    });
+  }
+
+  if (unpricedTitlesCount > 0) {
+    cashIssues.push({
+      key: 'costs',
+      label: `${unpricedTitlesCount} inventory lot(s) still have unknown purchase cost (NULL).`,
+      action: "switchSection('inventory'); setInventoryFilter('unknown_cost')",
+      btn: 'View Unpriced'
+    });
+  }
+
+  const isCashReconciled = (cashIssues.length === 0);
+  const cashAudit = {
+    isComplete: isCashReconciled,
+    openingVerified,
+    unpaidLiveCount: liveUnpaidOrders.length,
+    issues: cashIssues,
+    totalCashInflows: Math.round(totalCashInflows),
+    totalCashOutflows: Math.round(totalCashOutflows),
+    netTrackedMovement: currentCashBalance
+  };
 
   return {
     totalGrossOrderValue: Math.round(totalGrossOrderValue),
@@ -2246,6 +2380,8 @@ function calculateFinancialMetrics() {
     isProfitReconciled,
     paidOrders,
     paidSummary,
+    stockBaseline,
+    cashAudit,
     remainingInventoryValueDa: finalRemainingInventoryValue,
     unpricedTitlesCount,
     totalCountedPhysical,
@@ -2395,65 +2531,108 @@ function getOrderStatusBadgeHtml(status, isHist) {
 
 function updateDashboardMetrics() {
   const fin = calculateFinancialMetrics();
+  const ps = fin.paidSummary;
+  const base = fin.stockBaseline;
 
-  // 1. Available Cash
+  // 1. Confirmed Profit from Paid Orders (Top Primary Metric)
+  const paidProfEl = document.getElementById('metric-paid-profit');
+  const paidProfSubEl = document.getElementById('metric-paid-profit-sub');
+  if (paidProfEl) {
+    paidProfEl.textContent = (ps.knownCostCount === 0 && ps.allCount > 0)
+      ? 'Unknown Cost'
+      : `${ps.confirmedNetProfit.toLocaleString('fr-DZ')} DA`;
+  }
+  if (paidProfSubEl) {
+    paidProfSubEl.innerHTML = ps.unknownCostCount > 0
+      ? `<i class="fa-solid fa-clock"></i> From ${ps.knownCostCount} costed paid order(s) • ${ps.unknownCostCount} awaiting cost`
+      : `<i class="fa-solid fa-circle-check"></i> Net of COGS &amp; packaging (${ps.knownCostCount} paid orders)`;
+  }
+
+  // 2. Money on Hand (Strict Audit Guard — never shows unverified number as reconciled)
   const cashEl = document.getElementById('metric-cash-balance');
   const cashSubEl = document.getElementById('metric-cash-subtext');
   if (cashEl) {
-    if (fin.isCashReconciled && fin.currentCashBalance !== null) {
+    if (fin.isCashReconciled) {
       cashEl.textContent = `${fin.currentCashBalance.toLocaleString('fr-DZ')} DA`;
       cashEl.style.fontSize = '';
       if (cashSubEl) {
         cashSubEl.className = 'metric-subtext confirmed';
-        cashSubEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${fin.openingDate ? `Reconciled since ${escapeHtml(fin.openingDate)}` : 'Reconciled Cash Balance'}`;
+        cashSubEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> Audited cash (${escapeHtml(fin.openingDate || 'verified')})`;
       }
     } else {
-      cashEl.textContent = 'Not reconciled / غير محسوبة بعد';
+      cashEl.textContent = 'Unverified / غير مكتمل';
       cashEl.style.fontSize = '1.05rem';
       if (cashSubEl) {
         cashSubEl.className = 'metric-subtext';
-        cashSubEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Awaiting reconciliation`;
+        cashSubEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${fin.cashAudit.issues.length} audit item(s) — Open Finance`;
       }
     }
   }
 
-  // 2. Orders Count (Real count from IndexedDB / Supabase)
-  const totalOrdersEl = document.getElementById('metric-total-orders');
-  if (totalOrdersEl) totalOrdersEl.textContent = state.orders.length;
-
+  // 3. Paid Book Revenue (Delivery fees strictly excluded)
   const ordersBadge = document.getElementById('orders-nav-badge');
   if (ordersBadge) ordersBadge.textContent = state.orders.length;
 
-  // 3. Book Sales Revenue (strictly excluding delivery passthrough fees)
   const salesEl = document.getElementById('metric-total-sales');
-  if (salesEl) salesEl.textContent = `${fin.totalSalesRevenue.toLocaleString('fr-DZ')} DA`;
+  if (salesEl) salesEl.textContent = `${ps.bookRevenue.toLocaleString('fr-DZ')} DA`;
 
   const salesSubEl = document.getElementById('metric-sales-subtext');
   if (salesSubEl) {
-    salesSubEl.innerHTML = `<i class="fa-solid fa-book-open"></i> Net book sales (${fin.totalShippingCollected.toLocaleString('fr-DZ')} DA shipping excluded)`;
+    salesSubEl.innerHTML = `<i class="fa-solid fa-truck"></i> ${ps.allCount} paid orders (${ps.deliveryFeesExcluded.toLocaleString('fr-DZ')} DA delivery excluded)`;
   }
 
-  // 4. Remaining Inventory Asset Value (Strictly from physical stock at cost)
+  // 4. Current Stock Value (Simple summary; OLD & NEW details kept in Inventory / Finance)
   const invValEl = document.getElementById('metric-inventory-val');
-  if (invValEl) invValEl.textContent = `${fin.remainingInventoryValueDa.toLocaleString('fr-DZ')} DA`;
+  if (invValEl) {
+    const displayStockVal = fin.combinedBooks.valuationAtRetail > 0 ? fin.combinedBooks.valuationAtRetail : base.combined.retailValueDa;
+    invValEl.textContent = `${displayStockVal.toLocaleString('fr-DZ')} DA`;
+  }
 
   const invSubEl = document.getElementById('metric-inventory-subtext');
   if (invSubEl) {
     if (state.inventory.length === 0) {
-      invSubEl.innerHTML = `<span class="badge-neutral"><i class="fa-solid fa-boxes-stacked"></i> Awaiting physical import</span>`;
-    } else if (fin.unpricedTitlesCount > 0) {
-      invSubEl.innerHTML = `<span class="badge-provisional"><i class="fa-solid fa-clock"></i> ${fin.unpricedTitlesCount} unpriced (NULL)</span>`;
+      invSubEl.innerHTML = `<span class="badge-neutral">Baseline Retail: ${base.combined.retailValueDa.toLocaleString('fr-DZ')} DA</span>`;
     } else {
-      invSubEl.innerHTML = `<span class="badge-confirmed"><i class="fa-solid fa-circle-check"></i> Reconciled (${fin.totalAvailableUnits} units)</span>`;
+      invSubEl.innerHTML = `<span class="badge-confirmed">${fin.combinedBooks.available} avail (${fin.combinedBooks.valuationAtCost.toLocaleString('fr-DZ')} DA cost) • Details →</span>`;
     }
   }
 
-  // 5. Inventory Items Count (Nav badge) and Published Storefront Titles (Dashboard card)
   const invBadge = document.getElementById('inventory-nav-badge');
   if (invBadge) invBadge.textContent = state.inventory.length;
 
-  const catCountEl = document.getElementById('metric-catalog-count');
-  if (catCountEl) catCountEl.textContent = state.storefrontCatalogCount || 150;
+  // 5. Concise Main Dashboard Financial Overview Panel
+  const overviewEl = document.getElementById('dashboard-finance-overview');
+  if (overviewEl) {
+    overviewEl.innerHTML = `
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-subtle); padding-bottom: 6px;">
+          <span style="color: var(--text-muted);">Confirmed Paid Net Profit:</span>
+          <strong style="color: var(--success);">${ps.confirmedNetProfit.toLocaleString('fr-DZ')} DA</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-subtle); padding-bottom: 6px;">
+          <span style="color: var(--text-muted);">Paid Orders Book Sales (No Delivery):</span>
+          <strong>${ps.bookRevenue.toLocaleString('fr-DZ')} DA</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-subtle); padding-bottom: 6px;">
+          <span style="color: var(--text-muted);">Operating Expenses:</span>
+          <strong style="color: var(--danger);">−${fin.totalOperatingExpenses.toLocaleString('fr-DZ')} DA</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-subtle); padding-bottom: 6px;">
+          <span style="color: var(--text-muted);">Verified Stock Baseline (Retail / Cost):</span>
+          <strong>${base.combined.retailValueDa.toLocaleString('fr-DZ')} / ${base.combined.paidCostDa.toLocaleString('fr-DZ')} DA</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: var(--text-muted);">Money on Hand Status:</span>
+          <span class="badge ${fin.isCashReconciled ? 'badge-green' : 'badge-amber'}">
+            ${fin.isCashReconciled ? `Verified: ${fin.currentCashBalance.toLocaleString('fr-DZ')} DA` : `Incomplete (${fin.cashAudit.issues.length} gaps)`}
+          </span>
+        </div>
+        <button class="btn-secondary" style="margin-top: 6px; width: 100%; justify-content: center;" onclick="switchSection('finance')">
+          <i class="fa-solid fa-chart-pie"></i> Open Stock Breakdown &amp; Cash Audit
+        </button>
+      </div>
+    `;
+  }
 }
 
 function renderRecentOrders() {
@@ -2730,6 +2909,37 @@ function renderInventoryTable() {
     );
   }
 
+  const groupBanner = document.getElementById('inventory-group-summary-banner');
+  if (groupBanner) {
+    if (state.inventoryFilter === 'old_stock' || state.inventoryFilter === 'new_stock') {
+      const fin = calculateFinancialMetrics();
+      const isOldGrp = state.inventoryFilter === 'old_stock';
+      const baseGrp = isOldGrp ? fin.stockBaseline.oldStock : fin.stockBaseline.newStock;
+      const liveGrp = isOldGrp ? fin.oldStock : fin.newStock;
+      groupBanner.style.display = 'block';
+      groupBanner.innerHTML = `
+        <div class="panel-body" style="padding: 14px 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+            <strong>
+              <i class="fa-solid ${isOldGrp ? 'fa-clock-rotate-left' : 'fa-boxes-stacked'}"></i>
+              ${isOldGrp ? 'OLD_STOCK Financial Details' : 'NEW_STOCK (New Batch) Financial Details'}
+            </strong>
+            <span class="badge badge-blue">Photo Baseline + Live DB Remaining</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; font-size: 0.86rem;">
+            <div><span style="color: var(--text-muted);">Stock Value (Photo):</span><br/><strong>${baseGrp.retailValueDa.toLocaleString('fr-DZ')} DA</strong></div>
+            <div><span style="color: var(--text-muted);">Actual Paid (Photo):</span><br/><strong>${baseGrp.paidCostDa.toLocaleString('fr-DZ')} DA</strong></div>
+            <div><span style="color: var(--text-muted);">Stock Profit (Photo):</span><br/><strong style="color: var(--success);">+${baseGrp.expectedProfitDa.toLocaleString('fr-DZ')} DA (${baseGrp.marginPct}%)</strong></div>
+            <div><span style="color: var(--text-muted);">Remaining Live Stock:</span><br/><strong>${liveGrp.available} avail (${liveGrp.soldQty} sold) • ${liveGrp.valuationAtRetail.toLocaleString('fr-DZ')} DA retail</strong></div>
+          </div>
+        </div>
+      `;
+    } else {
+      groupBanner.style.display = 'none';
+      groupBanner.innerHTML = '';
+    }
+  }
+
   if (countEl) countEl.textContent = `${items.length} titles in view (${state.inventory.length} total in store)`;
 
   if (items.length === 0) {
@@ -2904,8 +3114,9 @@ function renderPurchasesSection() {
 
 function renderFinanceSection() {
   const fin = calculateFinancialMetrics();
+  const base = fin.stockBaseline;
 
-  // 1. Top Metrics
+  // 1. Top Metrics (Money on Hand uses strict Cash Audit completeness check)
   const cashEl = document.getElementById('finance-cash-balance');
   const cashSubEl = document.getElementById('finance-cash-subtext');
   if (cashEl) {
@@ -2914,16 +3125,62 @@ function renderFinanceSection() {
       cashEl.style.fontSize = '';
       if (cashSubEl) {
         cashSubEl.className = 'metric-subtext confirmed';
-        cashSubEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${fin.openingDate ? `Since ${escapeHtml(fin.openingDate)}` : 'Reconciled Cash on Hand'}`;
+        cashSubEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> Audited Cash (${escapeHtml(fin.openingDate || 'verified')})`;
       }
     } else {
-      cashEl.textContent = 'Not reconciled / غير محسوبة بعد';
+      cashEl.textContent = 'Unverified / غير مكتمل';
       cashEl.style.fontSize = '1.05rem';
       if (cashSubEl) {
         cashSubEl.className = 'metric-subtext';
-        cashSubEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Awaiting reconciliation`;
+        cashSubEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Partial movement: ${fin.currentCashBalance.toLocaleString('fr-DZ')} DA (${fin.cashAudit.issues.length} gap(s))`;
       }
     }
+  }
+
+  // Render Cash Audit & Ledger Completeness Panel
+  const auditBody = document.getElementById('finance-cash-audit-body');
+  if (auditBody) {
+    const ca = fin.cashAudit;
+    auditBody.innerHTML = `
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px; font-size: 0.85rem;">
+        <div style="padding: 10px; border-radius: 8px; background: #FFFDF8; border: 1px solid var(--border-color);">
+          <div style="color: var(--text-muted); font-size: 0.75rem;">Opening Cash (${escapeHtml(fin.openingDate || 'Unset')})</div>
+          <strong>${fin.openingCash.toLocaleString('fr-DZ')} DA</strong> ${ca.openingVerified ? '<span class="badge badge-green" style="font-size:0.68rem;">Verified</span>' : '<span class="badge badge-amber" style="font-size:0.68rem;">Unverified</span>'}
+        </div>
+        <div style="padding: 10px; border-radius: 8px; background: #F0FDF4; border: 1px solid #BBF7D0;">
+          <div style="color: #166534; font-size: 0.75rem;">+ Paid Live Inflow + Capital</div>
+          <strong style="color: var(--success);">+${(fin.totalCashInflowsFromSales + (ca.totalCashInflows - fin.openingCash - fin.totalCashInflowsFromSales)).toLocaleString('fr-DZ')} DA</strong>
+        </div>
+        <div style="padding: 10px; border-radius: 8px; background: #FFF1F2; border: 1px solid #FECDD3;">
+          <div style="color: #9F1239; font-size: 0.75rem;">− Recorded Outflows</div>
+          <strong style="color: var(--danger);">−${ca.totalCashOutflows.toLocaleString('fr-DZ')} DA</strong>
+        </div>
+        <div style="padding: 10px; border-radius: 8px; background: ${ca.isComplete ? '#F0FDF4' : '#FFFBEB'}; border: 1px solid ${ca.isComplete ? '#86EFAC' : '#FCD34D'};">
+          <div style="color: var(--text-muted); font-size: 0.75rem;">Tracked Cash Movement</div>
+          <strong>${ca.netTrackedMovement.toLocaleString('fr-DZ')} DA</strong>
+          <span class="badge ${ca.isComplete ? 'badge-green' : 'badge-amber'}" style="margin-left: 4px; font-size: 0.68rem;">${ca.isComplete ? 'Complete' : 'Incomplete'}</span>
+        </div>
+      </div>
+      ${ca.issues.length > 0 ? `
+        <div style="background: #FFFBEB; border: 1px solid #FCD34D; border-radius: 8px; padding: 12px 14px;">
+          <div style="font-weight: 700; color: #92400E; margin-bottom: 8px; font-size: 0.88rem;">
+            <i class="fa-solid fa-triangle-exclamation"></i> Why Money on Hand is Marked Unverified (${ca.issues.length} Incomplete Check${ca.issues.length === 1 ? '' : 's'}):
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            ${ca.issues.map(iss => `
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 0.83rem; color: #78350F; border-bottom: 1px dashed #FDE68A; padding-bottom: 6px;">
+                <span>• ${escapeHtml(iss.label)}</span>
+                <button class="btn-secondary" style="padding: 3px 10px; font-size: 0.76rem;" onclick="${iss.action}">${escapeHtml(iss.btn)}</button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : `
+        <div style="background: #F0FDF4; border: 1px solid #86EFAC; border-radius: 8px; padding: 10px 14px; color: #166534; font-size: 0.86rem;">
+          <i class="fa-solid fa-circle-check"></i> All opening cash, live order payments, batches, debts, capital, and inventory cost checks passed.
+        </div>
+      `}
+    `;
   }
 
   const invValEl = document.getElementById('finance-inventory-val');
@@ -2984,80 +3241,76 @@ function renderFinanceSection() {
     }
   }
 
-  // 2. New Stock Breakdown Card
+  // 2. New Stock Breakdown Card (Configured Photo Baseline + Live DB Remaining)
   const newStatusEl = document.getElementById('finance-new-stock-status');
   if (newStatusEl) {
-    newStatusEl.innerHTML = fin.newStock.soldQty > 0
-      ? `<i class="fa-solid fa-chart-line"></i> ${fin.newStock.soldQty} Sold • ${fin.newStock.available} Available`
-      : `<i class="fa-solid fa-check"></i> 100% In Stock (${fin.newStock.available} avail)`;
+    newStatusEl.innerHTML = `<i class="fa-solid fa-boxes-stacked"></i> ${fin.newStock.soldQty} Sold • ${fin.newStock.available} Avail`;
   }
 
   const newSoldEl = document.getElementById('finance-new-sold-qty');
-  if (newSoldEl) newSoldEl.textContent = `${fin.newStock.soldQty} Sold (${fin.newStock.available} avail / ${fin.newStock.onHand} on hand)`;
+  if (newSoldEl) newSoldEl.textContent = `Remaining: ${fin.newStock.available} avail (${fin.newStock.soldQty} sold)`;
 
   const newRetailEl = document.getElementById('finance-new-retail-val');
-  if (newRetailEl) newRetailEl.textContent = `${fin.newStock.valuationAtRetail.toLocaleString('fr-DZ')} DA`;
+  if (newRetailEl) newRetailEl.textContent = `${base.newStock.retailValueDa.toLocaleString('fr-DZ')} DA`;
 
   const newRevEl = document.getElementById('finance-new-revenue');
-  if (newRevEl) newRevEl.textContent = `${fin.newStock.revenue.toLocaleString('fr-DZ')} DA (${fin.newStock.soldQty} sold)`;
+  if (newRevEl) newRevEl.textContent = `${base.newStock.paidCostDa.toLocaleString('fr-DZ')} DA paid`;
 
   const newCogsEl = document.getElementById('finance-new-cogs');
-  if (newCogsEl) newCogsEl.textContent = `${fin.newStock.valuationAtCost.toLocaleString('fr-DZ')} DA`;
+  if (newCogsEl) newCogsEl.textContent = `${base.newStock.paidCostDa.toLocaleString('fr-DZ')} DA`;
 
   const newProfitEl = document.getElementById('finance-new-profit');
-  if (newProfitEl) newProfitEl.textContent = `+${fin.newStock.expectedProfit.toLocaleString('fr-DZ')} DA (${fin.newStock.marginPct}%)`;
+  if (newProfitEl) newProfitEl.textContent = `+${base.newStock.expectedProfitDa.toLocaleString('fr-DZ')} DA (${base.newStock.marginPct}%)`;
 
   const newFooterEl = document.getElementById('finance-new-batch-footer');
   if (newFooterEl) {
-    newFooterEl.innerHTML = `<span><i class="fa-solid fa-layer-group"></i> ${fin.newStock.titlesCount} Titles</span><span>Avg Cost: <strong>${fin.newStock.avgUnitCost.toFixed(2)} DA</strong> • Realized Profit: <strong>${fin.newStock.grossProfit.toLocaleString('fr-DZ')} DA</strong></span>`;
+    newFooterEl.innerHTML = `<span><i class="fa-solid fa-layer-group"></i> Photo: 195,200 / 96,954.5 / 98,245.5 DA</span><span>Live DB Avail Cost: <strong>${fin.newStock.valuationAtCost.toLocaleString('fr-DZ')} DA</strong></span>`;
   }
 
-  // 3. Old Stock Breakdown Card
+  // 3. Old Stock Breakdown Card (Configured Photo Baseline + Live DB Remaining)
   const oldStatusEl = document.getElementById('finance-old-stock-status');
   if (oldStatusEl) {
-    oldStatusEl.innerHTML = fin.oldStock.soldQty > 0
-      ? `<i class="fa-solid fa-clock-rotate-left"></i> ${fin.oldStock.soldQty} Sold (${fin.oldStock.available} avail)`
-      : `<i class="fa-solid fa-check"></i> ${fin.oldStock.available} In Stock`;
+    oldStatusEl.innerHTML = `<i class="fa-solid fa-clock-rotate-left"></i> ${fin.oldStock.soldQty} Sold • ${fin.oldStock.available} Avail`;
   }
 
   const oldSoldEl = document.getElementById('finance-old-sold-qty');
-  if (oldSoldEl) oldSoldEl.textContent = `${fin.oldStock.soldQty} Sold (${fin.oldStock.available} avail / ${fin.oldStock.onHand} on hand)`;
+  if (oldSoldEl) oldSoldEl.textContent = `Remaining: ${fin.oldStock.available} avail (${fin.oldStock.soldQty} sold)`;
 
   const oldRevEl = document.getElementById('finance-old-revenue');
-  if (oldRevEl) oldRevEl.textContent = `${fin.oldStock.valuationAtRetail.toLocaleString('fr-DZ')} DA`;
+  if (oldRevEl) oldRevEl.textContent = `${base.oldStock.retailValueDa.toLocaleString('fr-DZ')} DA`;
 
   const oldCogsEl = document.getElementById('finance-old-cogs');
-  if (oldCogsEl) oldCogsEl.textContent = `${fin.oldStock.valuationAtCost.toLocaleString('fr-DZ')} DA`;
+  if (oldCogsEl) oldCogsEl.textContent = `${base.oldStock.paidCostDa.toLocaleString('fr-DZ')} DA`;
 
   const oldProfitEl = document.getElementById('finance-old-profit');
-  if (oldProfitEl) oldProfitEl.textContent = `+${fin.oldStock.expectedProfit.toLocaleString('fr-DZ')} DA (${fin.oldStock.marginPct}%)`;
+  if (oldProfitEl) oldProfitEl.textContent = `+${base.oldStock.expectedProfitDa.toLocaleString('fr-DZ')} DA (${base.oldStock.marginPct}%)`;
 
   const oldFooterEl = document.getElementById('finance-old-stock-footer');
   if (oldFooterEl) {
-    oldFooterEl.innerHTML = `<span><i class="fa-solid fa-layer-group"></i> ${fin.oldStock.titlesCount} Titles</span><span>Avg Cost: <strong>${fin.oldStock.avgUnitCost.toFixed(2)} DA</strong> • Sales Rev: <strong>${fin.oldStock.revenue.toLocaleString('fr-DZ')} DA</strong></span>`;
+    oldFooterEl.innerHTML = `<span><i class="fa-solid fa-layer-group"></i> Photo: 110,870 / 68,983 / 41,887 DA</span><span>Live DB Avail Cost: <strong>${fin.oldStock.valuationAtCost.toLocaleString('fr-DZ')} DA</strong></span>`;
   }
 
-  // 3b. Combined Books Breakdown Card
+  // 3b. Combined Books Breakdown Card (Photo Baseline Combined + Live DB Remaining)
   const combStatusEl = document.getElementById('finance-combined-books-status');
   if (combStatusEl) {
     combStatusEl.innerHTML = `<i class="fa-solid fa-book"></i> ${fin.combinedBooks.soldQty} Sold • ${fin.combinedBooks.available} Avail`;
   }
 
   const combSoldEl = document.getElementById('finance-combined-books-sold-qty');
-  if (combSoldEl) combSoldEl.textContent = `${fin.combinedBooks.soldQty} Sold (${fin.combinedBooks.available} avail / ${fin.combinedBooks.onHand} on hand)`;
+  if (combSoldEl) combSoldEl.textContent = `Remaining: ${fin.combinedBooks.available} avail (${fin.combinedBooks.soldQty} sold)`;
 
   const combRevEl = document.getElementById('finance-combined-books-revenue');
-  if (combRevEl) combRevEl.textContent = `${fin.combinedBooks.valuationAtRetail.toLocaleString('fr-DZ')} DA`;
+  if (combRevEl) combRevEl.textContent = `${base.combined.retailValueDa.toLocaleString('fr-DZ')} DA`;
 
   const combCogsEl = document.getElementById('finance-combined-books-cogs');
-  if (combCogsEl) combCogsEl.textContent = `${fin.combinedBooks.valuationAtCost.toLocaleString('fr-DZ')} DA`;
+  if (combCogsEl) combCogsEl.textContent = `${base.combined.paidCostDa.toLocaleString('fr-DZ')} DA`;
 
   const combProfitEl = document.getElementById('finance-combined-books-profit');
-  if (combProfitEl) combProfitEl.textContent = `+${fin.combinedBooks.expectedProfit.toLocaleString('fr-DZ')} DA (${fin.combinedBooks.marginPct}%)`;
+  if (combProfitEl) combProfitEl.textContent = `+${base.combined.expectedProfitDa.toLocaleString('fr-DZ')} DA (${base.combined.marginPct}%)`;
 
   const combFooterEl = document.getElementById('finance-combined-books-footer');
   if (combFooterEl) {
-    combFooterEl.innerHTML = `<span><i class="fa-solid fa-books"></i> ${fin.combinedBooks.titlesCount} Titles</span><span>Avg Cost: <strong>${fin.combinedBooks.avgUnitCost.toFixed(2)} DA</strong> • Book Sales: <strong>${fin.combinedBooks.revenue.toLocaleString('fr-DZ')} DA</strong></span>`;
+    combFooterEl.innerHTML = `<span><i class="fa-solid fa-books"></i> Baseline: 306,070 / 165,937.5 / 140,132.5 DA</span><span>DB Remaining: <strong>${fin.combinedBooks.valuationAtRetail.toLocaleString('fr-DZ')} DA retail</strong></span>`;
   }
 
   // 3c. Accessories Breakdown Card (Standalone / Separate)
@@ -3152,12 +3405,23 @@ function renderFinanceSection() {
     }
   }
 
-  // 5. Stock Summary Table (100% live from physical + sales state)
+  // 5. Stock Summary Table (Photo Baseline + Live DB Remaining Stock)
   const stockTbody = document.getElementById('finance-stock-summary-tbody');
   if (stockTbody) {
     stockTbody.innerHTML = `
+      <tr style="background: #EFF6FF;">
+        <td><span class="badge-newstock"><i class="fa-solid fa-image"></i> NEW BATCH (Owner Verified Photo)</span></td>
+        <td><strong>${fin.newStock.titlesCount} Titles</strong></td>
+        <td><strong>Initial Baseline</strong></td>
+        <td><strong>${base.newStock.paidCostDa.toLocaleString('fr-DZ')} DA</strong></td>
+        <td>-</td>
+        <td><strong style="color: var(--vintage-blue);">${base.newStock.retailValueDa.toLocaleString('fr-DZ')} DA</strong></td>
+        <td><strong style="color: var(--success);">+${base.newStock.expectedProfitDa.toLocaleString('fr-DZ')} DA</strong></td>
+        <td><strong>${base.newStock.marginPct}%</strong></td>
+        <td><span class="badge badge-blue">Baseline</span></td>
+      </tr>
       <tr>
-        <td><span class="badge-newstock"><i class="fa-solid fa-boxes-stacked"></i> NEW BATCH (Fair & Restocks)</span></td>
+        <td><span class="badge-newstock"><i class="fa-solid fa-boxes-stacked"></i> NEW BATCH (Live DB Remaining)</span></td>
         <td><strong>${fin.newStock.titlesCount} Titles</strong></td>
         <td><strong style="color: var(--success);">${fin.newStock.available} avail</strong> <span style="font-size: 0.75rem; color: var(--text-muted);">(${fin.newStock.onHand} on hand)</span></td>
         <td><strong>${fin.newStock.valuationAtCost.toLocaleString('fr-DZ')} DA</strong></td>
@@ -3167,8 +3431,19 @@ function renderFinanceSection() {
         <td><strong>${fin.newStock.marginPct}%</strong></td>
         <td><span class="badge ${fin.newStock.soldQty > 0 ? 'badge-blue' : 'badge-green'}">${fin.newStock.soldQty} Sold</span></td>
       </tr>
+      <tr style="background: #FFFBEB;">
+        <td><span class="badge-oldstock"><i class="fa-solid fa-image"></i> OLD STOCK (Owner Verified Photo)</span></td>
+        <td><strong>${fin.oldStock.titlesCount} Titles</strong></td>
+        <td><strong>Initial Baseline</strong></td>
+        <td><strong>${base.oldStock.paidCostDa.toLocaleString('fr-DZ')} DA</strong></td>
+        <td>-</td>
+        <td><strong style="color: var(--vintage-blue);">${base.oldStock.retailValueDa.toLocaleString('fr-DZ')} DA</strong></td>
+        <td><strong style="color: var(--success);">+${base.oldStock.expectedProfitDa.toLocaleString('fr-DZ')} DA</strong></td>
+        <td><strong>${base.oldStock.marginPct}%</strong></td>
+        <td><span class="badge badge-amber">Baseline</span></td>
+      </tr>
       <tr>
-        <td><span class="badge-oldstock"><i class="fa-solid fa-clock-rotate-left"></i> OLD STOCK (Pre-fair FIFO)</span></td>
+        <td><span class="badge-oldstock"><i class="fa-solid fa-clock-rotate-left"></i> OLD STOCK (Live DB Remaining)</span></td>
         <td><strong>${fin.oldStock.titlesCount} Titles</strong></td>
         <td><strong style="color: var(--success);">${fin.oldStock.available} avail</strong> <span style="font-size: 0.75rem; color: var(--text-muted);">(${fin.oldStock.onHand} on hand)</span></td>
         <td><strong>${fin.oldStock.valuationAtCost.toLocaleString('fr-DZ')} DA</strong></td>
@@ -3179,7 +3454,18 @@ function renderFinanceSection() {
         <td><span class="badge badge-amber">${fin.oldStock.soldQty} Sold</span></td>
       </tr>
       <tr style="background: #F0FDF4; font-weight: bold; border-top: 2px solid #86EFAC;">
-        <td><span class="badge" style="background: #DCFCE7; color: #166534;"><i class="fa-solid fa-book-bookmark"></i> COMBINED BOOK INVENTORY</span></td>
+        <td><span class="badge" style="background: #DCFCE7; color: #166534;"><i class="fa-solid fa-book-bookmark"></i> COMBINED BASELINE (Photos Total)</span></td>
+        <td><strong>${fin.combinedBooks.titlesCount} Titles</strong></td>
+        <td><strong>Baseline Total</strong></td>
+        <td style="color: var(--text-primary); font-size: 1.02rem;"><strong>${base.combined.paidCostDa.toLocaleString('fr-DZ')} DA</strong></td>
+        <td>-</td>
+        <td style="color: var(--vintage-blue); font-size: 1.02rem;"><strong>${base.combined.retailValueDa.toLocaleString('fr-DZ')} DA</strong></td>
+        <td style="color: var(--success); font-size: 1.02rem;"><strong>+${base.combined.expectedProfitDa.toLocaleString('fr-DZ')} DA</strong></td>
+        <td style="color: var(--success); font-size: 1.02rem;"><strong>${base.combined.marginPct}%</strong></td>
+        <td><span class="badge badge-green">Configured</span></td>
+      </tr>
+      <tr style="background: #FFFDF8; font-weight: bold;">
+        <td><span class="badge" style="background: #DCFCE7; color: #166534;"><i class="fa-solid fa-warehouse"></i> LIVE DB REMAINING BOOKS</span></td>
         <td><strong>${fin.combinedBooks.titlesCount} Titles</strong></td>
         <td><strong style="color: var(--success); font-size: 1.02rem;">${fin.combinedBooks.available} units</strong></td>
         <td style="color: var(--text-primary); font-size: 1.02rem;"><strong>${fin.combinedBooks.valuationAtCost.toLocaleString('fr-DZ')} DA</strong></td>
@@ -3199,17 +3485,6 @@ function renderFinanceSection() {
         <td><strong style="color: var(--success);">+${fin.accessories.expectedProfit.toLocaleString('fr-DZ')} DA</strong></td>
         <td><strong>${fin.accessories.marginPct}%</strong></td>
         <td><span class="badge" style="background: #EDE9FE; color: #5B21B6;">${fin.accessories.soldQty} Sold</span></td>
-      </tr>
-      <tr style="background: #FFFDF8; font-weight: bold; border-top: 2px solid var(--border-color);">
-        <td><strong>GRAND TOTAL (Books + Accessories)</strong></td>
-        <td><strong>${fin.combined.distinctItems} Products</strong></td>
-        <td><strong style="color: var(--success); font-size: 1.05rem;">${fin.combined.available} units</strong></td>
-        <td style="color: var(--text-primary); font-size: 1.05rem;"><strong>${fin.combined.valuationAtCost.toLocaleString('fr-DZ')} DA</strong></td>
-        <td>${fin.combined.avgUnitCost.toFixed(2)} DA</td>
-        <td style="color: var(--vintage-blue); font-size: 1.05rem;"><strong>${fin.combined.valuationAtRetail.toLocaleString('fr-DZ')} DA</strong></td>
-        <td style="color: var(--success); font-size: 1.05rem;"><strong>+${fin.combined.expectedProfit.toLocaleString('fr-DZ')} DA</strong></td>
-        <td style="color: var(--success); font-size: 1.05rem;"><strong>${fin.combined.marginPct}%</strong></td>
-        <td><span class="badge badge-green">${fin.combinedBooks.soldQty + fin.accessories.soldQty} Sold</span></td>
       </tr>
     `;
   }
@@ -4580,9 +4855,12 @@ window.openOpeningPositionModal = function() {
   const cashEl = document.getElementById('opening-cash-input');
   const dateEl = document.getElementById('opening-date-input');
   const notesEl = document.getElementById('opening-notes-input');
+  const chkEl = document.getElementById('opening-verified-checkbox');
   if (cashEl) cashEl.value = (op.cash_balance_da !== null && op.cash_balance_da !== undefined) ? op.cash_balance_da : 0;
   if (dateEl) dateEl.value = op.as_of_date ? String(op.as_of_date).slice(0, 10) : new Date().toISOString().slice(0, 10);
-  if (notesEl) notesEl.value = op.notes || '';
+  const rawNotes = String(op.notes || '');
+  if (notesEl) notesEl.value = rawNotes.replace('[VERIFIED]', '').trim();
+  if (chkEl) chkEl.checked = !!(op.cash_verified === true || rawNotes.includes('[VERIFIED]'));
   openModal('modal-edit-opening');
 };
 
@@ -4590,21 +4868,27 @@ window.handleSaveOpeningPosition = async function(event) {
   event.preventDefault();
   const cashVal = parseFloat(document.getElementById('opening-cash-input')?.value);
   const asOfDate = document.getElementById('opening-date-input')?.value || new Date().toISOString().slice(0, 10);
-  const notes = (document.getElementById('opening-notes-input')?.value || '').trim();
+  const rawNotes = (document.getElementById('opening-notes-input')?.value || '').trim();
+  const isVerified = !!document.getElementById('opening-verified-checkbox')?.checked;
 
   if (isNaN(cashVal) || cashVal < 0) {
     alert('Please enter a valid non-negative opening cash balance.');
     return;
   }
 
+  const finalNotes = isVerified
+    ? `[VERIFIED]${rawNotes ? ' ' + rawNotes : ' Opening cash verified'}`
+    : (rawNotes || null);
+
   const prev = state.openingPosition || {};
   state.openingPosition = {
     id: 1,
     cash_balance_da: Math.round(cashVal),
+    cash_verified: isVerified,
     owner_contributions_da: Number(prev.owner_contributions_da) || 0,
     owner_withdrawals_da: Number(prev.owner_withdrawals_da) || 0,
     as_of_date: asOfDate,
-    notes: notes || null,
+    notes: finalNotes,
     updated_at: new Date().toISOString()
   };
 
@@ -4614,6 +4898,41 @@ window.handleSaveOpeningPosition = async function(event) {
   closeModal('modal-edit-opening');
   renderAppViews();
   if (state.online && auth.isAuthenticated()) sync.sync();
+};
+
+window.openStockBaselineModal = function() {
+  const base = getStockBaseline();
+  const setV = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+  setV('base-old-retail', base.oldStock.retailValueDa);
+  setV('base-old-cost', base.oldStock.paidCostDa);
+  setV('base-new-retail', base.newStock.retailValueDa);
+  setV('base-new-cost', base.newStock.paidCostDa);
+  openModal('modal-stock-baseline');
+};
+
+window.handleSaveStockBaseline = function(event) {
+  event.preventDefault();
+  const oldRetail = parseFloat(document.getElementById('base-old-retail')?.value);
+  const oldPaid = parseFloat(document.getElementById('base-old-cost')?.value);
+  const newRetail = parseFloat(document.getElementById('base-new-retail')?.value);
+  const newPaid = parseFloat(document.getElementById('base-new-cost')?.value);
+
+  if ([oldRetail, oldPaid, newRetail, newPaid].some(v => isNaN(v) || v < 0)) {
+    alert('Please enter valid non-negative numbers for all stock baseline fields.');
+    return;
+  }
+
+  const next = {
+    oldStock: { retailValueDa: oldRetail, paidCostDa: oldPaid, expectedProfitDa: oldRetail - oldPaid },
+    newStock: { retailValueDa: newRetail, paidCostDa: newPaid, expectedProfitDa: newRetail - newPaid }
+  };
+  try {
+    localStorage.setItem('gr_stock_baseline_v1', JSON.stringify(next));
+  } catch (e) {
+    console.warn('[StockBaseline] localStorage write warning:', e);
+  }
+  closeModal('modal-stock-baseline');
+  renderAppViews();
 };
 
 window.exportToExcel = function(scope) {

@@ -4,14 +4,14 @@
  * Provides full offline resilience for Windows laptop and iPhone Safari PWA.
  */
 
-const CACHE_NAME = 'gentle-readers-manager-v23';
+const CACHE_NAME = 'gentle-readers-manager-v24';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manager.css',
-  './manager.css?v=23',
+  './manager.css?v=24',
   './manager.js',
-  './manager.js?v=23',
+  './manager.js?v=24',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
