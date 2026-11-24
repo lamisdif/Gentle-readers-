@@ -15,22 +15,101 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
-    <script type="module">
-        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js';
+</head>
 
-        // Password protection
-        let pswd = sessionStorage.getItem('admin_orders_pwd') || prompt("Enter Admin Password:");
-        if (pswd !== "gentleadmin") {
-            sessionStorage.removeItem('admin_orders_pwd');
-            document.body.innerHTML = "<div class='flex items-center justify-center min-h-screen bg-slate-50'><div class='bg-white p-8 rounded-xl shadow-lg text-center border border-slate-100'><h1 class='text-rose-600 text-3xl font-extrabold mb-4'>Access Denied</h1><p class='text-slate-500'>Incorrect password. Please refresh to try again.</p></div></div>";
-            throw new Error("Access Denied");
-        }
-        sessionStorage.setItem('admin_orders_pwd', pswd);
+<body class="bg-slate-50 min-h-screen">
 
-        const supabaseUrl = "https://fsximdllrhglabxbqvay.supabase.co";
-        const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzeGltZGxscmhnbGFieGJxdmF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3NTg0NzgsImV4cCI6MjA3MjMzNDQ3OH0.KiRJdFoW4DtDAPMLqH9Im3-37GhIFmD269iDsY7ih2Q";
-        const supabase = createClient(supabaseUrl, supabaseKey);
+    <!-- Authentication Gate Modal (Shown by default on every visit/refresh) -->
+    <div id="auth-gate" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full p-8 text-center animate-in fade-in zoom-in-95 duration-200">
+            <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-900 tracking-tight mb-2">Admin Authentication</h2>
+            <p class="text-sm text-slate-500 mb-6">Enter the administrator password to view customer orders.</p>
+            
+            <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                <div>
+                    <input type="password" id="admin-password-input" placeholder="Enter admin password" required autofocus
+                        class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 text-center font-mono text-base outline-none transition-all duration-200" autocomplete="current-password">
+                </div>
+                
+                <div id="auth-error-msg" class="hidden text-sm font-semibold text-rose-600 bg-rose-50 border border-rose-200 py-2.5 px-4 rounded-xl"></div>
+                
+                <button type="submit" id="unlock-btn" class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold rounded-xl shadow-md transition-colors duration-200 flex items-center justify-center gap-2">
+                    <span id="btn-text">Unlock Orders Dashboard</span>
+                    <svg id="btn-spinner" class="hidden animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                </button>
+            </form>
+        </div>
+    </div>
 
+    <!-- Header Section (Hidden until authenticated) -->
+    <header id="main-header" class="hidden bg-white shadow border-b border-slate-200 sticky top-0 z-10">
+        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="py-5 flex items-center justify-between flex-wrap gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="bg-indigo-600 text-white p-2 rounded-lg shadow-sm">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Orders Dashboard</h1>
+                        <p class="text-sm font-medium text-slate-500" id="order-count">Loading...</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <div class="relative flex-1 sm:w-auto">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <input type="text" id="search-input" onkeyup="filterOrders()" placeholder="Search names, phones, IDs..."
+                            class="block w-full sm:w-[320px] pl-10 pr-4 py-2.5 text-sm text-slate-900 bg-slate-100 border-transparent rounded-full focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 shadow-sm transition-all duration-300 outline-none" autocomplete="off">
+                    </div>
+                    <button onclick="lockDashboard()" title="Lock dashboard"
+                        class="px-4 py-2.5 bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 text-sm font-medium rounded-full border border-slate-200 transition-colors duration-200 flex items-center gap-1.5 whitespace-nowrap">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        <span>Lock</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content (Hidden until authenticated) -->
+    <main id="main-content" class="hidden max-w-full mx-auto p-4 sm:p-6 lg:p-8">
+        <div class="overflow-x-auto pb-6">
+            <table class="w-full text-left table-spacing border-separate min-w-max">
+                <thead>
+                    <tr>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">ID</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Date</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">First Name</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Last Name</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Phone</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Insta</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Items Summary</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Subtotal</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Shipping</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Total</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Wilaya</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Daira</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Address</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Method</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Desk</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Pkg Type</th>
+                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Pkg Price</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-tbody">
+                    <!-- Rows dynamically generated -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
         let allOrders = [];
 
         function formatDate(dateStr) {
@@ -45,18 +124,14 @@
                 let items = typeof itemsJson === 'string' ? JSON.parse(itemsJson) : itemsJson;
 
                 let itemList = [];
-                // If it's an array, it might be an array of objects
                 if (Array.isArray(items)) {
                     itemList = items.map(i => {
                         let title = i.title || i.id || JSON.stringify(i);
-                        // Clean "1 × " or similar strings that might have leaked into titles or keys
                         title = String(title).replace(/ \d+ ×$/, '').replace(/ \d+x$/, '').replace(/^cms_/, '');
                         let qty = i.quantity || 1;
                         return `${title} <span class="text-indigo-600 font-semibold ml-1">(${qty} ${qty > 1 ? 'copies' : 'copy'})</span>`;
                     });
-                } 
-                // Or maybe an object { "Book Name": 2 }
-                else if (typeof items === 'object') {
+                } else if (typeof items === 'object') {
                     itemList = Object.entries(items).map(([key, value]) => {
                         let title = String(key).replace(/ \d+ ×$/, '').replace(/ \d+x$/, '').replace(/^cms_/, '');
                         let qty = parseInt(value, 10) || 1;
@@ -73,66 +148,92 @@
             }
         }
 
-        async function loadOrders() {
-            const tbody = document.getElementById("orders-tbody");
-            tbody.innerHTML = "<tr><td colspan='17' class='py-12 text-center text-slate-500 font-medium bg-transparent'><div class='flex justify-center items-center'><svg class='animate-spin -ml-1 mr-3 h-5 w-5 text-indigo-500' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'><circle class='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' stroke-width='4'></circle><path class='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path></svg> Fetching orders securely...</div></td></tr>";
+        async function handleAuthSubmit(e) {
+            e.preventDefault();
+            const passwordInput = document.getElementById("admin-password-input");
+            const password = passwordInput.value.trim();
+            const errorEl = document.getElementById("auth-error-msg");
+            const btnText = document.getElementById("btn-text");
+            const btnSpinner = document.getElementById("btn-spinner");
+            const submitBtn = document.getElementById("unlock-btn");
 
-            let data = null;
-            let error = null;
-
-            // 1. Fetch via Netlify Serverless Function (Server-Side Password & Service Role Verification)
-            try {
-                const fnRes = await fetch('/.netlify/functions/admin-orders', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: pswd })
-                });
-
-                const resJson = await fnRes.json();
-                if (fnRes.ok && resJson && Array.isArray(resJson.orders)) {
-                    data = resJson.orders;
-                } else {
-                    error = new Error(resJson.error || `Server returned status ${fnRes.status}`);
-                }
-            } catch (e) {
-                error = e;
-            }
-
-            // 2. Fallback: If authenticated owner session exists in browser, direct Supabase select
-            if (!data) {
-                try {
-                    const directRes = await supabase
-                        .from('orders')
-                        .select('*')
-                        .order('created_at', { ascending: false });
-                    if (!directRes.error && Array.isArray(directRes.data)) {
-                        data = directRes.data;
-                        error = null;
-                    }
-                } catch (e) {
-                    // Ignore fallback error
-                }
-            }
-
-            if (error || !data) {
-                console.error("Error fetching orders:", error);
-                const msg = error ? (error.message || JSON.stringify(error)) : 'Unable to load orders';
-                tbody.innerHTML = `<tr><td colspan='17' class='p-8 text-center text-rose-500 font-bold bg-white rounded-xl shadow-sm'>Error loading orders: ${msg}</td></tr>`;
+            if (!password) {
+                errorEl.textContent = "Please enter the admin password.";
+                errorEl.classList.remove("hidden");
                 return;
             }
 
-            allOrders = data || [];
-            renderTable(allOrders);
+            // UI Loading state
+            errorEl.classList.add("hidden");
+            btnText.textContent = "Verifying...";
+            btnSpinner.classList.remove("hidden");
+            submitBtn.disabled = true;
+
+            try {
+                // Call Netlify serverless function directly
+                const res = await fetch('/.netlify/functions/admin-orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: password })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    errorEl.textContent = data.error || "Access Denied: Incorrect admin password.";
+                    errorEl.classList.remove("hidden");
+                    passwordInput.value = "";
+                    passwordInput.focus();
+                    btnText.textContent = "Unlock Orders Dashboard";
+                    btnSpinner.classList.add("hidden");
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                // Authentication Successful
+                allOrders = data.orders || [];
+                
+                // Hide gate and reveal dashboard
+                document.getElementById("auth-gate").classList.add("hidden");
+                document.getElementById("main-header").classList.remove("hidden");
+                document.getElementById("main-content").classList.remove("hidden");
+
+                renderTable(allOrders);
+
+            } catch (err) {
+                errorEl.textContent = "Connection error: Unable to verify credentials with server.";
+                errorEl.classList.remove("hidden");
+                btnText.textContent = "Unlock Orders Dashboard";
+                btnSpinner.classList.add("hidden");
+                submitBtn.disabled = false;
+            }
+        }
+
+        function lockDashboard() {
+            allOrders = [];
+            const tbody = document.getElementById("orders-tbody");
+            tbody.innerHTML = "";
+            document.getElementById("order-count").textContent = "Locked";
+            document.getElementById("admin-password-input").value = "";
+            document.getElementById("auth-error-msg").classList.add("hidden");
+            document.getElementById("btn-text").textContent = "Unlock Orders Dashboard";
+            document.getElementById("btn-spinner").classList.add("hidden");
+            document.getElementById("unlock-btn").disabled = false;
+            
+            document.getElementById("main-header").classList.add("hidden");
+            document.getElementById("main-content").classList.add("hidden");
+            document.getElementById("auth-gate").classList.remove("hidden");
+            document.getElementById("admin-password-input").focus();
         }
 
         function renderTable(orders) {
             const tbody = document.getElementById("orders-tbody");
             if (orders.length === 0) {
                 tbody.innerHTML = "<tr><td colspan='17' class='py-12 text-center text-slate-500 font-medium bg-white rounded-xl shadow-sm'>No orders found matching your criteria.</td></tr>";
+                document.getElementById("order-count").innerHTML = `<span class="font-bold text-indigo-600">0</span> total orders`;
                 return;
             }
 
-            // Create beautiful cards out of rows
             tbody.innerHTML = orders.map(o => {
                 const isHome = (o.deliveryMethod || '').toLowerCase() === 'home';
                 const hasPkg = o.packaging_type && o.packaging_type !== 'none';
@@ -185,72 +286,7 @@
             });
             renderTable(filtered);
         };
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', loadOrders);
     </script>
-</head>
-
-<body class="bg-slate-50 min-h-screen">
-
-    <!-- Header Section -->
-    <header class="bg-white shadow border-b border-slate-200 sticky top-0 z-10">
-        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="py-5 flex items-center justify-between flex-wrap gap-4">
-                <div class="flex items-center gap-3">
-                    <div class="bg-indigo-600 text-white p-2 rounded-lg shadow-sm">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Orders Dashboard</h1>
-                        <p class="text-sm font-medium text-slate-500" id="order-count">Loading...</p>
-                    </div>
-                </div>
-                <div class="relative w-full sm:w-auto">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-5 w-5 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <input type="text" id="search-input" onkeyup="filterOrders()" placeholder="Search names, phones, IDs..."
-                        class="block w-full sm:w-[360px] pl-10 pr-4 py-2.5 text-sm text-slate-900 bg-slate-100 border-transparent rounded-full focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 shadow-sm transition-all duration-300 outline-none" autocomplete="off">
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="max-w-full mx-auto p-4 sm:p-6 lg:p-8">
-        <div class="overflow-x-auto pb-6">
-            <table class="w-full text-left table-spacing border-separate min-w-max">
-                <thead>
-                    <tr>
-                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">ID</th>
-                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Date</th>
-                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">First Name</th>
-                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Last Name</th>
-                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Phone</th>
-                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Insta</th>
-                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Items Summary</th>
-                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Subtotal</th>
-                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Shipping</th>
-                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Total</th>
-                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Wilaya</th>
-                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Daira</th>
-                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Address</th>
-                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Method</th>
-                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Desk</th>
-                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Pkg Type</th>
-                        <th class="px-4 pb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Pkg Price</th>
-                    </tr>
-                </thead>
-                <tbody id="orders-tbody">
-                    <!-- Rows dynamically generated -->
-                </tbody>
-            </table>
-        </div>
-    </main>
-
 </body>
 
 </html>

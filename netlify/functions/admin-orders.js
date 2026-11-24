@@ -1,5 +1,5 @@
 // Netlify Serverless Function: Secure Admin Orders Access
-// Bypasses RLS on the server side using the Supabase Service Role Key
+// Bypasses RLS strictly on the server side using the Supabase Service Role Key
 // Validates admin password against environment variable before returning data
 
 exports.handler = async function (event, context) {
@@ -9,7 +9,7 @@ exports.handler = async function (event, context) {
       statusCode: 204,
       headers: {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type, x-admin-password',
+        'Access-Control-Allow-Headers': 'Content-Type',
         'Access-Control-Allow-Methods': 'POST, OPTIONS'
       }
     };
@@ -31,19 +31,19 @@ exports.handler = async function (event, context) {
       body = {};
     }
 
-    // 1. Password Verification
+    // 1. Strict Password Verification
     const expectedPassword = process.env.ADMIN_PASSWORD || 'gentleadmin';
-    const providedPassword = body.password || event.headers['x-admin-password'];
+    const providedPassword = (body && typeof body.password === 'string') ? body.password.trim() : '';
 
     if (!providedPassword || providedPassword !== expectedPassword) {
       return {
         statusCode: 401,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error: 'Unauthorized: Incorrect admin password.' })
+        body: JSON.stringify({ error: 'Unauthorized: Incorrect or missing admin password.' })
       };
     }
 
-    // 2. Supabase Service Role Credentials
+    // 2. Supabase Service Role Credentials (Server-Side Only)
     const supabaseUrl = process.env.SUPABASE_URL || 'https://fsximdllrhglabxbqvay.supabase.co';
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -57,7 +57,7 @@ exports.handler = async function (event, context) {
       };
     }
 
-    // 3. Fetch Orders via Service Role (Bypasses Table RLS on Server Side)
+    // 3. Fetch Orders via Service Role (Bypasses Table RLS on Server Side Only)
     const targetUrl = `${supabaseUrl}/rest/v1/orders?select=*&order=created_at.desc`;
     const response = await fetch(targetUrl, {
       headers: {
