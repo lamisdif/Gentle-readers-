@@ -238,10 +238,10 @@ class AuthManager {
   async loginWithPassword(password) {
     if (!password) return false;
     try {
-      const res = await fetch('/api/admin-orders', {
+      const res = await fetch('/api/manager-api', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: password.trim() })
+        body: JSON.stringify({ password: password.trim(), action: 'verify_auth' })
       });
       if (res.ok) {
         this.adminPassword = password.trim();
@@ -250,12 +250,7 @@ class AuthManager {
       }
       return false;
     } catch (e) {
-      console.warn('[Auth] Password verification check notice:', e);
-      if (password.trim() === 'gentleadmin') {
-        this.adminPassword = 'gentleadmin';
-        sessionStorage.setItem('gr_owner_pass', 'gentleadmin');
-        return true;
-      }
+      console.warn('[Auth] Password verification notice:', e);
       return false;
     }
   }
@@ -481,6 +476,7 @@ const state = {
   searchQuery: '',
   inventoryFilter: 'all',
   ordersFilter: 'all',
+  debtsFilter: 'all',
   profitFilter: 'all',
   openingPosition: { cash_balance_da: 0, notes: 'Opening' },
   storefrontCatalogCount: 150,
@@ -501,9 +497,11 @@ class SyncCoordinator {
       return;
     }
 
-    // Refresh and verify owner session prior to syncing
-    const token = await auth.getValidToken();
-    if (!token || !auth.isAuthenticated()) {
+    // Refresh GitHub OAuth token when applicable; never block password-authenticated owner sync
+    if (!auth.adminPassword && !sessionStorage.getItem('gr_owner_pass')) {
+      await auth.getValidToken();
+    }
+    if (!auth.isAuthenticated()) {
       console.log('[Sync] Cannot sync: User is not authenticated or session expired.');
       this.updateStatus('unauthenticated');
       return;
@@ -653,36 +651,195 @@ class SyncCoordinator {
     }
   }
 
+  sanitizePayload(entityTable, action, payload) {
+    if (!payload || action === 'delete' || action === 'rpc') return payload;
+    const clean = { ...payload };
+
+    if (entityTable === 'suppliers') {
+      const allowed = new Set(['id', 'name', 'contact_person', 'phone', 'email', 'address', 'notes', 'created_at', 'updated_at']);
+      for (const k of Object.keys(clean)) {
+        if (!allowed.has(k)) delete clean[k];
+      }
+    } else if (entityTable === 'inventory_items') {
+      delete clean.purchase_cost_da;
+      delete clean.quantity_on_hand;
+      delete clean.quantity_available;
+      delete clean._dbQuantitySold;
+      delete clean._dbQuantityReserved;
+      const allowed = new Set([
+        'id', 'title', 'author', 'isbn', 'category', 'location',
+        'stock_group', 'batch_id', 'quantity_received',
+        'quantity_sold', 'quantity_reserved', 'quantity_damaged',
+        'quantity_lost', 'quantity_promotional', 'quantity_returned_to_supplier', 'quantity_count_adjustment',
+        'unit_purchase_cost_da', 'selling_price_da', 'supplier_name',
+        'acquisition_date', 'condition', 'notes', 'created_at', 'updated_at'
+      ]);
+      for (const k of Object.keys(clean)) {
+        if (!allowed.has(k)) delete clean[k];
+      }
+      if (action === 'update') delete clean.id;
+      if (!clean.acquisition_date && action !== 'update') {
+        clean.acquisition_date = (clean.created_at || new Date().toISOString()).slice(0, 10);
+      }
+      if (clean.batch_id === '' || clean.batch_id === undefined) {
+        clean.batch_id = null;
+      }
+      if (clean.stock_group && clean.stock_group !== 'OLD_STOCK' && clean.stock_group !== 'NEW_STOCK') {
+        if (!clean.notes || !clean.notes.includes('StockGroup:')) {
+          clean.notes = (clean.notes ? clean.notes + ' | ' : '') + `StockGroup: ${clean.stock_group}`;
+        }
+        clean.stock_group = 'NEW_STOCK';
+      }
+    } else if (entityTable === 'purchase_batches') {
+      if (clean.supplier_name && !clean.supplier_id) {
+        clean.notes = (clean.notes ? clean.notes + ' | ' : '') + `Supplier: ${clean.supplier_name}`;
+      }
+      delete clean.supplier_name;
+      if (clean.supplier_id === '' || clean.supplier_id === undefined) clean.supplier_id = null;
+      if (!clean.stock_group) clean.stock_group = 'NEW_STOCK';
+      if (clean.total_cost_da == null || isNaN(clean.total_cost_da)) clean.total_cost_da = 0;
+      if (clean.amount_paid_da == null || isNaN(clean.amount_paid_da)) clean.amount_paid_da = 0;
+      if (clean.total_units == null || isNaN(clean.total_units)) clean.total_units = 0;
+      if (clean.payment_status === 'unreconciled') clean.payment_status = 'unpaid';
+      if (clean.payment_status === 'paid_in_full') clean.payment_status = 'paid';
+      if (!['paid', 'partial', 'unpaid'].includes(clean.payment_status)) clean.payment_status = 'unpaid';
+      if (!clean.purchase_date) clean.purchase_date = (clean.created_at || new Date().toISOString()).slice(0, 10);
+      const allowed = new Set([
+        'id', 'batch_name', 'stock_group', 'supplier_id', 'purchase_date',
+        'total_units', 'total_cost_da', 'amount_paid_da', 'payment_status', 'notes', 'created_at', 'updated_at'
+      ]);
+      for (const k of Object.keys(clean)) {
+        if (!allowed.has(k)) delete clean[k];
+      }
+    } else if (entityTable === 'operating_expenses') {
+      if (clean.category === 'advertising') clean.category = 'marketing';
+      if (clean.category === 'delivery_surcharge') clean.category = 'transportation';
+      const allowedCategories = ['packaging', 'transportation', 'fair_fees', 'marketing', 'software', 'supplies', 'salaries', 'other'];
+      if (!allowedCategories.includes(clean.category)) clean.category = 'other';
+      if (!clean.expense_date) clean.expense_date = (clean.created_at || new Date().toISOString()).slice(0, 10);
+      if (!clean.payment_method || !['cash', 'baridimob', 'bank_transfer', 'other'].includes(clean.payment_method)) {
+        clean.payment_method = 'cash';
+      }
+      if (clean.notes && String(clean.notes).trim()) {
+        clean.description = clean.description ? `${clean.description} | ${String(clean.notes).trim()}` : String(clean.notes).trim();
+      }
+      const allowed = new Set(['id', 'category', 'amount_da', 'expense_date', 'payment_method', 'description', 'created_at', 'updated_at']);
+      for (const k of Object.keys(clean)) {
+        if (!allowed.has(k)) delete clean[k];
+      }
+    } else if (entityTable === 'debts') {
+      if (clean.debt_type === 'store_to_supplier') {
+        clean.debt_type = 'supplier';
+      } else if (clean.debt_type === 'owner_borrowing' || clean.debt_type === 'store_to_owner') {
+        const tag = clean.debt_type === 'owner_borrowing' ? 'Owner Borrowing' : 'Advance from Owner';
+        if (!clean.notes || !clean.notes.includes(tag)) {
+          clean.notes = clean.notes ? `${tag} | ${clean.notes}` : tag;
+        }
+        clean.debt_type = 'personal';
+      }
+      const allowed = new Set(['id', 'creditor_name', 'debt_type', 'original_amount_da', 'incurred_date', 'due_date', 'notes']);
+      for (const k of Object.keys(clean)) {
+        if (!allowed.has(k)) delete clean[k];
+      }
+      if (action === 'update') delete clean.id;
+      const allowedTypes = ['supplier', 'personal', 'bank', 'other'];
+      if (!allowedTypes.includes(clean.debt_type)) clean.debt_type = 'supplier';
+      if (clean.incurred_date === '') clean.incurred_date = null;
+      if (clean.due_date === '') clean.due_date = null;
+    } else if (entityTable === 'debt_repayments') {
+      const allowed = new Set(['id', 'debt_id', 'amount_da', 'repayment_date', 'payment_method', 'reversal_of_id', 'notes']);
+      for (const k of Object.keys(clean)) {
+        if (!allowed.has(k)) delete clean[k];
+      }
+      if (!clean.repayment_date) clean.repayment_date = (clean.created_at || new Date().toISOString()).slice(0, 10);
+      if (clean.reversal_of_id === '' || clean.reversal_of_id === undefined) clean.reversal_of_id = null;
+      if (!clean.payment_method || !['cash', 'baridimob', 'bank_transfer', 'other'].includes(clean.payment_method)) {
+        clean.payment_method = 'cash';
+      }
+    } else if (entityTable === 'opening_position') {
+      clean.id = 1;
+      clean.cash_balance_da = Number(clean.cash_balance_da) || 0;
+      clean.owner_contributions_da = Number(clean.owner_contributions_da) || 0;
+      clean.owner_withdrawals_da = Number(clean.owner_withdrawals_da) || 0;
+      if (!clean.as_of_date) clean.as_of_date = (clean.created_at || new Date().toISOString()).slice(0, 10);
+      const allowed = new Set(['id', 'cash_balance_da', 'owner_contributions_da', 'owner_withdrawals_da', 'as_of_date', 'notes', 'created_at', 'updated_at']);
+      for (const k of Object.keys(clean)) {
+        if (!allowed.has(k)) delete clean[k];
+      }
+    } else if (entityTable === 'capital_contributions') {
+      if (!clean.contribution_date) clean.contribution_date = (clean.created_at || new Date().toISOString()).slice(0, 10);
+      if (!clean.source) clean.source = 'Owner Personal Funds';
+      if (!clean.payment_method) clean.payment_method = 'Cash';
+      const allowed = new Set(['id', 'amount_da', 'contribution_date', 'source', 'payment_method', 'notes', 'created_at', 'updated_at']);
+      for (const k of Object.keys(clean)) {
+        if (!allowed.has(k)) delete clean[k];
+      }
+    } else if (entityTable === 'owner_withdrawals') {
+      if (!clean.withdrawal_date) clean.withdrawal_date = (clean.created_at || new Date().toISOString()).slice(0, 10);
+      if (!clean.reason) clean.reason = 'Owner Draw';
+      if (!clean.payment_method) clean.payment_method = 'Cash';
+      const allowed = new Set(['id', 'amount_da', 'withdrawal_date', 'reason', 'payment_method', 'notes', 'created_at', 'updated_at']);
+      for (const k of Object.keys(clean)) {
+        if (!allowed.has(k)) delete clean[k];
+      }
+    } else if (entityTable === 'stock_adjustments') {
+      if (!clean.adjustment_date) clean.adjustment_date = (clean.created_at || new Date().toISOString()).slice(0, 10);
+      if (!clean.created_by) clean.created_by = 'owner';
+      const allowed = new Set(['id', 'inventory_item_id', 'adjustment_type', 'quantity_change', 'previous_quantity', 'new_quantity', 'unit_cost_da', 'reason', 'adjustment_date', 'created_by', 'created_at']);
+      for (const k of Object.keys(clean)) {
+        if (!allowed.has(k)) delete clean[k];
+      }
+    }
+    return clean;
+  }
+
   async executeMutation(mut) {
-    const token = await auth.getValidToken();
+    const adminPass = auth.adminPassword || sessionStorage.getItem('gr_owner_pass');
+    const token = adminPass ? null : await auth.getValidToken();
     const endpoint = `${SUPABASE_URL}/rest/v1/${mut.entity_table}`;
     const idField = mut.entity_table === 'order_meta' ? 'order_id' : 'id';
     const primaryVal = mut.entity_id || (mut.payload ? mut.payload[idField] : null);
+    const clean = this.sanitizePayload(mut.entity_table, mut.action, mut.payload);
 
-    const adminPass = auth.adminPassword || sessionStorage.getItem('gr_owner_pass');
-    if (adminPass) {
+    // 1. Primary: Netlify secure serverless proxy (accepts owner password OR verified owner OAuth token)
+    if (adminPass || token) {
+      const proxyHeaders = { 'Content-Type': 'application/json' };
+      if (!adminPass && token) proxyHeaders['Authorization'] = `Bearer ${token}`;
+
+      let proxyRes = null;
       try {
-        const proxyRes = await fetch('/api/manager-api', {
+        proxyRes = await fetch('/api/manager-api', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: proxyHeaders,
           body: JSON.stringify({
-            password: adminPass,
+            ...(adminPass ? { password: adminPass } : {}),
             action: mut.action === 'rpc' ? 'rpc' : 'mutate',
             table: mut.entity_table,
             operation: mut.action,
-            record: mut.payload,
+            record: clean,
             idField: idField,
             idValue: primaryVal,
             rpc_name: mut.entity_table,
             params: mut.payload
           })
         });
-        if (proxyRes.ok) return;
-        const proxyErr = await proxyRes.json().catch(() => ({}));
-        console.warn('[Sync] Proxy mutation notice:', proxyErr);
       } catch (proxyNetErr) {
-        console.warn('[Sync] Proxy mutation network notice:', proxyNetErr.message);
+        if (!token) throw proxyNetErr;
       }
+
+      if (proxyRes) {
+        if (proxyRes.ok) return;
+        const proxyErr = await proxyRes.json().catch(() => ({ error: `HTTP ${proxyRes.status}` }));
+        const msg = proxyErr.error || `HTTP ${proxyRes.status}`;
+        // If authenticated via password or proxy rejected the Postgres mutation, surface the real error directly
+        if (adminPass || (proxyRes.status >= 400 && proxyRes.status < 500)) {
+          throw new Error(msg);
+        }
+      }
+    }
+
+    if (!token) {
+      throw new Error('Authentication required to sync mutation.');
     }
 
     let method = 'POST';
@@ -710,137 +867,9 @@ class SyncCoordinator {
       url = `${endpoint}?${idField}=eq.${primaryVal}`;
     }
 
-    // Sanitize payload: ensure only valid PostgreSQL columns and proper formats are sent
-    let sanitizedBody = undefined;
-    let clean = null;
-    if (mut.action === 'rpc') {
-      sanitizedBody = JSON.stringify(mut.payload || {});
-    } else if (mut.action !== 'delete' && mut.payload) {
-      clean = { ...mut.payload };
-
-      if (mut.entity_table === 'suppliers') {
-        const allowedSuppCols = new Set([
-          'id', 'name', 'contact_person', 'phone', 'email', 'address', 'notes', 'created_at', 'updated_at'
-        ]);
-        for (const k of Object.keys(clean)) {
-          if (!allowedSuppCols.has(k)) delete clean[k];
-        }
-      }
-
-      if (mut.entity_table === 'inventory_items') {
-        delete clean.purchase_cost_da;
-        delete clean.quantity_on_hand;
-        delete clean.quantity_available;
-        const extras = [];
-        if (clean.author) extras.push(`Author: ${clean.author}`);
-        if (clean.isbn) extras.push(`ISBN: ${clean.isbn}`);
-        if (clean.category && clean.category !== 'book') extras.push(`Category: ${clean.category}`);
-        if (extras.length > 0) {
-          clean.notes = (clean.notes ? clean.notes + ' | ' : '') + extras.join(' | ');
-        }
-        const allowedInvCols = new Set([
-          'id', 'title', 'stock_group', 'batch_id', 'quantity_received',
-          'quantity_sold', 'quantity_reserved', 'quantity_damaged',
-          'unit_purchase_cost_da', 'selling_price_da', 'supplier_name',
-          'acquisition_date', 'condition', 'notes', 'created_at', 'updated_at'
-        ]);
-        for (const k of Object.keys(clean)) {
-          if (!allowedInvCols.has(k)) delete clean[k];
-        }
-        if (!clean.acquisition_date) {
-          clean.acquisition_date = (clean.created_at || new Date().toISOString()).slice(0, 10);
-        }
-        if (clean.batch_id === '' || clean.batch_id === undefined) {
-          clean.batch_id = null;
-        }
-        // Normalize stock_group for Supabase DB check constraint (only accepts OLD_STOCK or NEW_STOCK)
-        if (clean.stock_group !== 'OLD_STOCK' && clean.stock_group !== 'NEW_STOCK') {
-          if (!clean.notes || !clean.notes.includes('StockGroup:')) {
-            clean.notes = (clean.notes ? clean.notes + ' | ' : '') + `StockGroup: ${clean.stock_group}`;
-          }
-          clean.stock_group = 'NEW_STOCK';
-        }
-      }
-
-      if (mut.entity_table === 'purchase_batches') {
-        if (clean.supplier_name && !clean.supplier_id) {
-          clean.notes = (clean.notes ? clean.notes + ' | ' : '') + `Supplier: ${clean.supplier_name}`;
-        }
-        delete clean.supplier_name;
-        if (clean.supplier_id === '' || clean.supplier_id === undefined) clean.supplier_id = null;
-        if (!clean.stock_group) clean.stock_group = 'NEW_STOCK';
-        if (clean.total_cost_da == null || isNaN(clean.total_cost_da)) clean.total_cost_da = 0;
-        if (clean.amount_paid_da == null || isNaN(clean.amount_paid_da)) clean.amount_paid_da = 0;
-        if (clean.total_units == null || isNaN(clean.total_units)) clean.total_units = 0;
-        if (clean.payment_status === 'unreconciled') clean.payment_status = 'unpaid';
-        if (clean.payment_status === 'paid_in_full') clean.payment_status = 'paid';
-        if (!['paid', 'partial', 'unpaid'].includes(clean.payment_status)) clean.payment_status = 'unpaid';
-        if (!clean.purchase_date) clean.purchase_date = (clean.created_at || new Date().toISOString()).slice(0, 10);
-        const allowedBatchCols = new Set([
-          'id', 'batch_name', 'stock_group', 'supplier_id', 'purchase_date',
-          'total_units', 'total_cost_da', 'amount_paid_da', 'payment_status', 'notes', 'created_at', 'updated_at'
-        ]);
-        for (const k of Object.keys(clean)) {
-          if (!allowedBatchCols.has(k)) delete clean[k];
-        }
-      }
-
-      if (mut.entity_table === 'operating_expenses') {
-        if (clean.category === 'advertising') clean.category = 'marketing';
-        if (clean.category === 'delivery_surcharge') clean.category = 'transportation';
-        const allowedCategories = ['packaging', 'transportation', 'fair_fees', 'marketing', 'software', 'supplies', 'salaries', 'other'];
-        if (!allowedCategories.includes(clean.category)) clean.category = 'other';
-        if (!clean.expense_date) clean.expense_date = (clean.created_at || new Date().toISOString()).slice(0, 10);
-        if (!clean.payment_method || !['cash', 'baridimob', 'bank_transfer', 'other'].includes(clean.payment_method)) {
-          clean.payment_method = 'cash';
-        }
-      }
-
-      if (mut.entity_table === 'debts') {
-        // Enforce column-level permissions: created_at, updated_at, amount_repaid_da, remaining_balance_da are not client-writable
-        const allowedDebtCols = new Set([
-          'id', 'creditor_name', 'debt_type', 'original_amount_da', 'incurred_date', 'due_date', 'notes'
-        ]);
-        for (const k of Object.keys(clean)) {
-          if (!allowedDebtCols.has(k)) delete clean[k];
-        }
-
-        // When updating an existing debt via PATCH, 'id' must be excluded from the update payload
-        // because UPDATE privilege on 'id' is revoked.
-        if (mut.action === 'update') {
-          delete clean.id;
-        }
-
-        const allowedTypes = ['supplier', 'personal', 'bank', 'other'];
-        if (!allowedTypes.includes(clean.debt_type)) clean.debt_type = 'supplier';
-        if (clean.incurred_date === '') clean.incurred_date = null;
-        if (clean.due_date === '') clean.due_date = null;
-      }
-
-      if (mut.entity_table === 'debt_repayments') {
-        const allowedRepCols = new Set([
-          'id', 'debt_id', 'amount_da', 'repayment_date', 'payment_method', 'reversal_of_id', 'notes'
-        ]);
-        for (const k of Object.keys(clean)) {
-          if (!allowedRepCols.has(k)) delete clean[k];
-        }
-        if (!clean.repayment_date) clean.repayment_date = (clean.created_at || new Date().toISOString()).slice(0, 10);
-        if (clean.reversal_of_id === '' || clean.reversal_of_id === undefined) clean.reversal_of_id = null;
-        if (!clean.payment_method || !['cash', 'baridimob', 'bank_transfer', 'other'].includes(clean.payment_method)) {
-          clean.payment_method = 'cash';
-        }
-      }
-
-      if (mut.entity_table === 'opening_position') {
-        clean.id = 1;
-        clean.cash_balance_da = Number(clean.cash_balance_da) || 0;
-        clean.owner_contributions_da = Number(clean.owner_contributions_da) || 0;
-        clean.owner_withdrawals_da = Number(clean.owner_withdrawals_da) || 0;
-        if (!clean.as_of_date) clean.as_of_date = (clean.created_at || new Date().toISOString()).slice(0, 10);
-      }
-
-      sanitizedBody = JSON.stringify(clean);
-    }
+    const sanitizedBody = (mut.action === 'delete')
+      ? undefined
+      : JSON.stringify(mut.action === 'rpc' ? (mut.payload || {}) : (clean || {}));
 
     const res = await fetch(url, {
       method: method,
@@ -853,12 +882,11 @@ class SyncCoordinator {
       const errMsg = errBody.message || errBody.error || `HTTP ${res.status}`;
 
       // 1. Idempotency Handler: Duplicate Key (PostgreSQL code 23505 / HTTP 409)
-      // If the row already exists in Supabase, retry safely via PATCH by ID (excluding 'id' from body)
       if (res.status === 409 || errBody.code === '23505' || errMsg.includes('duplicate key') || errMsg.includes('already exists')) {
         console.log(`[Sync] Record "${primaryVal}" in "${mut.entity_table}" already exists remotely. Resolving via idempotent PATCH...`);
         try {
           const patchPayload = { ...clean };
-          delete patchPayload.id; // Primary key must NEVER be included in an UPDATE / PATCH payload
+          delete patchPayload.id;
           if (mut.entity_table === 'order_meta') delete patchPayload.order_id;
 
           const patchRes = await fetch(`${endpoint}?${idField}=eq.${primaryVal}`, {
@@ -873,13 +901,13 @@ class SyncCoordinator {
           });
 
           if (patchRes.ok || patchRes.status === 204) {
-            return; // Successfully merged into existing remote record!
+            return;
           }
           const patchErrBody = await patchRes.json().catch(() => ({}));
           const patchErrMsg = patchErrBody.message || patchErrBody.error || `HTTP ${patchRes.status}`;
           throw new Error(`Idempotent merge failed on ${mut.entity_table}: ${patchErrMsg}`);
         } catch (patchErr) {
-          throw patchErr; // Do not discard pending operation; keep in queue until Supabase confirms
+          throw patchErr;
         }
       }
 
@@ -911,7 +939,6 @@ class SyncCoordinator {
               action: 'upsert',
               payload: batchToCreate
             });
-            // Retry the original inventory item insert now that parent batch exists
             const retryRes = await fetch(url, {
               method: method,
               headers: headers,
@@ -923,9 +950,7 @@ class SyncCoordinator {
           }
         }
 
-        // If batch still cannot be created, nullify batch_id so the inventory record is safely preserved in Supabase
         if (clean) {
-          console.warn(`[Sync] Setting batch_id=null for item "${mut.payload?.title}" to resolve foreign key conflict.`);
           clean.batch_id = null;
           const fallbackRes = await fetch(url, {
             method: method,
@@ -948,33 +973,31 @@ class SyncCoordinator {
 
   async fetchRemoteOrders() {
     let res = null;
-    const adminPass = auth.adminPassword || sessionStorage.getItem('gr_owner_pass') || 'gentleadmin';
+    const adminPass = auth.adminPassword || sessionStorage.getItem('gr_owner_pass');
+    const token = adminPass ? null : await auth.getValidToken();
 
-    // 1. Primary: Netlify serverless endpoint using service role server-side
-    try {
-      res = await fetch('/api/admin-orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: adminPass })
-      });
-    } catch (networkErr) {
-      console.warn('[Sync] Primary admin-orders fetch failed, attempting Supabase direct fallback:', networkErr);
+    if (adminPass) {
+      try {
+        res = await fetch('/api/admin-orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: adminPass })
+        });
+      } catch (networkErr) {
+        console.warn('[Sync] Primary admin-orders fetch failed:', networkErr);
+      }
     }
 
-    // 2. Fallback: Direct Supabase with verified Bearer token if logged in via OAuth
-    if (!res || !res.ok) {
-      const token = await auth.getValidToken();
-      if (token) {
-        try {
-          res = await fetch(`${SUPABASE_URL}/rest/v1/orders?select=*&order=created_at.desc`, {
-            headers: {
-              'apikey': SUPABASE_ANON_KEY,
-              'Authorization': `Bearer ${token}`
-            }
-          });
-        } catch (e) {
-          console.warn('[Sync] Direct OAuth orders fetch notice:', e);
-        }
+    if ((!res || !res.ok) && token) {
+      try {
+        res = await fetch(`${SUPABASE_URL}/rest/v1/orders?select=*&order=id.desc`, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${token}`
+          }
+        });
+      } catch (e) {
+        console.warn('[Sync] Direct OAuth orders fetch notice:', e);
       }
     }
 
@@ -982,7 +1005,6 @@ class SyncCoordinator {
       const data = await res.json();
       const remoteOrders = Array.isArray(data) ? data : (data.orders || []);
       if (Array.isArray(remoteOrders) && remoteOrders.length > 0) {
-        // Purge automated test probe records (firstName 'Test' and familyName 'Test')
         const testOrderIds = remoteOrders.filter(o => o.firstName === 'Test' && o.familyName === 'Test').map(o => o.id);
         testOrderIds.forEach(tId => idb.delete('orders', tId).catch(() => {}));
         const realOrders = remoteOrders.filter(o => !(o.firstName === 'Test' && o.familyName === 'Test'));
@@ -1003,44 +1025,59 @@ class SyncCoordinator {
   }
 
   async fetchRemoteManagementData() {
-    const adminPass = auth.adminPassword || sessionStorage.getItem('gr_owner_pass') || 'gentleadmin';
+    const adminPass = auth.adminPassword || sessionStorage.getItem('gr_owner_pass');
+    const token = adminPass ? null : await auth.getValidToken();
     let syncedViaManagerApi = false;
 
-    // 1. Primary: Netlify manager-api serverless endpoint for atomic, service-role secured sync
-    try {
-      const apiRes = await fetch('/api/manager-api', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: adminPass, action: 'fetch_all' })
-      });
-      if (apiRes.ok) {
-        const json = await apiRes.json();
-        if (json.success && json.data) {
-          const d = json.data;
-          if (d.inventory && d.inventory.length > 0) await idb.putBatch('inventory', d.inventory);
-          if (d.batches && d.batches.length > 0) await idb.putBatch('batches', d.batches);
-          if (d.suppliers && d.suppliers.length > 0) await idb.putBatch('suppliers', d.suppliers);
-          if (d.expenses && d.expenses.length > 0) await idb.putBatch('expenses', d.expenses);
-          if (d.debts && d.debts.length > 0) await idb.putBatch('debts', d.debts);
-          if (d.debtRepayments && d.debtRepayments.length > 0) await idb.putBatch('debt_repayments', d.debtRepayments);
-          if (d.openingPosition && d.openingPosition.length > 0) await idb.put('opening_position', d.openingPosition[0]);
-          if (d.orderMeta && d.orderMeta.length > 0) await idb.putBatch('order_meta', d.orderMeta);
-          if (d.orderStockAllocations && d.orderStockAllocations.length > 0) await idb.putBatch('order_stock_allocations', d.orderStockAllocations);
-          if (d.orderReturns && d.orderReturns.length > 0) await idb.putBatch('order_returns', d.orderReturns);
-          if (d.capitalContributions && d.capitalContributions.length > 0) await idb.putBatch('capital_contributions', d.capitalContributions);
-          if (d.ownerWithdrawals && d.ownerWithdrawals.length > 0) await idb.putBatch('owner_withdrawals', d.ownerWithdrawals);
-          if (d.stockAdjustments && d.stockAdjustments.length > 0) await idb.putBatch('stock_adjustments', d.stockAdjustments);
-          syncedViaManagerApi = true;
-          console.log('[Sync] Synchronized all management data via secure manager API.');
+    if (adminPass || token) {
+      try {
+        const headers = { 'Content-Type': 'application/json' };
+        if (!adminPass && token) headers['Authorization'] = `Bearer ${token}`;
+
+        const apiRes = await fetch('/api/manager-api', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            ...(adminPass ? { password: adminPass } : {}),
+            action: 'fetch_all'
+          })
+        });
+        if (apiRes.ok) {
+          const json = await apiRes.json();
+          if (json.success && json.data) {
+            const d = json.data;
+            if (Array.isArray(d.orders) && d.orders.length > 0 && state.orders.length === 0) {
+              const realOrders = d.orders.filter(o => !(o.firstName === 'Test' && o.familyName === 'Test'));
+              const processed = realOrders.map(o => ({
+                ...o,
+                is_historical: o.is_historical !== undefined ? o.is_historical : (Number(o.id) <= 170),
+                read_only: o.read_only !== undefined ? o.read_only : (Number(o.id) <= 170)
+              }));
+              await idb.putBatch('orders', processed);
+            }
+            if (d.inventory && d.inventory.length > 0) await idb.putBatch('inventory', d.inventory);
+            if (d.batches && d.batches.length > 0) await idb.putBatch('batches', d.batches);
+            if (d.suppliers && d.suppliers.length > 0) await idb.putBatch('suppliers', d.suppliers);
+            if (d.expenses && d.expenses.length > 0) await idb.putBatch('expenses', d.expenses);
+            if (d.debts && d.debts.length > 0) await idb.putBatch('debts', d.debts);
+            if (d.debtRepayments && d.debtRepayments.length > 0) await idb.putBatch('debt_repayments', d.debtRepayments);
+            if (d.openingPosition && d.openingPosition.length > 0) await idb.put('opening_position', d.openingPosition[0]);
+            if (d.orderMeta && d.orderMeta.length > 0) await idb.putBatch('order_meta', d.orderMeta);
+            if (d.orderStockAllocations && d.orderStockAllocations.length > 0) await idb.putBatch('order_stock_allocations', d.orderStockAllocations);
+            if (d.orderReturns && d.orderReturns.length > 0) await idb.putBatch('order_returns', d.orderReturns);
+            if (d.capitalContributions && d.capitalContributions.length > 0) await idb.putBatch('capital_contributions', d.capitalContributions);
+            if (d.ownerWithdrawals && d.ownerWithdrawals.length > 0) await idb.putBatch('owner_withdrawals', d.ownerWithdrawals);
+            if (d.stockAdjustments && d.stockAdjustments.length > 0) await idb.putBatch('stock_adjustments', d.stockAdjustments);
+            syncedViaManagerApi = true;
+            console.log('[Sync] Synchronized all management data via secure manager API.');
+          }
         }
+      } catch (e) {
+        console.warn('[Sync] Manager API batch fetch notice:', e.message);
       }
-    } catch (e) {
-      console.warn('[Sync] Manager API batch fetch notice:', e.message);
     }
 
-    // 2. Fallback: Supabase direct per-table queries if manager-api was unreachable
-    if (!syncedViaManagerApi) {
-      const token = await auth.getValidToken();
+    if (!syncedViaManagerApi && token) {
       const tables = [
         'suppliers',
         'purchase_batches',
@@ -1062,7 +1099,7 @@ class SyncCoordinator {
           const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=*`, {
             headers: {
               'apikey': SUPABASE_ANON_KEY,
-              'Authorization': token ? `Bearer ${token}` : `Bearer ${SUPABASE_ANON_KEY}`
+              'Authorization': `Bearer ${token}`
             }
           });
           if (res.ok) {
@@ -1081,7 +1118,6 @@ class SyncCoordinator {
       }
     }
 
-    // Refresh state from IndexedDB so the UI immediately reflects remote data
     await loadLocalData();
   }
 
@@ -1346,12 +1382,33 @@ function renderAppViews() {
   renderExpensesSection();
   renderFinanceSection();
   renderDebtsSection();
+  if (typeof renderAdvertisingSection === 'function') renderAdvertisingSection();
   populateBatchDropdown();
 }
 
 // ============================================================================
 // 5. FINANCIAL CALCULATION & ACCOUNTING ENGINE
 // ============================================================================
+function getInventoryOnHandQty(item) {
+  if (!item) return 0;
+  const rec = Number(item.quantity_received) || 0;
+  const countAdj = Number(item.quantity_count_adjustment) || 0;
+  const sold = Number(item.quantity_sold) || 0;
+  const dmg = Number(item.quantity_damaged) || 0;
+  const lost = Number(item.quantity_lost) || 0;
+  const promo = Number(item.quantity_promotional) || 0;
+  const retSupp = Number(item.quantity_returned_to_supplier) || 0;
+  return Math.max(0, rec + countAdj - sold - dmg - lost - promo - retSupp);
+}
+window.getInventoryOnHandQty = getInventoryOnHandQty;
+
+function getInventoryAvailableQty(item) {
+  if (!item) return 0;
+  const onHand = getInventoryOnHandQty(item);
+  const res = Number(item.quantity_reserved) || 0;
+  return Math.max(0, onHand - res);
+}
+window.getInventoryAvailableQty = getInventoryAvailableQty;
 function isAccessoryItem(item) {
   if (!item) return false;
   const grp = (item.stock_group || '').toUpperCase();
@@ -1494,8 +1551,11 @@ function applyLiveOrdersToInventory() {
         continue;
       }
       const invTokens = extractSignificantTokens(invNorm);
-      const intersection = tokens.filter(t => invTokens.includes(t));
-      if (intersection.length >= 1 && (intersection.length >= Math.min(tokens.length, invTokens.length))) {
+      let intersectionCount = 0;
+      for (const t of tokens) {
+        if (invTokens.has(t)) intersectionCount++;
+      }
+      if (tokens.size > 0 && invTokens.size > 0 && intersectionCount >= 1 && intersectionCount >= Math.min(tokens.size, invTokens.size)) {
         matches.push(inv);
       }
     }
@@ -1539,13 +1599,7 @@ function applyLiveOrdersToInventory() {
       for (const lot of matchingLots) {
         if (needed <= 0) break;
         const d = liveOrderDeductions.get(lot.id);
-        const rec = Number(lot.quantity_received) || 0;
-        const dmg = Number(lot.quantity_damaged) || 0;
-        const countAdj = Number(lot.quantity_count_adjustment) || 0;
-        const lost = Number(lot.quantity_lost) || 0;
-        const promo = Number(lot.quantity_promotional) || 0;
-        const retSupp = Number(lot.quantity_returned_to_supplier) || 0;
-        const netBase = Math.max(0, rec + countAdj - dmg - lost - promo - retSupp);
+        const netBase = Math.max(0, getInventoryOnHandQty({ ...lot, quantity_sold: 0 }));
         const alreadyAlloc = (d ? (d.sold + d.reserved) : 0);
         const availInLot = Math.max(0, netBase - alreadyAlloc);
 
@@ -1570,9 +1624,9 @@ function applyLiveOrdersToInventory() {
     });
   });
 
-  // 4. Subtract Customer Returns for Delivered Orders
+  // 4. Subtract Restocked Customer Returns for Delivered Orders
   (state.orderReturns || []).forEach(ret => {
-    if (ret.inventory_item_id) {
+    if (ret.inventory_item_id && ret.restocked_to_inventory !== false && ret.condition !== 'damaged') {
       const d = liveOrderDeductions.get(ret.inventory_item_id);
       if (d) {
         d.sold = Math.max(0, d.sold - (Number(ret.quantity) || 0));
@@ -1597,7 +1651,7 @@ window.applyLiveOrdersToInventory = applyLiveOrdersToInventory;
 function calculateFinancialMetrics() {
   applyLiveOrdersToInventory();
 
-  // 1. Build lookup maps for inventory by normalized title and calculate catalog unit economics
+  // 1. Build lookup maps for inventory by normalized title and compute catalog average cost ratio (for provisional estimates ONLY)
   const normTitleMap = new Map();
   let catalogCostSum = 0;
   let catalogPriceSum = 0;
@@ -1617,25 +1671,44 @@ function calculateFinancialMetrics() {
     }
   });
 
-  // Verified catalog cost ratio across priced bookstore inventory (~56.0%, yielding ~44.0% margin)
-  const catalogCostRatio = catalogPriceSum > 0 ? (catalogCostSum / catalogPriceSum) : 0.559;
+  const catalogCostRatio = catalogPriceSum > 0 ? (catalogCostSum / catalogPriceSum) : 0;
 
-  // 2. Aggregate sales per title from customer orders (excluding cancelled)
-  let totalSalesRevenue = 0;
-  let totalCashInflowsFromSales = 0;
+  // 2. Aggregate sales per title from customer orders (excluding cancelled) with STRICT shipping fee separation
+  let totalGrossOrderValue = 0;
+  let totalShippingCollected = 0;
+  let totalPackagingFees = 0;
+  let totalSalesRevenue = 0; // Book + Product revenue net of shipping passthrough
+  let historicalOrdersRevenue = 0;
+  let liveOrdersRevenue = 0;
+  let totalCashInflowsFromSales = 0; // Post-opening paid live orders cash collected
   const salesByTitle = new Map();
 
   state.orders.forEach(order => {
     const meta = state.orderMeta ? state.orderMeta.find(m => String(m.order_id) === String(order.id)) : null;
-    const fulfillmentStatus = meta ? meta.fulfillment_status : (order.is_historical ? 'delivered' : (order.status || 'pending'));
-    const isPaid = meta ? (meta.payment_status === 'paid') : (order.is_historical ? true : (order.payment_status === 'paid'));
+    const isHist = !!(order.is_historical || Number(order.id) <= 170);
+    const fulfillmentStatus = meta ? meta.fulfillment_status : (isHist ? 'delivered' : (order.status || 'pending'));
+    const isPaid = meta ? (meta.payment_status === 'paid') : (isHist ? true : (order.payment_status === 'paid'));
 
-    // Cancelled orders produce zero recognized revenue
     if (fulfillmentStatus === 'cancelled') return;
 
     const orderTotal = Number(order.total_price) || 0;
-    totalSalesRevenue += orderTotal;
-    if (isPaid) totalCashInflowsFromSales += orderTotal;
+    const shippingFee = Number(meta?.shipping_fee_da ?? order.shipping_price) || 0;
+    const packagingFee = Number(order.packaging_price) || 0;
+    const productRevenue = Math.max(0, orderTotal - shippingFee);
+
+    totalGrossOrderValue += orderTotal;
+    totalShippingCollected += shippingFee;
+    totalPackagingFees += packagingFee;
+    totalSalesRevenue += productRevenue;
+
+    if (isHist) {
+      historicalOrdersRevenue += productRevenue;
+    } else {
+      liveOrdersRevenue += productRevenue;
+      if (isPaid) {
+        totalCashInflowsFromSales += productRevenue;
+      }
+    }
 
     let itemsList = [];
     if (Array.isArray(order.items)) {
@@ -1643,57 +1716,58 @@ function calculateFinancialMetrics() {
     } else if (typeof order.items === 'string') {
       try {
         const parsed = JSON.parse(order.items);
-        if (Array.isArray(parsed)) itemsList = parsed;
-        else itemsList = [order.items];
+        itemsList = Array.isArray(parsed) ? parsed : [order.items];
       } catch {
         itemsList = [order.items];
       }
     }
     if (!Array.isArray(itemsList)) itemsList = [itemsList];
-    if (itemsList.length === 0 && orderTotal > 0) {
+    if (itemsList.length === 0 && productRevenue > 0) {
       itemsList = [`Order #${order.id || 'N/A'}`];
     }
 
     let totalItemsInOrder = 0;
+    let totalCatalogWeighted = 0;
     const parsedItems = [];
+    const merchandisePool = Math.max(0, productRevenue - packagingFee);
+
     itemsList.forEach(rawItem => {
-      let title = '', qty = 1;
-      if (typeof rawItem === 'object' && rawItem !== null) {
-        title = String(rawItem.title || rawItem.name || '').trim();
-        qty = Number(rawItem.quantity || rawItem.qty) || 1;
-      } else {
-        const rawStr = String(rawItem || '').trim();
-        const m = rawStr.match(/^(.*?)(?:\s*[×x*]\s*(\d+))?$/);
-        title = m ? m[1].trim() : rawStr;
-        qty = m && m[2] ? parseInt(m[2], 10) : 1;
-      }
-      if (!title) title = `Order #${order.id || 'N/A'}`;
-      totalItemsInOrder += qty;
-      parsedItems.push({ title, qty });
+      const pi = parseOrderItem(rawItem);
+      const matched = findInventoryItem(pi.title);
+      const explicitPrice = (typeof rawItem === 'object' && rawItem !== null && Number(rawItem.price) > 0)
+        ? Number(rawItem.price)
+        : (matched && Number(matched.selling_price_da) > 0 ? Number(matched.selling_price_da) : 0);
+      totalItemsInOrder += pi.qty;
+      totalCatalogWeighted += (explicitPrice * pi.qty);
+      parsedItems.push({ title: pi.title || `Order #${order.id || 'N/A'}`, qty: pi.qty, unitRefPrice: explicitPrice, isHist });
     });
 
-    const unitPrice = totalItemsInOrder > 0 ? (orderTotal / totalItemsInOrder) : 0;
-
     parsedItems.forEach(pi => {
+      const itemRev = totalCatalogWeighted > 0
+        ? (merchandisePool * ((pi.unitRefPrice * pi.qty) / totalCatalogWeighted))
+        : (totalItemsInOrder > 0 ? (merchandisePool * (pi.qty / totalItemsInOrder)) : 0);
+
       const normKey = normalizeText(pi.title);
       if (!salesByTitle.has(normKey)) {
         salesByTitle.set(normKey, {
           rawTitle: pi.title,
           quantitySold: 0,
+          liveSoldQty: 0,
+          histSoldQty: 0,
           revenue: 0,
           hasLiveSales: false
         });
       }
       const entry = salesByTitle.get(normKey);
       entry.quantitySold += pi.qty;
-      entry.revenue += (unitPrice * pi.qty);
-      if (!order.is_historical && Number(order.id) > 170) {
-        entry.hasLiveSales = true;
-      }
+      if (pi.isHist) entry.histSoldQty += pi.qty;
+      else entry.liveSoldQty += pi.qty;
+      entry.revenue += itemRev;
+      if (!pi.isHist) entry.hasLiveSales = true;
     });
   });
 
-  // 3. True FIFO Stock Allocation & Profit Engine
+  // 3. True FIFO Stock Allocation & Profit Engine (OLD_STOCK before NEW_STOCK; NULL costs stay NULL/provisional)
   let confirmedCogsOld = 0;
   let confirmedProfitOld = 0;
   let revenueOld = 0;
@@ -1704,13 +1778,17 @@ function calculateFinancialMetrics() {
   let revenueNew = 0;
   let soldQtyNew = 0;
 
+  let confirmedCogsAcc = 0;
+  let revenueAcc = 0;
+  let soldQtyAcc = 0;
+
   let totalConfirmedCogs = 0;
   let totalProvisionalCogs = 0;
   let totalConfirmedProfit = 0;
   let totalProvisionalProfit = 0;
 
   const titleProfits = [];
-  const handledKeys = new Set();
+  const handledLotIds = new Set();
 
   function isNewBatchLot(lot) {
     if (!lot) return false;
@@ -1721,22 +1799,19 @@ function calculateFinancialMetrics() {
   }
 
   salesByTitle.forEach((saleData, normKey) => {
-    handledKeys.add(normKey);
     const matchingLots = normTitleMap.get(normKey) || [];
-
-    // For live customer orders (id > 170), allow consuming from both OLD_STOCK and NEW_BATCH
-    // For historical orders (id <= 170), only consume OLD_STOCK
-    const eligibleLots = saleData.hasLiveSales 
-      ? matchingLots 
-      : matchingLots.filter(l => !isNewBatchLot(l));
+    const eligibleLots = (saleData.hasLiveSales
+      ? [...matchingLots]
+      : matchingLots.filter(l => !isNewBatchLot(l)));
 
     eligibleLots.sort((a, b) => {
-      const aIsOld = (a.stock_group || '').toUpperCase() === 'OLD_STOCK';
-      const bIsOld = (b.stock_group || '').toUpperCase() === 'OLD_STOCK';
-      if (aIsOld && !bIsOld) return -1;
-      if (!aIsOld && bIsOld) return 1;
-      return 0;
+      const aIsOld = (a.stock_group || '').toUpperCase() === 'OLD_STOCK' ? 0 : 1;
+      const bIsOld = (b.stock_group || '').toUpperCase() === 'OLD_STOCK' ? 0 : 1;
+      if (aIsOld !== bIsOld) return aIsOld - bIsOld;
+      return String(a.acquisition_date || '9999').localeCompare(String(b.acquisition_date || '9999'));
     });
+
+    eligibleLots.forEach(l => handledLotIds.add(l.id));
 
     const unitPrice = saleData.quantitySold > 0 ? (saleData.revenue / saleData.quantitySold) : 0;
     let titleCogs = 0;
@@ -1749,8 +1824,9 @@ function calculateFinancialMetrics() {
     if (eligibleLots.length > 0) {
       const primaryLot = eligibleLots[0];
       primaryAuthor = primaryLot.author || '-';
-      primaryStockGroup = primaryLot.stock_group || 'OLD_STOCK';
-      displayPrice = primaryLot.selling_price_da || unitPrice;
+      const isAccLot = isAccessoryItem(primaryLot);
+      primaryStockGroup = isAccLot ? 'ACCESSORIES' : (primaryLot.stock_group || 'OLD_STOCK');
+      displayPrice = Number(primaryLot.selling_price_da) || unitPrice;
 
       if (primaryLot.unit_purchase_cost_da !== null && primaryLot.unit_purchase_cost_da !== undefined && !isNaN(primaryLot.unit_purchase_cost_da)) {
         displayCost = Number(primaryLot.unit_purchase_cost_da);
@@ -1761,46 +1837,46 @@ function calculateFinancialMetrics() {
         const profit = saleData.revenue - titleCogs;
         totalConfirmedProfit += profit;
 
-        soldQtyOld += saleData.quantitySold;
-        revenueOld += saleData.revenue;
-        confirmedCogsOld += titleCogs;
-        confirmedProfitOld += profit;
+        if (isAccLot) {
+          soldQtyAcc += saleData.quantitySold;
+          revenueAcc += saleData.revenue;
+          confirmedCogsAcc += titleCogs;
+        } else if (isNewBatchLot(primaryLot)) {
+          soldQtyNew += saleData.quantitySold;
+          revenueNew += saleData.revenue;
+          confirmedCogsNew += titleCogs;
+          confirmedProfitNew += profit;
+        } else {
+          soldQtyOld += saleData.quantitySold;
+          revenueOld += saleData.revenue;
+          confirmedCogsOld += titleCogs;
+          confirmedProfitOld += profit;
+        }
       } else {
-        // Unpriced inventory item: use verified catalog cost ratio
-        displayCost = unitPrice * catalogCostRatio;
-        titleCogs = saleData.revenue * catalogCostRatio;
+        displayCost = null;
+        titleCogs = catalogCostRatio > 0 ? (saleData.revenue * catalogCostRatio) : 0;
         isTitleConfirmed = false;
-
         totalProvisionalCogs += titleCogs;
         totalProvisionalProfit += (saleData.revenue - titleCogs);
-
         soldQtyOld += saleData.quantitySold;
         revenueOld += saleData.revenue;
       }
     } else {
-      // Historical order title not in current physical count: use catalog cost ratio
-      displayCost = unitPrice * catalogCostRatio;
-      titleCogs = saleData.revenue * catalogCostRatio;
+      displayCost = null;
+      titleCogs = catalogCostRatio > 0 ? (saleData.revenue * catalogCostRatio) : 0;
       isTitleConfirmed = false;
-
       totalProvisionalCogs += titleCogs;
       totalProvisionalProfit += (saleData.revenue - titleCogs);
-
       soldQtyOld += saleData.quantitySold;
       revenueOld += saleData.revenue;
     }
 
-    const titleProfit = saleData.revenue - titleCogs;
-    const marginPct = saleData.revenue > 0 ? Math.round((titleProfit / saleData.revenue) * 100) : null;
+    const titleProfit = isTitleConfirmed ? (saleData.revenue - titleCogs) : (catalogCostRatio > 0 ? (saleData.revenue - titleCogs) : null);
+    const marginPct = (titleProfit !== null && saleData.revenue > 0) ? Math.round((titleProfit / saleData.revenue) * 100) : null;
     const targetUnitMargin = displayCost !== null ? (displayPrice - displayCost) : null;
 
     let onHand = 0;
-    eligibleLots.forEach(l => {
-      const rec = Number(l.quantity_received) || 0;
-      const res = Number(l.quantity_reserved) || 0;
-      const dmg = Number(l.quantity_damaged) || 0;
-      onHand += Math.max(0, rec - res - dmg);
-    });
+    eligibleLots.forEach(l => { onHand += getInventoryOnHandQty(l); });
 
     titleProfits.push({
       title: eligibleLots.length > 0 ? eligibleLots[0].title : saleData.rawTitle,
@@ -1808,83 +1884,61 @@ function calculateFinancialMetrics() {
       stockGroup: primaryStockGroup,
       quantitySold: saleData.quantitySold,
       quantityOnHand: onHand,
-      unitCost: displayCost !== null ? Math.round(displayCost) : null,
+      unitCost: displayCost !== null ? Math.round(displayCost * 100) / 100 : null,
       sellingPrice: Math.round(displayPrice),
       targetUnitMargin: targetUnitMargin !== null ? Math.round(targetUnitMargin) : null,
       revenue: Math.round(saleData.revenue),
-      cogs: Math.round(titleCogs),
-      grossProfit: Math.round(titleProfit),
+      cogs: isTitleConfirmed ? Math.round(titleCogs) : (catalogCostRatio > 0 ? Math.round(titleCogs) : null),
+      grossProfit: titleProfit !== null ? Math.round(titleProfit) : null,
       marginPct: marginPct,
       isConfirmed: isTitleConfirmed
     });
   });
 
-  // Also include inventory items that had 0 sales
-  // NEW BATCH books are strictly included with 0 copies sold and 100% stock on hand
-  normTitleMap.forEach((lots, normKey) => {
-    lots.forEach(lot => {
-      const isNew = isNewBatchLot(lot);
-      if (isNew) {
-        let onHand = Math.max(0, (Number(lot.quantity_received) || 0) - (Number(lot.quantity_reserved) || 0) - (Number(lot.quantity_damaged) || 0));
-        const cost = (lot.unit_purchase_cost_da !== null && lot.unit_purchase_cost_da !== undefined && !isNaN(lot.unit_purchase_cost_da)) ? Number(lot.unit_purchase_cost_da) : null;
-        const price = Number(lot.selling_price_da) || 0;
-        const targetMargin = (cost !== null && price > 0) ? (price - cost) : null;
-        const marginPct = (cost !== null && price > 0) ? Math.round(((price - cost) / price) * 100) : null;
+  // Include inventory items not yet matched in salesByTitle (zero duplicates)
+  state.inventory.forEach(lot => {
+    if (handledLotIds.has(lot.id)) return;
+    const onHand = getInventoryOnHandQty(lot);
+    const cost = (lot.unit_purchase_cost_da !== null && lot.unit_purchase_cost_da !== undefined && !isNaN(lot.unit_purchase_cost_da)) ? Number(lot.unit_purchase_cost_da) : null;
+    const price = Number(lot.selling_price_da) || 0;
+    const targetMargin = (cost !== null && price > 0) ? (price - cost) : null;
+    const marginPct = (cost !== null && price > 0) ? Math.round(((price - cost) / price) * 100) : null;
+    const isAcc = isAccessoryItem(lot);
+    const isNew = !isAcc && isNewBatchLot(lot);
 
-        titleProfits.push({
-          title: lot.title,
-          author: lot.author || '-',
-          stockGroup: 'NEW_STOCK',
-          quantitySold: 0, // STRICTLY ZERO for new book fair batch
-          quantityOnHand: onHand,
-          unitCost: cost,
-          sellingPrice: price,
-          targetUnitMargin: targetMargin,
-          revenue: 0,
-          cogs: 0,
-          grossProfit: null,
-          expectedRevenue: onHand * price,
-          expectedGrossProfit: (cost !== null) ? onHand * (price - cost) : null,
-          marginPct: marginPct,
-          isConfirmed: cost !== null
-        });
-      } else if (!handledKeys.has(normKey)) {
-        let onHand = Math.max(0, (Number(lot.quantity_received) || 0) - (Number(lot.quantity_sold) || 0) - (Number(lot.quantity_reserved) || 0) - (Number(lot.quantity_damaged) || 0));
-        const cost = (lot.unit_purchase_cost_da !== null && lot.unit_purchase_cost_da !== undefined && !isNaN(lot.unit_purchase_cost_da)) ? Number(lot.unit_purchase_cost_da) : null;
-        const price = Number(lot.selling_price_da) || 0;
-        const targetMargin = (cost !== null && price > 0) ? (price - cost) : null;
-        const marginPct = (cost !== null && price > 0) ? Math.round(((price - cost) / price) * 100) : null;
-
-        titleProfits.push({
-          title: lot.title,
-          author: lot.author || '-',
-          stockGroup: lot.stock_group || 'OLD_STOCK',
-          quantitySold: 0,
-          quantityOnHand: onHand,
-          unitCost: cost,
-          sellingPrice: price,
-          targetUnitMargin: targetMargin,
-          revenue: 0,
-          cogs: 0,
-          grossProfit: null,
-          marginPct: marginPct,
-          isConfirmed: cost !== null
-        });
-      }
+    titleProfits.push({
+      title: lot.title,
+      author: lot.author || '-',
+      stockGroup: isAcc ? 'ACCESSORIES' : (isNew ? 'NEW_STOCK' : (lot.stock_group || 'OLD_STOCK')),
+      quantitySold: Number(lot.quantity_sold) || 0,
+      quantityOnHand: onHand,
+      unitCost: cost,
+      sellingPrice: price,
+      targetUnitMargin: targetMargin,
+      revenue: 0,
+      cogs: 0,
+      grossProfit: null,
+      expectedRevenue: onHand * price,
+      expectedGrossProfit: (cost !== null) ? onHand * (price - cost) : null,
+      marginPct: marginPct,
+      isConfirmed: cost !== null
     });
   });
 
-  // 4. Remaining physical inventory asset valuation
+  // 4. Remaining physical inventory asset valuation (Phase 2 audit-safe quantities)
   let remainingInventoryValueDa = 0;
   let unpricedTitlesCount = 0;
   let totalCountedPhysical = 0;
+  let totalOnHandUnits = 0;
   let totalAvailableUnits = 0;
   let totalDamagedUnits = 0;
   let totalReservedUnits = 0;
 
   let oldStockValuation = 0;
   let oldStockValuationRetail = 0;
+  let oldStockCostUnits = 0;
   let oldStockCounted = 0;
+  let oldStockOnHand = 0;
   let oldStockAvailable = 0;
   let oldStockReserved = 0;
   let oldStockDamaged = 0;
@@ -1892,7 +1946,9 @@ function calculateFinancialMetrics() {
 
   let newStockValuationCost = 0;
   let newStockValuationRetail = 0;
+  let newStockCostUnits = 0;
   let newStockCounted = 0;
+  let newStockOnHand = 0;
   let newStockAvailable = 0;
   let newStockReserved = 0;
   let newStockDamaged = 0;
@@ -1900,7 +1956,9 @@ function calculateFinancialMetrics() {
 
   let accessoriesValuation = 0;
   let accessoriesValuationRetail = 0;
+  let accessoriesCostUnits = 0;
   let accessoriesCounted = 0;
+  let accessoriesOnHand = 0;
   let accessoriesAvailable = 0;
   let accessoriesReserved = 0;
   let accessoriesDamaged = 0;
@@ -1911,43 +1969,57 @@ function calculateFinancialMetrics() {
     const isNew = !isAcc && isNewBatchLot(item);
     const isOld = !isAcc && !isNew;
     const rec = Number(item.quantity_received) || 0;
-    // Real quantity sold and reserved from actual live bookstore orders
-    const sold = Number(item.quantity_sold) || 0;
+    const onHand = getInventoryOnHandQty(item);
+    const avail = getInventoryAvailableQty(item);
     const res = Number(item.quantity_reserved) || 0;
-    const dmg = Number(item.quantity_damaged) || 0;
-    const avail = Math.max(0, rec - sold - res - dmg);
-    const cost = (item.unit_purchase_cost_da !== null && item.unit_purchase_cost_da !== undefined && !isNaN(item.unit_purchase_cost_da)) ? Number(item.unit_purchase_cost_da) : null;
+    const dmg = (Number(item.quantity_damaged) || 0) + (Number(item.quantity_lost) || 0);
+    const cost = (item.unit_purchase_cost_da !== null && item.unit_purchase_cost_da !== undefined && item.unit_purchase_cost_da !== '' && !isNaN(item.unit_purchase_cost_da))
+      ? Number(item.unit_purchase_cost_da)
+      : null;
     const price = Number(item.selling_price_da) || 0;
 
     totalCountedPhysical += rec;
+    totalOnHandUnits += onHand;
     totalAvailableUnits += avail;
     totalReservedUnits += res;
     totalDamagedUnits += dmg;
 
     if (isAcc) {
       accessoriesCounted += rec;
+      accessoriesOnHand += onHand;
       accessoriesAvailable += avail;
       accessoriesReserved += res;
       accessoriesDamaged += dmg;
-      accessoriesItems.add(item.title);
+      if (item.title) accessoriesItems.add(item.title);
       if (price > 0) accessoriesValuationRetail += (avail * price);
-      if (cost !== null) accessoriesValuation += (avail * cost);
+      if (cost !== null) {
+        accessoriesValuation += (avail * cost);
+        accessoriesCostUnits += avail;
+      }
     } else if (isOld) {
       oldStockCounted += rec;
+      oldStockOnHand += onHand;
       oldStockAvailable += avail;
       oldStockReserved += res;
       oldStockDamaged += dmg;
-      oldStockTitles.add(item.title);
+      if (item.title) oldStockTitles.add(item.title);
       if (price > 0) oldStockValuationRetail += (avail * price);
-      if (cost !== null) oldStockValuation += (avail * cost);
+      if (cost !== null) {
+        oldStockValuation += (avail * cost);
+        oldStockCostUnits += avail;
+      }
     } else {
       newStockCounted += rec;
+      newStockOnHand += onHand;
       newStockAvailable += avail;
       newStockReserved += res;
       newStockDamaged += dmg;
-      newStockTitles.add(item.title);
+      if (item.title) newStockTitles.add(item.title);
       if (price > 0) newStockValuationRetail += (avail * price);
-      if (cost !== null) newStockValuationCost += (avail * cost);
+      if (cost !== null) {
+        newStockValuationCost += (avail * cost);
+        newStockCostUnits += avail;
+      }
     }
 
     if (cost !== null) {
@@ -1959,18 +2031,21 @@ function calculateFinancialMetrics() {
 
   // Real inventory numbers computed dynamically from actual inventory records
   const finalNewCounted = newStockCounted;
+  const finalNewOnHand = newStockOnHand;
   const finalNewAvail = newStockAvailable;
   const finalNewCost = newStockValuationCost;
   const finalNewRetail = newStockValuationRetail;
   const finalNewTitles = newStockTitles.size;
 
   const finalOldCounted = oldStockCounted;
+  const finalOldOnHand = oldStockOnHand;
   const finalOldAvail = oldStockAvailable;
   const finalOldCost = oldStockValuation;
   const finalOldRetail = oldStockValuationRetail;
   const finalOldTitles = oldStockTitles.size;
 
   const finalAccCounted = accessoriesCounted;
+  const finalAccOnHand = accessoriesOnHand;
   const finalAccAvail = accessoriesAvailable;
   const finalAccCost = accessoriesValuation;
   const finalAccRetail = accessoriesValuationRetail;
@@ -1981,20 +2056,44 @@ function calculateFinancialMetrics() {
   const combinedBooksRetail = finalNewRetail + finalOldRetail;
   const combinedBooksProfit = (finalNewRetail - finalNewCost) + (finalOldRetail - finalOldCost);
   const combinedBooksUnits = finalNewCounted + finalOldCounted;
+  const combinedBooksOnHand = finalNewOnHand + finalOldOnHand;
+  const combinedBooksAvail = finalNewAvail + finalOldAvail;
   const combinedBooksTitles = finalNewTitles + finalOldTitles;
+  const combinedBooksCostUnits = newStockCostUnits + oldStockCostUnits;
 
   // Storewide Grand Total (Books + Accessories)
   const combinedCost = combinedBooksCost + finalAccCost;
   const combinedRetail = combinedBooksRetail + finalAccRetail;
   const combinedProfit = combinedBooksProfit + (finalAccRetail - finalAccCost);
   const combinedUnits = combinedBooksUnits + finalAccCounted;
+  const combinedOnHand = combinedBooksOnHand + finalAccOnHand;
+  const combinedAvail = combinedBooksAvail + finalAccAvail;
   const combinedDistinct = combinedBooksTitles + finalAccItems;
+  const combinedCostUnits = combinedBooksCostUnits + accessoriesCostUnits;
 
-  const finalRemainingInventoryValue = remainingInventoryValueDa;
+  const finalRemainingInventoryValue = Math.round(remainingInventoryValueDa);
 
-  // 5. Operating expenses & Cash movements
+  // 5. Operating expenses & Cash movements (aware of opening_position.as_of_date)
+  const openingDate = state.openingPosition?.as_of_date
+    ? String(state.openingPosition.as_of_date).slice(0, 10)
+    : null;
+  const isOnOrAfterOpening = (dateVal) => {
+    if (!openingDate) return true;
+    if (!dateVal) return true;
+    return String(dateVal).slice(0, 10) >= openingDate;
+  };
+
   const totalOperatingExpenses = (state.expenses || []).reduce((sum, e) => sum + (Number(e.amount_da) || 0), 0);
-  const totalBatchPaid = (state.batches || []).reduce((sum, b) => sum + (Number(b.amount_paid_da) || 0), 0);
+  const postOpeningOperatingExpenses = (state.expenses || []).reduce((sum, e) => {
+    const d = e.expense_date || e.date || e.created_at;
+    return isOnOrAfterOpening(d) ? sum + (Number(e.amount_da) || 0) : sum;
+  }, 0);
+
+  const totalBatchPaidAll = (state.batches || []).reduce((sum, b) => sum + (Number(b.amount_paid_da) || 0), 0);
+  const postOpeningBatchPaid = (state.batches || []).reduce((sum, b) => {
+    const d = b.purchase_date || b.created_at;
+    return isOnOrAfterOpening(d) ? sum + (Number(b.amount_paid_da) || 0) : sum;
+  }, 0);
 
   // 6. Debts & Repayment Transaction Ledger
   const repaymentsMap = new Map();
@@ -2004,6 +2103,7 @@ function calculateFinancialMetrics() {
   });
 
   let totalDebtsRepaid = 0;
+  let postOpeningDebtsRepaid = 0;
   let outstandingDebtsDa = 0;
 
   (state.debts || []).forEach(d => {
@@ -2020,49 +2120,80 @@ function calculateFinancialMetrics() {
     d.remaining_balance_da = remaining;
   });
 
+  if ((state.debtRepayments || []).length > 0) {
+    postOpeningDebtsRepaid = (state.debtRepayments || []).reduce((sum, rep) => {
+      const d = rep.repayment_date || rep.created_at;
+      return isOnOrAfterOpening(d) ? sum + (Number(rep.amount_da) || 0) : sum;
+    }, 0);
+  } else {
+    postOpeningDebtsRepaid = totalDebtsRepaid;
+  }
+
   // 7. Reconciled Financial Figures (Gross Profit = Revenue - COGS; Net Profit = Gross Profit - Expenses)
   const totalCogs = totalConfirmedCogs + totalProvisionalCogs;
   const totalGrossProfit = totalSalesRevenue - totalCogs;
   const netProfit = totalGrossProfit - totalOperatingExpenses;
 
-  const isProfitReconciled = true;
+  const isProfitReconciled = (catalogCostRatio > 0 || totalProvisionalCogs === 0);
   const totalConfirmedProfitResult = Math.round(totalGrossProfit);
   const netConfirmedProfitResult = Math.round(netProfit);
 
-  // 8. Reconciled Cash Position
+  // 8. Reconciled Cash Position (anchored to opening_position.as_of_date)
   const openingCash = Number(state.openingPosition?.cash_balance_da) || 0;
   const totalCapitalInjected = (state.capitalContributions || []).reduce((sum, c) => sum + (Number(c.amount_da) || 0), 0);
-  const totalOwnerWithdrawals = (state.ownerWithdrawals || []).reduce((sum, w) => sum + (Number(w.amount_da) || 0), 0);
+  const postOpeningCapitalInjected = (state.capitalContributions || []).reduce((sum, c) => {
+    const d = c.contribution_date || c.created_at;
+    return isOnOrAfterOpening(d) ? sum + (Number(c.amount_da) || 0) : sum;
+  }, 0);
 
-  const totalCashInflows = openingCash + totalCashInflowsFromSales + totalCapitalInjected;
-  const totalCashOutflows = totalBatchPaid + totalDebtsRepaid + totalOperatingExpenses + totalOwnerWithdrawals;
-  const currentCashBalance = totalCashInflows - totalCashOutflows;
+  const totalOwnerWithdrawals = (state.ownerWithdrawals || []).reduce((sum, w) => sum + (Number(w.amount_da) || 0), 0);
+  const postOpeningOwnerWithdrawals = (state.ownerWithdrawals || []).reduce((sum, w) => {
+    const d = w.withdrawal_date || w.created_at;
+    return isOnOrAfterOpening(d) ? sum + (Number(w.amount_da) || 0) : sum;
+  }, 0);
+
+  const totalCashInflows = openingCash + totalCashInflowsFromSales + postOpeningCapitalInjected;
+  const totalCashOutflows = postOpeningBatchPaid + postOpeningDebtsRepaid + postOpeningOperatingExpenses + postOpeningOwnerWithdrawals;
+  const currentCashBalance = Math.round(totalCashInflows - totalCashOutflows);
   const isCashReconciled = true;
 
   return {
-    totalSalesRevenue,
-    totalCashInflowsFromSales,
+    totalGrossOrderValue: Math.round(totalGrossOrderValue),
+    totalShippingCollected: Math.round(totalShippingCollected),
+    totalPackagingFees: Math.round(totalPackagingFees),
+    totalSalesRevenue: Math.round(totalSalesRevenue),
+    historicalOrdersRevenue: Math.round(historicalOrdersRevenue),
+    liveOrdersRevenue: Math.round(liveOrdersRevenue),
+    totalCashInflowsFromSales: Math.round(totalCashInflowsFromSales),
     totalCogs: Math.round(totalCogs),
     totalConfirmedCogs: Math.round(totalConfirmedCogs),
     totalProvisionalCogs: Math.round(totalProvisionalCogs),
     totalGrossProfit: totalConfirmedProfitResult,
     totalConfirmedProfit: totalConfirmedProfitResult,
     provisionalProfitTotal: Math.round(totalProvisionalProfit),
-    totalOperatingExpenses,
+    totalOperatingExpenses: Math.round(totalOperatingExpenses),
+    postOpeningOperatingExpenses: Math.round(postOpeningOperatingExpenses),
+    totalBatchPaidAll: Math.round(totalBatchPaidAll),
+    postOpeningBatchPaid: Math.round(postOpeningBatchPaid),
+    totalDebtsRepaid: Math.round(totalDebtsRepaid),
+    postOpeningDebtsRepaid: Math.round(postOpeningDebtsRepaid),
     netProfit: netConfirmedProfitResult,
     netConfirmedProfit: netConfirmedProfitResult,
     isProfitReconciled,
     remainingInventoryValueDa: finalRemainingInventoryValue,
     unpricedTitlesCount,
-    totalCountedPhysical: combinedUnits,
-    totalAvailableUnits: finalNewAvail + finalOldAvail + finalAccAvail,
+    totalCountedPhysical,
+    totalOnHandUnits,
+    totalAvailableUnits,
     totalReservedUnits,
     totalDamagedUnits,
-    outstandingDebtsDa,
+    outstandingDebtsDa: Math.round(outstandingDebtsDa),
     isCashReconciled,
+    openingCash: Math.round(openingCash),
+    openingDate,
     currentCashBalance,
-    totalCapitalInjected,
-    totalOwnerWithdrawals,
+    totalCapitalInjected: Math.round(totalCapitalInjected),
+    totalOwnerWithdrawals: Math.round(totalOwnerWithdrawals),
     oldStock: {
       titlesCount: finalOldTitles,
       soldQty: soldQtyOld,
@@ -2070,6 +2201,7 @@ function calculateFinancialMetrics() {
       cogs: Math.round(confirmedCogsOld),
       grossProfit: Math.round(confirmedProfitOld),
       counted: finalOldCounted,
+      onHand: finalOldOnHand,
       available: finalOldAvail,
       reserved: oldStockReserved,
       damaged: oldStockDamaged,
@@ -2079,7 +2211,7 @@ function calculateFinancialMetrics() {
       valuationAtRetail: Math.round(finalOldRetail),
       expectedProfit: Math.round(finalOldRetail - finalOldCost),
       expectedProfitExact: finalOldRetail - finalOldCost,
-      avgUnitCost: finalOldCounted > 0 ? (finalOldCost / finalOldCounted) : 0,
+      avgUnitCost: oldStockCostUnits > 0 ? (finalOldCost / oldStockCostUnits) : 0,
       marginPct: finalOldRetail > 0 ? Math.round(((finalOldRetail - finalOldCost) / finalOldRetail) * 1000) / 10 : 0
     },
     newStock: {
@@ -2089,6 +2221,7 @@ function calculateFinancialMetrics() {
       cogs: Math.round(confirmedCogsNew),
       grossProfit: Math.round(confirmedProfitNew),
       counted: finalNewCounted,
+      onHand: finalNewOnHand,
       available: finalNewAvail,
       reserved: newStockReserved,
       damaged: newStockDamaged,
@@ -2098,7 +2231,7 @@ function calculateFinancialMetrics() {
       valuationAtRetail: Math.round(finalNewRetail),
       expectedProfit: Math.round(finalNewRetail - finalNewCost),
       expectedProfitExact: finalNewRetail - finalNewCost,
-      avgUnitCost: finalNewCounted > 0 ? (finalNewCost / finalNewCounted) : 0,
+      avgUnitCost: newStockCostUnits > 0 ? (finalNewCost / newStockCostUnits) : 0,
       marginPct: finalNewRetail > 0 ? Math.round(((finalNewRetail - finalNewCost) / finalNewRetail) * 1000) / 10 : 0
     },
     combinedBooks: {
@@ -2108,46 +2241,49 @@ function calculateFinancialMetrics() {
       cogs: Math.round(confirmedCogsOld + confirmedCogsNew),
       grossProfit: Math.round(confirmedProfitOld + confirmedProfitNew),
       counted: combinedBooksUnits,
-      available: finalNewAvail + finalOldAvail,
+      onHand: combinedBooksOnHand,
+      available: combinedBooksAvail,
       valuation: Math.round(combinedBooksCost),
       valuationExact: combinedBooksCost,
       valuationAtCost: Math.round(combinedBooksCost),
       valuationAtRetail: Math.round(combinedBooksRetail),
       expectedProfit: Math.round(combinedBooksProfit),
       expectedProfitExact: combinedBooksProfit,
-      avgUnitCost: combinedBooksUnits > 0 ? (combinedBooksCost / combinedBooksUnits) : 0,
+      avgUnitCost: combinedBooksCostUnits > 0 ? (combinedBooksCost / combinedBooksCostUnits) : 0,
       marginPct: combinedBooksRetail > 0 ? Math.round((combinedBooksProfit / combinedBooksRetail) * 1000) / 10 : 0
     },
     accessories: {
       itemsCount: finalAccItems,
-      soldQty: 0, // Standalone accessory lot
-      revenue: 0,
-      cogs: 0,
-      grossProfit: 0,
+      soldQty: soldQtyAcc,
+      revenue: Math.round(revenueAcc),
+      cogs: Math.round(confirmedCogsAcc),
+      grossProfit: Math.round(revenueAcc - confirmedCogsAcc),
       counted: finalAccCounted,
+      onHand: finalAccOnHand,
       available: finalAccAvail,
       reserved: accessoriesReserved,
       damaged: accessoriesDamaged,
-      valuation: finalAccCost,
-      valuationAtCost: finalAccCost,
-      valuationAtRetail: finalAccRetail,
-      expectedProfit: finalAccRetail - finalAccCost,
-      avgUnitCost: finalAccCounted > 0 ? (finalAccCost / finalAccCounted) : 205.93,
-      marginPct: finalAccRetail > 0 ? Math.round(((finalAccRetail - finalAccCost) / finalAccRetail) * 1000) / 10 : 35.4
+      valuation: Math.round(finalAccCost),
+      valuationAtCost: Math.round(finalAccCost),
+      valuationAtRetail: Math.round(finalAccRetail),
+      expectedProfit: Math.round(finalAccRetail - finalAccCost),
+      avgUnitCost: accessoriesCostUnits > 0 ? (finalAccCost / accessoriesCostUnits) : 0,
+      marginPct: finalAccRetail > 0 ? Math.round(((finalAccRetail - finalAccCost) / finalAccRetail) * 1000) / 10 : 0
     },
     combined: {
       distinctItems: combinedDistinct,
       counted: combinedUnits,
-      available: finalNewAvail + finalOldAvail + finalAccAvail,
-      valuationAtCost: combinedCost,
-      valuationAtRetail: combinedRetail,
-      expectedProfit: combinedProfit,
-      marginPct: combinedRetail > 0 ? Math.round((combinedProfit / combinedRetail) * 1000) / 10 : 45.5,
-      avgUnitCost: combinedUnits > 0 ? (combinedCost / combinedUnits) : 979.99
+      onHand: combinedOnHand,
+      available: combinedAvail,
+      valuationAtCost: Math.round(combinedCost),
+      valuationAtRetail: Math.round(combinedRetail),
+      expectedProfit: Math.round(combinedProfit),
+      marginPct: combinedRetail > 0 ? Math.round((combinedProfit / combinedRetail) * 1000) / 10 : 0,
+      avgUnitCost: combinedCostUnits > 0 ? (combinedCost / combinedCostUnits) : 0
     },
     historicalSales: {
       orderCount: state.orders.length,
-      revenue: totalSalesRevenue,
+      revenue: Math.round(totalSalesRevenue),
       cogs: Math.round(totalCogs),
       grossProfit: totalConfirmedProfitResult
     },
@@ -2158,10 +2294,43 @@ function calculateFinancialMetrics() {
 // ============================================================================
 // 6. VIEW RENDERERS & DATA BINDING
 // ============================================================================
+function getEffectiveOrderStatus(order) {
+  if (!order) return { isHist: false, status: 'pending', paymentStatus: 'unpaid', shippingFee: 0, meta: null };
+  const isHist = !!(order.is_historical || Number(order.id) <= 170);
+  const meta = state.orderMeta ? state.orderMeta.find(m => String(m.order_id) === String(order.id)) : null;
+  const status = meta
+    ? (meta.fulfillment_status || 'pending')
+    : (isHist ? 'delivered' : (order.status || 'pending'));
+  const paymentStatus = meta
+    ? (meta.payment_status || 'unpaid')
+    : (isHist ? 'paid' : (order.payment_status || 'unpaid'));
+  const shippingFee = Number(meta?.shipping_fee_da ?? order.shipping_price) || 0;
+  return { isHist, status, paymentStatus, shippingFee, meta };
+}
+
+function getOrderStatusBadgeHtml(status, isHist) {
+  if (isHist && status === 'delivered') {
+    return `<span class="badge badge-neutral" title="Historical Archive Order (Read-only)">Historical / أرشيف</span>`;
+  }
+  const map = {
+    pending: { cls: 'badge-amber', label: 'Pending / بانتظار التأكيد' },
+    confirmed: { cls: 'badge-blue', label: 'Confirmed / مؤكد' },
+    processing: { cls: 'badge-blue', label: 'Processing / قيد التجهيز' },
+    packed: { cls: 'badge-blue', label: 'Packed / جاهز للشحن' },
+    shipped: { cls: 'badge-blue', label: 'Shipped / تم الشحن' },
+    delivered: { cls: 'badge-green', label: 'Delivered / تم التسليم' },
+    cancelled: { cls: 'badge-rose', label: 'Cancelled / ملغى' },
+    rejected: { cls: 'badge-rose', label: 'Rejected / مرفوض' },
+    returned: { cls: 'badge-rose', label: 'Returned / مرتجع' }
+  };
+  const info = map[String(status || 'pending').toLowerCase()] || { cls: 'badge-neutral', label: escapeHtml(status || 'pending') };
+  return `<span class="badge ${info.cls}">${info.label}</span>`;
+}
+
 function updateDashboardMetrics() {
   const fin = calculateFinancialMetrics();
 
-  // 1. Available Cash (Unreconciled until verified against financial records)
+  // 1. Available Cash
   const cashEl = document.getElementById('metric-cash-balance');
   const cashSubEl = document.getElementById('metric-cash-subtext');
   if (cashEl) {
@@ -2170,14 +2339,14 @@ function updateDashboardMetrics() {
       cashEl.style.fontSize = '';
       if (cashSubEl) {
         cashSubEl.className = 'metric-subtext confirmed';
-        cashSubEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> Reconciled Cash Balance`;
+        cashSubEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${fin.openingDate ? `Reconciled since ${escapeHtml(fin.openingDate)}` : 'Reconciled Cash Balance'}`;
       }
     } else {
       cashEl.textContent = 'Not reconciled / غير محسوبة بعد';
       cashEl.style.fontSize = '1.05rem';
       if (cashSubEl) {
         cashSubEl.className = 'metric-subtext';
-        cashSubEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Awaiting reconciliation / بانتظار الجرد والتدقيق`;
+        cashSubEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Awaiting reconciliation`;
       }
     }
   }
@@ -2189,11 +2358,16 @@ function updateDashboardMetrics() {
   const ordersBadge = document.getElementById('orders-nav-badge');
   if (ordersBadge) ordersBadge.textContent = state.orders.length;
 
-  // 3. Historical Order Value (Summed from real customer orders)
+  // 3. Book Sales Revenue (strictly excluding delivery passthrough fees)
   const salesEl = document.getElementById('metric-total-sales');
   if (salesEl) salesEl.textContent = `${fin.totalSalesRevenue.toLocaleString('fr-DZ')} DA`;
 
-  // 4. Remaining Inventory Asset Value (Strictly from physical stock at cost; 0 DA until imported)
+  const salesSubEl = document.getElementById('metric-sales-subtext');
+  if (salesSubEl) {
+    salesSubEl.innerHTML = `<i class="fa-solid fa-book-open"></i> Net book sales (${fin.totalShippingCollected.toLocaleString('fr-DZ')} DA shipping excluded)`;
+  }
+
+  // 4. Remaining Inventory Asset Value (Strictly from physical stock at cost)
   const invValEl = document.getElementById('metric-inventory-val');
   if (invValEl) invValEl.textContent = `${fin.remainingInventoryValueDa.toLocaleString('fr-DZ')} DA`;
 
@@ -2202,9 +2376,9 @@ function updateDashboardMetrics() {
     if (state.inventory.length === 0) {
       invSubEl.innerHTML = `<span class="badge-neutral"><i class="fa-solid fa-boxes-stacked"></i> Awaiting physical import</span>`;
     } else if (fin.unpricedTitlesCount > 0) {
-      invSubEl.innerHTML = `<span class="badge-provisional"><i class="fa-solid fa-clock"></i> ${fin.unpricedTitlesCount} unpriced</span>`;
+      invSubEl.innerHTML = `<span class="badge-provisional"><i class="fa-solid fa-clock"></i> ${fin.unpricedTitlesCount} unpriced (NULL)</span>`;
     } else {
-      invSubEl.innerHTML = `<span class="badge-confirmed"><i class="fa-solid fa-circle-check"></i> Reconciled</span>`;
+      invSubEl.innerHTML = `<span class="badge-confirmed"><i class="fa-solid fa-circle-check"></i> Reconciled (${fin.totalAvailableUnits} units)</span>`;
     }
   }
 
@@ -2226,18 +2400,21 @@ function renderRecentOrders() {
   }
 
   const recent = state.orders.slice(0, 5);
-  tbody.innerHTML = recent.map(o => `
-    <tr>
-      <td><strong>#${o.id}</strong></td>
-      <td>
-        <div style="font-weight: 600;">${escapeHtml(o.firstName || '')} ${escapeHtml(o.familyName || '')}</div>
-        <div style="font-size: 0.8rem; color: var(--text-muted);">${escapeHtml(o.phoneNumber || '')}</div>
-      </td>
-      <td style="max-width: 280px; font-size: 0.86rem;">${formatOrderItems(o.items)}</td>
-      <td><strong>${o.total_price ? o.total_price + ' DA' : '-'}</strong></td>
-      <td><span class="badge badge-neutral">Historical / أرشيف</span></td>
-    </tr>
-  `).join('');
+  tbody.innerHTML = recent.map(o => {
+    const info = getEffectiveOrderStatus(o);
+    return `
+      <tr style="cursor: pointer;" onclick="viewOrderDetails(${o.id})">
+        <td><strong>#${o.id}</strong></td>
+        <td>
+          <div style="font-weight: 600;">${escapeHtml(o.firstName || '')} ${escapeHtml(o.familyName || '')}</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">${escapeHtml(o.phoneNumber || '')}</div>
+        </td>
+        <td style="max-width: 280px; font-size: 0.86rem;">${formatOrderItems(o.items)}</td>
+        <td><strong>${o.total_price ? Number(o.total_price).toLocaleString('fr-DZ') + ' DA' : '-'}</strong></td>
+        <td>${getOrderStatusBadgeHtml(info.status, info.isHist)}</td>
+      </tr>
+    `;
+  }).join('');
 }
 
 function renderOrdersTable() {
@@ -2248,16 +2425,22 @@ function renderOrdersTable() {
   let filtered = state.orders;
 
   if (state.ordersFilter === 'historical') {
-    filtered = filtered.filter(o => o.is_historical);
+    filtered = filtered.filter(o => getEffectiveOrderStatus(o).isHist);
   } else if (state.ordersFilter === 'pending') {
-    filtered = filtered.filter(o => !o.is_historical || o.status === 'pending');
+    filtered = filtered.filter(o => {
+      const info = getEffectiveOrderStatus(o);
+      return !info.isHist && ['pending', 'confirmed', 'processing', 'packed'].includes(info.status);
+    });
   } else if (state.ordersFilter === 'shipped') {
-    filtered = filtered.filter(o => o.status === 'delivered' || o.status === 'shipped');
+    filtered = filtered.filter(o => {
+      const info = getEffectiveOrderStatus(o);
+      return !info.isHist && ['shipped', 'delivered'].includes(info.status);
+    });
   }
 
   if (state.searchQuery) {
     const q = state.searchQuery.toLowerCase();
-    filtered = filtered.filter(o => 
+    filtered = filtered.filter(o =>
       String(o.id).includes(q) ||
       (o.firstName && o.firstName.toLowerCase().includes(q)) ||
       (o.familyName && o.familyName.toLowerCase().includes(q)) ||
@@ -2273,31 +2456,45 @@ function renderOrdersTable() {
     return;
   }
 
-  tbody.innerHTML = filtered.map(o => `
-    <tr>
-      <td><strong>#${o.id}</strong></td>
-      <td style="white-space: nowrap; font-size: 0.85rem;">${formatDate(o.created_at)}</td>
-      <td>
-        <div style="font-weight: 600;">${escapeHtml(o.firstName || '')} ${escapeHtml(o.familyName || '')}</div>
-        <div style="font-size: 0.8rem; color: var(--text-muted);">${escapeHtml(o.phoneNumber || '')}</div>
-        ${o.instagramUsername ? `<div style="font-size: 0.78rem; color: #B33D62;">@${escapeHtml(o.instagramUsername)}</div>` : ''}
-      </td>
-      <td style="font-size: 0.86rem; max-width: 300px;">${formatOrderItems(o.items)}</td>
-      <td style="white-space: nowrap;">
-        <span class="badge ${o.deliveryMethod === 'home' ? 'badge-blue' : 'badge-neutral'}">
-          ${(o.deliveryMethod || 'Desk').toUpperCase()}
-        </span>
-        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 3px;">${escapeHtml(o.wilaya || '')}</div>
-      </td>
-      <td><strong style="color: var(--success);">${o.total_price ? o.total_price + ' DA' : '-'}</strong></td>
-      <td><span class="badge badge-neutral" title="Historical Order (Read-only)">Unreconciled / تاريخي</span></td>
-      <td>
-        <button class="btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="viewOrderDetails(${o.id})">
-          <i class="fa-regular fa-eye"></i> View
-        </button>
-      </td>
-    </tr>
-  `).join('');
+  tbody.innerHTML = filtered.map(o => {
+    const info = getEffectiveOrderStatus(o);
+    const totalPrice = Number(o.total_price) || 0;
+    const bookTotal = Math.max(0, totalPrice - info.shippingFee);
+    return `
+      <tr>
+        <td>
+          <strong>#${o.id}</strong>
+          ${!info.isHist ? '<div style="font-size: 0.72rem; color: var(--vintage-blue); font-weight: 600;">LIVE</div>' : ''}
+        </td>
+        <td style="white-space: nowrap; font-size: 0.85rem;">${formatDate(o.created_at)}</td>
+        <td>
+          <div style="font-weight: 600;">${escapeHtml(o.firstName || '')} ${escapeHtml(o.familyName || '')}</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">${escapeHtml(o.phoneNumber || '')}</div>
+          ${o.instagramUsername ? `<div style="font-size: 0.78rem; color: #B33D62;">@${escapeHtml(o.instagramUsername)}</div>` : ''}
+        </td>
+        <td style="font-size: 0.86rem; max-width: 300px;">${formatOrderItems(o.items)}</td>
+        <td style="white-space: nowrap;">
+          <span class="badge ${o.deliveryMethod === 'home' ? 'badge-blue' : 'badge-neutral'}">
+            ${(o.deliveryMethod || 'Desk').toUpperCase()}
+          </span>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 3px;">${escapeHtml(o.wilaya || '')}</div>
+        </td>
+        <td>
+          <strong style="color: var(--success);">${totalPrice ? totalPrice.toLocaleString('fr-DZ') + ' DA' : '-'}</strong>
+          ${info.shippingFee > 0 ? `<div style="font-size: 0.74rem; color: var(--text-muted);">Books: ${bookTotal.toLocaleString('fr-DZ')} + Ship: ${info.shippingFee.toLocaleString('fr-DZ')}</div>` : ''}
+        </td>
+        <td>
+          ${getOrderStatusBadgeHtml(info.status, info.isHist)}
+          ${!info.isHist ? `<div style="font-size: 0.74rem; color: ${info.paymentStatus === 'paid' ? 'var(--success)' : 'var(--text-muted)'}; margin-top: 3px;">${escapeHtml(info.paymentStatus.toUpperCase())}</div>` : ''}
+        </td>
+        <td>
+          <button class="btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="viewOrderDetails(${o.id})">
+            <i class="fa-regular fa-eye"></i> Manage
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
 }
 
 function renderInventoryTable() {
@@ -2325,17 +2522,14 @@ function renderInventoryTable() {
   } else if (state.inventoryFilter === 'unknown_cost') {
     items = items.filter(i => i.unit_purchase_cost_da === null || i.unit_purchase_cost_da === undefined);
   } else if (state.inventoryFilter === 'low_stock') {
-    items = items.filter(i => {
-      const avail = (Number(i.quantity_received) || 0) - (Number(i.quantity_sold) || 0) - (Number(i.quantity_reserved) || 0) - (Number(i.quantity_damaged) || 0);
-      return avail <= 2;
-    });
+    items = items.filter(i => getInventoryAvailableQty(i) <= 2);
   } else if (state.inventoryFilter !== 'all') {
     items = items.filter(i => (i.item_type || i.category || 'book').toLowerCase() === state.inventoryFilter.toLowerCase());
   }
 
   if (state.searchQuery) {
     const q = state.searchQuery.toLowerCase();
-    items = items.filter(i => 
+    items = items.filter(i =>
       (i.title && i.title.toLowerCase().includes(q)) ||
       (i.author && i.author.toLowerCase().includes(q)) ||
       (i.isbn && i.isbn.includes(q))
@@ -2345,22 +2539,20 @@ function renderInventoryTable() {
   if (countEl) countEl.textContent = `${items.length} titles in view (${state.inventory.length} total in store)`;
 
   if (items.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" class="empty-state"><i class="fa-solid fa-book-open"></i><p>No inventory items found matching this filter. Use <strong>"Import Excel"</strong> or click <strong>"Add Item"</strong>.</p></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" class="empty-state"><i class="fa-solid fa-book-open"></i><p>No inventory items found matching this filter. Use <strong>"Import Excel"</strong> or click <strong>"Add Item"</strong>.</p></td></tr>`;
     return;
   }
 
   tbody.innerHTML = items.map(item => {
-    const received = Number(item.quantity_received) || 0;
-    const sold = Number(item.quantity_sold) || 0;
+    const onHand = getInventoryOnHandQty(item);
     const reserved = Number(item.quantity_reserved) || 0;
-    const damaged = Number(item.quantity_damaged) || 0;
-    const available = Math.max(0, received - sold - reserved - damaged);
+    const available = getInventoryAvailableQty(item);
     const isLow = available <= 2;
     const isOld = (item.stock_group || '').toUpperCase() === 'OLD_STOCK';
     const isAcc = isAccessoryItem(item);
 
-    const costBadge = (item.unit_purchase_cost_da !== null && item.unit_purchase_cost_da !== undefined && !isNaN(item.unit_purchase_cost_da))
-      ? `<span class="badge-confirmed">${item.unit_purchase_cost_da} DA</span>`
+    const costBadge = (item.unit_purchase_cost_da !== null && item.unit_purchase_cost_da !== undefined && item.unit_purchase_cost_da !== '' && !isNaN(item.unit_purchase_cost_da))
+      ? `<span class="badge-confirmed">${Number(item.unit_purchase_cost_da).toLocaleString('fr-DZ')} DA</span>`
       : `<span class="badge-provisional"><i class="fa-solid fa-clock"></i> Pending (NULL)</span>`;
 
     const groupBadge = isAcc
@@ -2371,14 +2563,14 @@ function renderInventoryTable() {
       <tr>
         <td>
           <div style="font-weight: 600; font-family: var(--font-serif); font-size: 0.96rem;">${escapeHtml(item.title)}</div>
-          <div style="font-size: 0.82rem; color: var(--text-muted);">${escapeHtml(item.author || '-')} ${item.isbn ? `• ISBN: ${item.isbn}` : ''}</div>
+          <div style="font-size: 0.82rem; color: var(--text-muted);">${escapeHtml(item.author || '-')} ${item.isbn ? `• ISBN: ${escapeHtml(item.isbn)}` : ''}</div>
           <div style="font-size: 0.78rem; color: var(--text-muted);"><i class="fa-solid fa-boxes-packing"></i> ${escapeHtml(item.supplier_name || (isAcc ? 'Accessories' : 'Book Fair'))}</div>
         </td>
         <td>
           ${groupBadge}
         </td>
         <td><span class="badge badge-neutral">${escapeHtml(item.category || item.item_type || (isAcc ? 'Accessory' : 'Book'))}</span></td>
-        <td><strong>${received}</strong></td>
+        <td><strong>${onHand}</strong></td>
         <td><strong>${reserved}</strong></td>
         <td>
           <span class="badge ${isLow ? 'badge-rose' : 'badge-green'}">
@@ -2386,7 +2578,15 @@ function renderInventoryTable() {
           </span>
         </td>
         <td>${costBadge}</td>
-        <td><strong style="color: var(--vintage-blue); font-size: 1rem;">${item.selling_price_da ? item.selling_price_da + ' DA' : '-'}</strong></td>
+        <td><strong style="color: var(--vintage-blue); font-size: 1rem;">${item.selling_price_da ? Number(item.selling_price_da).toLocaleString('fr-DZ') + ' DA' : '-'}</strong></td>
+        <td style="white-space: nowrap;">
+          <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.78rem;" onclick="openEditInventoryModal('${escapeHtml(String(item.id))}')" title="Edit Title / Price / Cost">
+            <i class="fa-solid fa-pen"></i> Edit
+          </button>
+          <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.78rem; margin-left: 4px;" onclick="openStockAdjustmentModal('${escapeHtml(String(item.id))}')" title="Adjust Stock / تسوية">
+            <i class="fa-solid fa-sliders"></i>
+          </button>
+        </td>
       </tr>
     `;
   }).join('');
@@ -2399,7 +2599,14 @@ function renderPurchasesSection() {
       container.innerHTML = `<div class="empty-state"><i class="fa-solid fa-boxes-packing"></i><p>No purchase batches recorded yet.</p></div>`;
     } else {
       container.innerHTML = state.batches.map(b => {
-        const totalCost = Number(b.total_cost_da) || 0;
+        const linkedItems = (state.inventory || []).filter(i => String(i.batch_id) === String(b.id));
+        const derivedUnits = linkedItems.reduce((s, i) => s + (Number(i.quantity_received) || 0), 0);
+        const derivedCost = linkedItems.reduce((s, i) => {
+          const c = (i.unit_purchase_cost_da !== null && i.unit_purchase_cost_da !== undefined && !isNaN(i.unit_purchase_cost_da)) ? Number(i.unit_purchase_cost_da) : 0;
+          return s + ((Number(i.quantity_received) || 0) * c);
+        }, 0);
+        const totalCost = (b.total_cost_da !== null && b.total_cost_da !== undefined) ? Number(b.total_cost_da) : derivedCost;
+        const totalUnits = Number(b.total_units) || derivedUnits;
         const amtPaid = Number(b.amount_paid_da) || 0;
         const balance = Math.max(0, totalCost - amtPaid);
         const statusBadgeClass = b.payment_status === 'paid' ? 'badge-green' : (b.payment_status === 'partial' ? 'badge-amber' : 'badge-rose');
@@ -2413,11 +2620,11 @@ function renderPurchasesSection() {
             <div class="panel-body">
               <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 12px;">
                 <div><strong>Group:</strong> <span class="badge badge-newstock">${escapeHtml(b.stock_group || 'NEW_STOCK')}</span></div>
-                <div><strong>Purchase Date:</strong> ${b.purchase_date || '-'}</div>
-                <div><strong>Copies Received:</strong> <strong>${b.total_units || 0}</strong> physical copies</div>
-                <div><strong>Total Batch Cost:</strong> <strong style="color: var(--vintage-blue); font-size: 1rem;">${totalCost.toLocaleString('fr-DZ')} DA</strong></div>
+                <div><strong>Purchase Date:</strong> ${escapeHtml(b.purchase_date || '-')}</div>
+                <div><strong>Copies Received:</strong> <strong>${totalUnits}</strong> (${linkedItems.length} lots)</div>
+                <div><strong>Total Batch Cost:</strong> <strong style="color: var(--vintage-blue); font-size: 1rem;">${Math.round(totalCost).toLocaleString('fr-DZ')} DA</strong></div>
                 <div><strong>Amount Paid:</strong> <strong style="color: var(--success); font-size: 1rem;">${amtPaid.toLocaleString('fr-DZ')} DA</strong></div>
-                <div><strong>Remaining Balance:</strong> <strong style="color: ${balance > 0 ? 'var(--warning)' : 'var(--success)'}; font-size: 1rem;">${balance.toLocaleString('fr-DZ')} DA</strong></div>
+                <div><strong>Remaining Balance:</strong> <strong style="color: ${balance > 0 ? 'var(--warning)' : 'var(--success)'}; font-size: 1rem;">${Math.round(balance).toLocaleString('fr-DZ')} DA</strong></div>
               </div>
               <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; margin-top: 8px;">${escapeHtml(b.notes || '')}</p>
             </div>
@@ -2427,34 +2634,72 @@ function renderPurchasesSection() {
     }
   }
 
-  // Suppliers Directory Table (Dynamically aggregated from actual itemized inventory)
+  // Suppliers Directory Table (Merging Supabase `suppliers` table + Inventory Lots + Supplier Debts)
   const suppliersTbody = document.getElementById('purchases-suppliers-tbody');
   if (suppliersTbody) {
-    const suppMap = {};
-    state.inventory.forEach(i => {
-      const name = i.supplier_name || 'Book Fair Exhibitors';
-      if (!suppMap[name]) {
-        suppMap[name] = { name, contact: 'Book Fair Exhibitor', titlesCount: 0, copiesCount: 0, totalCost: 0 };
+    const suppMap = new Map();
+    const ensureSupplier = (rawName, defaults = {}) => {
+      const displayName = (rawName || 'Unspecified Supplier').trim();
+      const key = displayName.toLowerCase();
+      if (!suppMap.has(key)) {
+        suppMap.set(key, {
+          name: displayName,
+          contact: defaults.contact || '-',
+          titlesCount: 0,
+          copiesCount: 0,
+          totalCost: 0,
+          hasUnknownCost: false,
+          outstandingDebtDa: 0
+        });
       }
-      suppMap[name].titlesCount++;
+      const entry = suppMap.get(key);
+      if (defaults.contact && entry.contact === '-') entry.contact = defaults.contact;
+      return entry;
+    };
+
+    (state.suppliers || []).forEach(s => {
+      const contactParts = [s.contact_name, s.phone, s.supplier_type].filter(Boolean);
+      ensureSupplier(s.name, { contact: contactParts.join(' • ') || 'Registered Supplier' });
+    });
+
+    (state.inventory || []).forEach(i => {
+      const supName = i.supplier_name || (isAccessoryItem(i) ? 'Accessories Supplier' : 'Book Fair Exhibitors');
+      const entry = ensureSupplier(supName, { contact: 'Catalog / Fair Lot' });
+      entry.titlesCount++;
       const copies = Number(i.quantity_received) || 0;
-      suppMap[name].copiesCount += copies;
-      if (i.unit_purchase_cost_da !== null && i.unit_purchase_cost_da !== undefined) {
-        suppMap[name].totalCost += (copies * Number(i.unit_purchase_cost_da));
+      entry.copiesCount += copies;
+      if (i.unit_purchase_cost_da !== null && i.unit_purchase_cost_da !== undefined && !isNaN(i.unit_purchase_cost_da)) {
+        entry.totalCost += (copies * Number(i.unit_purchase_cost_da));
+      } else {
+        entry.hasUnknownCost = true;
       }
     });
 
-    const suppliers = Object.values(suppMap);
+    (state.debts || []).forEach(d => {
+      if ((d.debt_type || '').toLowerCase() === 'supplier') {
+        const entry = ensureSupplier(d.creditor_name, { contact: 'Supplier Creditor' });
+        entry.outstandingDebtDa += Math.max(0, Number(d.remaining_balance_da ?? ((Number(d.original_amount_da) || 0) - (Number(d.amount_repaid_da) || 0))) || 0);
+      }
+    });
+
+    const suppliers = Array.from(suppMap.values()).sort((a, b) => b.totalCost - a.totalCost || b.copiesCount - a.copiesCount);
     if (suppliers.length === 0) {
       suppliersTbody.innerHTML = `<tr><td colspan="5" class="empty-state">No suppliers registered yet.</td></tr>`;
     } else {
       suppliersTbody.innerHTML = suppliers.map(s => `
         <tr>
-          <td><strong>${escapeHtml(s.name)}</strong></td>
+          <td>
+            <strong>${escapeHtml(s.name)}</strong>
+            ${s.outstandingDebtDa > 0 ? `<div style="font-size: 0.76rem; color: var(--warning);">Owed Debt: ${s.outstandingDebtDa.toLocaleString('fr-DZ')} DA</div>` : ''}
+          </td>
           <td>${escapeHtml(s.contact)}</td>
           <td>${s.titlesCount} Title${s.titlesCount !== 1 ? 's' : ''} (${s.copiesCount} copies)</td>
-          <td><strong style="color: var(--vintage-blue);">${s.totalCost.toLocaleString('fr-DZ')} DA</strong></td>
-          <td><span class="badge badge-green">Reconciled at Cost</span></td>
+          <td><strong style="color: var(--vintage-blue);">${Math.round(s.totalCost).toLocaleString('fr-DZ')} DA</strong></td>
+          <td>
+            ${s.hasUnknownCost
+              ? '<span class="badge badge-amber"><i class="fa-solid fa-clock"></i> Partial Cost (NULL)</span>'
+              : '<span class="badge badge-green">Reconciled at Cost</span>'}
+          </td>
         </tr>
       `).join('');
     }
@@ -2473,14 +2718,14 @@ function renderFinanceSection() {
       cashEl.style.fontSize = '';
       if (cashSubEl) {
         cashSubEl.className = 'metric-subtext confirmed';
-        cashSubEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> Reconciled Cash on Hand`;
+        cashSubEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${fin.openingDate ? `Since ${escapeHtml(fin.openingDate)}` : 'Reconciled Cash on Hand'}`;
       }
     } else {
       cashEl.textContent = 'Not reconciled / غير محسوبة بعد';
       cashEl.style.fontSize = '1.05rem';
       if (cashSubEl) {
         cashSubEl.className = 'metric-subtext';
-        cashSubEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Awaiting reconciliation / بانتظار الجرد والتدقيق`;
+        cashSubEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Awaiting reconciliation`;
       }
     }
   }
@@ -2493,9 +2738,9 @@ function renderFinanceSection() {
     if (state.inventory.length === 0) {
       invSubEl.innerHTML = `<span class="badge-neutral"><i class="fa-solid fa-boxes-stacked"></i> Awaiting physical import</span>`;
     } else if (fin.unpricedTitlesCount > 0) {
-      invSubEl.textContent = `${fin.unpricedTitlesCount} titles unpriced (NULL)`;
+      invSubEl.textContent = `${fin.unpricedTitlesCount} lots with unknown cost (NULL)`;
     } else {
-      invSubEl.textContent = 'All stock items priced';
+      invSubEl.textContent = `All ${fin.totalAvailableUnits} available units costed`;
     }
   }
 
@@ -2508,14 +2753,14 @@ function renderFinanceSection() {
       if (grossSubEl) {
         grossSubEl.className = 'metric-subtext confirmed';
         const marginPct = fin.totalSalesRevenue > 0 ? Math.round((fin.totalConfirmedProfit / fin.totalSalesRevenue) * 100) : 0;
-        grossSubEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sales (${fin.totalSalesRevenue.toLocaleString('fr-DZ')} DA) − COGS (${(fin.totalCogs || 0).toLocaleString('fr-DZ')} DA) • ${marginPct}% Margin`;
+        grossSubEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> Book Sales (${fin.totalSalesRevenue.toLocaleString('fr-DZ')} DA) − COGS (${(fin.totalCogs || 0).toLocaleString('fr-DZ')} DA) • ${marginPct}% Margin`;
       }
     } else {
       grossEl.textContent = 'Not reconciled / غير محسوبة بعد';
       grossEl.style.fontSize = '1.05rem';
       if (grossSubEl) {
         grossSubEl.className = 'metric-subtext';
-        grossSubEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Historical COGS unallocated; awaiting reconciliation`;
+        grossSubEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Historical COGS unallocated`;
       }
     }
   }
@@ -2535,52 +2780,79 @@ function renderFinanceSection() {
       netEl.style.fontSize = '1.05rem';
       if (netSubEl) {
         netSubEl.className = 'metric-subtext';
-        netSubEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Historical COGS unallocated; awaiting reconciliation`;
+        netSubEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Historical COGS unallocated`;
       }
     }
   }
 
+  const shipEl = document.getElementById('finance-shipping-collected');
+  if (shipEl) shipEl.textContent = `${fin.totalShippingCollected.toLocaleString('fr-DZ')} DA`;
+  const shipSubEl = document.getElementById('finance-shipping-subtext');
+  if (shipSubEl) {
+    shipSubEl.textContent = `Excluded from ${fin.totalSalesRevenue.toLocaleString('fr-DZ')} DA book sales (Gross Customer Paid: ${fin.totalGrossOrderValue.toLocaleString('fr-DZ')} DA)`;
+  }
+
   // 2. New Stock Breakdown Card
   const newStatusEl = document.getElementById('finance-new-stock-status');
-  if (newStatusEl) newStatusEl.innerHTML = `<i class="fa-solid fa-check"></i> 100% In Stock (0 Sold)`;
+  if (newStatusEl) {
+    newStatusEl.innerHTML = fin.newStock.soldQty > 0
+      ? `<i class="fa-solid fa-chart-line"></i> ${fin.newStock.soldQty} Sold • ${fin.newStock.available} Available`
+      : `<i class="fa-solid fa-check"></i> 100% In Stock (${fin.newStock.available} avail)`;
+  }
 
   const newSoldEl = document.getElementById('finance-new-sold-qty');
-  if (newSoldEl) newSoldEl.textContent = `0 Sold (${fin.newStock.available} in stock)`;
+  if (newSoldEl) newSoldEl.textContent = `${fin.newStock.soldQty} Sold (${fin.newStock.available} avail / ${fin.newStock.onHand} on hand)`;
 
   const newRetailEl = document.getElementById('finance-new-retail-val');
-  if (newRetailEl) newRetailEl.textContent = `${Math.round(fin.newStock.valuationAtRetail).toLocaleString('fr-DZ')} DA`;
+  if (newRetailEl) newRetailEl.textContent = `${fin.newStock.valuationAtRetail.toLocaleString('fr-DZ')} DA`;
 
   const newRevEl = document.getElementById('finance-new-revenue');
-  if (newRevEl) newRevEl.textContent = `0 DA`;
+  if (newRevEl) newRevEl.textContent = `${fin.newStock.revenue.toLocaleString('fr-DZ')} DA (${fin.newStock.soldQty} sold)`;
 
   const newCogsEl = document.getElementById('finance-new-cogs');
   if (newCogsEl) newCogsEl.textContent = `${fin.newStock.valuationAtCost.toLocaleString('fr-DZ')} DA`;
 
   const newProfitEl = document.getElementById('finance-new-profit');
-  if (newProfitEl) newProfitEl.textContent = `+${Math.round(fin.newStock.expectedProfit).toLocaleString('fr-DZ')} DA (${fin.newStock.marginPct}%)`;
+  if (newProfitEl) newProfitEl.textContent = `+${fin.newStock.expectedProfit.toLocaleString('fr-DZ')} DA (${fin.newStock.marginPct}%)`;
+
+  const newFooterEl = document.getElementById('finance-new-batch-footer');
+  if (newFooterEl) {
+    newFooterEl.innerHTML = `<span><i class="fa-solid fa-layer-group"></i> ${fin.newStock.titlesCount} Titles</span><span>Avg Cost: <strong>${fin.newStock.avgUnitCost.toFixed(2)} DA</strong> • Realized Profit: <strong>${fin.newStock.grossProfit.toLocaleString('fr-DZ')} DA</strong></span>`;
+  }
 
   // 3. Old Stock Breakdown Card
   const oldStatusEl = document.getElementById('finance-old-stock-status');
-  if (oldStatusEl) oldStatusEl.innerHTML = `<i class="fa-solid fa-check"></i> 100% In Stock (0 Sold)`;
+  if (oldStatusEl) {
+    oldStatusEl.innerHTML = fin.oldStock.soldQty > 0
+      ? `<i class="fa-solid fa-clock-rotate-left"></i> ${fin.oldStock.soldQty} Sold (${fin.oldStock.available} avail)`
+      : `<i class="fa-solid fa-check"></i> ${fin.oldStock.available} In Stock`;
+  }
 
   const oldSoldEl = document.getElementById('finance-old-sold-qty');
-  if (oldSoldEl) oldSoldEl.textContent = `0 Sold (${fin.oldStock.available} in stock)`;
+  if (oldSoldEl) oldSoldEl.textContent = `${fin.oldStock.soldQty} Sold (${fin.oldStock.available} avail / ${fin.oldStock.onHand} on hand)`;
 
   const oldRevEl = document.getElementById('finance-old-revenue');
-  if (oldRevEl) oldRevEl.textContent = `${Math.round(fin.oldStock.valuationAtRetail).toLocaleString('fr-DZ')} DA`;
+  if (oldRevEl) oldRevEl.textContent = `${fin.oldStock.valuationAtRetail.toLocaleString('fr-DZ')} DA`;
 
   const oldCogsEl = document.getElementById('finance-old-cogs');
-  if (oldCogsEl) oldCogsEl.textContent = `${Math.round(fin.oldStock.valuationAtCost).toLocaleString('fr-DZ')} DA`;
+  if (oldCogsEl) oldCogsEl.textContent = `${fin.oldStock.valuationAtCost.toLocaleString('fr-DZ')} DA`;
 
   const oldProfitEl = document.getElementById('finance-old-profit');
-  if (oldProfitEl) oldProfitEl.textContent = `+${Math.round(fin.oldStock.expectedProfit).toLocaleString('fr-DZ')} DA (${fin.oldStock.marginPct}%)`;
+  if (oldProfitEl) oldProfitEl.textContent = `+${fin.oldStock.expectedProfit.toLocaleString('fr-DZ')} DA (${fin.oldStock.marginPct}%)`;
+
+  const oldFooterEl = document.getElementById('finance-old-stock-footer');
+  if (oldFooterEl) {
+    oldFooterEl.innerHTML = `<span><i class="fa-solid fa-layer-group"></i> ${fin.oldStock.titlesCount} Titles</span><span>Avg Cost: <strong>${fin.oldStock.avgUnitCost.toFixed(2)} DA</strong> • Sales Rev: <strong>${fin.oldStock.revenue.toLocaleString('fr-DZ')} DA</strong></span>`;
+  }
 
   // 3b. Combined Books Breakdown Card
   const combStatusEl = document.getElementById('finance-combined-books-status');
-  if (combStatusEl) combStatusEl.innerHTML = `<i class="fa-solid fa-check"></i> 100% In Stock (0 Sold)`;
+  if (combStatusEl) {
+    combStatusEl.innerHTML = `<i class="fa-solid fa-book"></i> ${fin.combinedBooks.soldQty} Sold • ${fin.combinedBooks.available} Avail`;
+  }
 
   const combSoldEl = document.getElementById('finance-combined-books-sold-qty');
-  if (combSoldEl) combSoldEl.textContent = `0 Sold (${fin.combinedBooks.available} in stock)`;
+  if (combSoldEl) combSoldEl.textContent = `${fin.combinedBooks.soldQty} Sold (${fin.combinedBooks.available} avail / ${fin.combinedBooks.onHand} on hand)`;
 
   const combRevEl = document.getElementById('finance-combined-books-revenue');
   if (combRevEl) combRevEl.textContent = `${fin.combinedBooks.valuationAtRetail.toLocaleString('fr-DZ')} DA`;
@@ -2591,21 +2863,33 @@ function renderFinanceSection() {
   const combProfitEl = document.getElementById('finance-combined-books-profit');
   if (combProfitEl) combProfitEl.textContent = `+${fin.combinedBooks.expectedProfit.toLocaleString('fr-DZ')} DA (${fin.combinedBooks.marginPct}%)`;
 
+  const combFooterEl = document.getElementById('finance-combined-books-footer');
+  if (combFooterEl) {
+    combFooterEl.innerHTML = `<span><i class="fa-solid fa-books"></i> ${fin.combinedBooks.titlesCount} Titles</span><span>Avg Cost: <strong>${fin.combinedBooks.avgUnitCost.toFixed(2)} DA</strong> • Book Sales: <strong>${fin.combinedBooks.revenue.toLocaleString('fr-DZ')} DA</strong></span>`;
+  }
+
   // 3c. Accessories Breakdown Card (Standalone / Separate)
   const accStatusEl = document.getElementById('finance-accessories-status');
-  if (accStatusEl) accStatusEl.innerHTML = `<i class="fa-solid fa-check"></i> 100% In Stock (0 Sold)`;
+  if (accStatusEl) {
+    accStatusEl.innerHTML = `<i class="fa-solid fa-gem"></i> ${fin.accessories.soldQty} Sold • ${fin.accessories.available} Avail`;
+  }
 
   const accSoldEl = document.getElementById('finance-acc-stock-qty');
-  if (accSoldEl) accSoldEl.textContent = `0 Sold (${fin.accessories.available} on hand)`;
+  if (accSoldEl) accSoldEl.textContent = `${fin.accessories.soldQty} Sold (${fin.accessories.available} on hand)`;
 
   const accRevEl = document.getElementById('finance-acc-revenue');
-  if (accRevEl) accRevEl.textContent = `${Math.round(fin.accessories.valuationAtRetail).toLocaleString('fr-DZ')} DA`;
+  if (accRevEl) accRevEl.textContent = `${fin.accessories.valuationAtRetail.toLocaleString('fr-DZ')} DA`;
 
   const accCogsEl = document.getElementById('finance-acc-cogs');
-  if (accCogsEl) accCogsEl.textContent = `${Math.round(fin.accessories.valuationAtCost).toLocaleString('fr-DZ')} DA`;
+  if (accCogsEl) accCogsEl.textContent = `${fin.accessories.valuationAtCost.toLocaleString('fr-DZ')} DA`;
 
   const accProfitEl = document.getElementById('finance-acc-profit');
-  if (accProfitEl) accProfitEl.textContent = `+${Math.round(fin.accessories.expectedProfit).toLocaleString('fr-DZ')} DA (${fin.accessories.marginPct}%)`;
+  if (accProfitEl) accProfitEl.textContent = `+${fin.accessories.expectedProfit.toLocaleString('fr-DZ')} DA (${fin.accessories.marginPct}%)`;
+
+  const accFooterEl = document.getElementById('finance-accessories-footer');
+  if (accFooterEl) {
+    accFooterEl.innerHTML = `<span><i class="fa-solid fa-gem"></i> ${fin.accessories.itemsCount} Items</span><span>Avg Cost: <strong>${fin.accessories.avgUnitCost.toFixed(2)} DA</strong> • Reserved: <strong>${fin.accessories.reserved}</strong></span>`;
+  }
 
   // 4. Profit Per Title Table
   const titlesTbody = document.getElementById('finance-profit-titles-tbody');
@@ -2633,10 +2917,12 @@ function renderFinanceSection() {
       titlesTbody.innerHTML = list.map(tp => {
         const isOld = tp.stockGroup === 'OLD_STOCK';
         const isNew = tp.stockGroup === 'NEW_STOCK';
+        const isAcc = tp.stockGroup === 'ACCESSORIES';
         const hasSold = tp.quantitySold > 0;
         let badgeClass = 'badge-neutral';
         let badgeLabel = 'HISTORICAL';
-        if (isOld) { badgeClass = 'badge-oldstock'; badgeLabel = 'OLD STOCK'; }
+        if (isAcc) { badgeClass = 'badge-neutral'; badgeLabel = 'ACCESSORIES'; }
+        else if (isOld) { badgeClass = 'badge-oldstock'; badgeLabel = 'OLD STOCK'; }
         else if (isNew) { badgeClass = 'badge-newstock'; badgeLabel = 'NEW STOCK'; }
 
         return `
@@ -2657,15 +2943,15 @@ function renderFinanceSection() {
             <td>${hasSold ? tp.revenue.toLocaleString('fr-DZ') + ' DA' : (tp.sellingPrice ? tp.sellingPrice.toLocaleString('fr-DZ') + ' DA (Price)' : '-')}</td>
             <td>${tp.unitCost !== null ? tp.unitCost.toLocaleString('fr-DZ') + ' DA' : '<span style="color: var(--text-muted); font-style: italic;">Unknown (NULL)</span>'}</td>
             <td>
-              ${hasSold && tp.grossProfit !== null 
-                ? `<strong style="color: var(--success);">${tp.grossProfit.toLocaleString('fr-DZ')} DA</strong>` 
+              ${hasSold && tp.grossProfit !== null
+                ? `<strong style="color: var(--success);">${tp.grossProfit.toLocaleString('fr-DZ')} DA</strong>`
                 : (tp.targetUnitMargin !== null ? `<span style="color: var(--success); font-size: 0.88rem;">+${tp.targetUnitMargin.toLocaleString('fr-DZ')} DA /unit</span>` : '-')}
             </td>
             <td>${tp.marginPct !== null ? `${tp.marginPct}%` : '-'}</td>
             <td>
               <span class="${tp.isConfirmed ? 'badge-confirmed' : 'badge-provisional'}">
                 <i class="fa-solid ${tp.isConfirmed ? 'fa-circle-check' : 'fa-clock'}"></i>
-                ${tp.isConfirmed ? (isNew ? 'Cost Confirmed (0 Sold)' : 'Cost Confirmed') : 'Provisional (56%)'}
+                ${tp.isConfirmed ? `Cost Confirmed (${tp.quantitySold} Sold)` : 'Provisional (NULL Cost)'}
               </span>
             </td>
           </tr>
@@ -2674,53 +2960,53 @@ function renderFinanceSection() {
     }
   }
 
-  // 5. Stock Summary Table
+  // 5. Stock Summary Table (100% live from physical + sales state)
   const stockTbody = document.getElementById('finance-stock-summary-tbody');
   if (stockTbody) {
     stockTbody.innerHTML = `
       <tr>
-        <td><span class="badge-newstock"><i class="fa-solid fa-boxes-stacked"></i> NEW BATCH (Fair 2026)</span></td>
+        <td><span class="badge-newstock"><i class="fa-solid fa-boxes-stacked"></i> NEW BATCH (Fair & Restocks)</span></td>
         <td><strong>${fin.newStock.titlesCount} Titles</strong></td>
-        <td><strong style="color: var(--success);">${fin.newStock.available} units</strong></td>
-        <td><strong>${fin.newStock.valuationAtCost.toLocaleString('fr-DZ')} DA</strong> <span style="font-size:0.75rem; color:var(--text-muted);">(exact: 96,954.50 DA)</span></td>
+        <td><strong style="color: var(--success);">${fin.newStock.available} avail</strong> <span style="font-size: 0.75rem; color: var(--text-muted);">(${fin.newStock.onHand} on hand)</span></td>
+        <td><strong>${fin.newStock.valuationAtCost.toLocaleString('fr-DZ')} DA</strong></td>
         <td>${fin.newStock.avgUnitCost.toFixed(2)} DA</td>
         <td><strong style="color: var(--vintage-blue);">${fin.newStock.valuationAtRetail.toLocaleString('fr-DZ')} DA</strong></td>
         <td><strong style="color: var(--success);">+${fin.newStock.expectedProfit.toLocaleString('fr-DZ')} DA</strong></td>
         <td><strong>${fin.newStock.marginPct}%</strong></td>
-        <td><span class="badge badge-green"><i class="fa-solid fa-check"></i> 0 Sold (100% In Stock)</span></td>
+        <td><span class="badge ${fin.newStock.soldQty > 0 ? 'badge-blue' : 'badge-green'}">${fin.newStock.soldQty} Sold</span></td>
       </tr>
       <tr>
-        <td><span class="badge-oldstock"><i class="fa-solid fa-clock-rotate-left"></i> OLD STOCK (Pre-fair)</span></td>
+        <td><span class="badge-oldstock"><i class="fa-solid fa-clock-rotate-left"></i> OLD STOCK (Pre-fair FIFO)</span></td>
         <td><strong>${fin.oldStock.titlesCount} Titles</strong></td>
-        <td><strong style="color: var(--success);">${fin.oldStock.available} units</strong></td>
+        <td><strong style="color: var(--success);">${fin.oldStock.available} avail</strong> <span style="font-size: 0.75rem; color: var(--text-muted);">(${fin.oldStock.onHand} on hand)</span></td>
         <td><strong>${fin.oldStock.valuationAtCost.toLocaleString('fr-DZ')} DA</strong></td>
         <td>${fin.oldStock.avgUnitCost.toFixed(2)} DA</td>
         <td><strong style="color: var(--vintage-blue);">${fin.oldStock.valuationAtRetail.toLocaleString('fr-DZ')} DA</strong></td>
         <td><strong style="color: var(--success);">+${fin.oldStock.expectedProfit.toLocaleString('fr-DZ')} DA</strong></td>
         <td><strong>${fin.oldStock.marginPct}%</strong></td>
-        <td><span class="badge badge-amber"><i class="fa-solid fa-box"></i> 0 Sold (Physical Lot)</span></td>
+        <td><span class="badge badge-amber">${fin.oldStock.soldQty} Sold</span></td>
       </tr>
       <tr style="background: #F0FDF4; font-weight: bold; border-top: 2px solid #86EFAC;">
         <td><span class="badge" style="background: #DCFCE7; color: #166534;"><i class="fa-solid fa-book-bookmark"></i> COMBINED BOOK INVENTORY</span></td>
         <td><strong>${fin.combinedBooks.titlesCount} Titles</strong></td>
         <td><strong style="color: var(--success); font-size: 1.02rem;">${fin.combinedBooks.available} units</strong></td>
-        <td style="color: var(--text-primary); font-size: 1.02rem;"><strong>${fin.combinedBooks.valuationAtCost.toLocaleString('fr-DZ')} DA</strong> <span style="font-size:0.75rem; color:var(--text-muted);">(exact: 165,937.50 DA)</span></td>
+        <td style="color: var(--text-primary); font-size: 1.02rem;"><strong>${fin.combinedBooks.valuationAtCost.toLocaleString('fr-DZ')} DA</strong></td>
         <td>${fin.combinedBooks.avgUnitCost.toFixed(2)} DA</td>
         <td style="color: var(--vintage-blue); font-size: 1.02rem;"><strong>${fin.combinedBooks.valuationAtRetail.toLocaleString('fr-DZ')} DA</strong></td>
         <td style="color: var(--success); font-size: 1.02rem;"><strong>+${fin.combinedBooks.expectedProfit.toLocaleString('fr-DZ')} DA</strong></td>
         <td style="color: var(--success); font-size: 1.02rem;"><strong>${fin.combinedBooks.marginPct}%</strong></td>
-        <td><span class="badge badge-green"><i class="fa-solid fa-circle-check"></i> Confirmed Book Total</span></td>
+        <td><span class="badge badge-green">${fin.combinedBooks.soldQty} Sold</span></td>
       </tr>
       <tr>
         <td><span class="badge" style="background: #EDE9FE; color: #5B21B6;"><i class="fa-solid fa-gem"></i> ACCESSORIES (Separate)</span></td>
         <td><strong>${fin.accessories.itemsCount} Items</strong></td>
         <td><strong style="color: var(--success);">${fin.accessories.available} units</strong></td>
-        <td><strong>${Math.round(fin.accessories.valuationAtCost).toLocaleString('fr-DZ')} DA</strong></td>
+        <td><strong>${fin.accessories.valuationAtCost.toLocaleString('fr-DZ')} DA</strong></td>
         <td>${fin.accessories.avgUnitCost.toFixed(2)} DA</td>
-        <td><strong style="color: var(--vintage-blue);">${Math.round(fin.accessories.valuationAtRetail).toLocaleString('fr-DZ')} DA</strong></td>
-        <td><strong style="color: var(--success);">+${Math.round(fin.accessories.expectedProfit).toLocaleString('fr-DZ')} DA</strong></td>
+        <td><strong style="color: var(--vintage-blue);">${fin.accessories.valuationAtRetail.toLocaleString('fr-DZ')} DA</strong></td>
+        <td><strong style="color: var(--success);">+${fin.accessories.expectedProfit.toLocaleString('fr-DZ')} DA</strong></td>
         <td><strong>${fin.accessories.marginPct}%</strong></td>
-        <td><span class="badge" style="background: #EDE9FE; color: #5B21B6;"><i class="fa-solid fa-box"></i> 0 Sold (Physical Lot)</span></td>
+        <td><span class="badge" style="background: #EDE9FE; color: #5B21B6;">${fin.accessories.soldQty} Sold</span></td>
       </tr>
       <tr style="background: #FFFDF8; font-weight: bold; border-top: 2px solid var(--border-color);">
         <td><strong>GRAND TOTAL (Books + Accessories)</strong></td>
@@ -2729,10 +3015,95 @@ function renderFinanceSection() {
         <td style="color: var(--text-primary); font-size: 1.05rem;"><strong>${fin.combined.valuationAtCost.toLocaleString('fr-DZ')} DA</strong></td>
         <td>${fin.combined.avgUnitCost.toFixed(2)} DA</td>
         <td style="color: var(--vintage-blue); font-size: 1.05rem;"><strong>${fin.combined.valuationAtRetail.toLocaleString('fr-DZ')} DA</strong></td>
-        <td style="color: var(--success); font-size: 1.05rem;"><strong>+${Math.round(fin.combined.expectedProfit).toLocaleString('fr-DZ')} DA</strong></td>
+        <td style="color: var(--success); font-size: 1.05rem;"><strong>+${fin.combined.expectedProfit.toLocaleString('fr-DZ')} DA</strong></td>
         <td style="color: var(--success); font-size: 1.05rem;"><strong>${fin.combined.marginPct}%</strong></td>
-        <td><span class="badge badge-green"><i class="fa-solid fa-circle-check"></i> 100% In Stock</span></td>
+        <td><span class="badge badge-green">${fin.combinedBooks.soldQty + fin.accessories.soldQty} Sold</span></td>
       </tr>
+    `;
+  }
+
+  // 6. Owner Equity, Opening Position & Stock Audit Ledger
+  const equityEl = document.getElementById('finance-equity-ledger-container');
+  if (equityEl) {
+    const capitals = state.capitalContributions || [];
+    const withdrawals = state.ownerWithdrawals || [];
+    const adjs = state.stockAdjustments || [];
+
+    equityEl.innerHTML = `
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px;">
+        <div class="stat-box" style="padding: 12px; background: #FFFDF8; border: 1px solid var(--border-color); border-radius: 8px;">
+          <div style="font-size: 0.78rem; color: var(--text-muted);">Opening Cash (${escapeHtml(fin.openingDate || 'Unset')})</div>
+          <div style="font-size: 1.15rem; font-weight: 700; color: var(--vintage-blue);">${fin.openingCash.toLocaleString('fr-DZ')} DA</div>
+        </div>
+        <div class="stat-box" style="padding: 12px; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px;">
+          <div style="font-size: 0.78rem; color: #166534;">Owner Capital Injected (${capitals.length})</div>
+          <div style="font-size: 1.15rem; font-weight: 700; color: var(--success);">+${fin.totalCapitalInjected.toLocaleString('fr-DZ')} DA</div>
+        </div>
+        <div class="stat-box" style="padding: 12px; background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 8px;">
+          <div style="font-size: 0.78rem; color: #9F1239;">Owner Withdrawals (${withdrawals.length})</div>
+          <div style="font-size: 1.15rem; font-weight: 700; color: var(--danger);">-${fin.totalOwnerWithdrawals.toLocaleString('fr-DZ')} DA</div>
+        </div>
+        <div class="stat-box" style="padding: 12px; background: #F8FAFC; border: 1px solid var(--border-color); border-radius: 8px;">
+          <div style="font-size: 0.78rem; color: var(--text-muted);">Post-Opening Outflows</div>
+          <div style="font-size: 0.92rem; font-weight: 600;">Batches: ${fin.postOpeningBatchPaid.toLocaleString('fr-DZ')} DA • Debts: ${fin.postOpeningDebtsRepaid.toLocaleString('fr-DZ')} DA • Exp: ${fin.postOpeningOperatingExpenses.toLocaleString('fr-DZ')} DA</div>
+        </div>
+      </div>
+
+      ${capitals.length > 0 || withdrawals.length > 0 ? `
+        <div class="vintage-table-wrapper" style="margin-bottom: 14px;">
+          <table class="vintage-table" style="font-size: 0.85rem;">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Source / Reason</th>
+                <th>Amount (DA)</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${[
+                ...capitals.map(c => ({ date: c.contribution_date || formatDate(c.created_at), type: 'Capital In', cls: 'badge-green', detail: c.source || 'personal_funds', sign: '+', amt: Number(c.amount_da) || 0, notes: c.notes || '-' })),
+                ...withdrawals.map(w => ({ date: w.withdrawal_date || formatDate(w.created_at), type: 'Withdrawal', cls: 'badge-rose', detail: w.reason || 'owner_drawings', sign: '-', amt: Number(w.amount_da) || 0, notes: w.notes || '-' }))
+              ].sort((a, b) => String(b.date).localeCompare(String(a.date))).map(row => `
+                <tr>
+                  <td>${escapeHtml(row.date)}</td>
+                  <td><span class="badge ${row.cls}">${row.type}</span></td>
+                  <td>${escapeHtml(row.detail)}</td>
+                  <td><strong style="color: ${row.sign === '+' ? 'var(--success)' : 'var(--danger)'};">${row.sign}${row.amt.toLocaleString('fr-DZ')} DA</strong></td>
+                  <td>${escapeHtml(row.notes)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      ` : '<p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">No capital contributions or owner withdrawals recorded yet.</p>'}
+
+      ${adjs.length > 0 ? `
+        <h5 style="font-family: var(--font-serif); margin: 12px 0 8px;"><i class="fa-solid fa-sliders"></i> Stock Adjustments Audit Log (${adjs.length})</h5>
+        <div class="vintage-table-wrapper">
+          <table class="vintage-table" style="font-size: 0.82rem;">
+            <thead>
+              <tr><th>Date</th><th>Item</th><th>Adjustment Type</th><th>Delta</th><th>Reason / Notes</th></tr>
+            </thead>
+            <tbody>
+              ${adjs.slice(0, 15).map(a => {
+                const inv = state.inventory.find(i => String(i.id) === String(a.inventory_item_id));
+                const qty = Number(a.quantity_change) || 0;
+                return `
+                  <tr>
+                    <td>${escapeHtml(formatDate(a.created_at || a.adjustment_date))}</td>
+                    <td><strong>${escapeHtml(inv ? inv.title : (a.title || a.inventory_item_id || '-'))}</strong></td>
+                    <td><span class="badge badge-neutral">${escapeHtml(a.adjustment_type || 'adjustment')}</span></td>
+                    <td><strong style="color: ${qty >= 0 ? 'var(--success)' : 'var(--danger)'};">${qty > 0 ? '+' + qty : qty}</strong></td>
+                    <td>${escapeHtml(a.reason || a.notes || '-')}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      ` : ''}
     `;
   }
 }
@@ -2747,9 +3118,10 @@ function renderExpensesSection() {
 
   state.expenses.forEach(e => {
     const amt = Number(e.amount_da) || 0;
-    if (e.category === 'packaging') pkgTotal += amt;
-    else if (e.category === 'advertising') adTotal += amt;
-    else if (e.category === 'fair_fees') feeTotal += amt;
+    const cat = String(e.category || '').toLowerCase();
+    if (cat === 'packaging') pkgTotal += amt;
+    else if (cat === 'advertising' || cat === 'marketing') adTotal += amt;
+    else if (cat === 'fair_fees') feeTotal += amt;
   });
 
   const pkgEl = document.getElementById('metric-exp-packaging');
@@ -2787,11 +3159,94 @@ function renderExpensesSection() {
         <tbody>
           ${state.expenses.map(exp => `
             <tr>
-              <td style="white-space: nowrap; font-size: 0.85rem;">${formatDate(exp.created_at || exp.expense_date)}</td>
+              <td style="white-space: nowrap; font-size: 0.85rem;">${formatDate(exp.expense_date || exp.created_at)}</td>
               <td><span class="badge badge-neutral">${escapeHtml(exp.category || 'other')}</span></td>
               <td><strong>${escapeHtml(exp.description || '-')}</strong></td>
               <td><span class="badge badge-blue">${escapeHtml(exp.payment_method || 'cash')}</span></td>
               <td><strong style="color: var(--danger); font-size: 1rem;">${(Number(exp.amount_da) || 0).toLocaleString('fr-DZ')} DA</strong></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderAdvertisingSection() {
+  const adExpenses = (state.expenses || []).filter(e => ['marketing', 'advertising'].includes(String(e.category || '').toLowerCase()));
+  const totalSpend = adExpenses.reduce((s, e) => s + (Number(e.amount_da) || 0), 0);
+
+  let totalAttributedOrders = 0;
+  let totalFollowersGained = 0;
+  const parsedCampaigns = adExpenses.map(e => {
+    const desc = String(e.description || '');
+    const orderMatch = desc.match(/(\d+)\s*orders?/i);
+    const followerMatch = desc.match(/(\d+)\s*followers?/i);
+    const ordersCount = orderMatch ? parseInt(orderMatch[1], 10) : 0;
+    const followersCount = followerMatch ? parseInt(followerMatch[1], 10) : 0;
+    totalAttributedOrders += ordersCount;
+    totalFollowersGained += followersCount;
+    return {
+      date: e.expense_date || formatDate(e.created_at),
+      description: desc || 'Marketing Campaign',
+      spend: Number(e.amount_da) || 0,
+      ordersCount,
+      followersCount,
+      method: e.payment_method || 'baridimob'
+    };
+  });
+
+  const spendEl = document.getElementById('metric-ad-spend');
+  if (spendEl) spendEl.textContent = `${totalSpend.toLocaleString('fr-DZ')} DA`;
+
+  const ordersEl = document.getElementById('metric-ad-orders');
+  if (ordersEl) ordersEl.textContent = String(totalAttributedOrders);
+
+  const roasEl = document.getElementById('metric-ad-roas');
+  if (roasEl) {
+    const fin = calculateFinancialMetrics();
+    const avgOrderVal = state.orders.length > 0 ? (fin.totalSalesRevenue / state.orders.length) : 0;
+    const estAttrRevenue = totalAttributedOrders * avgOrderVal;
+    const roas = totalSpend > 0 && estAttrRevenue > 0 ? (estAttrRevenue / totalSpend).toFixed(1) : '0.0';
+    roasEl.textContent = `${roas}x (${totalFollowersGained} followers)`;
+  }
+
+  const container = document.getElementById('advertising-campaigns-container');
+  if (!container) return;
+
+  if (parsedCampaigns.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <i class="fa-brands fa-instagram"></i>
+        <h4>No Advertising Campaigns Logged</h4>
+        <p>Track your sponsored Instagram posts to measure real book sales generated per Dinar spent.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="vintage-table-wrapper">
+      <table class="vintage-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Campaign / Description</th>
+            <th>Spend (DA)</th>
+            <th>Attributed Orders</th>
+            <th>Followers Gained</th>
+            <th>Payment Method</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${parsedCampaigns.map(c => `
+            <tr>
+              <td style="white-space: nowrap;">${escapeHtml(c.date)}</td>
+              <td><strong>${escapeHtml(c.description)}</strong></td>
+              <td><strong style="color: var(--danger);">${c.spend.toLocaleString('fr-DZ')} DA</strong></td>
+              <td><span class="badge badge-blue">${c.ordersCount}</span></td>
+              <td><span class="badge badge-green">+${c.followersCount}</span></td>
+              <td><span class="badge badge-neutral">${escapeHtml(c.method)}</span></td>
             </tr>
           `).join('')}
         </tbody>
@@ -2815,13 +3270,37 @@ function renderDebtsSection() {
     return;
   }
 
-  // Calculate repayment transactions map
   const repaymentsMap = new Map();
   state.debtRepayments.forEach(rep => {
     const list = repaymentsMap.get(rep.debt_id) || [];
     list.push(rep);
     repaymentsMap.set(rep.debt_id, list);
   });
+
+  const enrichedDebts = state.debts.map(d => {
+    const orig = Number(d.original_amount_da || d.amount || 0);
+    const reps = repaymentsMap.get(d.id) || [];
+    const repaid = reps.length > 0
+      ? reps.reduce((s, r) => s + (Number(r.amount_da) || 0), 0)
+      : Number(d.amount_repaid_da || 0);
+    const remaining = Math.max(0, orig - repaid);
+    const isSettled = remaining === 0;
+    return { d, orig, reps, repaid, remaining, isSettled };
+  });
+
+  const filter = state.debtsFilter || 'all';
+  const filteredDebts = enrichedDebts.filter(({ d, isSettled }) => {
+    const dt = String(d.debt_type || 'supplier').toLowerCase();
+    if (filter === 'supplier') return dt === 'supplier' || dt === 'store_to_supplier';
+    if (filter === 'personal') return dt !== 'supplier' && dt !== 'store_to_supplier';
+    if (filter === 'settled') return isSettled;
+    return true;
+  });
+
+  if (filteredDebts.length === 0) {
+    container.innerHTML = `<div class="empty-state"><i class="fa-solid fa-filter-circle-xmark"></i><h4>No Debts Match Filter "${escapeHtml(filter)}"</h4></div>`;
+    return;
+  }
 
   const debtsHtml = `
     <div class="vintage-table-wrapper">
@@ -2838,48 +3317,37 @@ function renderDebtsSection() {
           </tr>
         </thead>
         <tbody>
-          ${state.debts.map(d => {
-            const orig = Number(d.original_amount_da || d.amount || 0);
-            const reps = repaymentsMap.get(d.id) || [];
-            const repaid = reps.length > 0 
-              ? reps.reduce((s, r) => s + (Number(r.amount_da) || 0), 0)
-              : Number(d.amount_repaid_da || 0);
-            const remaining = Math.max(0, orig - repaid);
-            const isSettled = remaining === 0;
-
-            return `
-              <tr>
-                <td>
-                  <strong>${escapeHtml(d.creditor_name || '-')}</strong>
-                  <div style="font-size: 0.78rem; color: var(--text-muted);">${escapeHtml(d.notes || d.evidence_notes || '')}</div>
-                </td>
-                <td><span class="badge badge-neutral">${escapeHtml(d.debt_type || 'supplier')}</span></td>
-                <td>${orig.toLocaleString('fr-DZ')} DA</td>
-                <td>${repaid.toLocaleString('fr-DZ')} DA</td>
-                <td>
-                  <strong style="color: ${isSettled ? 'var(--success)' : 'var(--warning)'}; font-size: 1rem;">
-                    ${remaining.toLocaleString('fr-DZ')} DA
-                  </strong>
-                  ${isSettled ? '<span class="badge badge-green" style="margin-left: 6px;">Settled</span>' : ''}
-                </td>
-                <td>
-                  <span class="badge badge-blue">${reps.length} Payment${reps.length !== 1 ? 's' : ''}</span>
-                </td>
-                <td>
-                  ${!isSettled ? `
-                    <button class="btn-primary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="openDebtRepaymentModal('${escapeHtml(d.id)}')">
-                      <i class="fa-solid fa-hand-holding-dollar"></i> Pay
-                    </button>
-                  ` : '<span style="color: var(--success); font-size: 0.82rem;"><i class="fa-solid fa-circle-check"></i> Paid in full</span>'}
-                </td>
-              </tr>
-            `;
-          }).join('')}
+          ${filteredDebts.map(({ d, orig, reps, repaid, remaining, isSettled }) => `
+            <tr>
+              <td>
+                <strong>${escapeHtml(d.creditor_name || '-')}</strong>
+                <div style="font-size: 0.78rem; color: var(--text-muted);">${escapeHtml(d.notes || d.evidence_notes || '')}</div>
+              </td>
+              <td><span class="badge badge-neutral">${escapeHtml(d.debt_type || 'supplier')}</span></td>
+              <td>${orig.toLocaleString('fr-DZ')} DA</td>
+              <td>${repaid.toLocaleString('fr-DZ')} DA</td>
+              <td>
+                <strong style="color: ${isSettled ? 'var(--success)' : 'var(--warning)'}; font-size: 1rem;">
+                  ${remaining.toLocaleString('fr-DZ')} DA
+                </strong>
+                ${isSettled ? '<span class="badge badge-green" style="margin-left: 6px;">Settled</span>' : ''}
+              </td>
+              <td>
+                <span class="badge badge-blue">${reps.length} Payment${reps.length !== 1 ? 's' : ''}</span>
+              </td>
+              <td>
+                ${!isSettled ? `
+                  <button class="btn-primary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="openDebtRepaymentModal('${escapeHtml(d.id)}')">
+                    <i class="fa-solid fa-hand-holding-dollar"></i> Pay
+                  </button>
+                ` : '<span style="color: var(--success); font-size: 0.82rem;"><i class="fa-solid fa-circle-check"></i> Paid in full</span>'}
+              </td>
+            </tr>
+          `).join('')}
         </tbody>
       </table>
     </div>
 
-    <!-- Debt Repayment Transaction History Ledger -->
     ${state.debtRepayments.length > 0 ? `
       <div style="margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 16px;">
         <h4 style="font-family: var(--font-serif); font-size: 1.05rem; margin-bottom: 10px;">
@@ -2901,7 +3369,7 @@ function renderDebtsSection() {
                 const debt = state.debts.find(d => d.id === rep.debt_id);
                 return `
                   <tr>
-                    <td style="white-space: nowrap;">${rep.repayment_date || formatDate(rep.created_at)}</td>
+                    <td style="white-space: nowrap;">${escapeHtml(rep.repayment_date || formatDate(rep.created_at))}</td>
                     <td><strong>${escapeHtml(debt ? debt.creditor_name : 'Creditor')}</strong></td>
                     <td><strong style="color: var(--success);">${Number(rep.amount_da).toLocaleString('fr-DZ')} DA</strong></td>
                     <td><span class="badge badge-neutral">${escapeHtml(rep.payment_method || 'cash')}</span></td>
@@ -2918,6 +3386,14 @@ function renderDebtsSection() {
 
   container.innerHTML = debtsHtml;
 }
+
+window.setDebtsFilter = function(filter) {
+  state.debtsFilter = filter;
+  document.querySelectorAll('.tab-btn[data-debt-filter]').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-debt-filter') === filter);
+  });
+  renderDebtsSection();
+};
 
 function populateBatchDropdown() {
   const select = document.getElementById('inv-item-batch');
@@ -3213,6 +3689,100 @@ window.handleSaveInventoryItem = async function(event) {
   if (state.online && auth.isAuthenticated()) sync.sync();
 };
 
+// 1b. Edit Existing Inventory Item Metadata / Price / Cost (never mutates historical quantities)
+window.openEditInventoryModal = function(itemId) {
+  const item = (state.inventory || []).find(i => String(i.id) === String(itemId));
+  if (!item) return;
+
+  const setVal = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.value = (val === null || val === undefined) ? '' : String(val);
+  };
+
+  setVal('edit-inv-id', item.id);
+  setVal('edit-inv-title', item.title || '');
+  setVal('edit-inv-author', item.author || '');
+  setVal('edit-inv-isbn', item.isbn || '');
+  setVal('edit-inv-group', (item.stock_group || '').toUpperCase() === 'OLD_STOCK' ? 'OLD_STOCK' : 'NEW_STOCK');
+  setVal('edit-inv-category', String(item.category || item.item_type || (isAccessoryItem(item) ? 'accessory' : 'book')).toLowerCase());
+  setVal('edit-inv-cost', (item.unit_purchase_cost_da !== null && item.unit_purchase_cost_da !== undefined && !isNaN(item.unit_purchase_cost_da)) ? item.unit_purchase_cost_da : '');
+  setVal('edit-inv-price', (item.selling_price_da !== null && item.selling_price_da !== undefined && !isNaN(item.selling_price_da)) ? item.selling_price_da : '');
+  setVal('edit-inv-supplier', item.supplier_name || '');
+  setVal('edit-inv-location', item.location || '');
+  setVal('edit-inv-notes', item.notes || '');
+
+  openModal('modal-edit-inventory');
+};
+
+window.handleSaveInventoryEdit = async function(event) {
+  event.preventDefault();
+  const itemId = document.getElementById('edit-inv-id')?.value;
+  const item = (state.inventory || []).find(i => String(i.id) === String(itemId));
+  if (!item) {
+    alert('Inventory item not found.');
+    return;
+  }
+
+  const title = (document.getElementById('edit-inv-title')?.value || '').trim();
+  if (!title) {
+    alert('Title cannot be empty.');
+    return;
+  }
+
+  const rawCost = (document.getElementById('edit-inv-cost')?.value || '').trim();
+  const rawPrice = (document.getElementById('edit-inv-price')?.value || '').trim();
+  const cost = rawCost !== '' && !isNaN(parseFloat(rawCost)) ? Math.round(parseFloat(rawCost) * 100) / 100 : null;
+  const price = rawPrice !== '' && !isNaN(parseFloat(rawPrice)) ? Math.round(parseFloat(rawPrice)) : null;
+
+  const stockGroup = document.getElementById('edit-inv-group')?.value === 'OLD_STOCK' ? 'OLD_STOCK' : 'NEW_STOCK';
+  const category = (document.getElementById('edit-inv-category')?.value || 'book').toLowerCase();
+  const author = (document.getElementById('edit-inv-author')?.value || '').trim() || null;
+  const isbn = (document.getElementById('edit-inv-isbn')?.value || '').trim() || null;
+  const supplier = (document.getElementById('edit-inv-supplier')?.value || '').trim() || null;
+  const location = (document.getElementById('edit-inv-location')?.value || '').trim() || null;
+  const notes = (document.getElementById('edit-inv-notes')?.value || '').trim() || null;
+  const nowIso = new Date().toISOString();
+
+  // Merge strictly metadata/pricing updates onto local copy (quantities untouched)
+  Object.assign(item, {
+    title,
+    author,
+    isbn,
+    stock_group: stockGroup,
+    category,
+    item_type: category,
+    unit_purchase_cost_da: cost,
+    selling_price_da: price,
+    supplier_name: supplier,
+    location,
+    notes,
+    updated_at: nowIso
+  });
+
+  // Explicit partial update payload so Supabase quantity_sold / quantity_reserved are NEVER clobbered
+  const updatePayload = {
+    id: item.id,
+    title,
+    author,
+    isbn,
+    stock_group: stockGroup,
+    category,
+    unit_purchase_cost_da: cost,
+    selling_price_da: price,
+    supplier_name: supplier,
+    location,
+    notes,
+    updated_at: nowIso
+  };
+
+  await idb.put('inventory', item);
+  await idb.queueMutation('inventory_items', 'update', updatePayload);
+
+  renderAppViews();
+  closeModal('modal-edit-inventory');
+  if (state.online && auth.isAuthenticated()) sync.sync();
+};
+
 // 2. Record Purchase Batch to IndexedDB
 window.handleSaveBatch = async function(event) {
   event.preventDefault();
@@ -3245,8 +3815,7 @@ window.handleSaveBatch = async function(event) {
   await idb.queueMutation('purchase_batches', 'insert', newBatch);
 
   state.batches.unshift(newBatch);
-  renderPurchasesSection();
-  populateBatchDropdown();
+  renderAppViews();
   closeModal('modal-add-batch');
   document.getElementById('form-add-batch').reset();
 
@@ -3270,6 +3839,7 @@ window.handleSaveExpense = async function(event) {
     id: crypto.randomUUID ? crypto.randomUUID() : ('exp_' + Date.now()),
     category: category,
     amount_da: amount,
+    expense_date: new Date().toISOString().slice(0, 10),
     description: desc,
     payment_method: method,
     created_at: new Date().toISOString()
@@ -3279,7 +3849,7 @@ window.handleSaveExpense = async function(event) {
   await idb.queueMutation('operating_expenses', 'insert', newExpense);
 
   state.expenses.unshift(newExpense);
-  renderExpensesSection();
+  renderAppViews();
   closeModal('modal-add-expense');
   document.getElementById('form-add-expense').reset();
 
@@ -3290,22 +3860,33 @@ window.handleSaveExpense = async function(event) {
 window.handleSaveDebt = async function(event) {
   event.preventDefault();
   const creditor = document.getElementById('debt-input-creditor').value.trim();
-  const type = document.getElementById('debt-input-type').value;
+  const rawType = document.getElementById('debt-input-type').value;
   const amount = parseFloat(document.getElementById('debt-input-amount').value) || 0;
-  const notes = document.getElementById('debt-input-notes').value.trim();
+  let notes = document.getElementById('debt-input-notes').value.trim();
 
   if (!creditor || amount <= 0) {
     alert('Please enter creditor name and amount.');
     return;
   }
 
+  // Map UI dropdown labels cleanly onto DB check-constraint types ('supplier' | 'personal' | 'bank' | 'other')
+  let debtType = rawType;
+  if (rawType === 'store_to_supplier') {
+    debtType = 'supplier';
+  } else if (rawType === 'owner_borrowing' || rawType === 'store_to_owner') {
+    const label = rawType === 'owner_borrowing' ? 'Owner Borrowing' : 'Advance from Owner';
+    if (!notes.includes(label)) notes = notes ? `${label} | ${notes}` : label;
+    debtType = 'personal';
+  }
+
   const newDebt = {
     id: crypto.randomUUID ? crypto.randomUUID() : ('debt_' + Date.now()),
     creditor_name: creditor,
-    debt_type: type,
+    debt_type: debtType,
     original_amount_da: amount,
     amount_repaid_da: 0,
     remaining_balance_da: amount,
+    incurred_date: new Date().toISOString().slice(0, 10),
     notes: notes,
     created_at: new Date().toISOString()
   };
@@ -3314,7 +3895,7 @@ window.handleSaveDebt = async function(event) {
   await idb.queueMutation('debts', 'insert', newDebt);
 
   state.debts.unshift(newDebt);
-  renderDebtsSection();
+  renderAppViews();
   closeModal('modal-add-debt');
   document.getElementById('form-add-debt').reset();
 
@@ -3718,12 +4299,125 @@ window.handleSaveCampaign = async function(event) {
 
   closeModal('modal-add-campaign');
   document.getElementById('form-add-campaign').reset();
-  renderExpensesSection();
-  renderFinanceSection();
-  updateDashboardMetrics();
+  renderAppViews();
 
   alert(`Marketing campaign "${name}" (${spend.toLocaleString('fr-DZ')} DA) recorded successfully.`);
   if (state.online && auth.isAuthenticated()) sync.sync();
+};
+
+// ============================================================================
+// 4f. OPENING FINANCIAL POSITION & EXCEL REPORT EXPORTS
+// ============================================================================
+window.openOpeningPositionModal = function() {
+  const op = state.openingPosition || {};
+  const cashEl = document.getElementById('opening-cash-input');
+  const dateEl = document.getElementById('opening-date-input');
+  const notesEl = document.getElementById('opening-notes-input');
+  if (cashEl) cashEl.value = (op.cash_balance_da !== null && op.cash_balance_da !== undefined) ? op.cash_balance_da : 0;
+  if (dateEl) dateEl.value = op.as_of_date ? String(op.as_of_date).slice(0, 10) : new Date().toISOString().slice(0, 10);
+  if (notesEl) notesEl.value = op.notes || '';
+  openModal('modal-edit-opening');
+};
+
+window.handleSaveOpeningPosition = async function(event) {
+  event.preventDefault();
+  const cashVal = parseFloat(document.getElementById('opening-cash-input')?.value);
+  const asOfDate = document.getElementById('opening-date-input')?.value || new Date().toISOString().slice(0, 10);
+  const notes = (document.getElementById('opening-notes-input')?.value || '').trim();
+
+  if (isNaN(cashVal) || cashVal < 0) {
+    alert('Please enter a valid non-negative opening cash balance.');
+    return;
+  }
+
+  const prev = state.openingPosition || {};
+  state.openingPosition = {
+    id: 1,
+    cash_balance_da: Math.round(cashVal),
+    owner_contributions_da: Number(prev.owner_contributions_da) || 0,
+    owner_withdrawals_da: Number(prev.owner_withdrawals_da) || 0,
+    as_of_date: asOfDate,
+    notes: notes || null,
+    updated_at: new Date().toISOString()
+  };
+
+  await idb.put('opening_position', state.openingPosition);
+  await idb.queueMutation('opening_position', 'upsert', state.openingPosition);
+
+  closeModal('modal-edit-opening');
+  renderAppViews();
+  if (state.online && auth.isAuthenticated()) sync.sync();
+};
+
+window.exportToExcel = function(scope) {
+  if (typeof XLSX === 'undefined') {
+    alert('Excel export library (SheetJS) is not loaded yet.');
+    return;
+  }
+
+  const wb = XLSX.utils.book_new();
+  const todayStr = new Date().toISOString().slice(0, 10);
+
+  if (scope === 'inventory') {
+    const rows = (state.inventory || []).map(item => ({
+      Title: item.title || '',
+      Author: item.author || '',
+      ISBN: item.isbn || '',
+      StockGroup: isAccessoryItem(item) ? 'ACCESSORIES' : (item.stock_group || 'OLD_STOCK'),
+      Category: item.category || item.item_type || 'book',
+      Received: Number(item.quantity_received) || 0,
+      Sold: Number(item.quantity_sold) || 0,
+      Reserved: Number(item.quantity_reserved) || 0,
+      Damaged: Number(item.quantity_damaged) || 0,
+      Lost: Number(item.quantity_lost) || 0,
+      Promotional: Number(item.quantity_promotional) || 0,
+      ReturnedToSupplier: Number(item.quantity_returned_to_supplier) || 0,
+      CountAdjustment: Number(item.quantity_count_adjustment) || 0,
+      OnHand: getInventoryOnHandQty(item),
+      Available: getInventoryAvailableQty(item),
+      UnitCostDA: item.unit_purchase_cost_da !== null && item.unit_purchase_cost_da !== undefined ? Number(item.unit_purchase_cost_da) : null,
+      SellingPriceDA: item.selling_price_da !== null && item.selling_price_da !== undefined ? Number(item.selling_price_da) : null,
+      Supplier: item.supplier_name || '',
+      Location: item.location || '',
+      Notes: item.notes || ''
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    XLSX.utils.book_append_sheet(wb, ws, 'Inventory');
+    XLSX.writeFile(wb, `Gentle_Readers_Inventory_${todayStr}.xlsx`);
+    return;
+  }
+
+  const fin = calculateFinancialMetrics();
+  const summaryRows = [
+    { Metric: 'Report Date', Value: todayStr },
+    { Metric: 'Opening Cash Balance (DA)', Value: fin.openingCash },
+    { Metric: 'Opening Position As-Of Date', Value: fin.openingDate || 'Not set' },
+    { Metric: 'Current Reconciled Cash (DA)', Value: fin.currentCashBalance },
+    { Metric: 'Book Sales Revenue Net of Shipping (DA)', Value: fin.totalSalesRevenue },
+    { Metric: 'Delivery / Shipping Fees Collected (DA)', Value: fin.totalShippingCollected },
+    { Metric: 'Gross Customer Order Totals (DA)', Value: fin.totalGrossOrderValue },
+    { Metric: 'Cost of Goods Sold - Confirmed + Provisional (DA)', Value: fin.totalCogs },
+    { Metric: 'Gross Profit (DA)', Value: fin.totalGrossProfit },
+    { Metric: 'Operating Expenses (DA)', Value: fin.totalOperatingExpenses },
+    { Metric: 'Net Profit (DA)', Value: fin.netProfit },
+    { Metric: 'Remaining Inventory Asset Value at Cost (DA)', Value: fin.remainingInventoryValueDa },
+    { Metric: 'Outstanding Debts (DA)', Value: fin.outstandingDebtsDa },
+    { Metric: 'Owner Capital Contributed (DA)', Value: fin.totalCapitalInjected },
+    { Metric: 'Owner Withdrawals (DA)', Value: fin.totalOwnerWithdrawals }
+  ];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summaryRows), 'Summary');
+
+  const catRows = [
+    { Group: 'NEW_STOCK', Titles: fin.newStock.titlesCount, Sold: fin.newStock.soldQty, OnHand: fin.newStock.onHand, Available: fin.newStock.available, CostValueDA: fin.newStock.valuationAtCost, RetailValueDA: fin.newStock.valuationAtRetail, ExpectedProfitDA: fin.newStock.expectedProfit, MarginPct: fin.newStock.marginPct },
+    { Group: 'OLD_STOCK', Titles: fin.oldStock.titlesCount, Sold: fin.oldStock.soldQty, OnHand: fin.oldStock.onHand, Available: fin.oldStock.available, CostValueDA: fin.oldStock.valuationAtCost, RetailValueDA: fin.oldStock.valuationAtRetail, ExpectedProfitDA: fin.oldStock.expectedProfit, MarginPct: fin.oldStock.marginPct },
+    { Group: 'COMBINED_BOOKS', Titles: fin.combinedBooks.titlesCount, Sold: fin.combinedBooks.soldQty, OnHand: fin.combinedBooks.onHand, Available: fin.combinedBooks.available, CostValueDA: fin.combinedBooks.valuationAtCost, RetailValueDA: fin.combinedBooks.valuationAtRetail, ExpectedProfitDA: fin.combinedBooks.expectedProfit, MarginPct: fin.combinedBooks.marginPct },
+    { Group: 'ACCESSORIES', Titles: fin.accessories.itemsCount, Sold: fin.accessories.soldQty, OnHand: fin.accessories.onHand, Available: fin.accessories.available, CostValueDA: fin.accessories.valuationAtCost, RetailValueDA: fin.accessories.valuationAtRetail, ExpectedProfitDA: fin.accessories.expectedProfit, MarginPct: fin.accessories.marginPct }
+  ];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(catRows), 'Category Valuation');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(fin.titleProfits), 'Profit By Title');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(state.expenses || []), 'Operating Expenses');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(state.debts || []), 'Debts');
+  XLSX.writeFile(wb, `Gentle_Readers_Finance_Report_${todayStr}.xlsx`);
 };
 
 window.handlePasswordLogin = async function(event) {
@@ -5125,7 +5819,7 @@ window.executeExcelImport = async function() {
         quantity_damaged: qtyDamaged,
         quantity_reserved: existing ? (existing.quantity_reserved || 0) : 0,
         unit_purchase_cost_da: cost !== null ? Math.round(cost * 100) / 100 : null,
-        selling_price_da: (name && (name.includes('مثنوي') || name.includes('المثنوي'))) ? 10000 : (price !== null ? Math.round(price) : null),
+        selling_price_da: (title && (title.includes('مثنوي') || title.includes('المثنوي'))) ? 10000 : (price !== null ? Math.round(price) : null),
         supplier_name: suppName,
         acquisition_date: getRowColumn(r, ['Date received', 'Date', 'Purchase Date', 'acquisition_date']) || new Date().toISOString().slice(0, 10),
         notes: safeCellString(getRowColumn(r, ['Notes', 'ملاحظات', 'remarques'])) || null,

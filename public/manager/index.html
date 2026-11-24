@@ -66,7 +66,7 @@
       </div>
 
       <form id="admin-pass-login-form" onsubmit="handlePasswordLogin(event)" style="display: flex; flex-direction: column; gap: 10px;">
-        <input type="password" id="admin-pass-input" class="form-control" placeholder="Enter owner password (e.g. gentleadmin)" required style="padding: 10px 14px; font-size: 0.95rem; border: 1px solid var(--border-color); border-radius: 6px;" />
+        <input type="password" id="admin-pass-input" class="form-control" placeholder="Enter owner password / أدخلي كلمة المرور" required autocomplete="current-password" style="padding: 10px 14px; font-size: 0.95rem; border: 1px solid var(--border-color); border-radius: 6px;" />
         <button type="submit" class="btn-primary" style="padding: 10px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
           <i class="fa-solid fa-key"></i> Sign in with Owner Password
         </button>
@@ -227,14 +227,14 @@
               <div id="metric-cash-subtext" class="metric-subtext"><i class="fa-solid fa-triangle-exclamation"></i> Awaiting reconciliation / بانتظار الجرد والتدقيق</div>
             </div>
 
-            <!-- 2. Historical Order Value -->
+            <!-- 2. Sales Revenue (Books & Products, Excl. Shipping) -->
             <div class="metric-card">
               <div class="metric-top">
-                <span class="metric-label">Historical Order Value / إجمالي قيمة الطلبات التاريخية</span>
+                <span class="metric-label">Book Sales Value / إجمالي مبيعات الكتب</span>
                 <div class="metric-icon green"><i class="fa-solid fa-file-invoice-dollar"></i></div>
               </div>
               <div id="metric-total-sales" class="metric-value">0 DA</div>
-              <div class="metric-subtext"><i class="fa-solid fa-clock-rotate-left"></i> Gross total of 139 customer orders (not cash received)</div>
+              <div id="metric-sales-subtext" class="metric-subtext"><i class="fa-solid fa-book-open"></i> Net of shipping fees (historical + live)</div>
             </div>
 
             <!-- 3. Total Customer Orders -->
@@ -356,9 +356,12 @@
             <i class="fa-solid fa-magnifying-glass"></i>
             <input type="text" class="search-input" placeholder="Search title, author, or ISBN..." oninput="handleSearch(this.value)" />
           </div>
-          <div style="display: flex; gap: 10px;">
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
             <button class="btn-secondary" onclick="openStockAdjustmentModal()">
               <i class="fa-solid fa-sliders"></i> Adjust Stock / تسوية
+            </button>
+            <button class="btn-secondary" onclick="exportToExcel('inventory')">
+              <i class="fa-solid fa-file-arrow-down" style="color: #1D6F42;"></i> Export Excel
             </button>
             <button class="btn-secondary" onclick="openExcelImportModal()">
               <i class="fa-solid fa-file-excel" style="color: #1D6F42;"></i> Import Excel (.xlsx)
@@ -399,10 +402,11 @@
                   <th>Available</th>
                   <th>Unit Cost (DA)</th>
                   <th>Selling Price (DA)</th>
+                  <th>Actions / إجراءات</th>
                 </tr>
               </thead>
               <tbody id="inventory-table-tbody">
-                <tr><td colspan="7" class="empty-state">Loading catalog inventory...</td></tr>
+                <tr><td colspan="9" class="empty-state">Loading catalog inventory...</td></tr>
               </tbody>
             </table>
           </div>
@@ -558,6 +562,9 @@
             <p style="font-size: 0.86rem; color: var(--text-muted);">Strict separation between inventory assets, sales, and operating expenses.</p>
           </div>
           <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn-secondary" onclick="openOpeningPositionModal()">
+              <i class="fa-solid fa-landmark"></i> Opening Cash / رصيد الافتتاح
+            </button>
             <button class="btn-primary" onclick="openModal('modal-add-capital')">
               <i class="fa-solid fa-plus-circle"></i> Add Capital / مساهمة رأس مال
             </button>
@@ -566,6 +573,9 @@
             </button>
             <button class="btn-secondary" onclick="openExcelImportModal()">
               <i class="fa-solid fa-file-excel" style="color: #1D6F42;"></i> Import Excel
+            </button>
+            <button class="btn-secondary" onclick="exportToExcel('finance')">
+              <i class="fa-solid fa-file-arrow-down" style="color: #1D6F42;"></i> Export Report (.xlsx)
             </button>
             <button class="btn-secondary" onclick="exportLocalBackup()">
               <i class="fa-solid fa-download"></i> Export Ledger (JSON)
@@ -587,13 +597,18 @@
           </div>
           <div class="metric-card">
             <div class="metric-top"><span class="metric-label">Gross Profit / إجمالي الربح</span><div class="metric-icon green"><i class="fa-solid fa-chart-line"></i></div></div>
-            <div id="finance-gross-profit" class="metric-value">203 813 DA</div>
-            <div id="finance-gross-subtext" class="metric-subtext confirmed"><i class="fa-solid fa-circle-check"></i> Sales (443 630 DA) − COGS (239 817 DA) • 46% Margin</div>
+            <div id="finance-gross-profit" class="metric-value">0 DA</div>
+            <div id="finance-gross-subtext" class="metric-subtext">Calculating from ledger...</div>
           </div>
           <div class="metric-card">
             <div class="metric-top"><span class="metric-label">Net Profit / صافي الربح</span><div class="metric-icon green"><i class="fa-solid fa-scale-balanced"></i></div></div>
-            <div id="finance-net-profit" class="metric-value">203 813 DA</div>
-            <div id="finance-net-subtext" class="metric-subtext confirmed"><i class="fa-solid fa-circle-check"></i> Gross Profit − Operating Expenses (0 DA)</div>
+            <div id="finance-net-profit" class="metric-value">0 DA</div>
+            <div id="finance-net-subtext" class="metric-subtext">Gross Profit − Operating Expenses</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-top"><span class="metric-label">Shipping Fees (Passthrough) / التوصيل</span><div class="metric-icon amber"><i class="fa-solid fa-truck"></i></div></div>
+            <div id="finance-shipping-collected" class="metric-value">0 DA</div>
+            <div id="finance-shipping-subtext" class="metric-subtext">Excluded from book sales revenue</div>
           </div>
         </div>
 
@@ -607,30 +622,28 @@
                 <span class="badge-newstock"><i class="fa-solid fa-boxes-stacked"></i> NEW BATCH</span>
                 <h4 style="margin-top: 4px;">Book Fair 2026 / معرض الكتاب</h4>
               </div>
-              <span id="finance-new-stock-status" class="badge badge-green"><i class="fa-solid fa-check"></i> 100% In Stock (0 Sold)</span>
+              <span id="finance-new-stock-status" class="badge badge-green"><i class="fa-solid fa-check"></i> Syncing...</span>
             </div>
             <div class="profit-metrics-row">
               <div class="profit-metric-item">
                 <span class="p-lbl">Physical Stock</span>
-                <span id="finance-new-sold-qty" class="p-val">0 Sold (87 in stock)</span>
+                <span id="finance-new-sold-qty" class="p-val">-</span>
               </div>
               <div class="profit-metric-item">
                 <span class="p-lbl">Expected Sales Revenue</span>
-                <span id="finance-new-retail-val" class="p-val" style="color: var(--vintage-blue); font-weight: 700;">195,200 DA</span>
+                <span id="finance-new-retail-val" class="p-val" style="color: var(--vintage-blue); font-weight: 700;">-</span>
               </div>
               <div class="profit-metric-item">
                 <span class="p-lbl">Original Purchase Cost</span>
-                <span id="finance-new-cogs" class="p-val">96,954 DA</span>
+                <span id="finance-new-cogs" class="p-val">-</span>
               </div>
               <div class="profit-metric-item">
                 <span class="p-lbl">Expected Gross Profit</span>
-                <span id="finance-new-profit" class="p-val" style="color: var(--success); font-weight: 700;">+98,246 DA (50.3%)</span>
+                <span id="finance-new-profit" class="p-val" style="color: var(--success); font-weight: 700;">-</span>
               </div>
             </div>
-            <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border-color); display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted);">
-              <span>Fair Paid: <strong>90,000 DA</strong></span>
-              <span>Supplier Balance: <strong style="color: var(--warning);">6,954.50 DA</strong></span>
-              <span><i class="fa-solid fa-box-archive"></i> 40 Titles | 87 Units</span>
+            <div id="finance-new-batch-footer" style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border-color); display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted);">
+              <span>Calculating batch totals...</span>
             </div>
           </div>
 
@@ -641,30 +654,28 @@
                 <span class="badge-oldstock"><i class="fa-solid fa-clock-rotate-left"></i> OLD STOCK</span>
                 <h4 style="margin-top: 4px;">Pre-Fair Stock / ما قبل المعرض</h4>
               </div>
-              <span id="finance-old-stock-status" class="badge badge-amber"><i class="fa-solid fa-check"></i> 100% In Stock (0 Sold)</span>
+              <span id="finance-old-stock-status" class="badge badge-amber"><i class="fa-solid fa-check"></i> Syncing...</span>
             </div>
             <div class="profit-metrics-row">
               <div class="profit-metric-item">
                 <span class="p-lbl">Physical Stock</span>
-                <span id="finance-old-sold-qty" class="p-val">0 Sold (61 in stock)</span>
+                <span id="finance-old-sold-qty" class="p-val">-</span>
               </div>
               <div class="profit-metric-item">
                 <span class="p-lbl">Expected Sales Revenue</span>
-                <span id="finance-old-revenue" class="p-val" style="color: var(--vintage-blue); font-weight: 700;">110,870 DA</span>
+                <span id="finance-old-revenue" class="p-val" style="color: var(--vintage-blue); font-weight: 700;">-</span>
               </div>
               <div class="profit-metric-item">
                 <span class="p-lbl">Original Purchase Cost</span>
-                <span id="finance-old-cogs" class="p-val">68,983 DA</span>
+                <span id="finance-old-cogs" class="p-val">-</span>
               </div>
               <div class="profit-metric-item">
                 <span class="p-lbl">Expected Gross Profit</span>
-                <span id="finance-old-profit" class="p-val" style="color: var(--success); font-weight: 700;">+41,887 DA (37.8%)</span>
+                <span id="finance-old-profit" class="p-val" style="color: var(--success); font-weight: 700;">-</span>
               </div>
             </div>
-            <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border-color); display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted);">
-              <span>Distinct Titles: <strong>47 Titles</strong></span>
-              <span>Avg Cost: <strong>1,130.87 DA</strong></span>
-              <span><i class="fa-solid fa-circle-check"></i> All 47 Priced</span>
+            <div id="finance-old-stock-footer" style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border-color); display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted);">
+              <span>Calculating lot valuation...</span>
             </div>
           </div>
 
@@ -675,30 +686,28 @@
                 <span class="badge" style="background: #CCFBF1; color: #0F766E; font-weight: 700;"><i class="fa-solid fa-book-bookmark"></i> COMBINED BOOKS</span>
                 <h4 style="margin-top: 4px;">Total Book Inventory / إجمالي الكتب</h4>
               </div>
-              <span id="finance-combined-books-status" class="badge badge-green"><i class="fa-solid fa-check"></i> 100% In Stock (0 Sold)</span>
+              <span id="finance-combined-books-status" class="badge badge-green"><i class="fa-solid fa-check"></i> Syncing...</span>
             </div>
             <div class="profit-metrics-row">
               <div class="profit-metric-item">
                 <span class="p-lbl">Physical Book Stock</span>
-                <span id="finance-combined-books-sold-qty" class="p-val">0 Sold (148 in stock)</span>
+                <span id="finance-combined-books-sold-qty" class="p-val">-</span>
               </div>
               <div class="profit-metric-item">
                 <span class="p-lbl">Expected Sales Revenue</span>
-                <span id="finance-combined-books-revenue" class="p-val" style="color: var(--vintage-blue); font-weight: 700;">306,070 DA</span>
+                <span id="finance-combined-books-revenue" class="p-val" style="color: var(--vintage-blue); font-weight: 700;">-</span>
               </div>
               <div class="profit-metric-item">
                 <span class="p-lbl">Original Purchase Cost</span>
-                <span id="finance-combined-books-cogs" class="p-val">165,937 DA</span>
+                <span id="finance-combined-books-cogs" class="p-val">-</span>
               </div>
               <div class="profit-metric-item">
                 <span class="p-lbl">Expected Gross Profit</span>
-                <span id="finance-combined-books-profit" class="p-val" style="color: var(--success); font-weight: 700;">+140,133 DA (45.8%)</span>
+                <span id="finance-combined-books-profit" class="p-val" style="color: var(--success); font-weight: 700;">-</span>
               </div>
             </div>
-            <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border-color); display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted);">
-              <span>Distinct Titles: <strong>87 Titles</strong> (40 New + 47 Old)</span>
-              <span>Avg Cost: <strong>1,121.20 DA</strong></span>
-              <span><i class="fa-solid fa-circle-check"></i> Exact: 165,937.50 DA</span>
+            <div id="finance-combined-books-footer" style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border-color); display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted);">
+              <span>Calculating book summary...</span>
             </div>
           </div>
 
@@ -709,30 +718,28 @@
                 <span class="badge" style="background: #EDE9FE; color: #5B21B6;"><i class="fa-solid fa-gem"></i> ACCESSORIES (SEPARATE)</span>
                 <h4 style="margin-top: 4px;">Bookmarks & Packaging / فواصل وتغليف</h4>
               </div>
-              <span id="finance-accessories-status" class="badge" style="background: #EDE9FE; color: #5B21B6;"><i class="fa-solid fa-check"></i> 100% In Stock (0 Sold)</span>
+              <span id="finance-accessories-status" class="badge" style="background: #EDE9FE; color: #5B21B6;"><i class="fa-solid fa-check"></i> Syncing...</span>
             </div>
             <div class="profit-metrics-row">
               <div class="profit-metric-item">
                 <span class="p-lbl">Physical Stock</span>
-                <span id="finance-acc-stock-qty" class="p-val">0 Sold (27 on hand)</span>
+                <span id="finance-acc-stock-qty" class="p-val">-</span>
               </div>
               <div class="profit-metric-item">
                 <span class="p-lbl">Expected Sales Revenue</span>
-                <span id="finance-acc-revenue" class="p-val" style="color: var(--vintage-blue); font-weight: 700;">8,600 DA</span>
+                <span id="finance-acc-revenue" class="p-val" style="color: var(--vintage-blue); font-weight: 700;">-</span>
               </div>
               <div class="profit-metric-item">
                 <span class="p-lbl">Original Purchase Cost</span>
-                <span id="finance-acc-cogs" class="p-val">5,560 DA</span>
+                <span id="finance-acc-cogs" class="p-val">-</span>
               </div>
               <div class="profit-metric-item">
                 <span class="p-lbl">Expected Gross Profit</span>
-                <span id="finance-acc-profit" class="p-val" style="color: var(--success); font-weight: 700;">+3,040 DA (35.4%)</span>
+                <span id="finance-acc-profit" class="p-val" style="color: var(--success); font-weight: 700;">-</span>
               </div>
             </div>
-            <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border-color); display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted);">
-              <span>Distinct Items: <strong>7 Items</strong></span>
-              <span>Avg Cost: <strong>205.93 DA</strong></span>
-              <span><i class="fa-solid fa-tag"></i> Calculated Separately</span>
+            <div id="finance-accessories-footer" style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border-color); display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted);">
+              <span>Calculating accessories...</span>
             </div>
           </div>
 
@@ -808,6 +815,16 @@
           </div>
         </div>
 
+        <!-- Owner Equity & Capital Ledger -->
+        <div class="card-panel" style="margin-top: 20px;">
+          <div class="panel-header">
+            <h4><i class="fa-solid fa-landmark"></i> Owner Capital, Withdrawals & Opening Position / رأس المال والمسحوبات</h4>
+          </div>
+          <div id="finance-equity-ledger-container" class="panel-body">
+            <p style="font-size: 0.86rem; color: var(--text-muted);">Calculating owner equity and cash movements...</p>
+          </div>
+        </div>
+
         <!-- Accounting Rules -->
         <div class="card-panel" style="margin-top: 20px;">
           <div class="panel-header">
@@ -840,10 +857,10 @@
         </div>
 
         <div class="tabs-nav">
-          <button class="tab-btn active">All Debts</button>
-          <button class="tab-btn">Storefront Debts to Suppliers</button>
-          <button class="tab-btn">Personal Borrowings from Store</button>
-          <button class="tab-btn">Paid in Full</button>
+          <button class="tab-btn active" data-debt-filter="all" onclick="setDebtsFilter('all')">All Debts</button>
+          <button class="tab-btn" data-debt-filter="supplier" onclick="setDebtsFilter('supplier')">Storefront Debts to Suppliers</button>
+          <button class="tab-btn" data-debt-filter="personal" onclick="setDebtsFilter('personal')">Personal Borrowings / Other</button>
+          <button class="tab-btn" data-debt-filter="settled" onclick="setDebtsFilter('settled')">Paid in Full</button>
         </div>
 
         <div class="card-panel">
@@ -854,7 +871,7 @@
             <div class="empty-state">
               <i class="fa-solid fa-scale-balanced"></i>
               <h4>No Debts Recorded Yet</h4>
-              <p>You can record liabilities or import creditors from the <strong>DEBTS</strong> sheet of <code>Gentle_Readers_Inventory_Starter.xlsx</code> in Phase 3.</p>
+              <p>You can record liabilities or import creditors from the <strong>DEBTS</strong> sheet of <code>Gentle_Readers_Inventory_Starter.xlsx</code>.</p>
             </div>
           </div>
         </div>
@@ -877,18 +894,18 @@
         <div class="metrics-grid">
           <div class="metric-card">
             <div class="metric-top"><span class="metric-label">Total Ad Spend</span><div class="metric-icon rose"><i class="fa-brands fa-instagram"></i></div></div>
-            <div class="metric-value">0 DA</div>
+            <div id="metric-ad-spend" class="metric-value">0 DA</div>
             <div class="metric-subtext">Lifetime tracked campaigns</div>
           </div>
           <div class="metric-card">
             <div class="metric-top"><span class="metric-label">Attributed Orders</span><div class="metric-icon blue"><i class="fa-solid fa-bag-shopping"></i></div></div>
-            <div class="metric-value">0</div>
+            <div id="metric-ad-orders" class="metric-value">0</div>
             <div class="metric-subtext">Orders via Instagram promotions</div>
           </div>
           <div class="metric-card">
-            <div class="metric-top"><span class="metric-label">Average ROAS</span><div class="metric-icon green"><i class="fa-solid fa-chart-pie"></i></div></div>
-            <div class="metric-value">0.0x</div>
-            <div class="metric-subtext">Return on ad spend</div>
+            <div class="metric-top"><span class="metric-label">Average ROAS / Followers</span><div class="metric-icon green"><i class="fa-solid fa-chart-pie"></i></div></div>
+            <div id="metric-ad-roas" class="metric-value">0.0x</div>
+            <div class="metric-subtext">Campaign performance</div>
           </div>
         </div>
 
@@ -896,10 +913,12 @@
           <div class="panel-header">
             <h4><i class="fa-solid fa-bullhorn"></i> Active & Past Campaigns</h4>
           </div>
-          <div class="empty-state">
-            <i class="fa-brands fa-instagram"></i>
-            <h4>No Advertising Campaigns Logged</h4>
-            <p>Track your sponsored Instagram posts to measure real book sales generated per Dinar spent.</p>
+          <div id="advertising-campaigns-container">
+            <div class="empty-state">
+              <i class="fa-brands fa-instagram"></i>
+              <h4>No Advertising Campaigns Logged</h4>
+              <p>Track your sponsored Instagram posts to measure real book sales generated per Dinar spent.</p>
+            </div>
           </div>
         </div>
       </section>
@@ -1676,6 +1695,119 @@
   </div>
 </div>
 
+<!-- 1b. Modal: Edit Existing Inventory Item -->
+<div id="modal-edit-inventory" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-pen-to-square"></i> Edit Inventory Item / تعديل بيانات المنتج</h3>
+      <button class="modal-close" onclick="closeModal('modal-edit-inventory')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="form-edit-inventory" onsubmit="handleSaveInventoryEdit(event)">
+        <input type="hidden" id="edit-inv-id" />
+        <div class="form-group">
+          <label for="edit-inv-title">Title / عنوان الكتاب أو المنتج *</label>
+          <input type="text" id="edit-inv-title" class="form-control" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="edit-inv-author">Author / المؤلف</label>
+            <input type="text" id="edit-inv-author" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label for="edit-inv-isbn">ISBN / المعرّف الدولي</label>
+            <input type="text" id="edit-inv-isbn" class="form-control" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="edit-inv-group">Stock Group / المجموعة</label>
+            <select id="edit-inv-group" class="form-control" required>
+              <option value="OLD_STOCK">OLD STOCK</option>
+              <option value="NEW_STOCK">NEW STOCK</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-inv-category">Category / الصنف</label>
+            <select id="edit-inv-category" class="form-control">
+              <option value="book">Book / كتاب</option>
+              <option value="bookmark">Bookmark / فاصل كتب</option>
+              <option value="accessory">Accessory / ملحق أو إكسسوار</option>
+              <option value="packaging">Packaging / تغليف</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="edit-inv-cost">Unit Purchase Cost (DA) / تكلفة الشراء</label>
+            <input type="number" id="edit-inv-cost" class="form-control" step="any" min="0" placeholder="Leave empty = Unknown (NULL)" />
+          </div>
+          <div class="form-group">
+            <label for="edit-inv-price">Selling Price (DA) / سعر البيع</label>
+            <input type="number" id="edit-inv-price" class="form-control" step="any" min="0" placeholder="e.g. 1200" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="edit-inv-supplier">Supplier / المورد</label>
+            <input type="text" id="edit-inv-supplier" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label for="edit-inv-location">Shelf / Location / الموقع</label>
+            <input type="text" id="edit-inv-location" class="form-control" placeholder="e.g. Shelf A-2" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-inv-notes">Notes / ملاحظات</label>
+          <textarea id="edit-inv-notes" class="form-control"></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeModal('modal-edit-inventory')">Cancel / إلغاء</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-save"></i> Update Item / حفظ التعديلات</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 5f. Modal: Edit Opening Financial Position -->
+<div id="modal-edit-opening" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-landmark"></i> Opening Financial Position / الرصيد الافتتاحي</h3>
+      <button class="modal-close" onclick="closeModal('modal-edit-opening')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="form-edit-opening" onsubmit="handleSaveOpeningPosition(event)">
+        <div class="form-row" style="margin-bottom: 12px;">
+          <div class="form-group">
+            <label for="opening-cash-input">Opening Cash Balance (DA) *</label>
+            <input type="number" id="opening-cash-input" class="form-control" step="any" min="0" required />
+          </div>
+          <div class="form-group">
+            <label for="opening-date-input">As Of Date / تاريخ بداية الجرد *</label>
+            <input type="date" id="opening-date-input" class="form-control" required />
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label for="opening-notes-input">Notes / ملاحظات</label>
+          <textarea id="opening-notes-input" class="form-control" placeholder="Opening cash drawer verification note..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeModal('modal-edit-opening')">Cancel / إلغاء</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-save"></i> Save Opening Position</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <!-- Local SheetJS with CDN fallback for offline Excel parsing -->
 <script src="vendor/xlsx.full.min.js"></script>
 <script>
@@ -1691,6 +1823,6 @@
     document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>');
   }
 </script>
-<script src="manager.js?v=21"></script>
+<script src="manager.js?v=22"></script>
 </body>
 </html>
