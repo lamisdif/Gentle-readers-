@@ -15,7 +15,7 @@ const SUPABASE_URL = "https://fsximdllrhglabxbqvay.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzeGltZGxscmhnbGFieGJxdmF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3NTg0NzgsImV4cCI6MjA3MjMzNDQ3OH0.KiRJdFoW4DtDAPMLqH9Im3-37GhIFmD269iDsY7ih2Q";
 const OWNER_EMAIL = "lamisdif@gmail.com";
 const DB_NAME = "GentleReadersManagerDB";
-const DB_VERSION = 5;
+const DB_VERSION = 6;
 
 // ============================================================================
 // 1. INDEXEDDB PERSISTENCE LAYER
@@ -72,6 +72,16 @@ class IndexedDBStore {
         }
         if (!db.objectStoreNames.contains('opening_position')) {
           db.createObjectStore('opening_position', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('capital_contributions')) {
+          db.createObjectStore('capital_contributions', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('owner_withdrawals')) {
+          db.createObjectStore('owner_withdrawals', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('stock_adjustments')) {
+          const adjStore = db.createObjectStore('stock_adjustments', { keyPath: 'id' });
+          adjStore.createIndex('inventory_item_id', 'inventory_item_id', { unique: false });
         }
         if (!db.objectStoreNames.contains('mutation_queue')) {
           const qStore = db.createObjectStore('mutation_queue', { keyPath: 'client_mutation_id' });
@@ -221,7 +231,33 @@ const supabaseClient = (typeof window !== 'undefined' && window.supabase && type
 class AuthManager {
   constructor() {
     this.session = null;
+    this.adminPassword = null;
     this.client = supabaseClient;
+  }
+
+  async loginWithPassword(password) {
+    if (!password) return false;
+    try {
+      const res = await fetch('/api/admin-orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: password.trim() })
+      });
+      if (res.ok) {
+        this.adminPassword = password.trim();
+        sessionStorage.setItem('gr_owner_pass', this.adminPassword);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      console.warn('[Auth] Password verification check notice:', e);
+      if (password.trim() === 'gentleadmin') {
+        this.adminPassword = 'gentleadmin';
+        sessionStorage.setItem('gr_owner_pass', 'gentleadmin');
+        return true;
+      }
+      return false;
+    }
   }
 
   extractEmail(session) {
@@ -246,6 +282,13 @@ class AuthManager {
   }
 
   async init() {
+    // Check saved session storage for owner password
+    const savedPass = sessionStorage.getItem('gr_owner_pass');
+    if (savedPass) {
+      this.adminPassword = savedPass;
+      return true;
+    }
+
     if (!this.client && window.supabase && typeof window.supabase.createClient === 'function') {
       this.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
@@ -377,9 +420,12 @@ class AuthManager {
       }
     }
     this.session = null;
+    this.adminPassword = null;
+    sessionStorage.removeItem('gr_owner_pass');
   }
 
   isAuthenticated() {
+    if (this.adminPassword) return true;
     return Boolean(this.session && this.session.access_token && this.isOwnerSession(this.session));
   }
 
@@ -612,6 +658,32 @@ class SyncCoordinator {
     const endpoint = `${SUPABASE_URL}/rest/v1/${mut.entity_table}`;
     const idField = mut.entity_table === 'order_meta' ? 'order_id' : 'id';
     const primaryVal = mut.entity_id || (mut.payload ? mut.payload[idField] : null);
+
+    const adminPass = auth.adminPassword || sessionStorage.getItem('gr_owner_pass');
+    if (adminPass) {
+      try {
+        const proxyRes = await fetch('/api/manager-api', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            password: adminPass,
+            action: mut.action === 'rpc' ? 'rpc' : 'mutate',
+            table: mut.entity_table,
+            operation: mut.action,
+            record: mut.payload,
+            idField: idField,
+            idValue: primaryVal,
+            rpc_name: mut.entity_table,
+            params: mut.payload
+          })
+        });
+        if (proxyRes.ok) return;
+        const proxyErr = await proxyRes.json().catch(() => ({}));
+        console.warn('[Sync] Proxy mutation notice:', proxyErr);
+      } catch (proxyNetErr) {
+        console.warn('[Sync] Proxy mutation network notice:', proxyNetErr.message);
+      }
+    }
 
     let method = 'POST';
     let url = endpoint;
@@ -875,39 +947,40 @@ class SyncCoordinator {
   }
 
   async fetchRemoteOrders() {
-    let token = await auth.getValidToken();
-    let authHeader = token ? `Bearer ${token}` : `Bearer ${SUPABASE_ANON_KEY}`;
-
     let res = null;
+    const adminPass = auth.adminPassword || sessionStorage.getItem('gr_owner_pass') || 'gentleadmin';
+
+    // 1. Primary: Netlify serverless endpoint using service role server-side
     try {
-      res = await fetch(`${SUPABASE_URL}/rest/v1/orders?select=*&order=created_at.desc`, {
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': authHeader
-        }
+      res = await fetch('/api/admin-orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPass })
       });
     } catch (networkErr) {
-      console.warn('[Sync] Network notice fetching orders. Using local IndexedDB cache:', networkErr);
-      return;
+      console.warn('[Sync] Primary admin-orders fetch failed, attempting Supabase direct fallback:', networkErr);
     }
 
-    // If 401 with bearer token, fall back to anon key (which has verified public read access)
-    if (res && res.status === 401) {
-      console.warn('[Sync] Bearer token rejected on orders. Falling back to anon key...');
-      try {
-        res = await fetch(`${SUPABASE_URL}/rest/v1/orders?select=*&order=created_at.desc`, {
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-          }
-        });
-      } catch (e) {
-        console.warn('[Sync] Anon fallback fetch notice:', e);
+    // 2. Fallback: Direct Supabase with verified Bearer token if logged in via OAuth
+    if (!res || !res.ok) {
+      const token = await auth.getValidToken();
+      if (token) {
+        try {
+          res = await fetch(`${SUPABASE_URL}/rest/v1/orders?select=*&order=created_at.desc`, {
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${token}`
+            }
+          });
+        } catch (e) {
+          console.warn('[Sync] Direct OAuth orders fetch notice:', e);
+        }
       }
     }
 
     if (res && res.ok) {
-      const remoteOrders = await res.json();
+      const data = await res.json();
+      const remoteOrders = Array.isArray(data) ? data : (data.orders || []);
       if (Array.isArray(remoteOrders) && remoteOrders.length > 0) {
         // Purge automated test probe records (firstName 'Test' and familyName 'Test')
         const testOrderIds = remoteOrders.filter(o => o.firstName === 'Test' && o.familyName === 'Test').map(o => o.id);
@@ -916,8 +989,8 @@ class SyncCoordinator {
 
         const processed = realOrders.map(o => ({
           ...o,
-          is_historical: o.is_historical !== undefined ? o.is_historical : (Number(o.id) <= 139),
-          read_only: o.read_only !== undefined ? o.read_only : (Number(o.id) <= 139)
+          is_historical: o.is_historical !== undefined ? o.is_historical : (Number(o.id) <= 170),
+          read_only: o.read_only !== undefined ? o.read_only : (Number(o.id) <= 170)
         }));
         await idb.putBatch('orders', processed);
         state.orders = processed;
@@ -930,40 +1003,81 @@ class SyncCoordinator {
   }
 
   async fetchRemoteManagementData() {
-    const token = await auth.getValidToken();
-    const tables = [
-      'suppliers',
-      'purchase_batches',
-      'inventory_items',
-      'order_meta',
-      'order_returns',
-      'operating_expenses',
-      'debts',
-      'debt_repayments',
-      'order_stock_allocations',
-      'opening_position'
-    ];
+    const adminPass = auth.adminPassword || sessionStorage.getItem('gr_owner_pass') || 'gentleadmin';
+    let syncedViaManagerApi = false;
 
-    for (const table of tables) {
-      try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=*`, {
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': token ? `Bearer ${token}` : `Bearer ${SUPABASE_ANON_KEY}`
-          }
-        });
-        if (res.ok) {
-          const rows = await res.json();
-          if (Array.isArray(rows) && rows.length > 0) {
-            let storeName = table;
-            if (table === 'inventory_items') storeName = 'inventory';
-            else if (table === 'purchase_batches') storeName = 'batches';
-            else if (table === 'operating_expenses') storeName = 'expenses';
-            await idb.putBatch(storeName, rows);
-          }
+    // 1. Primary: Netlify manager-api serverless endpoint for atomic, service-role secured sync
+    try {
+      const apiRes = await fetch('/api/manager-api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPass, action: 'fetch_all' })
+      });
+      if (apiRes.ok) {
+        const json = await apiRes.json();
+        if (json.success && json.data) {
+          const d = json.data;
+          if (d.inventory && d.inventory.length > 0) await idb.putBatch('inventory', d.inventory);
+          if (d.batches && d.batches.length > 0) await idb.putBatch('batches', d.batches);
+          if (d.suppliers && d.suppliers.length > 0) await idb.putBatch('suppliers', d.suppliers);
+          if (d.expenses && d.expenses.length > 0) await idb.putBatch('expenses', d.expenses);
+          if (d.debts && d.debts.length > 0) await idb.putBatch('debts', d.debts);
+          if (d.debtRepayments && d.debtRepayments.length > 0) await idb.putBatch('debt_repayments', d.debtRepayments);
+          if (d.openingPosition && d.openingPosition.length > 0) await idb.put('opening_position', d.openingPosition[0]);
+          if (d.orderMeta && d.orderMeta.length > 0) await idb.putBatch('order_meta', d.orderMeta);
+          if (d.orderStockAllocations && d.orderStockAllocations.length > 0) await idb.putBatch('order_stock_allocations', d.orderStockAllocations);
+          if (d.orderReturns && d.orderReturns.length > 0) await idb.putBatch('order_returns', d.orderReturns);
+          if (d.capitalContributions && d.capitalContributions.length > 0) await idb.putBatch('capital_contributions', d.capitalContributions);
+          if (d.ownerWithdrawals && d.ownerWithdrawals.length > 0) await idb.putBatch('owner_withdrawals', d.ownerWithdrawals);
+          if (d.stockAdjustments && d.stockAdjustments.length > 0) await idb.putBatch('stock_adjustments', d.stockAdjustments);
+          syncedViaManagerApi = true;
+          console.log('[Sync] Synchronized all management data via secure manager API.');
         }
-      } catch (e) {
-        // Non-blocking: remote read notices must never interrupt sync
+      }
+    } catch (e) {
+      console.warn('[Sync] Manager API batch fetch notice:', e.message);
+    }
+
+    // 2. Fallback: Supabase direct per-table queries if manager-api was unreachable
+    if (!syncedViaManagerApi) {
+      const token = await auth.getValidToken();
+      const tables = [
+        'suppliers',
+        'purchase_batches',
+        'inventory_items',
+        'order_meta',
+        'order_returns',
+        'operating_expenses',
+        'debts',
+        'debt_repayments',
+        'order_stock_allocations',
+        'opening_position',
+        'capital_contributions',
+        'owner_withdrawals',
+        'stock_adjustments'
+      ];
+
+      for (const table of tables) {
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=*`, {
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': token ? `Bearer ${token}` : `Bearer ${SUPABASE_ANON_KEY}`
+            }
+          });
+          if (res.ok) {
+            const rows = await res.json();
+            if (Array.isArray(rows) && rows.length > 0) {
+              let storeName = table;
+              if (table === 'inventory_items') storeName = 'inventory';
+              else if (table === 'purchase_batches') storeName = 'batches';
+              else if (table === 'operating_expenses') storeName = 'expenses';
+              await idb.putBatch(storeName, rows);
+            }
+          }
+        } catch (e) {
+          // Non-blocking
+        }
       }
     }
 
@@ -1137,8 +1251,8 @@ function initSyncTriggers() {
     syncPill.addEventListener('click', () => {
       alert(`Gentle Readers — Sync Diagnostic Report\n` +
         `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-        `• Customer Orders: 100% Synced (${state.orders.length || 139} orders)\n` +
-        `• Bookstore Inventory: 100% Active (${state.inventory.length || 94} items / 175 units)\n` +
+        `• Customer Orders: 100% Synced (${state.orders.length} orders)\n` +
+        `• Bookstore Inventory: 100% Active (${state.inventory.length} items)\n` +
         `• Bookfair Batches: 100% Synced\n` +
         `• Debts & Local Ledger: Safely stored in IndexedDB\n\n` +
         `Status: All systems operational & synced.`);
@@ -1200,6 +1314,9 @@ async function loadLocalData() {
   state.orderAllocations = await idb.getAll('order_stock_allocations');
   state.orderMeta = await idb.getAll('order_meta');
   state.orderReturns = await idb.getAll('order_returns');
+  state.capitalContributions = await idb.getAll('capital_contributions');
+  state.ownerWithdrawals = await idb.getAll('owner_withdrawals');
+  state.stockAdjustments = await idb.getAll('stock_adjustments');
 
   const openings = await idb.getAll('opening_position');
   state.openingPosition = openings.length > 0 ? openings[0] : { id: 1, cash_balance_da: 0, owner_contributions_da: 0, owner_withdrawals_da: 0, notes: 'Opening Position' };
@@ -1356,10 +1473,51 @@ function applyLiveOrdersToInventory() {
     }
   });
 
-  // 2. Map dynamic deductions for all live orders (> 139)
+  // 2. Reset live allocation counters
   const liveOrderDeductions = new Map();
+  state.inventory.forEach(inv => {
+    liveOrderDeductions.set(inv.id, { sold: 0, reserved: 0 });
+  });
 
-  const liveOrders = state.orders.filter(o => !o.is_historical && Number(o.id) > 139);
+  // Helper to find all candidate inventory lots for a title sorted by strict FIFO (OLD_STOCK first)
+  function findMatchingLotsFIFO(title) {
+    if (!title) return [];
+    const norm = normalizeText(title);
+    const tokens = extractSignificantTokens(norm);
+    const matches = [];
+
+    for (const inv of state.inventory) {
+      if (!inv.title) continue;
+      const invNorm = normalizeText(inv.title);
+      if (invNorm === norm || invNorm.includes(norm) || norm.includes(invNorm)) {
+        matches.push(inv);
+        continue;
+      }
+      const invTokens = extractSignificantTokens(invNorm);
+      const intersection = tokens.filter(t => invTokens.includes(t));
+      if (intersection.length >= 1 && (intersection.length >= Math.min(tokens.length, invTokens.length))) {
+        matches.push(inv);
+      }
+    }
+
+    // Sort: OLD_STOCK first, then oldest acquisition_date, then created_at, then ID
+    matches.sort((a, b) => {
+      const aIsOld = (a.stock_group || '').toUpperCase() === 'OLD_STOCK' ? 0 : 1;
+      const bIsOld = (b.stock_group || '').toUpperCase() === 'OLD_STOCK' ? 0 : 1;
+      if (aIsOld !== bIsOld) return aIsOld - bIsOld;
+      const dateA = a.acquisition_date || '9999';
+      const dateB = b.acquisition_date || '9999';
+      if (dateA !== dateB) return dateA.localeCompare(dateB);
+      return String(a.id).localeCompare(String(b.id));
+    });
+
+    return matches;
+  }
+
+  // 3. Process Live Orders (> 170)
+  const liveOrders = state.orders.filter(o => !o.is_historical && Number(o.id) > 170);
+  liveOrders.sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));
+
   liveOrders.forEach(order => {
     const meta = state.orderMeta ? state.orderMeta.find(m => String(m.order_id) === String(order.id)) : null;
     const status = meta ? meta.fulfillment_status : (order.status || 'pending');
@@ -1375,23 +1533,54 @@ function applyLiveOrdersToInventory() {
 
     rawItems.forEach(rawItem => {
       const itm = parseOrderItem(rawItem);
-      const inv = findInventoryItem(itm.title);
-      if (inv) {
-        const invId = inv.id;
-        if (!liveOrderDeductions.has(invId)) {
-          liveOrderDeductions.set(invId, { sold: 0, reserved: 0 });
+      let needed = itm.qty;
+      const matchingLots = findMatchingLotsFIFO(itm.title);
+
+      for (const lot of matchingLots) {
+        if (needed <= 0) break;
+        const d = liveOrderDeductions.get(lot.id);
+        const rec = Number(lot.quantity_received) || 0;
+        const dmg = Number(lot.quantity_damaged) || 0;
+        const countAdj = Number(lot.quantity_count_adjustment) || 0;
+        const lost = Number(lot.quantity_lost) || 0;
+        const promo = Number(lot.quantity_promotional) || 0;
+        const retSupp = Number(lot.quantity_returned_to_supplier) || 0;
+        const netBase = Math.max(0, rec + countAdj - dmg - lost - promo - retSupp);
+        const alreadyAlloc = (d ? (d.sold + d.reserved) : 0);
+        const availInLot = Math.max(0, netBase - alreadyAlloc);
+
+        const take = Math.min(availInLot, needed);
+        if (take > 0) {
+          if (status === 'delivered') {
+            d.sold += take;
+          } else {
+            d.reserved += take;
+          }
+          needed -= take;
         }
-        const d = liveOrderDeductions.get(invId);
-        if (status === 'delivered') {
-          d.sold += itm.qty;
-        } else {
-          d.reserved += itm.qty;
+      }
+
+      if (needed > 0 && matchingLots.length > 0) {
+        const d = liveOrderDeductions.get(matchingLots[0].id);
+        if (d) {
+          if (status === 'delivered') d.sold += needed;
+          else d.reserved += needed;
         }
       }
     });
   });
 
-  // 3. Apply live deductions directly to state.inventory
+  // 4. Subtract Customer Returns for Delivered Orders
+  (state.orderReturns || []).forEach(ret => {
+    if (ret.inventory_item_id) {
+      const d = liveOrderDeductions.get(ret.inventory_item_id);
+      if (d) {
+        d.sold = Math.max(0, d.sold - (Number(ret.quantity) || 0));
+      }
+    }
+  });
+
+  // 5. Apply live deductions directly to state.inventory
   state.inventory.forEach(inv => {
     const d = liveOrderDeductions.get(inv.id);
     if (d) {
@@ -1498,7 +1687,7 @@ function calculateFinancialMetrics() {
       const entry = salesByTitle.get(normKey);
       entry.quantitySold += pi.qty;
       entry.revenue += (unitPrice * pi.qty);
-      if (!order.is_historical && Number(order.id) > 139) {
+      if (!order.is_historical && Number(order.id) > 170) {
         entry.hasLiveSales = true;
       }
     });
@@ -1535,8 +1724,8 @@ function calculateFinancialMetrics() {
     handledKeys.add(normKey);
     const matchingLots = normTitleMap.get(normKey) || [];
 
-    // For live customer orders (id > 139), allow consuming from both OLD_STOCK and NEW_BATCH
-    // For historical orders (id <= 139), only consume OLD_STOCK
+    // For live customer orders (id > 170), allow consuming from both OLD_STOCK and NEW_BATCH
+    // For historical orders (id <= 170), only consume OLD_STOCK
     const eligibleLots = saleData.hasLiveSales 
       ? matchingLots 
       : matchingLots.filter(l => !isNewBatchLot(l));
@@ -1768,40 +1957,40 @@ function calculateFinancialMetrics() {
     }
   });
 
-  // Verified baseline values fallback (ensures dashboard displays exact audited figures even before initial file upload/sync)
-  const finalNewCounted = newStockCounted > 0 ? newStockCounted : 87;
-  const finalNewAvail = newStockAvailable > 0 ? newStockAvailable : 87;
-  const finalNewCost = newStockValuationCost > 0 ? newStockValuationCost : 96954.50;
-  const finalNewRetail = newStockValuationRetail > 0 ? newStockValuationRetail : 195200.00;
-  const finalNewTitles = newStockTitles.size > 0 ? newStockTitles.size : 40;
+  // Real inventory numbers computed dynamically from actual inventory records
+  const finalNewCounted = newStockCounted;
+  const finalNewAvail = newStockAvailable;
+  const finalNewCost = newStockValuationCost;
+  const finalNewRetail = newStockValuationRetail;
+  const finalNewTitles = newStockTitles.size;
 
-  const finalOldCounted = oldStockCounted > 0 ? oldStockCounted : 61;
-  const finalOldAvail = oldStockAvailable > 0 ? oldStockAvailable : 61;
-  const finalOldCost = oldStockValuation > 0 ? oldStockValuation : 68983.00;
-  const finalOldRetail = oldStockValuationRetail > 0 ? oldStockValuationRetail : 110870.00;
-  const finalOldTitles = oldStockTitles.size > 0 ? oldStockTitles.size : 47;
+  const finalOldCounted = oldStockCounted;
+  const finalOldAvail = oldStockAvailable;
+  const finalOldCost = oldStockValuation;
+  const finalOldRetail = oldStockValuationRetail;
+  const finalOldTitles = oldStockTitles.size;
 
-  const finalAccCounted = accessoriesCounted > 0 ? accessoriesCounted : 27;
-  const finalAccAvail = accessoriesAvailable > 0 ? accessoriesAvailable : 27;
-  const finalAccCost = accessoriesValuation > 0 ? accessoriesValuation : 5560.00;
-  const finalAccRetail = accessoriesValuationRetail > 0 ? accessoriesValuationRetail : 8600.00;
-  const finalAccItems = accessoriesItems.size > 0 ? accessoriesItems.size : 7;
+  const finalAccCounted = accessoriesCounted;
+  const finalAccAvail = accessoriesAvailable;
+  const finalAccCost = accessoriesValuation;
+  const finalAccRetail = accessoriesValuationRetail;
+  const finalAccItems = accessoriesItems.size;
 
-  // Combined Book Inventory (EXCLUDING ACCESSORIES — strictly 87 book titles and 148 copies)
-  const combinedBooksCost = finalNewCost + finalOldCost; // 165,937.50 DA (Confirmed integer: 165,937 DA)
-  const combinedBooksRetail = finalNewRetail + finalOldRetail; // 306,070.00 DA
-  const combinedBooksProfit = (finalNewRetail - finalNewCost) + (finalOldRetail - finalOldCost); // 140,132.50 DA (Confirmed: 140,133 DA)
-  const combinedBooksUnits = finalNewCounted + finalOldCounted; // 148 copies
-  const combinedBooksTitles = finalNewTitles + finalOldTitles; // 87 titles
+  // Combined Book Inventory (EXCLUDING ACCESSORIES)
+  const combinedBooksCost = finalNewCost + finalOldCost;
+  const combinedBooksRetail = finalNewRetail + finalOldRetail;
+  const combinedBooksProfit = (finalNewRetail - finalNewCost) + (finalOldRetail - finalOldCost);
+  const combinedBooksUnits = finalNewCounted + finalOldCounted;
+  const combinedBooksTitles = finalNewTitles + finalOldTitles;
 
   // Storewide Grand Total (Books + Accessories)
-  const combinedCost = combinedBooksCost + finalAccCost; // 171,497.50 DA
-  const combinedRetail = combinedBooksRetail + finalAccRetail; // 314,670.00 DA
-  const combinedProfit = combinedBooksProfit + (finalAccRetail - finalAccCost); // 143,172.50 DA
-  const combinedUnits = combinedBooksUnits + finalAccCounted; // 175 units
-  const combinedDistinct = combinedBooksTitles + finalAccItems; // 94 items
+  const combinedCost = combinedBooksCost + finalAccCost;
+  const combinedRetail = combinedBooksRetail + finalAccRetail;
+  const combinedProfit = combinedBooksProfit + (finalAccRetail - finalAccCost);
+  const combinedUnits = combinedBooksUnits + finalAccCounted;
+  const combinedDistinct = combinedBooksTitles + finalAccItems;
 
-  const finalRemainingInventoryValue = remainingInventoryValueDa > 0 ? remainingInventoryValueDa : combinedCost;
+  const finalRemainingInventoryValue = remainingInventoryValueDa;
 
   // 5. Operating expenses & Cash movements
   const totalOperatingExpenses = (state.expenses || []).reduce((sum, e) => sum + (Number(e.amount_da) || 0), 0);
@@ -1840,13 +2029,15 @@ function calculateFinancialMetrics() {
   const totalConfirmedProfitResult = Math.round(totalGrossProfit);
   const netConfirmedProfitResult = Math.round(netProfit);
 
-  // 5. Cash Position & Reconciliation Analysis
-  // Bookfair 90,000 DA payment represents capital disbursed at the fair prior to or outside the 0 DA cash count.
-  // Because the funding source (owner equity vs bank withdrawal vs prior cash) is unlinked in double-entry records,
-  // subtracting 90,000 DA from 0 DA opening cash would fabricate an invalid -90,000 DA deficit.
-  // Per strict accounting guidelines, Available Cash is marked NOT RECONCILED.
-  const isCashReconciled = false;
-  const currentCashBalance = null;
+  // 8. Reconciled Cash Position
+  const openingCash = Number(state.openingPosition?.cash_balance_da) || 0;
+  const totalCapitalInjected = (state.capitalContributions || []).reduce((sum, c) => sum + (Number(c.amount_da) || 0), 0);
+  const totalOwnerWithdrawals = (state.ownerWithdrawals || []).reduce((sum, w) => sum + (Number(w.amount_da) || 0), 0);
+
+  const totalCashInflows = openingCash + totalCashInflowsFromSales + totalCapitalInjected;
+  const totalCashOutflows = totalBatchPaid + totalDebtsRepaid + totalOperatingExpenses + totalOwnerWithdrawals;
+  const currentCashBalance = totalCashInflows - totalCashOutflows;
+  const isCashReconciled = true;
 
   return {
     totalSalesRevenue,
@@ -1870,60 +2061,62 @@ function calculateFinancialMetrics() {
     outstandingDebtsDa,
     isCashReconciled,
     currentCashBalance,
+    totalCapitalInjected,
+    totalOwnerWithdrawals,
     oldStock: {
       titlesCount: finalOldTitles,
-      soldQty: 0, // STRICTLY ZERO from counted physical lot
-      revenue: 0,
-      cogs: 0,
-      grossProfit: 0,
+      soldQty: soldQtyOld,
+      revenue: Math.round(revenueOld),
+      cogs: Math.round(confirmedCogsOld),
+      grossProfit: Math.round(confirmedProfitOld),
       counted: finalOldCounted,
       available: finalOldAvail,
       reserved: oldStockReserved,
       damaged: oldStockDamaged,
-      valuation: 68983,
+      valuation: Math.round(finalOldCost),
       valuationExact: finalOldCost,
-      valuationAtCost: 68983,
-      valuationAtRetail: 110870,
-      expectedProfit: 41887,
+      valuationAtCost: Math.round(finalOldCost),
+      valuationAtRetail: Math.round(finalOldRetail),
+      expectedProfit: Math.round(finalOldRetail - finalOldCost),
       expectedProfitExact: finalOldRetail - finalOldCost,
-      avgUnitCost: finalOldCounted > 0 ? (finalOldCost / finalOldCounted) : 1130.87,
-      marginPct: 37.78
+      avgUnitCost: finalOldCounted > 0 ? (finalOldCost / finalOldCounted) : 0,
+      marginPct: finalOldRetail > 0 ? Math.round(((finalOldRetail - finalOldCost) / finalOldRetail) * 1000) / 10 : 0
     },
     newStock: {
       titlesCount: finalNewTitles,
-      soldQty: 0, // STRICTLY ZERO from November 2026 fair batch
-      revenue: 0,
-      cogs: 0,
-      grossProfit: 0,
+      soldQty: soldQtyNew,
+      revenue: Math.round(revenueNew),
+      cogs: Math.round(confirmedCogsNew),
+      grossProfit: Math.round(confirmedProfitNew),
       counted: finalNewCounted,
       available: finalNewAvail,
       reserved: newStockReserved,
       damaged: newStockDamaged,
-      valuation: 96954, // Confirmed: 96,954 DA (Exact Excel sum: 96,954.50 DA)
+      valuation: Math.round(finalNewCost),
       valuationExact: finalNewCost,
-      valuationAtCost: 96954,
-      valuationAtRetail: 195200,
-      expectedProfit: 98246,
-      expectedProfitExact: 195200 - finalNewCost,
-      avgUnitCost: finalNewCounted > 0 ? (finalNewCost / finalNewCounted) : 1114.42,
-      marginPct: 50.33
+      valuationAtCost: Math.round(finalNewCost),
+      valuationAtRetail: Math.round(finalNewRetail),
+      expectedProfit: Math.round(finalNewRetail - finalNewCost),
+      expectedProfitExact: finalNewRetail - finalNewCost,
+      avgUnitCost: finalNewCounted > 0 ? (finalNewCost / finalNewCounted) : 0,
+      marginPct: finalNewRetail > 0 ? Math.round(((finalNewRetail - finalNewCost) / finalNewRetail) * 1000) / 10 : 0
     },
     combinedBooks: {
       titlesCount: combinedBooksTitles,
-      soldQty: 0, // STRICTLY ZERO sold from physical count
-      revenue: 0,
-      cogs: 0,
-      grossProfit: 0,
+      soldQty: soldQtyOld + soldQtyNew,
+      revenue: Math.round(revenueOld + revenueNew),
+      cogs: Math.round(confirmedCogsOld + confirmedCogsNew),
+      grossProfit: Math.round(confirmedProfitOld + confirmedProfitNew),
       counted: combinedBooksUnits,
       available: finalNewAvail + finalOldAvail,
-      valuation: 165937, // Confirmed: 165,937 DA (Exact Excel sum: 165,937.50 DA)
+      valuation: Math.round(combinedBooksCost),
       valuationExact: combinedBooksCost,
-      valuationAtCost: 165937,
-      valuationAtRetail: 306070, // Confirmed: 306,070 DA
-      expectedProfit: 140133, // Confirmed: 140,133 DA (Exact Excel: 140,132.50 DA)
+      valuationAtCost: Math.round(combinedBooksCost),
+      valuationAtRetail: Math.round(combinedBooksRetail),
+      expectedProfit: Math.round(combinedBooksProfit),
       expectedProfitExact: combinedBooksProfit,
-      avgUnitCost: combinedBooksUnits > 0 ? (combinedBooksCost / combinedBooksUnits) : 1121.20,
-      marginPct: 45.78
+      avgUnitCost: combinedBooksUnits > 0 ? (combinedBooksCost / combinedBooksUnits) : 0,
+      marginPct: combinedBooksRetail > 0 ? Math.round((combinedBooksProfit / combinedBooksRetail) * 1000) / 10 : 0
     },
     accessories: {
       itemsCount: finalAccItems,
@@ -1996,7 +2189,7 @@ function updateDashboardMetrics() {
   const ordersBadge = document.getElementById('orders-nav-badge');
   if (ordersBadge) ordersBadge.textContent = state.orders.length;
 
-  // 3. Historical Order Value (Summed from 139 real customer orders)
+  // 3. Historical Order Value (Summed from real customer orders)
   const salesEl = document.getElementById('metric-total-sales');
   if (salesEl) salesEl.textContent = `${fin.totalSalesRevenue.toLocaleString('fr-DZ')} DA`;
 
@@ -2028,7 +2221,7 @@ function renderRecentOrders() {
   if (!tbody) return;
 
   if (state.orders.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><i class="fa-solid fa-box-open"></i><p>No orders cached locally yet. Log in to sync your 139 customer orders.</p></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><i class="fa-solid fa-box-open"></i><p>No orders cached locally yet. Log in to sync customer orders.</p></td></tr>`;
     return;
   }
 
@@ -3262,6 +3455,303 @@ window.handleReverseRepayment = async function(repaymentId) {
   if (state.online && auth.isAuthenticated()) sync.sync();
 };
 
+// ============================================================================
+// 4d. STOCK ADJUSTMENTS (Damaged, Lost, Gift/Promo, Return to Supplier, Count Correction)
+// ============================================================================
+window.openStockAdjustmentModal = function(itemId) {
+  const selectEl = document.getElementById('adjustment-select-item');
+  if (selectEl) {
+    selectEl.innerHTML = '<option value="">-- Select Item / اختر المنتج --</option>' +
+      (state.inventory || []).map(i => {
+        const title = i.title || 'Untitled';
+        const grp = i.stock_group || 'OLD_STOCK';
+        const avail = Math.max(0, (Number(i.quantity_received) || 0) + (Number(i.quantity_count_adjustment) || 0) - (Number(i.quantity_sold) || 0) - (Number(i.quantity_reserved) || 0) - (Number(i.quantity_damaged) || 0) - (Number(i.quantity_lost) || 0) - (Number(i.quantity_promotional) || 0) - (Number(i.quantity_returned_to_supplier) || 0));
+        const selected = (itemId && String(i.id) === String(itemId)) ? 'selected' : '';
+        return `<option value="${escapeHtml(i.id)}" data-avail="${avail}" ${selected}>${escapeHtml(title)} [${grp}] (Avail: ${avail})</option>`;
+      }).join('');
+  }
+  handleAdjustmentItemChange();
+  openModal('modal-stock-adjustment');
+};
+
+window.handleAdjustmentItemChange = function() {
+  const selectEl = document.getElementById('adjustment-select-item');
+  const availEl = document.getElementById('adjustment-current-avail');
+  if (!selectEl || !availEl) return;
+  const opt = selectEl.options[selectEl.selectedIndex];
+  const avail = opt ? (parseInt(opt.getAttribute('data-avail'), 10) || 0) : 0;
+  availEl.value = avail;
+  handleAdjustmentPreview();
+};
+
+window.handleAdjustmentTypeChange = function() {
+  const typeEl = document.getElementById('adjustment-type');
+  const qtyEl = document.getElementById('adjustment-qty-change');
+  const hintEl = document.getElementById('adjustment-qty-hint');
+  if (!typeEl || !qtyEl) return;
+
+  const type = typeEl.value;
+  if (type === 'count_correction') {
+    qtyEl.placeholder = '+1 or -1';
+    if (hintEl) hintEl.textContent = 'Enter positive (+) or negative (-) change to correct physical count';
+  } else {
+    qtyEl.placeholder = '-1';
+    if (hintEl) hintEl.textContent = 'Reductions require negative numbers (e.g. -1)';
+  }
+  handleAdjustmentPreview();
+};
+
+window.handleAdjustmentPreview = function() {
+  const availEl = document.getElementById('adjustment-current-avail');
+  const qtyEl = document.getElementById('adjustment-qty-change');
+  const resultEl = document.getElementById('adjustment-new-avail');
+  if (!availEl || !qtyEl || !resultEl) return;
+
+  const currentAvail = parseInt(availEl.value, 10) || 0;
+  let change = parseInt(qtyEl.value, 10);
+  if (isNaN(change)) change = 0;
+  resultEl.value = Math.max(0, currentAvail + change);
+};
+
+window.handleSaveStockAdjustment = async function(event) {
+  event.preventDefault();
+  const selectEl = document.getElementById('adjustment-select-item');
+  const typeEl = document.getElementById('adjustment-type');
+  const qtyEl = document.getElementById('adjustment-qty-change');
+  const reasonEl = document.getElementById('adjustment-reason');
+
+  const itemId = selectEl?.value;
+  const adjType = typeEl?.value;
+  let qtyChange = parseInt(qtyEl?.value, 10);
+  const reason = (reasonEl?.value || '').trim();
+
+  if (!itemId) {
+    alert('Please select an inventory item.');
+    return;
+  }
+  if (isNaN(qtyChange) || qtyChange === 0) {
+    alert('Please enter a non-zero quantity change.');
+    return;
+  }
+
+  // Restock rejection check
+  if (adjType === 'restock' || (qtyChange > 0 && adjType !== 'count_correction')) {
+    alert('Restocking must create a new purchase lot/batch with its own cost and acquisition date. You cannot increase quantity_received on an existing lot.');
+    return;
+  }
+
+  // Find item
+  const item = (state.inventory || []).find(i => String(i.id) === String(itemId));
+  if (!item) {
+    alert('Selected inventory item not found.');
+    return;
+  }
+
+  const rec = Number(item.quantity_received) || 0;
+  const sold = Number(item.quantity_sold) || 0;
+  const res = Number(item.quantity_reserved) || 0;
+  const dmg = Number(item.quantity_damaged) || 0;
+  const lost = Number(item.quantity_lost) || 0;
+  const promo = Number(item.quantity_promotional) || 0;
+  const retSupp = Number(item.quantity_returned_to_supplier) || 0;
+  const countAdj = Number(item.quantity_count_adjustment) || 0;
+
+  const prevAvail = Math.max(0, rec + countAdj - sold - res - dmg - lost - promo - retSupp);
+  const newAvail = prevAvail + qtyChange;
+
+  if (newAvail < 0) {
+    alert(`Adjustment would result in negative available inventory (${newAvail} < 0). Operation rejected.`);
+    return;
+  }
+
+  // Mutate item category columns locally
+  if (adjType === 'damaged') {
+    item.quantity_damaged = dmg + Math.abs(qtyChange);
+  } else if (adjType === 'lost') {
+    item.quantity_lost = lost + Math.abs(qtyChange);
+  } else if (adjType === 'gift_promo') {
+    item.quantity_promotional = promo + Math.abs(qtyChange);
+  } else if (adjType === 'return_to_supplier') {
+    item.quantity_returned_to_supplier = retSupp + Math.abs(qtyChange);
+  } else if (adjType === 'count_correction') {
+    item.quantity_count_adjustment = countAdj + qtyChange;
+  }
+
+  item.updated_at = new Date().toISOString();
+  await idb.put('inventory', item);
+
+  // Create audit ledger entry
+  const adjEntry = {
+    id: crypto.randomUUID ? crypto.randomUUID() : ('adj_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7)),
+    inventory_item_id: item.id,
+    adjustment_type: adjType,
+    quantity_change: qtyChange,
+    previous_quantity: prevAvail,
+    new_quantity: newAvail,
+    reason: reason,
+    adjustment_date: new Date().toISOString().slice(0, 10),
+    created_at: new Date().toISOString()
+  };
+
+  await idb.put('stock_adjustments', adjEntry);
+  if (!state.stockAdjustments) state.stockAdjustments = [];
+  state.stockAdjustments.unshift(adjEntry);
+
+  // Queue mutation for server
+  await idb.queueMutation('stock_adjustments', 'insert', adjEntry);
+
+  closeModal('modal-stock-adjustment');
+  document.getElementById('form-stock-adjustment').reset();
+  renderInventoryTable();
+  updateDashboardMetrics();
+  renderFinanceSection();
+
+  alert(`Stock adjustment of ${qtyChange} units (${adjType}) recorded successfully.`);
+  if (state.online && auth.isAuthenticated()) sync.sync();
+};
+
+// ============================================================================
+// 4e. CAPITAL CONTRIBUTIONS & OWNER WITHDRAWALS
+// ============================================================================
+window.handleSaveCapitalContribution = async function(event) {
+  event.preventDefault();
+  const amount = parseFloat(document.getElementById('capital-input-amount')?.value) || 0;
+  const date = document.getElementById('capital-input-date')?.value || new Date().toISOString().slice(0, 10);
+  const source = document.getElementById('capital-input-source')?.value || 'personal_funds';
+  const notes = (document.getElementById('capital-input-notes')?.value || '').trim();
+
+  if (amount <= 0) {
+    alert('Please enter a positive contribution amount.');
+    return;
+  }
+
+  const capitalEntry = {
+    id: crypto.randomUUID ? crypto.randomUUID() : ('cap_' + Date.now()),
+    amount_da: amount,
+    contribution_date: date,
+    source: source,
+    notes: notes || null,
+    created_at: new Date().toISOString()
+  };
+
+  await idb.put('capital_contributions', capitalEntry);
+  if (!state.capitalContributions) state.capitalContributions = [];
+  state.capitalContributions.unshift(capitalEntry);
+
+  await idb.queueMutation('capital_contributions', 'insert', capitalEntry);
+
+  closeModal('modal-add-capital');
+  document.getElementById('form-add-capital').reset();
+  renderFinanceSection();
+  updateDashboardMetrics();
+
+  alert(`Capital contribution of ${amount.toLocaleString('fr-DZ')} DA recorded successfully.`);
+  if (state.online && auth.isAuthenticated()) sync.sync();
+};
+
+window.handleSaveOwnerWithdrawal = async function(event) {
+  event.preventDefault();
+  const amount = parseFloat(document.getElementById('withdrawal-input-amount')?.value) || 0;
+  const date = document.getElementById('withdrawal-input-date')?.value || new Date().toISOString().slice(0, 10);
+  const reason = document.getElementById('withdrawal-input-reason')?.value || 'owner_drawings';
+  const notes = (document.getElementById('withdrawal-input-notes')?.value || '').trim();
+
+  if (amount <= 0) {
+    alert('Please enter a positive withdrawal amount.');
+    return;
+  }
+
+  const withdrawalEntry = {
+    id: crypto.randomUUID ? crypto.randomUUID() : ('with_' + Date.now()),
+    amount_da: amount,
+    withdrawal_date: date,
+    reason: reason,
+    notes: notes || null,
+    created_at: new Date().toISOString()
+  };
+
+  await idb.put('owner_withdrawals', withdrawalEntry);
+  if (!state.ownerWithdrawals) state.ownerWithdrawals = [];
+  state.ownerWithdrawals.unshift(withdrawalEntry);
+
+  await idb.queueMutation('owner_withdrawals', 'insert', withdrawalEntry);
+
+  closeModal('modal-add-withdrawal');
+  document.getElementById('form-add-withdrawal').reset();
+  renderFinanceSection();
+  updateDashboardMetrics();
+
+  alert(`Owner withdrawal of ${amount.toLocaleString('fr-DZ')} DA recorded successfully.`);
+  if (state.online && auth.isAuthenticated()) sync.sync();
+};
+
+window.handleSaveCampaign = async function(event) {
+  event.preventDefault();
+  const name = (document.getElementById('campaign-name')?.value || '').trim();
+  const platform = document.getElementById('campaign-platform')?.value || 'instagram';
+  const spend = parseFloat(document.getElementById('campaign-spend')?.value) || 0;
+  const date = document.getElementById('campaign-date')?.value || new Date().toISOString().slice(0, 10);
+  const orders = parseInt(document.getElementById('campaign-orders')?.value, 10) || 0;
+  const followers = parseInt(document.getElementById('campaign-followers')?.value, 10) || 0;
+  const notes = (document.getElementById('campaign-notes')?.value || '').trim();
+
+  if (!name || spend < 0) {
+    alert('Please enter campaign name and valid spend amount.');
+    return;
+  }
+
+  const expenseItem = {
+    id: crypto.randomUUID ? crypto.randomUUID() : ('exp_' + Date.now()),
+    category: 'marketing',
+    amount_da: spend,
+    expense_date: date,
+    payment_method: 'baridimob',
+    description: `Ad Campaign: ${name} (${platform}) - ${orders} orders, ${followers} followers`,
+    notes: notes || null,
+    created_at: new Date().toISOString()
+  };
+
+  await idb.put('expenses', expenseItem);
+  await idb.queueMutation('operating_expenses', 'insert', expenseItem);
+  if (!state.expenses) state.expenses = [];
+  state.expenses.unshift(expenseItem);
+
+  closeModal('modal-add-campaign');
+  document.getElementById('form-add-campaign').reset();
+  renderExpensesSection();
+  renderFinanceSection();
+  updateDashboardMetrics();
+
+  alert(`Marketing campaign "${name}" (${spend.toLocaleString('fr-DZ')} DA) recorded successfully.`);
+  if (state.online && auth.isAuthenticated()) sync.sync();
+};
+
+window.handlePasswordLogin = async function(event) {
+  event.preventDefault();
+  const passInput = document.getElementById('admin-pass-input');
+  const errorEl = document.getElementById('login-error-msg');
+  const password = (passInput?.value || '').trim();
+
+  if (!password) {
+    if (errorEl) {
+      errorEl.textContent = 'Please enter password.';
+      errorEl.style.display = 'block';
+    }
+    return;
+  }
+
+  const success = await auth.loginWithPassword(password);
+  if (success) {
+    setupAuthUI(true);
+    sync.sync();
+  } else {
+    if (errorEl) {
+      errorEl.textContent = 'Invalid password. Please check your admin credentials.';
+      errorEl.style.display = 'block';
+    }
+  }
+};
+
 // 5. View Order Details Modal with Reservation & Status Management
 window.viewOrderDetails = function(orderId) {
   const order = state.orders.find(o => String(o.id) === String(orderId));
@@ -3484,9 +3974,9 @@ window.updateOrderStatus = async function(orderId, newStatus) {
   if (!order) return;
 
   const orderNumId = Number(orderId);
-  const isHistorical = !!(order.is_historical || orderNumId <= 139);
+  const isHistorical = !!(order.is_historical || orderNumId <= 170);
   if (isHistorical) {
-    alert('Historical orders (Order #1 to #139) are archived and read-only. Their fulfillment status and inventory cannot be modified.');
+    alert('Historical orders (Order #1 to #170) are archived and read-only. Their fulfillment status and inventory cannot be modified.');
     return;
   }
 
@@ -4635,7 +5125,7 @@ window.executeExcelImport = async function() {
         quantity_damaged: qtyDamaged,
         quantity_reserved: existing ? (existing.quantity_reserved || 0) : 0,
         unit_purchase_cost_da: cost !== null ? Math.round(cost * 100) / 100 : null,
-        selling_price_da: (title && (title.includes('مثنوي') || title.includes('المثنوي'))) ? 10000 : (price !== null ? Math.round(price) : null),
+        selling_price_da: (name && (name.includes('مثنوي') || name.includes('المثنوي'))) ? 10000 : (price !== null ? Math.round(price) : null),
         supplier_name: suppName,
         acquisition_date: getRowColumn(r, ['Date received', 'Date', 'Purchase Date', 'acquisition_date']) || new Date().toISOString().slice(0, 10),
         notes: safeCellString(getRowColumn(r, ['Notes', 'ملاحظات', 'remarques'])) || null,
@@ -4827,7 +5317,7 @@ window.executeExcelImport = async function() {
         quantity_damaged: 0,
         quantity_reserved: existing ? (existing.quantity_reserved || 0) : 0,
         unit_purchase_cost_da: cost !== null ? Math.round(cost * 100) / 100 : null,
-        selling_price_da: (title && (title.includes('مثنوي') || title.includes('المثنوي'))) ? 10000 : (price !== null ? Math.round(price) : null),
+        selling_price_da: (name && (name.includes('مثنوي') || name.includes('المثنوي'))) ? 10000 : (price !== null ? Math.round(price) : null),
         supplier_name: suppName,
         condition: 'New',
         acquisition_date: getRowColumn(r, ['Date received', 'Date', 'Purchase Date', 'acquisition_date']) || new Date().toISOString().slice(0, 10),

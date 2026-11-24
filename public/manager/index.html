@@ -59,6 +59,19 @@
         <span>Continue with GitHub / الدخول عبر جيت هاب</span>
       </a>
 
+      <div style="margin: 16px 0; display: flex; align-items: center; text-align: center; color: var(--text-muted); font-size: 0.82rem;">
+        <span style="flex: 1; border-bottom: 1px solid var(--border-color);"></span>
+        <span style="padding: 0 10px;">OR / أو كلمة المرور</span>
+        <span style="flex: 1; border-bottom: 1px solid var(--border-color);"></span>
+      </div>
+
+      <form id="admin-pass-login-form" onsubmit="handlePasswordLogin(event)" style="display: flex; flex-direction: column; gap: 10px;">
+        <input type="password" id="admin-pass-input" class="form-control" placeholder="Enter owner password (e.g. gentleadmin)" required style="padding: 10px 14px; font-size: 0.95rem; border: 1px solid var(--border-color); border-radius: 6px;" />
+        <button type="submit" class="btn-primary" style="padding: 10px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <i class="fa-solid fa-key"></i> Sign in with Owner Password
+        </button>
+      </form>
+
       <div class="login-security-notice">
         <p><i class="fa-solid fa-shield-halved"></i> <strong>Strict Access Policy:</strong> Authentication is restricted exclusively to <code>lamisdif@gmail.com</code>. Every other account is rejected and blocked from accessing management data by Supabase Database Row-Level Security (RLS).</p>
       </div>
@@ -344,6 +357,9 @@
             <input type="text" class="search-input" placeholder="Search title, author, or ISBN..." oninput="handleSearch(this.value)" />
           </div>
           <div style="display: flex; gap: 10px;">
+            <button class="btn-secondary" onclick="openStockAdjustmentModal()">
+              <i class="fa-solid fa-sliders"></i> Adjust Stock / تسوية
+            </button>
             <button class="btn-secondary" onclick="openExcelImportModal()">
               <i class="fa-solid fa-file-excel" style="color: #1D6F42;"></i> Import Excel (.xlsx)
             </button>
@@ -541,7 +557,13 @@
             <h3 style="font-family: var(--font-serif); font-size: 1.25rem;">Financial Position & Double-Entry Ledger</h3>
             <p style="font-size: 0.86rem; color: var(--text-muted);">Strict separation between inventory assets, sales, and operating expenses.</p>
           </div>
-          <div style="display: flex; gap: 10px;">
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn-primary" onclick="openModal('modal-add-capital')">
+              <i class="fa-solid fa-plus-circle"></i> Add Capital / مساهمة رأس مال
+            </button>
+            <button class="btn-secondary" onclick="openModal('modal-add-withdrawal')">
+              <i class="fa-solid fa-minus-circle"></i> Withdrawal / مسحوبات المالك
+            </button>
             <button class="btn-secondary" onclick="openExcelImportModal()">
               <i class="fa-solid fa-file-excel" style="color: #1D6F42;"></i> Import Excel
             </button>
@@ -847,7 +869,7 @@
             <h3 style="font-family: var(--font-serif); font-size: 1.25rem;">Instagram & Meta Advertising</h3>
             <p style="font-size: 0.86rem; color: var(--text-muted);">Attributed orders, ad spend in DA, followers gained, and Return on Ad Spend (ROAS).</p>
           </div>
-          <button class="btn-primary" onclick="alert('New campaign tracker modal.')">
+          <button class="btn-primary" onclick="openModal('modal-add-campaign')">
             <i class="fa-solid fa-plus"></i> Add Campaign
           </button>
         </div>
@@ -1243,6 +1265,213 @@
     </div>
     <div id="modal-body" class="modal-body">
       <!-- Injected dynamically -->
+    </div>
+  </div>
+</div>
+
+<!-- 5b. Modal: Stock Adjustment (Damaged, Lost, Gift/Promo, Return to Supplier, Count Correction) -->
+<div id="modal-stock-adjustment" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-sliders"></i> Stock Adjustment / تسوية مخزون</h3>
+      <button class="modal-close" onclick="closeModal('modal-stock-adjustment')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="form-stock-adjustment" onsubmit="handleSaveStockAdjustment(event)">
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label for="adjustment-select-item">Inventory Item / الكتاب أو المنتج *</label>
+          <select id="adjustment-select-item" class="form-control" required onchange="handleAdjustmentItemChange()">
+            <option value="">-- Select Item / اختر المنتج --</option>
+          </select>
+        </div>
+
+        <div class="form-row" style="margin-bottom: 12px;">
+          <div class="form-group">
+            <label for="adjustment-type">Adjustment Classification / نوع التسوية *</label>
+            <select id="adjustment-type" class="form-control" required onchange="handleAdjustmentTypeChange()">
+              <option value="damaged">Damaged / تلف في المخزن (خصم)</option>
+              <option value="lost">Lost & Shrinkage / ضياع وفقدان (خصم)</option>
+              <option value="gift_promo">Gift & Promotion / هدايا وترويج (خصم)</option>
+              <option value="return_to_supplier">Return to Supplier / إرجاع للمورد (خصم)</option>
+              <option value="count_correction">Count Correction / تصحيح الجرد الفعلي (+ أو -)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Current Available / المتوفر حالياً</label>
+            <input type="text" id="adjustment-current-avail" class="form-control" readonly value="0" style="background: #F3F4F6;" />
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-bottom: 12px;">
+          <div class="form-group">
+            <label for="adjustment-qty-change">Quantity Change / مقدار التغيير *</label>
+            <input type="number" id="adjustment-qty-change" class="form-control" required placeholder="-1" oninput="handleAdjustmentPreview()" />
+            <small id="adjustment-qty-hint" style="color: var(--text-muted); font-size: 0.78rem;">Use negative numbers for reductions (e.g. -1)</small>
+          </div>
+          <div class="form-group">
+            <label>New Quantity Result / الرصيد الناتج</label>
+            <input type="text" id="adjustment-new-avail" class="form-control" readonly value="0" style="background: #F3F4F6;" />
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label for="adjustment-reason">Reason & Evidence / سبب التسوية والملاحظات *</label>
+          <textarea id="adjustment-reason" class="form-control" required placeholder="e.g. Damaged in transit, promo copy, physical recount correction..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeModal('modal-stock-adjustment')">Cancel / إلغاء</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-save"></i> Apply Adjustment / تطبيق التسوية</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 5c. Modal: Record Owner Capital Contribution -->
+<div id="modal-add-capital" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-plus-circle"></i> Owner Capital Contribution / مساهمة رأس مال</h3>
+      <button class="modal-close" onclick="closeModal('modal-add-capital')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="form-add-capital" onsubmit="handleSaveCapitalContribution(event)">
+        <div class="form-row" style="margin-bottom: 12px;">
+          <div class="form-group">
+            <label for="capital-input-amount">Amount (DA) / المبلغ بالدينار *</label>
+            <input type="number" id="capital-input-amount" class="form-control" min="1" step="any" required placeholder="e.g. 50000" />
+          </div>
+          <div class="form-group">
+            <label for="capital-input-date">Contribution Date / التاريخ *</label>
+            <input type="date" id="capital-input-date" class="form-control" required />
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label for="capital-input-source">Source of Funds / مصدر الأموال</label>
+          <select id="capital-input-source" class="form-control">
+            <option value="personal_funds">Personal Savings / أموال شخصية</option>
+            <option value="bank_transfer">Bank Transfer / تحويل بنكي</option>
+            <option value="cash_injection">Cash Injection / إيداع نقدي</option>
+            <option value="other">Other / أخرى</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label for="capital-input-notes">Notes / ملاحظات</label>
+          <textarea id="capital-input-notes" class="form-control" placeholder="Purpose or reference details..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeModal('modal-add-capital')">Cancel / إلغاء</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-save"></i> Save Contribution / حفظ المساهمة</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 5d. Modal: Record Owner Capital Withdrawal -->
+<div id="modal-add-withdrawal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-minus-circle"></i> Owner Capital Withdrawal / مسحوبات المالك</h3>
+      <button class="modal-close" onclick="closeModal('modal-add-withdrawal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="form-add-withdrawal" onsubmit="handleSaveOwnerWithdrawal(event)">
+        <div class="form-row" style="margin-bottom: 12px;">
+          <div class="form-group">
+            <label for="withdrawal-input-amount">Amount (DA) / المبلغ بالدينار *</label>
+            <input type="number" id="withdrawal-input-amount" class="form-control" min="1" step="any" required placeholder="e.g. 15000" />
+          </div>
+          <div class="form-group">
+            <label for="withdrawal-input-date">Withdrawal Date / التاريخ *</label>
+            <input type="date" id="withdrawal-input-date" class="form-control" required />
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label for="withdrawal-input-reason">Reason / سبب السحب</label>
+          <select id="withdrawal-input-reason" class="form-control">
+            <option value="owner_drawings">Owner Drawings / سحب أرباح أو شخصي</option>
+            <option value="living_expenses">Living Expenses / مصاريف معيشة</option>
+            <option value="other">Other / أخرى</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label for="withdrawal-input-notes">Notes / ملاحظات</label>
+          <textarea id="withdrawal-input-notes" class="form-control" placeholder="Details or reference..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeModal('modal-add-withdrawal')">Cancel / إلغاء</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-save"></i> Save Withdrawal / حفظ المسحوبات</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 5e. Modal: Add Advertising Campaign Tracker -->
+<div id="modal-add-campaign" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3><i class="fa-brands fa-instagram"></i> Add Campaign Tracker / تتبع حملة إعلانية</h3>
+      <button class="modal-close" onclick="closeModal('modal-add-campaign')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="form-add-campaign" onsubmit="handleSaveCampaign(event)">
+        <div class="form-row" style="margin-bottom: 12px;">
+          <div class="form-group">
+            <label for="campaign-name">Campaign Name / اسم الحملة *</label>
+            <input type="text" id="campaign-name" class="form-control" required placeholder="e.g. November Book Fair Promotion" />
+          </div>
+          <div class="form-group">
+            <label for="campaign-platform">Platform / المنصة</label>
+            <select id="campaign-platform" class="form-control">
+              <option value="instagram">Instagram / انستغرام</option>
+              <option value="facebook">Facebook / فيسبوك</option>
+              <option value="tiktok">TikTok / تيك توك</option>
+              <option value="other">Other / أخرى</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-bottom: 12px;">
+          <div class="form-group">
+            <label for="campaign-spend">Ad Spend (DA) / تكلفة الإعلان *</label>
+            <input type="number" id="campaign-spend" class="form-control" min="0" step="any" required placeholder="e.g. 5000" />
+          </div>
+          <div class="form-group">
+            <label for="campaign-date">Start Date / التاريخ *</label>
+            <input type="date" id="campaign-date" class="form-control" required />
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-bottom: 12px;">
+          <div class="form-group">
+            <label for="campaign-orders">Attributed Orders / الطلبات المنسوبة</label>
+            <input type="number" id="campaign-orders" class="form-control" min="0" value="0" />
+          </div>
+          <div class="form-group">
+            <label for="campaign-followers">Followers Gained / المتابعون الجدد</label>
+            <input type="number" id="campaign-followers" class="form-control" min="0" value="0" />
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label for="campaign-notes">Notes & Key Highlights / ملاحظات</label>
+          <textarea id="campaign-notes" class="form-control" placeholder="Target audience, creative used..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeModal('modal-add-campaign')">Cancel / إلغاء</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-save"></i> Save Campaign / حفظ الحملة</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
