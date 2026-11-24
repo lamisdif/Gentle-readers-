@@ -80,19 +80,25 @@
             let data = null;
             let error = null;
 
-            // 1. Try secure RPC with admin password
+            // 1. Fetch via Netlify Serverless Function (Server-Side Password & Service Role Verification)
             try {
-                const rpcRes = await supabase.rpc('get_admin_orders', { p_admin_password: pswd });
-                if (!rpcRes.error && Array.isArray(rpcRes.data)) {
-                    data = rpcRes.data;
+                const fnRes = await fetch('/.netlify/functions/admin-orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pswd })
+                });
+
+                const resJson = await fnRes.json();
+                if (fnRes.ok && resJson && Array.isArray(resJson.orders)) {
+                    data = resJson.orders;
                 } else {
-                    error = rpcRes.error;
+                    error = new Error(resJson.error || `Server returned status ${fnRes.status}`);
                 }
             } catch (e) {
                 error = e;
             }
 
-            // 2. Fallback: If authenticated owner session exists, direct select
+            // 2. Fallback: If authenticated owner session exists in browser, direct Supabase select
             if (!data) {
                 try {
                     const directRes = await supabase
@@ -104,7 +110,7 @@
                         error = null;
                     }
                 } catch (e) {
-                    // Ignore fallback error if RPC already recorded error
+                    // Ignore fallback error
                 }
             }
 
