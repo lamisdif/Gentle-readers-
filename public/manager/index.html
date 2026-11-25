@@ -403,6 +403,7 @@
               </tbody>
             </table>
           </div>
+          <div id="inventory-pagination" style="padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; border-top: 1px solid var(--border-color); flex-wrap: wrap;"></div>
         </div>
       </section>
 
@@ -453,6 +454,7 @@
               </tbody>
             </table>
           </div>
+          <div id="orders-pagination" style="padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; border-top: 1px solid var(--border-color); flex-wrap: wrap;"></div>
         </div>
       </section>
 
@@ -533,6 +535,7 @@
               </tbody>
             </table>
           </div>
+          <div id="paid-orders-pagination" style="padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; border-top: 1px solid var(--border-color); flex-wrap: wrap;"></div>
         </div>
       </section>
 
@@ -984,6 +987,75 @@
               </tbody>
             </table>
           </div>
+          <div id="finance-titles-pagination" style="padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; border-top: 1px solid var(--border-color); flex-wrap: wrap;"></div>
+        </div>
+
+        <!-- Monthly & Yearly Financial Summaries (Single Unified Source) -->
+        <div id="finance-period-summary-panel" class="card-panel" style="margin-top: 20px;">
+          <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div>
+              <h4><i class="fa-solid fa-calendar-days"></i> Monthly &amp; Yearly Financial Summary / ملخص الأرباح الشهري والسنوي</h4>
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">
+                Built directly from the unified paid-order &amp; lot-attribution ledger (delivery fees strictly excluded).
+              </p>
+            </div>
+          </div>
+          <div class="vintage-table-wrapper" style="margin-bottom: 14px;">
+            <table class="vintage-table" style="font-size: 0.85rem;">
+              <thead>
+                <tr>
+                  <th>Year / السنة</th>
+                  <th>Paid Orders</th>
+                  <th>Delivery Excl. (DA)</th>
+                  <th>Store Revenue (DA)</th>
+                  <th>Confirmed COGS (DA)</th>
+                  <th>Order Pkg Cost (DA)</th>
+                  <th>Earned Gross Profit (DA)</th>
+                  <th>Operating Exp. (DA)</th>
+                  <th>Earned Net Profit (DA)</th>
+                </tr>
+              </thead>
+              <tbody id="finance-yearly-summary-tbody">
+                <tr><td colspan="9" class="empty-state">Calculating yearly summary...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="vintage-table-wrapper">
+            <table class="vintage-table" style="font-size: 0.84rem;">
+              <thead>
+                <tr>
+                  <th>Month / الشهر</th>
+                  <th>Paid Orders</th>
+                  <th>Costed / Review</th>
+                  <th>Delivery Excl. (DA)</th>
+                  <th>Store Revenue (DA)</th>
+                  <th>Confirmed COGS (DA)</th>
+                  <th>Earned Gross Profit (DA)</th>
+                  <th>Operating Exp. (DA)</th>
+                  <th>Earned Net Profit (DA)</th>
+                </tr>
+              </thead>
+              <tbody id="finance-monthly-summary-tbody">
+                <tr><td colspan="9" class="empty-state">Calculating monthly summary...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Storewide Accounting & Stock-Lot Audit Trail -->
+        <div id="finance-audit-review-panel" class="card-panel" style="margin-top: 20px;">
+          <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div>
+              <h4><i class="fa-solid fa-magnifying-glass-chart"></i> Accounting &amp; Lot Attribution Audit / تدقيق المطابقة والدفعات</h4>
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">
+                Strictly refuses to guess missing historical costs or cross-match unrelated titles. Items below require owner confirmation.
+              </p>
+            </div>
+            <div id="finance-audit-summary-badges" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
+          </div>
+          <div id="finance-audit-review-body" class="panel-body">
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Running accounting audit...</p>
+          </div>
         </div>
 
         <!-- Inventory Physical Counts & Valuation -->
@@ -1169,7 +1241,7 @@
                   <i class="fa-solid fa-sync"></i> Test Full Synchronization
                 </button>
                 <button class="btn-secondary" onclick="forceUpdateApp()">
-                  <i class="fa-solid fa-broom"></i> Force App Update / Clear Cache (v26)
+                  <i class="fa-solid fa-broom"></i> Force App Update / Clear Cache (v27)
                 </button>
               </div>
             </div>
@@ -2153,6 +2225,6 @@
     document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>');
   }
 </script>
-<script src="manager.js?v=26"></script>
+<script src="manager.js?v=27"></script>
 </body>
 </html>

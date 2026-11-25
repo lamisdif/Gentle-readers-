@@ -766,6 +766,7 @@ async function savePackagingConfig(cfg) {
     await idb.put('opening_position', state.openingPosition);
     await idb.queueMutation('opening_position', 'upsert', state.openingPosition);
   }
+  if (typeof invalidateAccountingCache === 'function') invalidateAccountingCache();
   return normalized;
 }
 
@@ -803,6 +804,12 @@ const state = {
   debts: [],
   debtRepayments: [],
   orderAllocations: [],
+  orderStockAllocations: [],
+  orderMeta: [],
+  orderReturns: [],
+  capitalContributions: [],
+  ownerWithdrawals: [],
+  stockAdjustments: [],
   cmsBooks: [],
   cmsBookmarks: [],
   cmsAccessories: [],
@@ -814,12 +821,37 @@ const state = {
   paidOrdersFilter: 'all',
   debtsFilter: 'all',
   profitFilter: 'all',
+  pageLimits: {
+    inventory: 50,
+    orders: 50,
+    paidOrders: 50,
+    profitTitles: 60
+  },
   openingPosition: { cash_balance_da: 0, notes: 'Opening' },
   storefrontCatalogCount: 150,
   excelWorkbook: null,
   excelParsedData: null,
   activeImporterSheet: 'NEW BATCH'
 };
+
+// Performance caches (invalidated cleanly only when underlying accounting/catalog state changes)
+let _finCache = null;
+let _invSearchIndex = null;
+let _cmsLoadedOnce = false;
+let _lastVisibilitySyncTs = 0;
+let _searchDebounceTimer = null;
+const ALL_MANAGER_SECTIONS = [
+  'dashboard', 'inventory', 'orders', 'paid-orders',
+  'purchases', 'expenses', 'finance', 'debts', 'advertising', 'settings'
+];
+const _dirtySections = new Set(ALL_MANAGER_SECTIONS);
+
+function invalidateAccountingCache() {
+  _finCache = null;
+  _invSearchIndex = null;
+  ALL_MANAGER_SECTIONS.forEach(s => _dirtySections.add(s));
+}
+window.invalidateAccountingCache = invalidateAccountingCache;
 
 class SyncCoordinator {
   constructor() {
@@ -959,13 +991,14 @@ class SyncCoordinator {
         }
       }
 
-      // 2. Fetch remote orders securely (with auto session refresh & anon fallback)
-      await this.fetchRemoteOrders();
+      // 2. Single round-trip remote sync via manager-api fetch_all (includes orders + all 13 management tables),
+      // falling back to fetchRemoteOrders() + per-table REST only if manager-api batch sync fails
+      const batchSynced = await this.fetchRemoteManagementData();
+      if (!batchSynced) {
+        await this.fetchRemoteOrders();
+      }
 
-      // 3. Fetch other remote management data (when tables exist)
-      await this.fetchRemoteManagementData();
-
-      // 4. Idempotently ensure starter accessories/packaging & Order #176 correction exist and sync
+      // 3. Idempotently ensure starter accessories/packaging & Order #176 correction exist and sync
       let autoQueued = false;
       if (typeof ensureStarterAccessoriesAndPackaging === 'function') {
         if (await ensureStarterAccessoriesAndPackaging({ queueRemote: true })) autoQueued = true;
@@ -987,8 +1020,9 @@ class SyncCoordinator {
             await idb.put('mutation_queue', mut);
           }
         }
-        applyLiveOrdersToInventory();
       }
+
+      await loadLocalData({ render: false });
 
       if (permissionBlockedTables.size > 0) {
         const tblList = Array.from(permissionBlockedTables).join(', ');
@@ -1147,6 +1181,19 @@ class SyncCoordinator {
       if (!clean.adjustment_date) clean.adjustment_date = (clean.created_at || new Date().toISOString()).slice(0, 10);
       if (!clean.created_by) clean.created_by = 'owner';
       const allowed = new Set(['id', 'inventory_item_id', 'adjustment_type', 'quantity_change', 'previous_quantity', 'new_quantity', 'unit_cost_da', 'reason', 'adjustment_date', 'created_by', 'created_at']);
+      for (const k of Object.keys(clean)) {
+        if (!allowed.has(k)) delete clean[k];
+      }
+    } else if (entityTable === 'order_stock_allocations') {
+      clean.order_id = Number(clean.order_id);
+      clean.quantity = Math.max(1, parseInt(clean.quantity, 10) || 1);
+      if (!clean.cost_basis || !['fifo', 'specific_lot', 'provisional'].includes(clean.cost_basis)) {
+        clean.cost_basis = 'specific_lot';
+      }
+      if (!clean.allocation_status || !['reserved', 'confirmed', 'released'].includes(clean.allocation_status)) {
+        clean.allocation_status = 'confirmed';
+      }
+      const allowed = new Set(['id', 'order_id', 'inventory_item_id', 'quantity', 'unit_purchase_cost_da', 'cost_basis', 'allocation_status', 'created_at']);
       for (const k of Object.keys(clean)) {
         if (!allowed.has(k)) delete clean[k];
       }
@@ -1418,30 +1465,33 @@ class SyncCoordinator {
           const json = await apiRes.json();
           if (json.success && json.data) {
             const d = json.data;
-            if (Array.isArray(d.orders) && d.orders.length > 0 && state.orders.length === 0) {
+            const batchWrites = [];
+            if (Array.isArray(d.orders) && d.orders.length > 0) {
               const realOrders = d.orders.filter(o => !(o.firstName === 'Test' && o.familyName === 'Test'));
               const processed = realOrders.map(o => ({
                 ...o,
                 is_historical: o.is_historical !== undefined ? o.is_historical : (Number(o.id) <= 170),
                 read_only: o.read_only !== undefined ? o.read_only : (Number(o.id) <= 170)
               }));
-              await idb.putBatch('orders', processed);
+              batchWrites.push(idb.putBatch('orders', processed));
             }
-            if (d.inventory && d.inventory.length > 0) await idb.putBatch('inventory', d.inventory);
-            if (d.batches && d.batches.length > 0) await idb.putBatch('batches', d.batches);
-            if (d.suppliers && d.suppliers.length > 0) await idb.putBatch('suppliers', d.suppliers);
-            if (d.expenses && d.expenses.length > 0) await idb.putBatch('expenses', d.expenses);
-            if (d.debts && d.debts.length > 0) await idb.putBatch('debts', d.debts);
-            if (d.debtRepayments && d.debtRepayments.length > 0) await idb.putBatch('debt_repayments', d.debtRepayments);
-            if (d.openingPosition && d.openingPosition.length > 0) await idb.put('opening_position', d.openingPosition[0]);
-            if (d.orderMeta && d.orderMeta.length > 0) await idb.putBatch('order_meta', d.orderMeta);
-            if (d.orderStockAllocations && d.orderStockAllocations.length > 0) await idb.putBatch('order_stock_allocations', d.orderStockAllocations);
-            if (d.orderReturns && d.orderReturns.length > 0) await idb.putBatch('order_returns', d.orderReturns);
-            if (d.capitalContributions && d.capitalContributions.length > 0) await idb.putBatch('capital_contributions', d.capitalContributions);
-            if (d.ownerWithdrawals && d.ownerWithdrawals.length > 0) await idb.putBatch('owner_withdrawals', d.ownerWithdrawals);
-            if (d.stockAdjustments && d.stockAdjustments.length > 0) await idb.putBatch('stock_adjustments', d.stockAdjustments);
+            if (d.inventory && d.inventory.length > 0) batchWrites.push(idb.putBatch('inventory', d.inventory));
+            if (d.batches && d.batches.length > 0) batchWrites.push(idb.putBatch('batches', d.batches));
+            if (d.suppliers && d.suppliers.length > 0) batchWrites.push(idb.putBatch('suppliers', d.suppliers));
+            if (d.expenses && d.expenses.length > 0) batchWrites.push(idb.putBatch('expenses', d.expenses));
+            if (d.debts && d.debts.length > 0) batchWrites.push(idb.putBatch('debts', d.debts));
+            if (d.debtRepayments && d.debtRepayments.length > 0) batchWrites.push(idb.putBatch('debt_repayments', d.debtRepayments));
+            if (d.openingPosition && d.openingPosition.length > 0) batchWrites.push(idb.put('opening_position', d.openingPosition[0]));
+            if (d.orderMeta && d.orderMeta.length > 0) batchWrites.push(idb.putBatch('order_meta', d.orderMeta));
+            if (d.orderStockAllocations && d.orderStockAllocations.length > 0) batchWrites.push(idb.putBatch('order_stock_allocations', d.orderStockAllocations));
+            if (d.orderReturns && d.orderReturns.length > 0) batchWrites.push(idb.putBatch('order_returns', d.orderReturns));
+            if (d.capitalContributions && d.capitalContributions.length > 0) batchWrites.push(idb.putBatch('capital_contributions', d.capitalContributions));
+            if (d.ownerWithdrawals && d.ownerWithdrawals.length > 0) batchWrites.push(idb.putBatch('owner_withdrawals', d.ownerWithdrawals));
+            if (d.stockAdjustments && d.stockAdjustments.length > 0) batchWrites.push(idb.putBatch('stock_adjustments', d.stockAdjustments));
+            await Promise.all(batchWrites);
             syncedViaManagerApi = true;
             console.log('[Sync] Synchronized all management data via secure manager API.');
+            return true;
           }
         }
       } catch (e) {
@@ -1466,7 +1516,7 @@ class SyncCoordinator {
         'stock_adjustments'
       ];
 
-      for (const table of tables) {
+      await Promise.all(tables.map(async (table) => {
         try {
           const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=*`, {
             headers: {
@@ -1487,10 +1537,10 @@ class SyncCoordinator {
         } catch (e) {
           // Non-blocking
         }
-      }
+      }));
     }
 
-    await loadLocalData();
+    return syncedViaManagerApi;
   }
 
   updateStatus(status) {
@@ -1658,9 +1708,11 @@ function initSyncTriggers() {
     sync.updateStatus('offline');
   });
 
-  // iOS Safari Foreground Wakeup (handles iOS background-sync restrictions)
+  // iOS Safari Foreground Wakeup (throttled to 15s cooldown to avoid UI lag on quick tab switches)
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && state.online && auth.isAuthenticated()) {
+    const now = Date.now();
+    if (document.visibilityState === 'visible' && state.online && auth.isAuthenticated() && (now - _lastVisibilitySyncTs > 15000)) {
+      _lastVisibilitySyncTs = now;
       console.log('[iOS Trigger] App brought to foreground, triggering sync...');
       sync.sync();
     }
@@ -1680,10 +1732,41 @@ function initSyncTriggers() {
   }
 }
 
-async function loadLocalData() {
-  const allCachedOrders = await idb.getAll('orders');
+async function loadLocalData({ render = true } = {}) {
+  // Read all local IndexedDB stores in parallel instead of sequentially
+  const [
+    allCachedOrders,
+    rawInventory,
+    batches,
+    suppliers,
+    expenses,
+    debts,
+    debtRepayments,
+    orderStockAllocs,
+    orderMeta,
+    orderReturns,
+    capitalContributions,
+    ownerWithdrawals,
+    stockAdjustments,
+    openings
+  ] = await Promise.all([
+    idb.getAll('orders'),
+    idb.getAll('inventory'),
+    idb.getAll('batches'),
+    idb.getAll('suppliers'),
+    idb.getAll('expenses'),
+    idb.getAll('debts'),
+    idb.getAll('debt_repayments'),
+    idb.getAll('order_stock_allocations'),
+    idb.getAll('order_meta'),
+    idb.getAll('order_returns'),
+    idb.getAll('capital_contributions'),
+    idb.getAll('owner_withdrawals'),
+    idb.getAll('stock_adjustments'),
+    idb.getAll('opening_position')
+  ]);
+
   state.orders = (allCachedOrders || []).filter(o => !(o.firstName === 'Test' && o.familyName === 'Test'));
-  const rawInventory = await idb.getAll('inventory');
 
   // Deduplicate inventory by normalized title and stock group / accessory / packaging role
   const dedupMap = new Map();
@@ -1695,7 +1778,7 @@ async function loadLocalData() {
     const grp = isPkg ? 'PACKAGING' : (isAcc ? 'ACCESSORIES' : (item.stock_group || 'NEW_STOCK').toUpperCase());
     const normT = (item.title || '')
       .toLowerCase()
-      .replace(/[\u064B-\u065F\u0670]/g, '')
+      .replace(/[\u064B-\u065F\u0670\u0640]/g, '')
       .replace(/[،,.\-_:;!?'"()\[\]]/g, '')
       .replace(/\s+/g, ' ')
       .trim();
@@ -1718,64 +1801,67 @@ async function loadLocalData() {
     }
   });
   state.inventory = Array.from(dedupMap.values());
-  // Preserve real catalog/edited selling prices; default unset Mathnawi price only if null
   state.inventory.forEach(inv => {
     if ((inv.selling_price_da === null || inv.selling_price_da === undefined) && inv.title && (inv.title.includes('مثنوي') || inv.title.includes('المثنوي'))) {
       inv.selling_price_da = 10000;
     }
   });
-  applyLiveOrdersToInventory();
   if (prunedDuplicateIds.length > 0) {
     prunedDuplicateIds.forEach(pId => idb.delete('inventory', pId).catch(() => {}));
   }
 
-  state.batches = await idb.getAll('batches');
-  state.suppliers = await idb.getAll('suppliers');
-  state.expenses = await idb.getAll('expenses');
-  state.debts = await idb.getAll('debts');
-  state.debtRepayments = await idb.getAll('debt_repayments');
-  state.orderAllocations = await idb.getAll('order_stock_allocations');
-  state.orderMeta = await idb.getAll('order_meta');
-  state.orderReturns = await idb.getAll('order_returns');
-  state.capitalContributions = await idb.getAll('capital_contributions');
-  state.ownerWithdrawals = await idb.getAll('owner_withdrawals');
-  state.stockAdjustments = await idb.getAll('stock_adjustments');
-
-  const openings = await idb.getAll('opening_position');
+  state.batches = batches || [];
+  state.suppliers = suppliers || [];
+  state.expenses = expenses || [];
+  state.debts = debts || [];
+  state.debtRepayments = debtRepayments || [];
+  state.orderStockAllocations = orderStockAllocs || [];
+  state.orderAllocations = state.orderStockAllocations; // unified alias
+  state.orderMeta = orderMeta || [];
+  state.orderReturns = orderReturns || [];
+  state.capitalContributions = capitalContributions || [];
+  state.ownerWithdrawals = ownerWithdrawals || [];
+  state.stockAdjustments = stockAdjustments || [];
   state.openingPosition = openings.length > 0 ? openings[0] : { id: 1, cash_balance_da: 0, owner_contributions_da: 0, owner_withdrawals_da: 0, notes: 'Opening Position' };
 
-  // Load published storefront catalogs (books, bookmarks, accessories) for product linking & price reference
-  try {
-    const [cmsRes, bmRes, accRes] = await Promise.all([
-      fetch('../cms-books.json').catch(() => null),
-      fetch('../cms-bookmarks.json').catch(() => null),
-      fetch('../cms-accessories.json').catch(() => null)
-    ]);
-    if (cmsRes && cmsRes.ok) {
-      const cmsBooks = await cmsRes.json();
-      if (Array.isArray(cmsBooks) && cmsBooks.length > 0) {
-        state.cmsBooks = cmsBooks;
-        state.storefrontCatalogCount = cmsBooks.length;
+  invalidateAccountingCache();
+
+  // Load published storefront catalogs once per session (books, bookmarks, accessories)
+  if (!_cmsLoadedOnce) {
+    try {
+      const [cmsRes, bmRes, accRes] = await Promise.all([
+        fetch('../cms-books.json').catch(() => null),
+        fetch('../cms-bookmarks.json').catch(() => null),
+        fetch('../cms-accessories.json').catch(() => null)
+      ]);
+      if (cmsRes && cmsRes.ok) {
+        const cmsBooks = await cmsRes.json();
+        if (Array.isArray(cmsBooks) && cmsBooks.length > 0) {
+          state.cmsBooks = cmsBooks;
+          state.storefrontCatalogCount = cmsBooks.length;
+        }
       }
+      if (bmRes && bmRes.ok) {
+        const bmList = await bmRes.json();
+        if (Array.isArray(bmList)) state.cmsBookmarks = bmList;
+      }
+      if (accRes && accRes.ok) {
+        const accList = await accRes.json();
+        if (Array.isArray(accList)) state.cmsAccessories = accList;
+      }
+      _cmsLoadedOnce = true;
+    } catch (err) {
+      // Retain offline defaults
     }
-    if (bmRes && bmRes.ok) {
-      const bmList = await bmRes.json();
-      if (Array.isArray(bmList)) state.cmsBookmarks = bmList;
-    }
-    if (accRes && accRes.ok) {
-      const accList = await accRes.json();
-      if (Array.isArray(accList)) state.cmsAccessories = accList;
-    }
-  } catch (err) {
-    // Retain offline defaults
   }
 
   if ((state.inventory && state.inventory.length > 0) || (state.orders && state.orders.length > 0)) {
     await ensureStarterAccessoriesAndPackaging({ queueRemote: false });
+    invalidateAccountingCache();
     applyLiveOrdersToInventory();
   }
 
-  renderAppViews();
+  if (render) renderAppViews();
 }
 
 async function ensureStarterAccessoriesAndPackaging({ queueRemote = true } = {}) {
@@ -1990,18 +2076,69 @@ async function ensureOrder176Corrected() {
   return true;
 }
 
-function renderAppViews() {
-  updateDashboardMetrics();
-  renderRecentOrders();
-  renderInventoryTable();
-  renderOrdersTable();
-  if (typeof renderPaidOrdersSection === 'function') renderPaidOrdersSection();
-  renderPurchasesSection();
-  renderExpensesSection();
-  renderFinanceSection();
-  renderDebtsSection();
-  if (typeof renderAdvertisingSection === 'function') renderAdvertisingSection();
-  populateBatchDropdown();
+function updateGlobalNavBadges() {
+  const ordersBadge = document.getElementById('orders-nav-badge');
+  if (ordersBadge) ordersBadge.textContent = (state.orders || []).length;
+  const invBadge = document.getElementById('inventory-nav-badge');
+  if (invBadge) invBadge.textContent = (state.inventory || []).length;
+  const paidBadge = document.getElementById('paid-orders-nav-badge');
+  if (paidBadge && _finCache && _finCache.paidSummary) {
+    paidBadge.textContent = _finCache.paidSummary.allCount;
+  }
+}
+
+function renderSingleSection(sectionId) {
+  switch (sectionId) {
+    case 'dashboard':
+      updateDashboardMetrics();
+      renderRecentOrders();
+      break;
+    case 'inventory':
+      renderInventoryTable();
+      populateBatchDropdown();
+      break;
+    case 'orders':
+      renderOrdersTable();
+      break;
+    case 'paid-orders':
+      if (typeof renderPaidOrdersSection === 'function') renderPaidOrdersSection();
+      break;
+    case 'purchases':
+      renderPurchasesSection();
+      break;
+    case 'expenses':
+      renderExpensesSection();
+      break;
+    case 'finance':
+      renderFinanceSection();
+      break;
+    case 'debts':
+      renderDebtsSection();
+      break;
+    case 'advertising':
+      if (typeof renderAdvertisingSection === 'function') renderAdvertisingSection();
+      break;
+    case 'settings':
+      break;
+    default:
+      updateDashboardMetrics();
+      renderRecentOrders();
+      break;
+  }
+  _dirtySections.delete(sectionId);
+}
+
+function renderAppViews({ forceAll = false, invalidate = true } = {}) {
+  if (invalidate) {
+    invalidateAccountingCache();
+  }
+  const active = state.activeSection || 'dashboard';
+  if (forceAll) {
+    ALL_MANAGER_SECTIONS.forEach(s => renderSingleSection(s));
+  } else {
+    renderSingleSection(active);
+  }
+  updateGlobalNavBadges();
 }
 
 // ============================================================================
@@ -2091,14 +2228,60 @@ window.isAccessoryItem = isAccessoryItem;
 function normalizeText(s) {
   return String(s || '')
     .toLowerCase()
-    .replace(/[أإآ]/g, 'ا')
+    .replace(/[\u064B-\u065F\u0670\u0640]/g, '') // strip Arabic diacritics & tatweel
+    .replace(/[٠-٩]/g, d => String(d.charCodeAt(0) - 0x0660))
+    .replace(/[أإآٱ]/g, 'ا')
     .replace(/ة/g, 'ه')
-    .replace(/ى/g, 'ي')
-    .replace(/[^\w\s\u0600-\u06FF]/g, '')
+    .replace(/[ىئ]/g, 'ي')
+    .replace(/ؤ/g, 'و')
+    .replace(/[^\w\s\u0600-\u06FF]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
 window.normalizeText = normalizeText;
+
+function compactText(s) {
+  return normalizeText(s).replace(/\s+/g, '');
+}
+
+const TITLE_MATCH_STOPWORDS = new Set([
+  'الى', 'الي', 'على', 'علي', 'عن', 'من', 'في', 'مع', 'او', 'ثم', 'بين', 'عند',
+  'بعد', 'قبل', 'نحو', 'حول', 'تحت', 'فوق', 'ضد', 'و', 'ان', 'لا', 'ما', 'هذا', 'هذه',
+  'دار', 'طبعه', 'اداب', 'تنوير', 'كلمات', 'شروق', 'محروسه', 'افاق',
+  'جزء', 'اجزاء', 'جزئين', 'مجلد', 'كتاب', 'اول', 'ثاني', 'لعقد', 'قران',
+  'the', 'and', 'for', 'with', 'from', 'into', 'that', 'this', 'of', 'on', 'in', 'to', 'by', 'a', 'an', 'series', 'books', 'book', 'vol', 'part'
+]);
+
+// Verified storefront <-> inventory edition aliases (strictly same physical book/set)
+const VERIFIED_TITLE_ALIASES = new Map([
+  ['المثنوي ج1 الي 6', 'مثنوي 1 6'],
+  ['استعدادات لعقد قران', 'استعدادات و قصص اخري'],
+  ['اخرج مع فتاه تحب الكتابه', 'اخرج في موعد مع فتاه تحب الكتابه'],
+  ['ميه عام من العزله طبعه التنوير', 'ميه عام من العزله'],
+  ['مئه عام من العزله طبعه التنوير', 'مئه عام من العزله']
+]);
+
+function extractVolumeSignature(normStr) {
+  const s = normStr || '';
+  if (/(?:^|\s)(?:ج\s*1\s+(?:الي|الى)?\s*6|1\s+6|1\s+و\s+2|1\s+2|جزيين|جزئين)(?=\s|$)/.test(s)) {
+    return { kind: 'range', val: null };
+  }
+  const endVol = s.match(/(?:^|\s)(?:ج\s*)?([1-6])(?:\s*$)/);
+  if (endVol) return { kind: 'vol', val: endVol[1] };
+  if (s.includes('كتاب الاول') || s.includes('الكتاب الاول') || s.includes('جزء الاول')) {
+    return { kind: 'vol', val: '1' };
+  }
+  if (s.includes('كتاب الثاني') || s.includes('الكتاب الثاني') || s.includes('جزء الثاني')) {
+    return { kind: 'vol', val: '2' };
+  }
+  return { kind: 'none', val: null };
+}
+
+function volumesAreCompatible(vA, vB) {
+  if (!vA || !vB) return true;
+  if (vA.kind === 'vol' && vB.kind === 'vol' && vA.val !== vB.val) return false;
+  return true;
+}
 
 function parseOrderItem(rawItem) {
   let title = '';
@@ -2128,64 +2311,218 @@ window.parseOrderItem = parseOrderItem;
 
 function extractSignificantTokens(s) {
   if (!s) return new Set();
-  const clean = String(s)
-    .toLowerCase()
-    .replace(/[أإآ]/g, 'ا')
-    .replace(/ة/g, 'ه')
-    .replace(/ى/g, 'ي')
-    .replace(/[^\w\s\u0600-\u06FF]/g, ' ')
-    .replace(/\b(ج\d+|\d+|الى|الي|جزء|ج|دار|ديوان|مختارات|وقصص|قصص|اخرى|لعقد|قران)\b/g, ' ')
-    .replace(/\bال([^\s]{3,})\b/g, '$1')
-    .replace(/\s+/g, ' ')
-    .trim();
-  return new Set(clean.split(' ').filter(w => w.length >= 3));
+  const norm = normalizeText(s);
+  if (!norm) return new Set();
+  const out = new Set();
+  for (const rawWord of norm.split(' ')) {
+    if (!rawWord || /^(ج?\d+)$/.test(rawWord)) continue;
+    let w = rawWord;
+    // Safely strip Arabic definite article prefixes without ASCII \b boundaries
+    if (w.startsWith('وال') && w.length >= 6) {
+      w = w.slice(3);
+    } else if (w.startsWith('ال') && w.length >= 5) {
+      w = w.slice(2);
+    }
+    if (TITLE_MATCH_STOPWORDS.has(w) || TITLE_MATCH_STOPWORDS.has(rawWord)) continue;
+    if (w.length >= 3) out.add(w);
+  }
+  return out;
 }
 window.extractSignificantTokens = extractSignificantTokens;
 
-function findInventoryItem(title) {
-  if (!title || !state.inventory) return null;
-  const normTarget = normalizeText(title);
-  if (!normTarget) return null;
-
-  // 1. Exact match on normalized title
-  let match = state.inventory.find(i => normalizeText(i.title) === normTarget);
-  if (match) return match;
-
-  // 2. Fuzzy / contains match
-  match = state.inventory.find(i => {
-    const ni = normalizeText(i.title);
-    return ni && (ni.includes(normTarget) || normTarget.includes(ni));
-  });
-  if (match) return match;
-
-  // 3. Significant Arabic token match (handles Al-, volume labels like 1-6 / ج1 الى 6)
-  const targetTokens = extractSignificantTokens(title);
-  if (targetTokens.size > 0) {
-    let bestMatch = null;
-    let maxIntersection = 0;
-    for (const inv of state.inventory) {
-      const invTokens = extractSignificantTokens(inv.title);
-      let intersection = 0;
-      for (const t of targetTokens) {
-        if (invTokens.has(t)) intersection++;
-      }
-      if (intersection > maxIntersection) {
-        maxIntersection = intersection;
-        bestMatch = inv;
-      }
+function computeLevenshteinSimilarity(a, b) {
+  if (!a || !b) return 0;
+  if (a === b) return 1;
+  const la = a.length;
+  const lb = b.length;
+  if (Math.abs(la - lb) > 4) return 0;
+  const dp = new Array(lb + 1);
+  for (let j = 0; j <= lb; j++) dp[j] = j;
+  for (let i = 1; i <= la; i++) {
+    let prev = dp[0];
+    dp[0] = i;
+    for (let j = 1; j <= lb; j++) {
+      const cur = dp[j];
+      dp[j] = (a[i - 1] === b[j - 1]) ? prev : 1 + Math.min(prev, dp[j], dp[j - 1]);
+      prev = cur;
     }
-    const minRequired = targetTokens.size >= 4 ? 2 : 1;
-    if (bestMatch && maxIntersection >= minRequired) {
-      return bestMatch;
+  }
+  return 1 - (dp[lb] / Math.max(la, lb));
+}
+
+function getInventorySearchIndex() {
+  if (_invSearchIndex) return _invSearchIndex;
+  const invList = state.inventory || [];
+  const normMap = new Map();
+  const compactMap = new Map();
+  const idMap = new Map();
+  const groupsList = [];
+
+  invList.forEach(item => {
+    if (!item) return;
+    if (item.id !== undefined && item.id !== null) {
+      idMap.set(String(item.id), item);
+    }
+    if (!item.title) return;
+    const nt = normalizeText(item.title);
+    const ct = nt.replace(/\s+/g, '');
+    if (!normMap.has(nt)) {
+      normMap.set(nt, []);
+      if (ct && !compactMap.has(ct)) compactMap.set(ct, nt);
+      groupsList.push({
+        normTitle: nt,
+        compactTitle: ct,
+        vols: extractVolumeSignature(nt),
+        tokens: extractSignificantTokens(nt),
+        isPkg: isPackagingPaperItem(item),
+        isAcc: !isPackagingPaperItem(item) && isAccessoryItem(item)
+      });
+    }
+    normMap.get(nt).push(item);
+  });
+
+  _invSearchIndex = { normMap, compactMap, idMap, groupsList };
+  return _invSearchIndex;
+}
+
+function resolveMatchedLotsWithReason(title, { excludePackaging = true } = {}) {
+  if (!title) return { lots: [], matchMethod: 'none', canonicalNormTitle: '' };
+  const idx = getInventorySearchIndex();
+
+  // Website Accessory link check first (strictly binds storefront accessories & bookmarks)
+  const webAcc = getWebsiteAccessoryMatch(title);
+  if (webAcc) {
+    const webNorm = normalizeText(webAcc.title);
+    const webLots = idx.normMap.get(webNorm);
+    if (webLots && webLots.length > 0) {
+      return { lots: [...webLots], matchMethod: 'accessory_link', canonicalNormTitle: webNorm };
     }
   }
 
-  return null;
+  let nt = normalizeText(title);
+  if (!nt) return { lots: [], matchMethod: 'none', canonicalNormTitle: '' };
+
+  if (VERIFIED_TITLE_ALIASES.has(nt)) {
+    const aliasTarget = VERIFIED_TITLE_ALIASES.get(nt);
+    if (idx.normMap.has(aliasTarget)) {
+      return {
+        lots: (idx.normMap.get(aliasTarget) || []).filter(l => !excludePackaging || !isPackagingPaperItem(l)),
+        matchMethod: 'verified_alias',
+        canonicalNormTitle: aliasTarget
+      };
+    }
+  }
+
+  // Tier 1: Exact normalized title
+  if (idx.normMap.has(nt)) {
+    const hits = idx.normMap.get(nt).filter(l => !excludePackaging || !isPackagingPaperItem(l));
+    if (hits.length > 0) return { lots: [...hits], matchMethod: 'exact', canonicalNormTitle: nt };
+  }
+
+  // Tier 1b: Exact space-insensitive match (e.g. كبرياء وهوى vs كبرياء و هوى)
+  const ct = nt.replace(/\s+/g, '');
+  if (idx.compactMap.has(ct)) {
+    const mappedNorm = idx.compactMap.get(ct);
+    const hits = (idx.normMap.get(mappedNorm) || []).filter(l => !excludePackaging || !isPackagingPaperItem(l));
+    if (hits.length > 0) return { lots: [...hits], matchMethod: 'compact', canonicalNormTitle: mappedNorm };
+  }
+
+  const orderVols = extractVolumeSignature(nt);
+
+  // Tier 2: Strict word-boundary prefix edition match (min 2 words & >= 8 chars on shorter title;
+  // prevents 1-word titles like "الغريب" inside long titles like "10 دقائق و38 ثانية في هذا العالم الغريب")
+  let prefixTarget = null;
+  let bestPrefixLen = 0;
+  for (const grp of idx.groupsList) {
+    if (excludePackaging && grp.isPkg) continue;
+    if (!volumesAreCompatible(orderVols, grp.vols)) continue;
+    const shorter = grp.normTitle.length <= nt.length ? grp.normTitle : nt;
+    if (shorter.length >= 8 && shorter.split(' ').length >= 2) {
+      if (nt.startsWith(grp.normTitle + ' ') || grp.normTitle.startsWith(nt + ' ')) {
+        if (shorter.length > bestPrefixLen) {
+          bestPrefixLen = shorter.length;
+          prefixTarget = grp.normTitle;
+        }
+      }
+    }
+  }
+  if (prefixTarget) {
+    const hits = (idx.normMap.get(prefixTarget) || []).filter(l => !excludePackaging || !isPackagingPaperItem(l));
+    if (hits.length > 0) return { lots: [...hits], matchMethod: 'prefix', canonicalNormTitle: prefixTarget };
+  }
+
+  // Tier 3: High-precision content token match (prevents unrelated 1-word partial matches)
+  const orderTokens = extractSignificantTokens(nt);
+  if (orderTokens.size > 0) {
+    let bestGroup = null;
+    let bestScore = 0;
+    for (const grp of idx.groupsList) {
+      if (excludePackaging && grp.isPkg) continue;
+      if (!volumesAreCompatible(orderVols, grp.vols)) continue;
+      if (!grp.tokens || grp.tokens.size === 0) continue;
+
+      let inter = 0;
+      for (const t of orderTokens) {
+        if (grp.tokens.has(t)) inter++;
+      }
+      if (inter === 0) continue;
+
+      const covOrder = inter / orderTokens.size;
+      const covInv = inter / grp.tokens.size;
+      const fullExactTokens = (inter === orderTokens.size && inter === grp.tokens.size);
+      const multiTokenStrongOverlap = (inter >= 2 && covOrder >= 0.65 && covInv >= 0.65);
+
+      if (fullExactTokens || multiTokenStrongOverlap) {
+        const score = covOrder + covInv + (inter * 0.01);
+        if (score > bestScore) {
+          bestScore = score;
+          bestGroup = grp.normTitle;
+        }
+      }
+    }
+    if (bestGroup) {
+      const hits = (idx.normMap.get(bestGroup) || []).filter(l => !excludePackaging || !isPackagingPaperItem(l));
+      if (hits.length > 0) return { lots: [...hits], matchMethod: 'tokens', canonicalNormTitle: bestGroup };
+    }
+  }
+
+  // Tier 4: High character similarity (>= 0.85) for spelling typos (e.g. "A thousan splendid suns")
+  let bestTypo = null;
+  let bestSim = 0.849;
+  for (const grp of idx.groupsList) {
+    if (excludePackaging && grp.isPkg) continue;
+    if (!volumesAreCompatible(orderVols, grp.vols)) continue;
+    const sim = computeLevenshteinSimilarity(nt, grp.normTitle);
+    if (sim > bestSim) {
+      bestSim = sim;
+      bestTypo = grp.normTitle;
+    }
+  }
+  if (bestTypo) {
+    const hits = (idx.normMap.get(bestTypo) || []).filter(l => !excludePackaging || !isPackagingPaperItem(l));
+    if (hits.length > 0) return { lots: [...hits], matchMethod: 'typo', canonicalNormTitle: bestTypo };
+  }
+
+  return { lots: [], matchMethod: 'none', canonicalNormTitle: '' };
+}
+
+function findInventoryItem(title) {
+  if (!title || !state.inventory) return null;
+  const { lots } = resolveMatchedLotsWithReason(title, { excludePackaging: false });
+  if (lots.length === 0) return null;
+  const sorted = [...lots].sort((a, b) => {
+    const aIsOld = (a.stock_group || '').toUpperCase() === 'OLD_STOCK' ? 0 : 1;
+    const bIsOld = (b.stock_group || '').toUpperCase() === 'OLD_STOCK' ? 0 : 1;
+    if (aIsOld !== bIsOld) return aIsOld - bIsOld;
+    return String(a.acquisition_date || '9999').localeCompare(String(b.acquisition_date || '9999'));
+  });
+  return sorted[0];
 }
 window.findInventoryItem = findInventoryItem;
 
 function isNewBatchLot(lot) {
   if (!lot) return false;
+  if (isPackagingPaperItem(lot) || isAccessoryItem(lot)) return false;
   const grp = String(lot.stock_group || '').toUpperCase();
   const bId = String(lot.batch_id || '').toLowerCase();
   const bName = String(lot.batch || '').toLowerCase();
@@ -2224,6 +2561,9 @@ function resolveEffectiveOrderPricing(order, meta) {
 }
 
 function buildInventoryNormTitleMap(inventoryList) {
+  if (inventoryList === state.inventory) {
+    return getInventorySearchIndex().normMap;
+  }
   const normTitleMap = new Map();
   (inventoryList || []).forEach(item => {
     if (item && item.title) {
@@ -2237,21 +2577,37 @@ function buildInventoryNormTitleMap(inventoryList) {
   return normTitleMap;
 }
 
-function resolveCandidateLotsForTitle(title, isHist, normTitleMap) {
+function isLotChronologicallyEligibleForOrder(lot, isHist, orderDateStr) {
+  if (!lot) return false;
+  if (isPackagingPaperItem(lot)) return false;
+  if (isAccessoryItem(lot)) return true;
+  if ((lot.stock_group || '').toUpperCase() === 'OLD_STOCK') return true;
+  // Historical orders (before Nov 2026 Book Fair) or orders dated before the lot acquisition
+  // MUST NOT borrow NEW_STOCK Book Fair purchase costs.
+  if (isHist) return false;
+  const acq = lot.acquisition_date ? String(lot.acquisition_date).slice(0, 10) : '';
+  if (orderDateStr && acq && orderDateStr < acq) return false;
+  return true;
+}
+
+function resolveCandidateLotsForTitle(title, isHist, normTitleMap, orderDateStr = '', rawOrderTitle = '') {
   if (!title) return [];
-  const normKey = normalizeText(title);
-  let matchingLots = (normTitleMap && normTitleMap.get(normKey)) || [];
-  if (matchingLots.length === 0) {
-    const fallback = findInventoryItem(title);
-    if (fallback) {
-      const fbKey = normalizeText(fallback.title);
-      const fbLots = (normTitleMap && fbKey && normTitleMap.get(fbKey)) || [];
-      matchingLots = fbLots.length > 0 ? fbLots : [fallback];
-    }
-  }
-  let eligible = !isHist ? [...matchingLots] : matchingLots.filter(l => !isNewBatchLot(l));
-  if (eligible.length === 0) eligible = [...matchingLots];
+  const { lots } = resolveMatchedLotsWithReason(title, { excludePackaging: true });
+  if (lots.length === 0) return [];
+
+  // Prefer date/chronology-eligible lots ONLY (never fabricate missing historical cost from future NEW_STOCK!)
+  const eligible = lots.filter(l => isLotChronologicallyEligibleForOrder(l, isHist, orderDateStr));
+  if (eligible.length === 0) return [];
+
+  const normRaw = normalizeText(rawOrderTitle || title);
+  const preferNewEdition = normRaw.includes('التنوير');
+
   eligible.sort((a, b) => {
+    if (preferNewEdition) {
+      const aIsNew = isNewBatchLot(a) ? 0 : 1;
+      const bIsNew = isNewBatchLot(b) ? 0 : 1;
+      if (aIsNew !== bIsNew) return aIsNew - bIsNew;
+    }
     const aIsOld = (a.stock_group || '').toUpperCase() === 'OLD_STOCK' ? 0 : 1;
     const bIsOld = (b.stock_group || '').toUpperCase() === 'OLD_STOCK' ? 0 : 1;
     if (aIsOld !== bIsOld) return aIsOld - bIsOld;
@@ -2308,14 +2664,252 @@ function toRawIdbInventoryCopy(inv) {
   return copy;
 }
 
+function buildAccountingLookupMaps() {
+  const searchIdx = getInventorySearchIndex();
+  const metaByOrderId = new Map();
+  (state.orderMeta || []).forEach(m => {
+    if (m && m.order_id !== undefined && m.order_id !== null) {
+      metaByOrderId.set(String(m.order_id), m);
+    }
+  });
+
+  const allocsSource = (Array.isArray(state.orderStockAllocations) && state.orderStockAllocations.length > 0)
+    ? state.orderStockAllocations
+    : (state.orderAllocations || []);
+  const allocsByOrderId = new Map();
+  allocsSource.forEach(a => {
+    if (!a || a.order_id === undefined || a.order_id === null || a.allocation_status === 'released') return;
+    const key = String(a.order_id);
+    if (!allocsByOrderId.has(key)) allocsByOrderId.set(key, []);
+    allocsByOrderId.get(key).push(a);
+  });
+
+  const returnsByOrderIdTitle = new Map();
+  (state.orderReturns || []).forEach(ret => {
+    if (ret && ret.condition !== 'damaged' && ret.restocked_to_inventory !== false) {
+      const k = `${String(ret.order_id)}::${normalizeText(ret.title)}`;
+      returnsByOrderIdTitle.set(k, (returnsByOrderIdTitle.get(k) || 0) + (Number(ret.quantity) || 0));
+    }
+  });
+
+  return { searchIdx, metaByOrderId, allocsByOrderId, returnsByOrderIdTitle };
+}
+
+function getNumericUnitCostOrNull(lotOrVal) {
+  const raw = (lotOrVal && typeof lotOrVal === 'object') ? lotOrVal.unit_purchase_cost_da : lotOrVal;
+  if (raw === null || raw === undefined || raw === '' || isNaN(raw)) return null;
+  return Number(raw);
+}
+
+// Resolves a single order line item's lot allocation & unit cost using:
+//   1. Persisted order_stock_allocations (highest priority, never guessed)
+//   2. Chronologically valid & safe title match + capacity-aware FIFO / price disambiguation
+// Never borrows post-order NEW_STOCK costs for historical orders, and flags unknown/ambiguous items.
+function attributeOrderItemLot(pi, order, isHist, orderDateStr, itemRefPrice, lookups, remainingCapByLotId, availableAllocs) {
+  const qty = Math.max(1, Number(pi.qty) || 1);
+  const { searchIdx } = lookups;
+
+  // 1. Check persisted order_stock_allocations first
+  if (availableAllocs && availableAllocs.length > 0) {
+    // Match exact allocation by inventory item title / match
+    const { lots: rawMatchedLots } = resolveMatchedLotsWithReason(pi.title, { excludePackaging: true });
+    const matchedLotIdSet = new Set(rawMatchedLots.map(l => String(l.id)));
+
+    const matchingAllocs = [];
+    for (let i = 0; i < availableAllocs.length; i++) {
+      const al = availableAllocs[i];
+      if (!al || al._consumedRemaining <= 0) continue;
+      const alLot = searchIdx.idMap.get(String(al.inventory_item_id));
+      const alLotNorm = alLot ? normalizeText(alLot.title) : '';
+      const orderItemNorm = normalizeText(pi.title);
+      if (
+        matchedLotIdSet.has(String(al.inventory_item_id)) ||
+        (alLotNorm && orderItemNorm && (alLotNorm === orderItemNorm || VERIFIED_TITLE_ALIASES.get(orderItemNorm) === alLotNorm))
+      ) {
+        matchingAllocs.push(al);
+      }
+    }
+
+    if (matchingAllocs.length > 0) {
+      let need = qty;
+      const lotSlices = [];
+      for (const al of matchingAllocs) {
+        if (need <= 0) break;
+        const take = Math.min(need, al._consumedRemaining);
+        if (take <= 0) continue;
+        al._consumedRemaining -= take;
+        need -= take;
+
+        const lot = searchIdx.idMap.get(String(al.inventory_item_id)) || null;
+        if (remainingCapByLotId && lot) {
+          const cap = remainingCapByLotId.get(String(lot.id)) || 0;
+          remainingCapByLotId.set(String(lot.id), Math.max(0, cap - take));
+        }
+        const costFromAlloc = getNumericUnitCostOrNull(al.unit_purchase_cost_da);
+        const unitCost = costFromAlloc !== null ? costFromAlloc : getNumericUnitCostOrNull(lot);
+        lotSlices.push({
+          lot,
+          lotId: String(al.inventory_item_id),
+          qty: take,
+          unitCost,
+          costBasis: al.cost_basis || 'specific_lot'
+        });
+      }
+
+      if (need === 0 && lotSlices.length > 0) {
+        const allKnown = lotSlices.every(s => s.unitCost !== null);
+        const lineCogs = allKnown ? lotSlices.reduce((s, sl) => s + sl.qty * sl.unitCost, 0) : null;
+        const knownPartial = lotSlices.reduce((s, sl) => s + (sl.unitCost !== null ? sl.qty * sl.unitCost : 0), 0);
+        const primary = lotSlices[0];
+        return {
+          lot: primary.lot,
+          lotSlices,
+          matchedMethod: 'allocated',
+          attributionStatus: allKnown ? 'allocated' : 'missing_cost',
+          costBasis: primary.costBasis,
+          unitCost: primary.unitCost,
+          lineCogs,
+          knownPartial,
+          reviewReason: allKnown ? null : 'Allocated lot is missing purchase cost (NULL)'
+        };
+      }
+    }
+  }
+
+  // 2. Safe Arabic / English matching without cross-title false positives
+  const { lots: rawMatchedLots, matchMethod } = resolveMatchedLotsWithReason(pi.title, { excludePackaging: true });
+  if (rawMatchedLots.length === 0) {
+    return {
+      lot: null,
+      lotSlices: [],
+      matchedMethod: 'none',
+      attributionStatus: 'unmatched',
+      costBasis: 'unmatched',
+      unitCost: null,
+      lineCogs: null,
+      knownPartial: 0,
+      reviewReason: 'Title not matched in current inventory catalog'
+    };
+  }
+
+  // 3. Enforce chronology boundary: pre-Fair historical orders CANNOT borrow Nov 2026 Book Fair costs
+  const eligibleLots = rawMatchedLots.filter(l => isLotChronologicallyEligibleForOrder(l, isHist, orderDateStr));
+  if (eligibleLots.length === 0) {
+    const sampleFuture = rawMatchedLots[0];
+    return {
+      lot: null,
+      lotSlices: [],
+      matchedMethod: matchMethod,
+      attributionStatus: 'needs_review_pre_batch',
+      costBasis: 'pre_batch_unreconciled',
+      unitCost: null,
+      lineCogs: null,
+      knownPartial: 0,
+      reviewReason: `Order (${orderDateStr || 'historical'}) predates NEW_STOCK batch (${sampleFuture?.acquisition_date || '2026-11-04'}); no OLD_STOCK cost recorded`
+    };
+  }
+
+  // Sort lots: explicit edition match > selling-price match > OLD_STOCK before NEW_STOCK > earliest acquisition_date
+  const normRawTitle = normalizeText(pi.raw || pi.title);
+  const preferTanweer = normRawTitle.includes('التنوير');
+  const sortedLots = [...eligibleLots].sort((a, b) => {
+    if (preferTanweer) {
+      const aNew = isNewBatchLot(a) ? 0 : 1;
+      const bNew = isNewBatchLot(b) ? 0 : 1;
+      if (aNew !== bNew) return aNew - bNew;
+    }
+    if (itemRefPrice > 0) {
+      const aDiff = Math.abs((Number(a.selling_price_da) || 0) - itemRefPrice);
+      const bDiff = Math.abs((Number(b.selling_price_da) || 0) - itemRefPrice);
+      const aExactP = aDiff <= 10 ? 0 : 1;
+      const bExactP = bDiff <= 10 ? 0 : 1;
+      if (aExactP !== bExactP) return aExactP - bExactP;
+    }
+    const aIsOld = (a.stock_group || '').toUpperCase() === 'OLD_STOCK' ? 0 : 1;
+    const bIsOld = (b.stock_group || '').toUpperCase() === 'OLD_STOCK' ? 0 : 1;
+    if (aIsOld !== bIsOld) return aIsOld - bIsOld;
+    return String(a.acquisition_date || '9999').localeCompare(String(b.acquisition_date || '9999'));
+  });
+
+  // Allocate across remaining capacity in FIFO order if live order, or use primary lot cost for historical records
+  const lotSlices = [];
+  if (!isHist && remainingCapByLotId) {
+    let need = qty;
+    for (const lot of sortedLots) {
+      if (need <= 0) break;
+      const k = String(lot.id);
+      const cap = remainingCapByLotId.get(k) || 0;
+      const take = Math.min(cap, need);
+      if (take > 0) {
+        remainingCapByLotId.set(k, cap - take);
+        need -= take;
+        lotSlices.push({
+          lot,
+          lotId: k,
+          qty: take,
+          unitCost: getNumericUnitCostOrNull(lot),
+          costBasis: sortedLots.length > 1 ? 'fifo' : 'single_lot'
+        });
+      }
+    }
+    if (need > 0) {
+      const fallbackLot = sortedLots[0];
+      lotSlices.push({
+        lot: fallbackLot,
+        lotId: String(fallbackLot.id),
+        qty: need,
+        unitCost: getNumericUnitCostOrNull(fallbackLot),
+        costBasis: sortedLots.length > 1 ? 'fifo' : 'single_lot'
+      });
+    }
+  } else {
+    const primaryLot = sortedLots[0];
+    lotSlices.push({
+      lot: primaryLot,
+      lotId: String(primaryLot.id),
+      qty,
+      unitCost: getNumericUnitCostOrNull(primaryLot),
+      costBasis: sortedLots.length > 1 ? 'fifo' : 'single_lot'
+    });
+  }
+
+  const allKnown = lotSlices.every(s => s.unitCost !== null);
+  const lineCogs = allKnown ? lotSlices.reduce((s, sl) => s + sl.qty * sl.unitCost, 0) : null;
+  const knownPartial = lotSlices.reduce((s, sl) => s + (sl.unitCost !== null ? sl.qty * sl.unitCost : 0), 0);
+  const primary = lotSlices[0];
+  const hasMixedGroups = eligibleLots.length > 1 && new Set(eligibleLots.map(l => `${l.stock_group}:${l.unit_purchase_cost_da}`)).size > 1;
+
+  return {
+    lot: primary.lot,
+    lotSlices,
+    matchedMethod: matchMethod,
+    attributionStatus: allKnown ? (hasMixedGroups ? 'fifo_mixed_lots' : 'matched') : 'missing_cost',
+    costBasis: primary.costBasis,
+    unitCost: primary.unitCost,
+    lineCogs,
+    knownPartial,
+    reviewReason: allKnown ? null : `Lot "${primary.lot?.title || pi.title}" has NULL purchase cost`
+  };
+}
+
 function computePaidOrderDetails(order, normTitleMap) {
-  const meta = state.orderMeta ? state.orderMeta.find(m => String(m.order_id) === String(order.id)) : null;
+  if (_finCache && _finCache.paidOrderById && _finCache.paidOrderById.has(String(order?.id))) {
+    return _finCache.paidOrderById.get(String(order.id));
+  }
+  const lookups = buildAccountingLookupMaps();
+  const meta = lookups.metaByOrderId.get(String(order.id)) || null;
   const isHist = !!(order.is_historical || Number(order.id) <= 170);
   const status = meta ? (meta.fulfillment_status || 'pending') : (isHist ? 'delivered' : (order.status || 'pending'));
   const paymentStatus = meta ? (meta.payment_status || 'unpaid') : (isHist ? 'paid' : (order.payment_status || 'unpaid'));
   const pricing = resolveEffectiveOrderPricing(order, meta);
   const rawItems = parseOrderItemsSafe(order);
   const parsedItems = rawItems.map(parseOrderItem);
+  const orderDateStr = order?.created_at ? String(order.created_at).slice(0, 10) : '';
+
+  const orderAllocs = (lookups.allocsByOrderId.get(String(order.id)) || []).map(a => ({
+    ...a,
+    _consumedRemaining: Number(a.quantity) || 0
+  }));
 
   let knownCogsSum = 0;
   let allCostsKnown = parsedItems.length > 0;
@@ -2327,25 +2921,27 @@ function computePaidOrderDetails(order, normTitleMap) {
     unknownTitles.push(`Order #${order.id} (unitemized)`);
   }
 
-  parsedItems.forEach(pi => {
-    const lots = resolveCandidateLotsForTitle(pi.title, isHist, normTitleMap);
-    const primaryLot = lots[0] || null;
-    const unitCost = (primaryLot && primaryLot.unit_purchase_cost_da !== null && primaryLot.unit_purchase_cost_da !== undefined && primaryLot.unit_purchase_cost_da !== '' && !isNaN(primaryLot.unit_purchase_cost_da))
-      ? Number(primaryLot.unit_purchase_cost_da)
-      : null;
-
-    if (unitCost === null) {
+  parsedItems.forEach((pi, idx) => {
+    const quickMatch = findInventoryItem(pi.title);
+    const refPrice = resolveOrderItemHistoricalRefPrice(rawItems[idx], quickMatch, order, meta);
+    const attr = attributeOrderItemLot(pi, order, isHist, orderDateStr, refPrice, lookups, null, orderAllocs);
+    if (attr.lineCogs === null) {
       allCostsKnown = false;
       unknownTitles.push(pi.title || 'Unknown Title');
     } else {
-      knownCogsSum += (pi.qty * unitCost);
+      knownCogsSum += attr.lineCogs;
     }
-
     itemBreakdowns.push({
       title: pi.title,
       qty: pi.qty,
-      unitCost,
-      lineCogs: unitCost !== null ? (pi.qty * unitCost) : null
+      unitCost: attr.unitCost,
+      lineCogs: attr.lineCogs,
+      lotId: attr.lot ? String(attr.lot.id) : null,
+      lotTitle: attr.lot ? attr.lot.title : null,
+      stockGroup: attr.lot ? (isAccessoryItem(attr.lot) ? 'ACCESSORIES' : (attr.lot.stock_group || 'OLD_STOCK')) : null,
+      attributionStatus: attr.attributionStatus,
+      costBasis: attr.costBasis,
+      reviewReason: attr.reviewReason
     });
   });
 
@@ -2372,8 +2968,8 @@ function computePaidOrderDetails(order, normTitleMap) {
   };
 }
 
-function computeLiveOrderInventoryEffects(providedNormTitleMap) {
-  const normTitleMap = providedNormTitleMap || buildInventoryNormTitleMap(state.inventory);
+function computeLiveOrderInventoryEffects(providedLookups) {
+  const lookups = providedLookups || buildAccountingLookupMaps();
   const liveSoldByLotId = new Map();
   const matchedOrdersByLotId = new Map();
   const remainingCapacityByLotId = new Map();
@@ -2388,18 +2984,11 @@ function computeLiveOrderInventoryEffects(providedNormTitleMap) {
     remainingCapacityByLotId.set(String(inv.id), cap);
   });
 
-  // Subtract good-condition / restocked customer returns on live orders
-  const returnedQtyByOrderTitle = new Map();
-  (state.orderReturns || []).forEach(ret => {
-    if (ret && ret.condition !== 'damaged' && ret.restocked_to_inventory !== false) {
-      const k = `${String(ret.order_id)}::${normalizeText(ret.title)}`;
-      returnedQtyByOrderTitle.set(k, (returnedQtyByOrderTitle.get(k) || 0) + (Number(ret.quantity) || 0));
-    }
-  });
-
+  const returnedQtyByOrderTitle = new Map(lookups.returnsByOrderIdTitle);
   const sortedOrders = [...(state.orders || [])].sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));
+
   sortedOrders.forEach(order => {
-    const meta = state.orderMeta ? state.orderMeta.find(m => String(m.order_id) === String(order.id)) : null;
+    const meta = lookups.metaByOrderId.get(String(order.id)) || null;
     const isHist = !!(order.is_historical || Number(order.id) <= 170);
     const fulfillmentStatus = meta ? (meta.fulfillment_status || 'pending') : (isHist ? 'delivered' : (order.status || 'pending'));
     const paymentStatus = meta ? (meta.payment_status || 'unpaid') : (isHist ? 'paid' : (order.payment_status || 'unpaid'));
@@ -2409,11 +2998,13 @@ function computeLiveOrderInventoryEffects(providedNormTitleMap) {
     const isConfirmedLiveSale = !isHist && (paymentStatus === 'paid' || fulfillmentStatus === 'delivered');
     const rawItems = parseOrderItemsSafe(order);
     const parsedItems = rawItems.map(parseOrderItem);
+    const orderDateStr = order?.created_at ? String(order.created_at).slice(0, 10) : '';
+    const orderAllocs = (lookups.allocsByOrderId.get(String(order.id)) || []).map(a => ({
+      ...a,
+      _consumedRemaining: Number(a.quantity) || 0
+    }));
 
-    parsedItems.forEach(pi => {
-      const candidateLots = resolveCandidateLotsForTitle(pi.title, isHist, normTitleMap).filter(l => !isPackagingPaperItem(l));
-      if (candidateLots.length === 0) return;
-
+    parsedItems.forEach((pi, idx) => {
       const returnKey = `${String(order.id)}::${normalizeText(pi.title)}`;
       const availableReturnDeduction = returnedQtyByOrderTitle.get(returnKey) || 0;
       const deductedReturn = Math.min(pi.qty, availableReturnDeduction);
@@ -2422,8 +3013,21 @@ function computeLiveOrderInventoryEffects(providedNormTitleMap) {
       }
       const netQty = Math.max(0, pi.qty - deductedReturn);
 
-      // Record order provenance against the FIFO primary lot (even for unpaid live/historical views)
-      const provenanceLotId = String(candidateLots[0].id);
+      const quickLot = findInventoryItem(pi.title);
+      const refPrice = resolveOrderItemHistoricalRefPrice(rawItems[idx], quickLot, order, meta);
+      const attr = attributeOrderItemLot(
+        { ...pi, qty: Math.max(1, netQty) },
+        order,
+        isHist,
+        orderDateStr,
+        refPrice,
+        lookups,
+        isConfirmedLiveSale ? remainingCapacityByLotId : null,
+        orderAllocs
+      );
+      if (!attr.lot) return;
+
+      const provenanceLotId = String(attr.lot.id);
       if (!matchedOrdersByLotId.has(provenanceLotId)) matchedOrdersByLotId.set(provenanceLotId, []);
       matchedOrdersByLotId.get(provenanceLotId).push({
         orderId: order.id,
@@ -2434,37 +3038,27 @@ function computeLiveOrderInventoryEffects(providedNormTitleMap) {
         isHist,
         fulfillmentStatus,
         paymentStatus,
-        isConfirmedLiveSale
+        isConfirmedLiveSale,
+        costBasis: attr.costBasis
       });
 
       if (!isConfirmedLiveSale || netQty <= 0) return;
 
-      // FIFO allocate confirmed live sale quantity across eligible lots without modifying quantity_received
-      let remainingNeed = netQty;
-      for (const lot of candidateLots) {
-        if (remainingNeed <= 0) break;
-        const lotKey = String(lot.id);
-        const cap = remainingCapacityByLotId.get(lotKey) || 0;
-        const take = Math.min(cap, remainingNeed);
-        if (take > 0) {
-          liveSoldByLotId.set(lotKey, (liveSoldByLotId.get(lotKey) || 0) + take);
-          remainingCapacityByLotId.set(lotKey, cap - take);
-          remainingNeed -= take;
+      (attr.lotSlices || []).forEach(sl => {
+        if (sl.lot && sl.qty > 0) {
+          const lk = String(sl.lot.id);
+          liveSoldByLotId.set(lk, (liveSoldByLotId.get(lk) || 0) + sl.qty);
         }
-      }
-      if (remainingNeed > 0) {
-        const fallbackKey = String(candidateLots[0].id);
-        liveSoldByLotId.set(fallbackKey, (liveSoldByLotId.get(fallbackKey) || 0) + remainingNeed);
-      }
+      });
     });
   });
 
   return { liveSoldByLotId, matchedOrdersByLotId };
 }
 
-function applyLiveOrdersToInventory() {
+function applyLiveOrdersToInventoryCore(providedLookups) {
   if (!state.inventory) return;
-  const normTitleMap = buildInventoryNormTitleMap(state.inventory);
+  const lookups = providedLookups || buildAccountingLookupMaps();
   state.inventory.forEach(inv => {
     if ((inv.selling_price_da === null || inv.selling_price_da === undefined) && inv.title && (inv.title.includes('مثنوي') || inv.title.includes('المثنوي'))) {
       inv.selling_price_da = 10000;
@@ -2472,10 +3066,10 @@ function applyLiveOrdersToInventory() {
     ensureInventoryDbBaseline(inv);
   });
 
-  const { liveSoldByLotId, matchedOrdersByLotId } = computeLiveOrderInventoryEffects(normTitleMap);
+  const { liveSoldByLotId, matchedOrdersByLotId } = computeLiveOrderInventoryEffects(lookups);
   state._lotMatchedOrders = matchedOrdersByLotId;
 
-  // Preserve original quantity_received intact; combine pre-live accessory/offline baseline + confirmed live FIFO demand without double deduction
+  // Preserve original quantity_received intact; combine pre-live accessory/offline baseline + confirmed live demand without double deduction
   state.inventory.forEach(inv => {
     const dbRawSold = Number(inv._dbRawSold) || 0;
     const confirmedLiveSold = liveSoldByLotId.get(String(inv.id)) || 0;
@@ -2487,6 +3081,11 @@ function applyLiveOrdersToInventory() {
     const computedSold = Math.max(dbRawSold, baselinePreLiveSold + confirmedLiveSold);
     inv.quantity_sold = maxCap > 0 ? Math.min(maxCap, computedSold) : computedSold;
   });
+}
+function applyLiveOrdersToInventory(providedLookups) {
+  _finCache = null;
+  _invSearchIndex = null;
+  return applyLiveOrdersToInventoryCore(providedLookups);
 }
 window.applyLiveOrdersToInventory = applyLiveOrdersToInventory;
 
@@ -2969,29 +3568,47 @@ function resolveOrderItemHistoricalRefPrice(rawItem, matchedLot, order, meta) {
 }
 
 function calculateFinancialMetrics() {
-  applyLiveOrdersToInventory();
+  if (_finCache) return _finCache;
 
-  // 1. Build lookup maps for inventory by normalized title (NEVER fabricate missing unit costs)
-  const normTitleMap = buildInventoryNormTitleMap(state.inventory);
+  const lookups = buildAccountingLookupMaps();
+  applyLiveOrdersToInventoryCore(lookups);
 
-  // 2. Aggregate PAID confirmed sales strictly (unpaid orders & delivery fees excluded from revenue/profit!)
+  const { searchIdx, metaByOrderId, allocsByOrderId } = lookups;
+
+  // Capacity tracker for chronological live FIFO attribution (uses original capacity untouched)
+  const remainingCapByLotId = new Map();
+  (state.inventory || []).forEach(inv => {
+    const dmgLossPromoRet = (Number(inv.quantity_damaged) || 0)
+      + (Number(inv.quantity_lost) || 0)
+      + (Number(inv.quantity_promotional) || 0)
+      + (Number(inv.quantity_returned_to_supplier) || 0);
+    const countAdj = Number(inv.quantity_count_adjustment) || 0;
+    const cap = Math.max(0, (Number(inv.quantity_received) || 0) + countAdj - dmgLossPromoRet);
+    remainingCapByLotId.set(String(inv.id), cap);
+  });
+
+  // Sort orders chronologically ascending so FIFO and monthly summaries are deterministic
+  const sortedOrders = [...(state.orders || [])].sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));
+
   let totalGrossOrderValue = 0;
   let totalShippingCollected = 0;
   let totalPackagingFees = 0;
   let totalOrderPackagingCosts = 0;
-  let totalSalesRevenue = 0; // Book & Merchandise PAID revenue strictly net of delivery fees
+  let totalSalesRevenue = 0;
   let historicalOrdersRevenue = 0;
   let liveOrdersRevenue = 0;
-  let totalCashInflowsFromSales = 0; // Paid live orders book revenue (delivery excluded!)
+  let totalCashInflowsFromSales = 0;
   let unpaidOrdersCount = 0;
   let unpaidLiveCount = 0;
   let unpaidBookRevenue = 0;
   let unpaidDeliveryFees = 0;
   let unpaidGrossOrderValue = 0;
+
   const salesByTitle = new Map();
   const unpaidQtyByTitleKey = new Map();
 
-  const paidOrders = [];
+  const paidOrdersAsc = [];
+  const paidOrderById = new Map();
   let paidGrossCustomerPaid = 0;
   let paidDeliveryFeesExcluded = 0;
   let paidActualShippingCostsRecorded = 0;
@@ -3010,129 +3627,16 @@ function calculateFinancialMetrics() {
   let paidLiveKnownCostCount = 0;
   let paidLiveUnknownCostCount = 0;
 
-  state.orders.forEach(order => {
-    const meta = state.orderMeta ? state.orderMeta.find(m => String(m.order_id) === String(order.id)) : null;
-    const isHist = !!(order.is_historical || Number(order.id) <= 170);
-    const fulfillmentStatus = meta ? (meta.fulfillment_status || 'pending') : (isHist ? 'delivered' : (order.status || 'pending'));
-    const paymentStatus = meta ? (meta.payment_status || 'unpaid') : (isHist ? 'paid' : (order.payment_status || 'unpaid'));
-    const isPaid = paymentStatus === 'paid';
-
-    if (fulfillmentStatus === 'cancelled' || fulfillmentStatus === 'rejected') return;
-
-    const pricing = resolveEffectiveOrderPricing(order, meta);
-    const { orderTotal, shippingFee, actualShippingCost, packagingCost, packagingFeeCharged, bookRevenue } = pricing;
-
-    if (!isPaid) {
-      // Track unpaid live/pending orders separately; NEVER count them as earned revenue or earned profit
-      unpaidOrdersCount++;
-      if (!isHist) unpaidLiveCount++;
-      unpaidBookRevenue += bookRevenue;
-      unpaidDeliveryFees += shippingFee;
-      unpaidGrossOrderValue += orderTotal;
-      parseOrderItemsSafe(order).forEach(rawItem => {
-        const pi = parseOrderItem(rawItem);
-        const nk = normalizeText(pi.title);
-        if (nk) unpaidQtyByTitleKey.set(nk, (unpaidQtyByTitleKey.get(nk) || 0) + (pi.qty || 1));
-      });
-      return;
-    }
-
-    totalGrossOrderValue += orderTotal;
-    totalShippingCollected += shippingFee;
-    totalPackagingFees += packagingFeeCharged;
-    totalOrderPackagingCosts += packagingCost;
-    totalSalesRevenue += bookRevenue;
-
-    if (isHist) {
-      historicalOrdersRevenue += bookRevenue;
-    } else {
-      liveOrdersRevenue += bookRevenue;
-      totalCashInflowsFromSales += bookRevenue;
-    }
-
-    const paidDetail = computePaidOrderDetails(order, normTitleMap);
-    paidOrders.push(paidDetail);
-    paidGrossCustomerPaid += orderTotal;
-    paidDeliveryFeesExcluded += shippingFee;
-    paidActualShippingCostsRecorded += actualShippingCost;
-    paidBookRevenue += bookRevenue;
-    paidKnownBookCogs += paidDetail.knownCogsPartial;
-    paidPackagingCosts += packagingCost;
-
-    if (isHist) paidHistoricalCount++;
-    else {
-      paidLiveCount++;
-      paidLiveBookRevenue += bookRevenue;
-    }
-
-    if (paidDetail.allCostsKnown) {
-      paidKnownCostCount++;
-      paidConfirmedOrdersBookRevenue += bookRevenue;
-      paidConfirmedOrdersCogs += paidDetail.cogs;
-      paidConfirmedOrdersPackagingCosts += packagingCost;
-      if (!isHist) {
-        paidLiveKnownCostCount++;
-        paidLiveKnownNetProfit += paidDetail.netProfit;
-      }
-    } else {
-      paidUnknownCostCount++;
-      if (!isHist) paidLiveUnknownCostCount++;
-    }
-
-    let itemsList = parseOrderItemsSafe(order);
-    if (itemsList.length === 0 && bookRevenue > 0) {
-      itemsList = [`Order #${order.id || 'N/A'}`];
-    }
-
-    let totalItemsInOrder = 0;
-    let totalCatalogWeighted = 0;
-    const parsedItems = [];
-    const merchandisePool = Math.max(0, bookRevenue - packagingFeeCharged);
-
-    itemsList.forEach(rawItem => {
-      const pi = parseOrderItem(rawItem);
-      const matched = findInventoryItem(pi.title);
-      const explicitPrice = resolveOrderItemHistoricalRefPrice(rawItem, matched, order, meta);
-      totalItemsInOrder += pi.qty;
-      totalCatalogWeighted += (explicitPrice * pi.qty);
-      parsedItems.push({ title: pi.title || `Order #${order.id || 'N/A'}`, qty: pi.qty, unitRefPrice: explicitPrice, isHist, orderId: order.id });
-    });
-
-    parsedItems.forEach(pi => {
-      const itemRev = totalCatalogWeighted > 0
-        ? (merchandisePool * ((pi.unitRefPrice * pi.qty) / totalCatalogWeighted))
-        : (totalItemsInOrder > 0 ? (merchandisePool * (pi.qty / totalItemsInOrder)) : 0);
-
-      const normKey = normalizeText(pi.title);
-      if (!salesByTitle.has(normKey)) {
-        salesByTitle.set(normKey, {
-          rawTitle: pi.title,
-          quantitySold: 0,
-          liveSoldQty: 0,
-          histSoldQty: 0,
-          revenue: 0,
-          hasLiveSales: false,
-          paidOrdersList: []
-        });
-      }
-      const entry = salesByTitle.get(normKey);
-      entry.quantitySold += pi.qty;
-      if (pi.isHist) entry.histSoldQty += pi.qty;
-      else entry.liveSoldQty += pi.qty;
-      entry.revenue += itemRev;
-      entry.paidOrdersList.push({ orderId: pi.orderId, qty: pi.qty, revenue: itemRev, isHist: pi.isHist });
-      if (!pi.isHist) entry.hasLiveSales = true;
-    });
-  });
-
-  // 3. True FIFO Stock Cost & Profit Engine (NULL purchase cost stays NULL/unknown; NEVER treated as 0)
+  // Group-level metrics aggregated strictly from the SAME attributed line items
   let confirmedCogsOld = 0;
   let confirmedProfitOld = 0;
+  let costedRevenueOld = 0;
   let revenueOld = 0;
   let soldQtyOld = 0;
 
   let confirmedCogsNew = 0;
   let confirmedProfitNew = 0;
+  let costedRevenueNew = 0;
   let revenueNew = 0;
   let soldQtyNew = 0;
 
@@ -3146,107 +3650,402 @@ function calculateFinancialMetrics() {
   let unknownCostSalesCount = 0;
   let unknownCostRevenueTotal = 0;
 
-  const titleProfits = [];
+  // Title-level & Period-level & Audit aggregators
+  const titleAggMap = new Map();
   const handledLotIds = new Set();
+  const monthlyMap = new Map();
+  const yearlyMap = new Map();
+  const needsReviewItems = [];
+  let cancelledOrdersCount = 0;
+  let allocatedLinesCount = 0;
 
-  salesByTitle.forEach((saleData, normKey) => {
-    const eligibleLots = resolveCandidateLotsForTitle(saleData.rawTitle, !saleData.hasLiveSales, normTitleMap);
-    eligibleLots.forEach(l => handledLotIds.add(l.id));
+  const ensurePeriod = (map, key, label) => {
+    if (!map.has(key)) {
+      map.set(key, {
+        key,
+        label,
+        paidOrdersCount: 0,
+        costedOrdersCount: 0,
+        reviewOrdersCount: 0,
+        grossPaidDa: 0,
+        deliveryExclDa: 0,
+        storeRevenueDa: 0,
+        confirmedCogsDa: 0,
+        orderPkgCostsDa: 0,
+        costedGrossProfitDa: 0,
+        operatingExpensesDa: 0
+      });
+    }
+    return map.get(key);
+  };
 
-    const unitPrice = saleData.quantitySold > 0 ? (saleData.revenue / saleData.quantitySold) : 0;
-    let titleCogs = null;
-    let isTitleConfirmed = false;
-    let primaryStockGroup = 'HISTORICAL';
-    let primaryAuthor = '-';
-    let displayPrice = unitPrice;
-    let displayCost = null;
+  sortedOrders.forEach(order => {
+    const meta = metaByOrderId.get(String(order.id)) || null;
+    const isHist = !!(order.is_historical || Number(order.id) <= 170);
+    const fulfillmentStatus = meta ? (meta.fulfillment_status || 'pending') : (isHist ? 'delivered' : (order.status || 'pending'));
+    const paymentStatus = meta ? (meta.payment_status || 'unpaid') : (isHist ? 'paid' : (order.payment_status || 'unpaid'));
+    const isPaid = paymentStatus === 'paid';
 
-    if (eligibleLots.length > 0) {
-      const primaryLot = eligibleLots[0];
-      primaryAuthor = primaryLot.author || '-';
-      const isPkgLot = isPackagingPaperItem(primaryLot);
-      const isAccLot = !isPkgLot && isAccessoryItem(primaryLot);
-      primaryStockGroup = isPkgLot ? 'PACKAGING' : (isAccLot ? 'ACCESSORIES' : (primaryLot.stock_group || 'OLD_STOCK'));
-      displayPrice = Number(primaryLot.selling_price_da) || unitPrice;
-
-      if (primaryLot.unit_purchase_cost_da !== null && primaryLot.unit_purchase_cost_da !== undefined && primaryLot.unit_purchase_cost_da !== '' && !isNaN(primaryLot.unit_purchase_cost_da)) {
-        displayCost = Number(primaryLot.unit_purchase_cost_da);
-        titleCogs = saleData.quantitySold * displayCost;
-        isTitleConfirmed = true;
-
-        totalConfirmedCogs += titleCogs;
-        confirmedSalesRevenue += saleData.revenue;
-        const profit = saleData.revenue - titleCogs;
-        totalConfirmedProfit += profit;
-
-        if (isAccLot) {
-          soldQtyAcc += saleData.quantitySold;
-          revenueAcc += saleData.revenue;
-          confirmedCogsAcc += titleCogs;
-        } else if (!isPkgLot && isNewBatchLot(primaryLot)) {
-          soldQtyNew += saleData.quantitySold;
-          revenueNew += saleData.revenue;
-          confirmedCogsNew += titleCogs;
-          confirmedProfitNew += profit;
-        } else if (!isPkgLot) {
-          soldQtyOld += saleData.quantitySold;
-          revenueOld += saleData.revenue;
-          confirmedCogsOld += titleCogs;
-          confirmedProfitOld += profit;
-        }
-      } else {
-        displayCost = null;
-        titleCogs = null;
-        isTitleConfirmed = false;
-        unknownCostSalesCount++;
-        unknownCostRevenueTotal += saleData.revenue;
-        if (!isAccLot && !isPkgLot) {
-          soldQtyOld += saleData.quantitySold;
-          revenueOld += saleData.revenue;
-        }
-      }
-    } else {
-      displayCost = null;
-      titleCogs = null;
-      isTitleConfirmed = false;
-      unknownCostSalesCount++;
-      unknownCostRevenueTotal += saleData.revenue;
-      soldQtyOld += saleData.quantitySold;
-      revenueOld += saleData.revenue;
+    if (fulfillmentStatus === 'cancelled' || fulfillmentStatus === 'rejected') {
+      cancelledOrdersCount++;
+      return;
     }
 
-    const titleProfit = isTitleConfirmed ? (saleData.revenue - titleCogs) : null;
-    const marginPct = (titleProfit !== null && saleData.revenue > 0) ? Math.round((titleProfit / saleData.revenue) * 100) : null;
-    const targetUnitMargin = displayCost !== null ? (displayPrice - displayCost) : null;
+    const pricing = resolveEffectiveOrderPricing(order, meta);
+    const { orderTotal, shippingFee, actualShippingCost, packagingCost, packagingFeeCharged, bookRevenue } = pricing;
 
+    if (!isPaid) {
+      unpaidOrdersCount++;
+      if (!isHist) unpaidLiveCount++;
+      unpaidBookRevenue += bookRevenue;
+      unpaidDeliveryFees += shippingFee;
+      unpaidGrossOrderValue += orderTotal;
+      parseOrderItemsSafe(order).forEach(rawItem => {
+        const pi = parseOrderItem(rawItem);
+        const { canonicalNormTitle } = resolveMatchedLotsWithReason(pi.title, { excludePackaging: true });
+        const nk = canonicalNormTitle || normalizeText(pi.title);
+        if (nk) unpaidQtyByTitleKey.set(nk, (unpaidQtyByTitleKey.get(nk) || 0) + (pi.qty || 1));
+      });
+      return;
+    }
+
+    totalGrossOrderValue += orderTotal;
+    totalShippingCollected += shippingFee;
+    totalPackagingFees += packagingFeeCharged;
+    totalOrderPackagingCosts += packagingCost;
+    totalSalesRevenue += bookRevenue;
+
+    if (isHist) historicalOrdersRevenue += bookRevenue;
+    else {
+      liveOrdersRevenue += bookRevenue;
+      totalCashInflowsFromSales += bookRevenue;
+    }
+
+    const orderDateStr = order?.created_at ? String(order.created_at).slice(0, 10) : '';
+    const monthKey = orderDateStr.length >= 7 ? orderDateStr.slice(0, 7) : 'Unknown';
+    const yearKey = orderDateStr.length >= 4 ? orderDateStr.slice(0, 4) : 'Unknown';
+    const mPeriod = ensurePeriod(monthlyMap, monthKey, monthKey);
+    const yPeriod = ensurePeriod(yearlyMap, yearKey, yearKey);
+
+    let itemsList = parseOrderItemsSafe(order);
+    const isUnitemized = (itemsList.length === 0 && bookRevenue > 0);
+    if (isUnitemized) {
+      itemsList = [`Order #${order.id || 'N/A'}`];
+    }
+
+    const merchandisePool = Math.max(0, bookRevenue - packagingFeeCharged);
+    let totalItemsInOrder = 0;
+    let totalCatalogWeighted = 0;
+    const preParsed = [];
+
+    itemsList.forEach(rawItem => {
+      const pi = parseOrderItem(rawItem);
+      const quickLot = findInventoryItem(pi.title);
+      const explicitPrice = resolveOrderItemHistoricalRefPrice(rawItem, quickLot, order, meta);
+      totalItemsInOrder += pi.qty;
+      totalCatalogWeighted += (explicitPrice * pi.qty);
+      preParsed.push({ rawItem, pi, explicitPrice });
+    });
+
+    const orderAllocs = (allocsByOrderId.get(String(order.id)) || []).map(a => ({
+      ...a,
+      _consumedRemaining: Number(a.quantity) || 0
+    }));
+
+    let orderKnownCogsSum = 0;
+    let orderAllCostsKnown = !isUnitemized && preParsed.length > 0;
+    const orderUnknownTitles = [];
+    const itemBreakdowns = [];
+
+    if (isUnitemized) {
+      orderAllCostsKnown = false;
+      orderUnknownTitles.push(`Order #${order.id} (unitemized)`);
+      needsReviewItems.push({
+        orderId: order.id,
+        orderDate: orderDateStr,
+        isHist,
+        title: `Order #${order.id} (unitemized)`,
+        qty: 1,
+        revenueDa: Math.round(bookRevenue),
+        status: 'unitemized',
+        reason: 'Order has revenue but no itemized books listed'
+      });
+    }
+
+    preParsed.forEach(({ pi, explicitPrice }) => {
+      const itemRev = totalCatalogWeighted > 0
+        ? (merchandisePool * ((explicitPrice * pi.qty) / totalCatalogWeighted))
+        : (totalItemsInOrder > 0 ? (merchandisePool * (pi.qty / totalItemsInOrder)) : 0);
+
+      const attr = attributeOrderItemLot(
+        pi,
+        order,
+        isHist,
+        orderDateStr,
+        explicitPrice,
+        lookups,
+        !isHist ? remainingCapByLotId : null,
+        orderAllocs
+      );
+
+      if (attr.attributionStatus === 'allocated') allocatedLinesCount++;
+
+      // Register matched lot(s) and canonical title key for salesByTitle (so Accessories & Books unify cleanly)
+      const canonicalKey = attr.lot ? normalizeText(attr.lot.title) : normalizeText(pi.title);
+      if (!salesByTitle.has(canonicalKey)) {
+        salesByTitle.set(canonicalKey, {
+          rawTitle: attr.lot ? attr.lot.title : pi.title,
+          quantitySold: 0,
+          liveSoldQty: 0,
+          histSoldQty: 0,
+          revenue: 0,
+          hasLiveSales: false,
+          paidOrdersList: []
+        });
+      }
+      const saleEntry = salesByTitle.get(canonicalKey);
+      saleEntry.quantitySold += pi.qty;
+      if (isHist) saleEntry.histSoldQty += pi.qty;
+      else saleEntry.liveSoldQty += pi.qty;
+      saleEntry.revenue += itemRev;
+      saleEntry.paidOrdersList.push({ orderId: order.id, qty: pi.qty, revenue: itemRev, isHist });
+      if (!isHist) saleEntry.hasLiveSales = true;
+
+      if (attr.lineCogs === null) {
+        orderAllCostsKnown = false;
+        orderUnknownTitles.push(pi.title || 'Unknown Title');
+        unknownCostSalesCount++;
+        unknownCostRevenueTotal += itemRev;
+
+        const isAccFallback = !!getWebsiteAccessoryMatch(pi.title) || pi.type === 'accessory';
+        if (!isAccFallback) {
+          soldQtyOld += pi.qty;
+          revenueOld += itemRev;
+        }
+        if (!isUnitemized) {
+          needsReviewItems.push({
+            orderId: order.id,
+            orderDate: orderDateStr,
+            isHist,
+            title: pi.title || 'Unknown Title',
+            qty: pi.qty,
+            revenueDa: Math.round(itemRev),
+            status: attr.attributionStatus,
+            reason: attr.reviewReason || 'Missing cost or inventory match'
+          });
+        }
+      } else {
+        orderKnownCogsSum += attr.lineCogs;
+        totalConfirmedCogs += attr.lineCogs;
+        confirmedSalesRevenue += itemRev;
+        totalConfirmedProfit += (itemRev - attr.lineCogs);
+
+        // Allocate line revenue and COGS proportionally per exact slice lot (handles mixed OLD_STOCK + NEW_STOCK splits accurately!)
+        const totalSliceQty = (attr.lotSlices || []).reduce((s, sl) => s + (sl.qty || 0), 0) || pi.qty;
+        (attr.lotSlices || []).forEach(sl => {
+          const lot = sl.lot;
+          if (lot) handledLotIds.add(lot.id);
+          const sliceRev = totalSliceQty > 0 ? (itemRev * (sl.qty / totalSliceQty)) : itemRev;
+          const sliceCogs = sl.qty * sl.unitCost;
+          const sliceProfit = sliceRev - sliceCogs;
+          const isPkgLot = lot && isPackagingPaperItem(lot);
+          const isAccLot = lot && !isPkgLot && isAccessoryItem(lot);
+
+          if (isAccLot) {
+            soldQtyAcc += sl.qty;
+            revenueAcc += sliceRev;
+            confirmedCogsAcc += sliceCogs;
+          } else if (!isPkgLot && isNewBatchLot(lot)) {
+            soldQtyNew += sl.qty;
+            revenueNew += sliceRev;
+            costedRevenueNew += sliceRev;
+            confirmedCogsNew += sliceCogs;
+            confirmedProfitNew += sliceProfit;
+          } else if (!isPkgLot) {
+            soldQtyOld += sl.qty;
+            revenueOld += sliceRev;
+            costedRevenueOld += sliceRev;
+            confirmedCogsOld += sliceCogs;
+            confirmedProfitOld += sliceProfit;
+          }
+        });
+      }
+
+      // Accumulate titleProfits for books cleanly from exact attributed cost per slice
+      const primaryLot = attr.lot;
+      const isAccLine = primaryLot && isAccessoryItem(primaryLot);
+      const isPkgLine = primaryLot && isPackagingPaperItem(primaryLot);
+      if (!isAccLine && !isPkgLine) {
+        const tpKey = canonicalKey || `raw::${pi.title}`;
+        if (!titleAggMap.has(tpKey)) {
+          titleAggMap.set(tpKey, {
+            title: primaryLot ? primaryLot.title : pi.title,
+            author: primaryLot ? (primaryLot.author || '-') : '-',
+            stockGroup: primaryLot ? (isNewBatchLot(primaryLot) ? 'NEW_STOCK' : (primaryLot.stock_group || 'OLD_STOCK')) : 'HISTORICAL',
+            quantitySold: 0,
+            revenue: 0,
+            confirmedCogsSum: 0,
+            costedQty: 0,
+            hasUnknownLine: false,
+            displayPrice: primaryLot ? (Number(primaryLot.selling_price_da) || explicitPrice) : explicitPrice,
+            lastUnitCost: attr.unitCost
+          });
+        }
+        const tp = titleAggMap.get(tpKey);
+        tp.quantitySold += pi.qty;
+        tp.revenue += itemRev;
+        if (attr.lineCogs !== null) {
+          tp.confirmedCogsSum += attr.lineCogs;
+          tp.costedQty += pi.qty;
+          tp.lastUnitCost = attr.unitCost;
+        } else {
+          tp.hasUnknownLine = true;
+        }
+      }
+
+      itemBreakdowns.push({
+        title: pi.title,
+        qty: pi.qty,
+        unitCost: attr.unitCost,
+        lineCogs: attr.lineCogs,
+        lineRevenue: Math.round(itemRev),
+        lotId: primaryLot ? String(primaryLot.id) : null,
+        lotTitle: primaryLot ? primaryLot.title : null,
+        stockGroup: primaryLot ? (isAccessoryItem(primaryLot) ? 'ACCESSORIES' : (primaryLot.stock_group || 'OLD_STOCK')) : null,
+        attributionStatus: attr.attributionStatus,
+        costBasis: attr.costBasis,
+        reviewReason: attr.reviewReason
+      });
+    });
+
+    const orderCogs = orderAllCostsKnown ? Math.round(orderKnownCogsSum) : null;
+    const orderNetProfit = orderAllCostsKnown ? Math.round(bookRevenue - orderKnownCogsSum - packagingCost) : null;
+
+    const paidDetail = {
+      order,
+      meta,
+      isHist,
+      status: fulfillmentStatus,
+      paymentStatus,
+      carrier: meta?.carrier || '',
+      trackingNumber: meta?.tracking_number || '',
+      paymentMethod: meta?.payment_method || '',
+      ...pricing,
+      parsedItems: preParsed.map(x => x.pi),
+      itemBreakdowns,
+      allCostsKnown: orderAllCostsKnown,
+      unknownTitles: orderUnknownTitles,
+      knownCogsPartial: Math.round(orderKnownCogsSum),
+      cogs: orderCogs,
+      netProfit: orderNetProfit
+    };
+    paidOrdersAsc.push(paidDetail);
+    paidOrderById.set(String(order.id), paidDetail);
+
+    paidGrossCustomerPaid += orderTotal;
+    paidDeliveryFeesExcluded += shippingFee;
+    paidActualShippingCostsRecorded += actualShippingCost;
+    paidBookRevenue += bookRevenue;
+    paidKnownBookCogs += Math.round(orderKnownCogsSum);
+    paidPackagingCosts += packagingCost;
+
+    mPeriod.paidOrdersCount++;
+    yPeriod.paidOrdersCount++;
+    mPeriod.grossPaidDa += orderTotal;
+    yPeriod.grossPaidDa += orderTotal;
+    mPeriod.deliveryExclDa += shippingFee;
+    yPeriod.deliveryExclDa += shippingFee;
+    mPeriod.storeRevenueDa += bookRevenue;
+    yPeriod.storeRevenueDa += bookRevenue;
+
+    if (isHist) paidHistoricalCount++;
+    else {
+      paidLiveCount++;
+      paidLiveBookRevenue += bookRevenue;
+    }
+
+    if (orderAllCostsKnown) {
+      paidKnownCostCount++;
+      paidConfirmedOrdersBookRevenue += bookRevenue;
+      paidConfirmedOrdersCogs += orderCogs;
+      paidConfirmedOrdersPackagingCosts += packagingCost;
+      mPeriod.costedOrdersCount++;
+      yPeriod.costedOrdersCount++;
+      mPeriod.confirmedCogsDa += orderCogs;
+      yPeriod.confirmedCogsDa += orderCogs;
+      mPeriod.orderPkgCostsDa += packagingCost;
+      yPeriod.orderPkgCostsDa += packagingCost;
+      mPeriod.costedGrossProfitDa += (bookRevenue - orderCogs - packagingCost);
+      yPeriod.costedGrossProfitDa += (bookRevenue - orderCogs - packagingCost);
+      if (!isHist) {
+        paidLiveKnownCostCount++;
+        paidLiveKnownNetProfit += orderNetProfit;
+      }
+    } else {
+      paidUnknownCostCount++;
+      mPeriod.reviewOrdersCount++;
+      yPeriod.reviewOrdersCount++;
+      if (!isHist) paidLiveUnknownCostCount++;
+    }
+  });
+
+  // Order newest first for Paid Orders display while preserving chronological FIFO attribution
+  const paidOrders = [...paidOrdersAsc].reverse();
+
+  // Attach operating expenses to monthly/yearly periods
+  (state.expenses || []).forEach(exp => {
+    const amt = Number(exp.amount_da) || 0;
+    const dStr = String(exp.expense_date || exp.date || exp.created_at || '').slice(0, 10);
+    const mKey = dStr.length >= 7 ? dStr.slice(0, 7) : 'Unknown';
+    const yKey = dStr.length >= 4 ? dStr.slice(0, 4) : 'Unknown';
+    if (monthlyMap.has(mKey) || amt > 0) ensurePeriod(monthlyMap, mKey, mKey).operatingExpensesDa += amt;
+    if (yearlyMap.has(yKey) || amt > 0) ensurePeriod(yearlyMap, yKey, yKey).operatingExpensesDa += amt;
+  });
+
+  const periodSummaries = {
+    monthly: Array.from(monthlyMap.values()).sort((a, b) => String(b.key).localeCompare(String(a.key))),
+    yearly: Array.from(yearlyMap.values()).sort((a, b) => String(b.key).localeCompare(String(a.key)))
+  };
+
+  // Build titleProfits for books cleanly
+  const titleProfits = [];
+  titleAggMap.forEach((tp, normKey) => {
+    const lots = searchIdx.normMap.get(normKey) || [];
+    lots.forEach(l => handledLotIds.add(l.id));
     let onHand = 0;
-    eligibleLots.forEach(l => { onHand += getInventoryOnHandQty(l); });
+    lots.forEach(l => { onHand += getInventoryOnHandQty(l); });
+
+    const isConfirmed = !tp.hasUnknownLine && tp.costedQty > 0;
+    const avgUnitCost = tp.costedQty > 0 ? (tp.confirmedCogsSum / tp.costedQty) : tp.lastUnitCost;
+    const titleProfit = isConfirmed ? (tp.revenue - tp.confirmedCogsSum) : null;
+    const marginPct = (titleProfit !== null && tp.revenue > 0) ? Math.round((titleProfit / tp.revenue) * 100) : null;
+    const targetUnitMargin = (avgUnitCost !== null && tp.displayPrice > 0) ? (tp.displayPrice - avgUnitCost) : null;
 
     titleProfits.push({
-      title: eligibleLots.length > 0 ? eligibleLots[0].title : saleData.rawTitle,
-      author: primaryAuthor,
-      stockGroup: primaryStockGroup,
-      quantitySold: saleData.quantitySold,
+      title: tp.title,
+      author: tp.author,
+      stockGroup: tp.stockGroup,
+      quantitySold: tp.quantitySold,
       quantityOnHand: onHand,
-      unitCost: displayCost !== null ? Math.round(displayCost * 100) / 100 : null,
-      sellingPrice: Math.round(displayPrice),
+      unitCost: avgUnitCost !== null ? Math.round(avgUnitCost * 100) / 100 : null,
+      sellingPrice: Math.round(tp.displayPrice),
       targetUnitMargin: targetUnitMargin !== null ? Math.round(targetUnitMargin) : null,
-      revenue: Math.round(saleData.revenue),
-      cogs: isTitleConfirmed ? Math.round(titleCogs) : null,
+      revenue: Math.round(tp.revenue),
+      cogs: isConfirmed ? Math.round(tp.confirmedCogsSum) : null,
       grossProfit: titleProfit !== null ? Math.round(titleProfit) : null,
-      marginPct: marginPct,
-      isConfirmed: isTitleConfirmed
+      marginPct,
+      isConfirmed
     });
   });
 
-  // Include inventory items not yet matched in salesByTitle (zero duplicates)
+  // Include inventory items not yet matched in sales (zero duplicates)
   state.inventory.forEach(lot => {
     if (handledLotIds.has(lot.id)) return;
     const isPkg = isPackagingPaperItem(lot);
     const isAcc = !isPkg && isAccessoryItem(lot);
     const isNew = !isPkg && !isAcc && isNewBatchLot(lot);
     const onHand = getInventoryOnHandQty(lot);
-    const cost = (lot.unit_purchase_cost_da !== null && lot.unit_purchase_cost_da !== undefined && lot.unit_purchase_cost_da !== '' && !isNaN(lot.unit_purchase_cost_da)) ? Number(lot.unit_purchase_cost_da) : null;
+    const cost = getNumericUnitCostOrNull(lot);
     const price = Number(lot.selling_price_da) || 0;
     const targetMargin = (!isPkg && cost !== null && price > 0) ? (price - cost) : null;
     const marginPct = (!isPkg && cost !== null && price > 0) ? Math.round(((price - cost) / price) * 100) : null;
@@ -3265,16 +4064,16 @@ function calculateFinancialMetrics() {
       grossProfit: null,
       expectedRevenue: isPkg ? 0 : (onHand * price),
       expectedGrossProfit: (!isPkg && cost !== null) ? onHand * (price - cost) : null,
-      marginPct: marginPct,
+      marginPct,
       isConfirmed: !isPkg && cost !== null
     });
   });
 
-  // 4. Separate Accessories, Packaging Paper & Remaining Book Stock Valuation (Phase 2 audit-safe)
+  // Separate Accessories & Packaging Paper reports
   const accReport = computeAccessoriesFinancialReport(salesByTitle, unpaidQtyByTitleKey);
   const pkgReport = computePackagingConsumptionMetrics();
 
-  // Keep titleProfits Accessories & Packaging rows consistent with standalone accReport / pkgReport
+  // Keep titleProfits Accessories & Packaging rows strictly unified with accReport / pkgReport
   const filteredTitleProfits = titleProfits.filter(tp => tp.stockGroup !== 'ACCESSORIES' && tp.stockGroup !== 'PACKAGING');
   titleProfits.length = 0;
   titleProfits.push(...filteredTitleProfits);
@@ -3676,7 +4475,19 @@ function calculateFinancialMetrics() {
     netTrackedMovement: currentCashBalance
   };
 
-  return {
+  const auditSummary = {
+    auditedOrdersCount: sortedOrders.length,
+    cancelledOrdersCount,
+    unpaidOrdersCount,
+    paidOrdersCount: paidOrders.length,
+    costedPaidOrdersCount: paidKnownCostCount,
+    needsReviewOrdersCount: paidUnknownCostCount,
+    allocatedLinesCount,
+    needsReviewItemsCount: needsReviewItems.length,
+    needsReviewItems
+  };
+
+  _finCache = {
     totalGrossOrderValue: Math.round(totalGrossOrderValue),
     totalShippingCollected: Math.round(totalShippingCollected),
     totalTransportationExpenses: Math.round(totalTransportationExpenses),
@@ -3708,7 +4519,10 @@ function calculateFinancialMetrics() {
     netConfirmedProfit: netConfirmedProfitResult,
     isProfitReconciled,
     paidOrders,
+    paidOrderById,
     paidSummary,
+    periodSummaries,
+    auditSummary,
     stockBaseline,
     cashAudit,
     remainingInventoryValueDa: finalRemainingInventoryValue,
@@ -3729,6 +4543,7 @@ function calculateFinancialMetrics() {
       titlesCount: finalOldTitles,
       soldQty: soldQtyOld,
       revenue: Math.round(revenueOld),
+      costedRevenue: Math.round(costedRevenueOld),
       cogs: Math.round(confirmedCogsOld),
       grossProfit: Math.round(confirmedProfitOld),
       counted: finalOldCounted,
@@ -3749,6 +4564,7 @@ function calculateFinancialMetrics() {
       titlesCount: finalNewTitles,
       soldQty: soldQtyNew,
       revenue: Math.round(revenueNew),
+      costedRevenue: Math.round(costedRevenueNew),
       cogs: Math.round(confirmedCogsNew),
       grossProfit: Math.round(confirmedProfitNew),
       counted: finalNewCounted,
@@ -3769,6 +4585,7 @@ function calculateFinancialMetrics() {
       titlesCount: combinedBooksTitles,
       soldQty: soldQtyOld + soldQtyNew,
       revenue: Math.round(revenueOld + revenueNew),
+      costedRevenue: Math.round(costedRevenueOld + costedRevenueNew),
       cogs: Math.round(confirmedCogsOld + confirmedCogsNew),
       grossProfit: Math.round(confirmedProfitOld + confirmedProfitNew),
       counted: combinedBooksUnits,
@@ -3788,7 +4605,7 @@ function calculateFinancialMetrics() {
     booksReport: {
       soldQty: soldQtyOld + soldQtyNew,
       revenue: Math.round(revenueOld + revenueNew),
-      costedRevenue: Math.round(confirmedSalesRevenue - revenueAcc),
+      costedRevenue: Math.round(costedRevenueOld + costedRevenueNew),
       cogs: Math.round(confirmedCogsOld + confirmedCogsNew),
       grossProfit: Math.round(confirmedProfitOld + confirmedProfitNew),
       remainingCostVal: Math.round(combinedBooksCost),
@@ -3814,6 +4631,8 @@ function calculateFinancialMetrics() {
     },
     titleProfits
   };
+
+  return _finCache;
 }
 
 // ============================================================================
@@ -3985,24 +4804,74 @@ function renderRecentOrders() {
   }).join('');
 }
 
+function renderPaginationBar(containerId, totalCount, shownCount, pageKey, renderFnName) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  if (totalCount <= 0) {
+    el.innerHTML = '';
+    el.style.display = 'none';
+    return;
+  }
+  el.style.display = 'flex';
+  const curLimit = (state.pageLimits && state.pageLimits[pageKey]) || 50;
+  const remaining = Math.max(0, totalCount - shownCount);
+  el.innerHTML = `
+    <span style="font-size: 0.82rem; color: var(--text-muted);">
+      Showing <strong>${shownCount}</strong> of <strong>${totalCount}</strong> rows
+    </span>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+      ${remaining > 0 ? `
+        <button type="button" class="btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="expandTablePage('${pageKey}', 50, '${renderFnName}')">
+          Show ${Math.min(50, remaining)} more
+        </button>
+        <button type="button" class="btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="expandTablePage('${pageKey}', ${totalCount}, '${renderFnName}')">
+          Show All (${totalCount})
+        </button>
+      ` : (curLimit > 60 && totalCount > 60 ? `
+        <button type="button" class="btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="resetTablePage('${pageKey}', '${renderFnName}')">
+          Show Top 50
+        </button>
+      ` : '')}
+    </div>
+  `;
+}
+
+window.expandTablePage = function(pageKey, deltaOrTotal, renderFnName) {
+  if (!state.pageLimits) state.pageLimits = {};
+  const cur = state.pageLimits[pageKey] || 50;
+  state.pageLimits[pageKey] = deltaOrTotal >= cur && deltaOrTotal > 100 ? deltaOrTotal : (cur + deltaOrTotal);
+  if (typeof window[renderFnName] === 'function') window[renderFnName]();
+};
+
+window.resetTablePage = function(pageKey, renderFnName) {
+  if (!state.pageLimits) state.pageLimits = {};
+  state.pageLimits[pageKey] = 50;
+  if (typeof window[renderFnName] === 'function') window[renderFnName]();
+};
+
 function renderOrdersTable() {
   const tbody = document.getElementById('orders-table-tbody');
   const countEl = document.getElementById('orders-total-count');
   if (!tbody) return;
 
-  let filtered = state.orders;
+  const metaMap = new Map((state.orderMeta || []).map(m => [String(m.order_id), m]));
+  let filtered = state.orders || [];
 
   if (state.ordersFilter === 'historical') {
-    filtered = filtered.filter(o => getEffectiveOrderStatus(o).isHist);
+    filtered = filtered.filter(o => !!(o.is_historical || Number(o.id) <= 170));
   } else if (state.ordersFilter === 'pending') {
     filtered = filtered.filter(o => {
-      const info = getEffectiveOrderStatus(o);
-      return !info.isHist && ['pending', 'confirmed', 'processing', 'packed'].includes(info.status);
+      const isHist = !!(o.is_historical || Number(o.id) <= 170);
+      const m = metaMap.get(String(o.id));
+      const st = m ? (m.fulfillment_status || 'pending') : (isHist ? 'delivered' : (o.status || 'pending'));
+      return !isHist && ['pending', 'confirmed', 'processing', 'packed'].includes(st);
     });
   } else if (state.ordersFilter === 'shipped') {
     filtered = filtered.filter(o => {
-      const info = getEffectiveOrderStatus(o);
-      return !info.isHist && ['shipped', 'delivered'].includes(info.status);
+      const isHist = !!(o.is_historical || Number(o.id) <= 170);
+      const m = metaMap.get(String(o.id));
+      const st = m ? (m.fulfillment_status || 'pending') : (isHist ? 'delivered' : (o.status || 'pending'));
+      return !isHist && ['shipped', 'delivered'].includes(st);
     });
   }
 
@@ -4021,18 +4890,26 @@ function renderOrdersTable() {
 
   if (filtered.length === 0) {
     tbody.innerHTML = `<tr><td colspan="8" class="empty-state"><i class="fa-solid fa-receipt"></i><p>No matching orders found.</p></td></tr>`;
+    renderPaginationBar('orders-pagination', 0, 0, 'orders', 'renderOrdersTable');
     return;
   }
 
-  tbody.innerHTML = filtered.map(o => {
-    const info = getEffectiveOrderStatus(o);
-    const totalPrice = Number(o.total_price) || 0;
-    const bookTotal = Math.max(0, totalPrice - info.shippingFee);
+  const limit = (state.pageLimits && state.pageLimits.orders) || 50;
+  const visible = filtered.slice(0, limit);
+
+  tbody.innerHTML = visible.map(o => {
+    const m = metaMap.get(String(o.id)) || null;
+    const isHist = !!(o.is_historical || Number(o.id) <= 170);
+    const status = m ? (m.fulfillment_status || 'pending') : (isHist ? 'delivered' : (o.status || 'pending'));
+    const paymentStatus = m ? (m.payment_status || 'unpaid') : (isHist ? 'paid' : (o.payment_status || 'unpaid'));
+    const pricing = resolveEffectiveOrderPricing(o, m);
+    const totalPrice = pricing.orderTotal;
+    const bookTotal = pricing.bookRevenue;
     return `
       <tr>
         <td>
           <strong>#${o.id}</strong>
-          ${!info.isHist ? '<div style="font-size: 0.72rem; color: var(--vintage-blue); font-weight: 600;">LIVE</div>' : ''}
+          ${!isHist ? '<div style="font-size: 0.72rem; color: var(--vintage-blue); font-weight: 600;">LIVE</div>' : ''}
         </td>
         <td style="white-space: nowrap; font-size: 0.85rem;">${formatDate(o.created_at)}</td>
         <td>
@@ -4049,11 +4926,11 @@ function renderOrdersTable() {
         </td>
         <td>
           <strong style="color: var(--success);">${totalPrice ? totalPrice.toLocaleString('fr-DZ') + ' DA' : '-'}</strong>
-          ${info.shippingFee > 0 ? `<div style="font-size: 0.74rem; color: var(--text-muted);">Books: ${bookTotal.toLocaleString('fr-DZ')} + Ship: ${info.shippingFee.toLocaleString('fr-DZ')}</div>` : ''}
+          ${pricing.shippingFee > 0 ? `<div style="font-size: 0.74rem; color: var(--text-muted);">Books: ${bookTotal.toLocaleString('fr-DZ')} + Ship: ${pricing.shippingFee.toLocaleString('fr-DZ')}</div>` : ''}
         </td>
         <td>
-          ${getOrderStatusBadgeHtml(info.status, info.isHist)}
-          ${!info.isHist ? `<div style="font-size: 0.74rem; color: ${info.paymentStatus === 'paid' ? 'var(--success)' : 'var(--text-muted)'}; margin-top: 3px;">${escapeHtml(info.paymentStatus.toUpperCase())}</div>` : ''}
+          ${getOrderStatusBadgeHtml(status, isHist)}
+          ${!isHist ? `<div style="font-size: 0.74rem; color: ${paymentStatus === 'paid' ? 'var(--success)' : 'var(--text-muted)'}; margin-top: 3px;">${escapeHtml(paymentStatus.toUpperCase())}</div>` : ''}
         </td>
         <td>
           <button class="btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="viewOrderDetails(${o.id})">
@@ -4063,7 +4940,10 @@ function renderOrdersTable() {
       </tr>
     `;
   }).join('');
+
+  renderPaginationBar('orders-pagination', filtered.length, visible.length, 'orders', 'renderOrdersTable');
 }
+window.renderOrdersTable = renderOrdersTable;
 
 function renderPaidOrdersSection() {
   const fin = calculateFinancialMetrics();
@@ -4146,10 +5026,14 @@ function renderPaidOrdersSection() {
 
   if (filtered.length === 0) {
     tbody.innerHTML = `<tr><td colspan="11" class="empty-state"><i class="fa-solid fa-circle-check"></i><p>No confirmed paid orders match this filter. Mark an order as Paid or Confirm Delivery in Order Details.</p></td></tr>`;
+    renderPaginationBar('paid-orders-pagination', 0, 0, 'paidOrders', 'renderPaidOrdersSection');
     return;
   }
 
-  tbody.innerHTML = filtered.map(p => {
+  const paidLimit = (state.pageLimits && state.pageLimits.paidOrders) || 50;
+  const visiblePaid = filtered.slice(0, paidLimit);
+
+  tbody.innerHTML = visiblePaid.map(p => {
     const o = p.order;
     const costHtml = p.allCostsKnown
       ? `<div><strong>${p.cogs.toLocaleString('fr-DZ')} DA</strong> COGS</div>
@@ -4191,7 +5075,10 @@ function renderPaidOrdersSection() {
       </tr>
     `;
   }).join('');
+
+  renderPaginationBar('paid-orders-pagination', filtered.length, visiblePaid.length, 'paidOrders', 'renderPaidOrdersSection');
 }
+window.renderPaidOrdersSection = renderPaidOrdersSection;
 
 function renderInventoryTable() {
   const tbody = document.getElementById('inventory-table-tbody');
@@ -4316,10 +5203,14 @@ function renderInventoryTable() {
 
   if (items.length === 0) {
     tbody.innerHTML = `<tr><td colspan="10" class="empty-state"><i class="fa-solid fa-book-open"></i><p>No inventory items found matching this filter. Use <strong>"Import Excel"</strong> or click <strong>"Add Item"</strong>.</p></td></tr>`;
+    renderPaginationBar('inventory-pagination', 0, 0, 'inventory', 'renderInventoryTable');
     return;
   }
 
-  tbody.innerHTML = items.map(item => {
+  const invLimit = (state.pageLimits && state.pageLimits.inventory) || 50;
+  const visibleInv = items.slice(0, invLimit);
+
+  tbody.innerHTML = visibleInv.map(item => {
     const isPkg = isPackagingPaperItem(item);
     const isAcc = !isPkg && isAccessoryItem(item);
     const isOld = (item.stock_group || '').toUpperCase() === 'OLD_STOCK';
@@ -4418,7 +5309,10 @@ function renderInventoryTable() {
       </tr>
     `;
   }).join('');
+
+  renderPaginationBar('inventory-pagination', items.length, visibleInv.length, 'inventory', 'renderInventoryTable');
 }
+window.renderInventoryTable = renderInventoryTable;
 
 function renderPurchasesSection() {
   const container = document.getElementById('purchases-batches-list');
@@ -4976,8 +5870,11 @@ function renderFinanceSection() {
 
     if (list.length === 0) {
       titlesTbody.innerHTML = `<tr><td colspan="8" class="empty-state">No catalog items matching this filter.</td></tr>`;
+      renderPaginationBar('finance-titles-pagination', 0, 0, 'profitTitles', 'renderFinanceSection');
     } else {
-      titlesTbody.innerHTML = list.map(tp => {
+      const titlesLimit = (state.pageLimits && state.pageLimits.profitTitles) || 60;
+      const visibleList = list.slice(0, titlesLimit);
+      titlesTbody.innerHTML = visibleList.map(tp => {
         const isOld = tp.stockGroup === 'OLD_STOCK';
         const isNew = tp.stockGroup === 'NEW_STOCK';
         const isAcc = tp.stockGroup === 'ACCESSORIES';
@@ -5022,6 +5919,83 @@ function renderFinanceSection() {
           </tr>
         `;
       }).join('');
+      renderPaginationBar('finance-titles-pagination', list.length, visibleList.length, 'profitTitles', 'renderFinanceSection');
+    }
+  }
+
+  // 4b. Monthly & Yearly Financial Summaries (Single Unified Source)
+  const renderPeriodRows = (tbodyEl, rows, includeBreakdownCols) => {
+    if (!tbodyEl) return;
+    if (!rows || rows.length === 0) {
+      tbodyEl.innerHTML = `<tr><td colspan="9" class="empty-state">No confirmed paid period data yet.</td></tr>`;
+      return;
+    }
+    tbodyEl.innerHTML = rows.map(r => {
+      const gross = Math.round(r.costedGrossProfitDa || 0);
+      const exp = Math.round(r.operatingExpensesDa || 0);
+      const net = gross - exp;
+      const statusCell = includeBreakdownCols
+        ? `<td><strong>${r.costedOrdersCount}</strong> costed${r.reviewOrdersCount > 0 ? ` <span class="badge badge-amber" style="font-size:0.68rem;">${r.reviewOrdersCount} review</span>` : ''}</td>`
+        : `<td>${Math.round(r.orderPkgCostsDa || 0).toLocaleString('fr-DZ')} DA</td>`;
+      return `
+        <tr>
+          <td><strong>${escapeHtml(r.label)}</strong></td>
+          <td>${r.paidOrdersCount}</td>
+          ${statusCell}
+          <td style="color:var(--text-muted);">${Math.round(r.deliveryExclDa).toLocaleString('fr-DZ')} DA</td>
+          <td><strong>${Math.round(r.storeRevenueDa).toLocaleString('fr-DZ')} DA</strong></td>
+          <td>${Math.round(r.confirmedCogsDa).toLocaleString('fr-DZ')} DA</td>
+          <td><strong style="color:${gross >= 0 ? 'var(--success)' : 'var(--danger)'};">${gross.toLocaleString('fr-DZ')} DA</strong></td>
+          <td style="color:var(--danger);">${exp > 0 ? '−' + exp.toLocaleString('fr-DZ') + ' DA' : '0 DA'}</td>
+          <td><strong style="color:${net >= 0 ? 'var(--success)' : 'var(--danger)'};">${net.toLocaleString('fr-DZ')} DA</strong></td>
+        </tr>
+      `;
+    }).join('');
+  };
+  renderPeriodRows(document.getElementById('finance-yearly-summary-tbody'), fin.periodSummaries?.yearly, false);
+  renderPeriodRows(document.getElementById('finance-monthly-summary-tbody'), fin.periodSummaries?.monthly, true);
+
+  // 4c. Storewide Accounting & Lot Attribution Audit Panel
+  const auditBadgesEl = document.getElementById('finance-audit-summary-badges');
+  const auditReviewBody = document.getElementById('finance-audit-review-body');
+  if (auditBadgesEl && fin.auditSummary) {
+    const au = fin.auditSummary;
+    auditBadgesEl.innerHTML = `
+      <span class="badge badge-neutral">Audited: ${au.auditedOrdersCount} orders</span>
+      <span class="badge badge-green">Costed Paid: ${au.costedPaidOrdersCount}/${au.paidOrdersCount}</span>
+      <span class="badge badge-blue">Persisted Allocations: ${au.allocatedLinesCount} lines</span>
+      <span class="badge ${au.needsReviewItemsCount > 0 ? 'badge-amber' : 'badge-green'}">Needs Review: ${au.needsReviewItemsCount} items</span>
+    `;
+  }
+  if (auditReviewBody && fin.auditSummary) {
+    const items = fin.auditSummary.needsReviewItems || [];
+    if (items.length === 0) {
+      auditReviewBody.innerHTML = `<div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:10px 14px;color:#166534;font-size:0.86rem;"><i class="fa-solid fa-circle-check"></i> All paid order items are cleanly attributed to verified inventory lots with known purchase costs.</div>`;
+    } else {
+      const sample = items.slice(0, 25);
+      auditReviewBody.innerHTML = `
+        <p style="font-size:0.83rem;color:var(--text-muted);margin-bottom:10px;">
+          Showing ${sample.length} of ${items.length} line item(s) across ${fin.auditSummary.needsReviewOrdersCount} order(s) without fabricated costs. Click any order to inspect or link a lot:
+        </p>
+        <div class="vintage-table-wrapper">
+          <table class="vintage-table" style="font-size:0.81rem;">
+            <thead><tr><th>Order #</th><th>Date</th><th>Item Title</th><th>Qty</th><th>Revenue (DA)</th><th>Review Reason</th><th>Action</th></tr></thead>
+            <tbody>
+              ${sample.map(it => `
+                <tr>
+                  <td><strong>#${it.orderId}</strong> ${it.isHist ? '<span class="badge badge-neutral" style="font-size:0.65rem;">HIST</span>' : '<span class="badge badge-blue" style="font-size:0.65rem;">LIVE</span>'}</td>
+                  <td style="white-space:nowrap;">${escapeHtml(it.orderDate || '-')}</td>
+                  <td><strong>${escapeHtml(it.title)}</strong></td>
+                  <td>${it.qty}</td>
+                  <td>${(it.revenueDa || 0).toLocaleString('fr-DZ')} DA</td>
+                  <td style="color:#92400E;">${escapeHtml(it.reason || 'Needs review')}</td>
+                  <td><button class="btn-secondary" style="padding:2px 8px;font-size:0.74rem;" onclick="viewOrderDetails(${it.orderId})">Inspect</button></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
     }
   }
 
@@ -5194,6 +6168,8 @@ function renderFinanceSection() {
     `;
   }
 }
+
+window.renderFinanceSection = renderFinanceSection;
 
 function renderExpensesSection() {
   const container = document.getElementById('expenses-list-container');
@@ -5602,13 +6578,17 @@ function switchSection(sectionId) {
     headerTitle.innerHTML = titles[sectionId];
   }
 
-  renderAppViews();
+  if (_dirtySections.has(sectionId)) {
+    renderSingleSection(sectionId);
+  }
+  updateGlobalNavBadges();
 }
 
 window.switchSection = switchSection;
 
 window.setPaidOrdersFilter = function(filter) {
   state.paidOrdersFilter = filter;
+  if (state.pageLimits) state.pageLimits.paidOrders = 50;
   document.querySelectorAll('.tab-btn[data-paid-filter]').forEach(b => {
     b.classList.toggle('active', b.getAttribute('data-paid-filter') === filter);
   });
@@ -5637,6 +6617,7 @@ window.triggerManualSync = function() {
 
 window.setOrdersFilter = function(filter) {
   state.ordersFilter = filter;
+  if (state.pageLimits) state.pageLimits.orders = 50;
   document.querySelectorAll('.tab-btn[data-order-filter]').forEach(b => {
     b.classList.toggle('active', b.getAttribute('data-order-filter') === filter);
   });
@@ -5724,11 +6705,26 @@ window.handleRestoreBackupFile = function(event) {
 
 window.handleSearch = function(query) {
   state.searchQuery = query;
-  renderAppViews();
+  // Reset table page limits on new search and keep active search inputs in sync
+  if (state.pageLimits) {
+    state.pageLimits.inventory = 50;
+    state.pageLimits.orders = 50;
+    state.pageLimits.paidOrders = 50;
+    state.pageLimits.profitTitles = 60;
+  }
+  if (_searchDebounceTimer) clearTimeout(_searchDebounceTimer);
+  _searchDebounceTimer = setTimeout(() => {
+    // Only re-render the visible section (does NOT recalculate entire accounting cache!)
+    renderSingleSection(state.activeSection || 'dashboard');
+    ['inventory', 'orders', 'paid-orders', 'finance'].forEach(s => {
+      if (s !== state.activeSection) _dirtySections.add(s);
+    });
+  }, 130);
 };
 
 window.setInventoryFilter = function(filter) {
   state.inventoryFilter = filter;
+  if (state.pageLimits) state.pageLimits.inventory = 50;
   document.querySelectorAll('.tab-btn[data-filter]').forEach(b => {
     b.classList.toggle('active', b.getAttribute('data-filter') === filter);
   });
@@ -6772,6 +7768,9 @@ window.exportToExcel = function(scope) {
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(fin.accessories?.breakdown || []), 'Accessories Report');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(fin.packaging?.variants || []), 'Packaging Paper');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(fin.titleProfits), 'Profit By Title');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(fin.periodSummaries?.monthly || []), 'Monthly Summary');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(fin.periodSummaries?.yearly || []), 'Yearly Summary');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(fin.auditSummary?.needsReviewItems || []), 'Audit Review Items');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(state.expenses || []), 'Operating Expenses');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(state.debts || []), 'Debts');
   XLSX.writeFile(wb, `Gentle_Readers_Finance_Report_${todayStr}.xlsx`);
@@ -6819,7 +7818,13 @@ window.viewOrderDetails = function(orderId) {
   const isHistorical = !!(order.is_historical || Number(order.id) <= 170);
   const paymentMethod = meta?.payment_method || '';
 
-  const allocs = state.orderAllocations ? state.orderAllocations.filter(a => String(a.order_id) === String(orderId)) : [];
+  const fin = calculateFinancialMetrics();
+  const orderAccounting = (fin.paidOrderById && fin.paidOrderById.get(String(orderId))) || computePaidOrderDetails(order);
+  const allocsSource = (Array.isArray(state.orderStockAllocations) && state.orderStockAllocations.length > 0)
+    ? state.orderStockAllocations
+    : (state.orderAllocations || []);
+  const allocs = allocsSource.filter(a => String(a.order_id) === String(orderId));
+  const invIdx = getInventorySearchIndex();
   const rawOrderItems = parseOrderItemsSafe(order);
   const pkgSpec = PACKAGING_VARIANTS.find(v => v.variantKey === resolvePackagingVariantKey(meta?.packaging_used || order.packaging_type));
   const pkgLabel = pkgSpec
@@ -6874,26 +7879,45 @@ window.viewOrderDetails = function(orderId) {
       </div>
 
       <div>
-        <h4 style="font-family: var(--font-serif); margin-bottom: 8px;">Ordered Items (قائمة المنتجات):</h4>
+        <h4 style="font-family: var(--font-serif); margin-bottom: 8px;">Ordered Items &amp; Lot Attribution (قائمة المنتجات والدفعة):</h4>
         <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
           ${rawOrderItems.length === 0 ? '<span class="text-muted">-</span>' : rawOrderItems.map((rawItm, idx) => {
             const pi = parseOrderItem(rawItm);
-            const matchedLot = findInventoryItem(pi.title);
+            const lineInfo = orderAccounting?.itemBreakdowns?.[idx] || null;
+            const { lots: rawCandidateLots } = resolveMatchedLotsWithReason(pi.title, { excludePackaging: true });
+            const matchedLot = (lineInfo?.lotId && invIdx.idMap.get(lineInfo.lotId)) || findInventoryItem(pi.title);
             const isAccItem = !!getWebsiteAccessoryMatch(pi.title) || pi.type === 'accessory' || (typeof rawItm === 'string' && rawItm.includes('[Accessory]'));
             const unitRef = resolveOrderItemHistoricalRefPrice(rawItm, matchedLot, order, meta);
             const labelStr = typeof rawItm === 'object' ? `${pi.title}${pi.qty > 1 ? ` × ${pi.qty}` : ''}` : String(rawItm);
+            const lotBadge = lineInfo && lineInfo.unitCost !== null
+              ? `<span class="badge ${lineInfo.stockGroup === 'OLD_STOCK' ? 'badge-amber' : (lineInfo.stockGroup === 'ACCESSORIES' ? 'badge-neutral' : 'badge-blue')}" style="font-size:0.68rem;margin-left:6px;">${escapeHtml(lineInfo.stockGroup || 'LOT')}: ${lineInfo.unitCost.toLocaleString('fr-DZ')} DA cost${lineInfo.costBasis === 'specific_lot' ? ' (Pinned)' : ''}</span>`
+              : `<span class="badge badge-provisional" style="font-size:0.68rem;margin-left:6px;" title="${escapeHtml(lineInfo?.reviewReason || 'Unknown purchase cost')}"><i class="fa-solid fa-clock"></i> Review Needed</span>`;
+            const showLotSelector = canCorrectLineItems && rawCandidateLots.length > 1;
             return `
-              <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px dashed var(--border-subtle);">
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px dashed var(--border-subtle); flex-wrap: wrap;">
                 <div>
-                  • ${escapeHtml(labelStr)}
+                  • <strong>${escapeHtml(labelStr)}</strong>
                   ${isAccItem ? '<span class="badge" style="background:#EDE9FE;color:#5B21B6;font-size:0.68rem;margin-left:4px;">Accessory</span>' : ''}
-                  ${unitRef > 0 ? `<span style="font-size:0.76rem;color:var(--text-muted);margin-left:6px;">(${unitRef.toLocaleString('fr-DZ')} DA)</span>` : ''}
+                  ${unitRef > 0 ? `<span style="font-size:0.76rem;color:var(--text-muted);margin-left:6px;">(${unitRef.toLocaleString('fr-DZ')} DA retail)</span>` : ''}
+                  ${lotBadge}
+                  ${lineInfo?.reviewReason ? `<div style="font-size:0.72rem;color:#92400E;margin-top:2px;">⚠ ${escapeHtml(lineInfo.reviewReason)}</div>` : ''}
                 </div>
-                ${canCorrectLineItems && rawOrderItems.length > 1 ? `
-                  <button type="button" class="btn-secondary" style="padding: 2px 8px; font-size: 0.72rem; color: var(--danger); border-color: #FECDD3;" onclick="openOrderLineCorrection(${order.id}, ${idx})" title="Remove unavailable item &amp; adjust order total">
-                    <i class="fa-solid fa-eraser"></i> Remove / Adjust
-                  </button>
-                ` : ''}
+                <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                  ${showLotSelector ? `
+                    <select class="input" style="padding:2px 6px; font-size:0.75rem; width:auto;" onchange="saveOrderItemLotAllocation(${order.id}, ${idx}, this.value)">
+                      ${rawCandidateLots.map(cand => {
+                        const cCost = getNumericUnitCostOrNull(cand);
+                        const sel = String(cand.id) === String(lineInfo?.lotId) ? 'selected' : '';
+                        return `<option value="${escapeHtml(String(cand.id))}" ${sel}>${escapeHtml(cand.stock_group || 'LOT')} (${cCost !== null ? cCost + ' DA' : 'NULL'})</option>`;
+                      }).join('')}
+                    </select>
+                  ` : ''}
+                  ${canCorrectLineItems && rawOrderItems.length > 1 ? `
+                    <button type="button" class="btn-secondary" style="padding: 2px 8px; font-size: 0.72rem; color: var(--danger); border-color: #FECDD3;" onclick="openOrderLineCorrection(${order.id}, ${idx})" title="Remove unavailable item &amp; adjust order total">
+                      <i class="fa-solid fa-eraser"></i> Remove / Adjust
+                    </button>
+                  ` : ''}
+                </div>
               </div>
             `;
           }).join('')}
@@ -6903,7 +7927,7 @@ window.viewOrderDetails = function(orderId) {
       ${allocs.length > 0 ? `
         <div>
           <h4 style="font-family: var(--font-serif); font-size: 0.95rem; margin-bottom: 6px;">
-            <i class="fa-solid fa-layer-group"></i> FIFO Stock Allocations (تخصيص المخزون حسب الدفعة)
+            <i class="fa-solid fa-layer-group"></i> Persisted Stock Allocations (تخصيص المخزون المحفوظ)
           </h4>
           <div class="vintage-table-wrapper">
             <table class="vintage-table" style="font-size: 0.82rem;">
@@ -6913,19 +7937,24 @@ window.viewOrderDetails = function(orderId) {
                   <th>Stock Group</th>
                   <th>Allocated Qty</th>
                   <th>Unit Cost</th>
-                  <th>Status</th>
+                  <th>Basis / Status</th>
                 </tr>
               </thead>
               <tbody>
-                ${allocs.map(a => `
+                ${allocs.map(a => {
+                  const invRow = invIdx.idMap.get(String(a.inventory_item_id));
+                  const rowTitle = a.title || invRow?.title || 'Book';
+                  const rowGroup = a.stock_group || invRow?.stock_group || 'NEW_STOCK';
+                  return `
                   <tr>
-                    <td><strong>${escapeHtml(a.title || 'Book')}</strong></td>
-                    <td><span class="badge ${a.stock_group === 'OLD_STOCK' ? 'badge-neutral' : 'badge-blue'}">${a.stock_group || 'NEW_STOCK'}</span></td>
+                    <td><strong>${escapeHtml(rowTitle)}</strong></td>
+                    <td><span class="badge ${rowGroup === 'OLD_STOCK' ? 'badge-amber' : 'badge-blue'}">${escapeHtml(rowGroup)}</span></td>
                     <td>${a.quantity}</td>
-                    <td>${a.unit_purchase_cost_da != null ? a.unit_purchase_cost_da.toLocaleString('fr-DZ') + ' DA' : '<em style="color:var(--text-muted)">Unknown (NULL)</em>'}</td>
-                    <td><span class="badge ${a.allocation_status === 'confirmed' ? 'badge-green' : (a.allocation_status === 'released' ? 'badge-rose' : 'badge-gold')}">${a.allocation_status}</span></td>
+                    <td>${a.unit_purchase_cost_da != null ? Number(a.unit_purchase_cost_da).toLocaleString('fr-DZ') + ' DA' : '<em style="color:var(--text-muted)">Unknown (NULL)</em>'}</td>
+                    <td><span class="badge ${a.allocation_status === 'confirmed' ? 'badge-green' : (a.allocation_status === 'released' ? 'badge-rose' : 'badge-gold')}">${escapeHtml(a.cost_basis || 'fifo')} · ${escapeHtml(a.allocation_status)}</span></td>
                   </tr>
-                `).join('')}
+                `;
+                }).join('')}
               </tbody>
             </table>
           </div>
@@ -6999,18 +8028,26 @@ window.viewOrderDetails = function(orderId) {
         ` : ''}
       </div>
 
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; border-top: 1px solid var(--border-color); padding-top: 12px; background: #FFFDF8; padding: 12px; border-radius: 8px;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; border-top: 1px solid var(--border-color); padding-top: 12px; background: #FFFDF8; padding: 12px; border-radius: 8px;">
         <div>
           <div style="font-size: 0.76rem; color: var(--text-muted);">Customer Paid Total</div>
-          <strong style="font-size: 1.1rem;">${eff.orderTotal.toLocaleString('fr-DZ')} DA</strong>
+          <strong style="font-size: 1.08rem;">${eff.orderTotal.toLocaleString('fr-DZ')} DA</strong>
         </div>
         <div>
-          <div style="font-size: 0.76rem; color: var(--text-muted);">Delivery Fee (Excluded)</div>
-          <strong style="font-size: 1.1rem; color: var(--text-muted);">− ${eff.shippingFee.toLocaleString('fr-DZ')} DA</strong>
+          <div style="font-size: 0.76rem; color: var(--text-muted);">Delivery Fee (Excl.)</div>
+          <strong style="font-size: 1.08rem; color: var(--text-muted);">− ${eff.shippingFee.toLocaleString('fr-DZ')} DA</strong>
         </div>
         <div>
-          <div style="font-size: 0.76rem; color: var(--text-muted);">Bookstore Revenue</div>
-          <strong style="font-size: 1.15rem; color: var(--success);">${eff.bookRevenue.toLocaleString('fr-DZ')} DA</strong>
+          <div style="font-size: 0.76rem; color: var(--text-muted);">Store Revenue</div>
+          <strong style="font-size: 1.08rem; color: var(--vintage-blue);">${eff.bookRevenue.toLocaleString('fr-DZ')} DA</strong>
+        </div>
+        <div>
+          <div style="font-size: 0.76rem; color: var(--text-muted);">Attributed COGS</div>
+          <strong style="font-size: 1.08rem;">${orderAccounting?.allCostsKnown ? orderAccounting.cogs.toLocaleString('fr-DZ') + ' DA' : 'Review Needed'}</strong>
+        </div>
+        <div>
+          <div style="font-size: 0.76rem; color: var(--text-muted);">Order Net Profit</div>
+          <strong style="font-size: 1.1rem; color: ${orderAccounting?.allCostsKnown ? (orderAccounting.netProfit >= 0 ? 'var(--success)' : 'var(--danger)') : 'var(--text-muted)'};">${orderAccounting?.allCostsKnown ? orderAccounting.netProfit.toLocaleString('fr-DZ') + ' DA' : 'Pending Review'}</strong>
         </div>
       </div>
 
@@ -7057,6 +8094,58 @@ window.viewOrderDetails = function(orderId) {
   `;
 
   modal.classList.add('active');
+};
+
+window.saveOrderItemLotAllocation = async function(orderId, itemIndex, newLotId) {
+  const order = (state.orders || []).find(o => String(o.id) === String(orderId));
+  if (!order) return;
+  const rawItems = parseOrderItemsSafe(order);
+  const rawItm = rawItems[itemIndex];
+  if (!rawItm) return;
+  const pi = parseOrderItem(rawItm);
+  const lot = (state.inventory || []).find(i => String(i.id) === String(newLotId));
+  if (!lot) return;
+
+  if (!Array.isArray(state.orderStockAllocations)) state.orderStockAllocations = [];
+  state.orderAllocations = state.orderStockAllocations;
+
+  // Release any previous allocation for this order matching candidate lots of the same title
+  const { lots: candidateLots } = resolveMatchedLotsWithReason(pi.title, { excludePackaging: true });
+  const candidateIds = new Set(candidateLots.map(l => String(l.id)));
+  for (const existing of state.orderStockAllocations) {
+    if (String(existing.order_id) === String(orderId) && candidateIds.has(String(existing.inventory_item_id)) && existing.allocation_status !== 'released') {
+      existing.allocation_status = 'released';
+      if (idb.db) {
+        await idb.put('order_stock_allocations', existing);
+        await idb.queueMutation('order_stock_allocations', 'upsert', existing);
+      }
+    }
+  }
+
+  const eff = getEffectiveOrderStatus(order);
+  const allocRecord = {
+    id: deterministicUuid(`alloc::${orderId}::${itemIndex}::${lot.id}`),
+    order_id: Number(orderId),
+    inventory_item_id: String(lot.id),
+    quantity: pi.qty || 1,
+    unit_purchase_cost_da: getNumericUnitCostOrNull(lot),
+    cost_basis: 'specific_lot',
+    allocation_status: (eff.status === 'delivered' || eff.paymentStatus === 'paid') ? 'confirmed' : 'reserved',
+    created_at: new Date().toISOString()
+  };
+
+  const prevIdx = state.orderStockAllocations.findIndex(a => String(a.id) === String(allocRecord.id));
+  if (prevIdx >= 0) state.orderStockAllocations[prevIdx] = allocRecord;
+  else state.orderStockAllocations.push(allocRecord);
+
+  if (idb.db) {
+    await idb.put('order_stock_allocations', allocRecord);
+    await idb.queueMutation('order_stock_allocations', 'upsert', allocRecord);
+  }
+
+  renderAppViews();
+  viewOrderDetails(orderId);
+  if (state.online && auth.isAuthenticated()) sync.sync();
 };
 
 window.openOrderLineCorrection = function(orderId, itemIndex) {
@@ -7348,10 +8437,38 @@ window.updateOrderStatus = async function(orderId, newStatus) {
       }
     }
 
-    const allocs = state.orderAllocations ? state.orderAllocations.filter(a => String(a.order_id) === String(orderId)) : [];
-    for (const al of allocs) {
-      al.allocation_status = 'confirmed';
-      await idb.put('order_stock_allocations', al);
+    const allocsSource = (Array.isArray(state.orderStockAllocations) && state.orderStockAllocations.length > 0)
+      ? state.orderStockAllocations
+      : (state.orderAllocations || []);
+    const allocs = allocsSource.filter(a => String(a.order_id) === String(orderId) && a.allocation_status !== 'released');
+    if (allocs.length > 0) {
+      for (const al of allocs) {
+        al.allocation_status = 'confirmed';
+        await idb.put('order_stock_allocations', al);
+        await idb.queueMutation('order_stock_allocations', 'upsert', al);
+      }
+    } else {
+      // Persist confirmed stock lot allocations permanently so future COGS never relies on guesswork
+      const detail = computePaidOrderDetails(order);
+      if (!Array.isArray(state.orderStockAllocations)) state.orderStockAllocations = [];
+      state.orderAllocations = state.orderStockAllocations;
+      for (let idx = 0; idx < (detail.itemBreakdowns || []).length; idx++) {
+        const bd = detail.itemBreakdowns[idx];
+        if (!bd || !bd.lotId) continue;
+        const allocRow = {
+          id: deterministicUuid(`alloc::${orderNumId}::${idx}::${bd.lotId}`),
+          order_id: orderNumId,
+          inventory_item_id: String(bd.lotId),
+          quantity: bd.qty || 1,
+          unit_purchase_cost_da: bd.unitCost,
+          cost_basis: bd.costBasis === 'specific_lot' ? 'specific_lot' : 'fifo',
+          allocation_status: 'confirmed',
+          created_at: new Date().toISOString()
+        };
+        state.orderStockAllocations.push(allocRow);
+        await idb.put('order_stock_allocations', allocRow);
+        await idb.queueMutation('order_stock_allocations', 'upsert', allocRow);
+      }
     }
     // Perform lifecycle delivery confirmation strictly via SECURITY DEFINER RPC
     await idb.queueMutation('confirm_order_delivery', 'rpc', { p_order_id: orderNumId });
@@ -8772,6 +9889,7 @@ window.executeExcelImport = async function() {
 
 window.setProfitFilter = function(filter) {
   state.profitFilter = filter;
+  if (state.pageLimits) state.pageLimits.profitTitles = 60;
   document.querySelectorAll('.tab-btn[data-profit-filter]').forEach(b => {
     b.classList.toggle('active', b.getAttribute('data-profit-filter') === filter);
   });
