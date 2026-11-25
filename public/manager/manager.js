@@ -499,6 +499,299 @@ function getStockBaseline() {
   };
 }
 
+const WEBSITE_ACCESSORY_LINKS = [
+  {
+    lotId: 'a0000000-0000-4000-8000-000000000001',
+    webId: 'bookmark_boot-shaped-bookmarks',
+    slug: 'boot-shaped-bookmarks',
+    shortName: 'Boots Bookmarks',
+    title: 'Whimsical Boots Bookmarks / فاصل الأحذية المميز',
+    category: 'bookmark',
+    defaultCostDa: 263,
+    defaultPriceDa: 1000,
+    purchasedQty: 3,
+    soldQty: 3,
+    baselinePreLiveSold: 2,
+    acquisitionDate: '2026-10-15',
+    salesTiers: [
+      { qty: 2, unitPriceDa: 850, offline: true, label: 'First 2 sold at 850 DA' },
+      { qty: 1, unitPriceDa: 1000, orderId: 198, label: 'Last 1 sold at 1,000 DA (Order #198)' }
+    ],
+    priceHistory: [
+      { beforeDate: '2026-11-14T21:10:00Z', unitPriceDa: 850 }
+    ],
+    keywords: ['whimsical boots', 'boot-shaped', 'فاصل الاحذيه']
+  },
+  {
+    lotId: 'a0000000-0000-4000-8000-000000000002',
+    webId: 'bookmark_cat-bookmarks',
+    slug: 'cat-bookmarks',
+    shortName: 'Cat Bookmarks',
+    title: 'Acrylic Cat Bookmarks / فواصل قطط لطيفة',
+    category: 'bookmark',
+    defaultCostDa: 143,
+    defaultPriceDa: 450,
+    purchasedQty: 2,
+    soldQty: 1,
+    baselinePreLiveSold: 1,
+    acquisitionDate: '2026-10-15',
+    salesTiers: [
+      { qty: 1, unitPriceDa: 450, orderId: 169, label: 'Order #169' }
+    ],
+    priceHistory: [],
+    keywords: ['acrylic cat', 'cat bookmarks', 'فواصل قطط']
+  },
+  {
+    lotId: 'a0000000-0000-4000-8000-000000000003',
+    webId: 'bookmark_metallic-leaf-bookmarks',
+    slug: 'metallic-leaf-bookmarks',
+    shortName: 'Metallic Leaves Bookmarks',
+    title: 'Metallic Leaf Chain Bookmarks / فواصل أوراق شجر معدنية ذهبية',
+    category: 'bookmark',
+    defaultCostDa: 173,
+    defaultPriceDa: 800,
+    purchasedQty: 4,
+    soldQty: 2,
+    baselinePreLiveSold: 2,
+    acquisitionDate: '2026-10-15',
+    salesTiers: [
+      { qty: 2, unitPriceDa: 750, orderIds: [168, 170], label: 'First 2 sold at 750 DA (Orders #168 & #170)' }
+    ],
+    priceHistory: [
+      { beforeDate: '2026-11-10T17:11:29Z', unitPriceDa: 750 }
+    ],
+    keywords: ['metallic leaf', 'metallic leaves', 'اوراق شجر معدنيه']
+  },
+  {
+    lotId: 'a0000000-0000-4000-8000-000000000004',
+    webId: 'acc_book-tracker',
+    slug: 'book-tracker',
+    shortName: 'Reading Lists',
+    title: 'Reading Log & Book Tracker / بطاقة تتبع القراءة والمراجعات',
+    category: 'accessory',
+    defaultCostDa: 62,
+    defaultPriceDa: 150,
+    purchasedQty: 20,
+    soldQty: 2,
+    baselinePreLiveSold: 2,
+    acquisitionDate: '2026-10-15',
+    salesTiers: [
+      { qty: 1, unitPriceDa: 150, orderId: 170, label: 'Order #170' },
+      { qty: 1, unitPriceDa: 150, offline: true, label: 'Direct / offline sale' }
+    ],
+    priceHistory: [],
+    keywords: ['reading log', 'book tracker', 'بطاقه تتبع القراءه', 'reading list']
+  }
+];
+
+const PACKAGING_VARIANTS = [
+  {
+    variantKey: 'surprise',
+    lotId: 'b0000000-0000-4000-8000-000000000001',
+    shortName: 'Surprise',
+    title: 'Surprise / مفاجأة (Wrapping Paper)',
+    sellingPriceDa: 500,
+    approxMeters: 3,
+    provisionalTotalCostDa: null,
+    aliases: ['surprise', 'مفاجاه', 'مفاجأة']
+  },
+  {
+    variantKey: 'paper_wildflowers',
+    lotId: 'b0000000-0000-4000-8000-000000000002',
+    shortName: 'Vintage',
+    title: 'Vintage Wildflowers / ورق زهور برية كلاسيكي',
+    sellingPriceDa: 600,
+    approxMeters: 3,
+    provisionalTotalCostDa: 840,
+    aliases: ['paper_wildflowers', 'vintage', 'wildflowers', 'زهور بريه']
+  },
+  {
+    variantKey: 'paper_pine_berries',
+    lotId: 'b0000000-0000-4000-8000-000000000003',
+    shortName: 'Christmas',
+    title: 'Festive Pine & Berries (Christmas) / ورق صنوبر وتوت شتوي',
+    sellingPriceDa: 600,
+    approxMeters: 3,
+    provisionalTotalCostDa: 822,
+    aliases: ['paper_pine_berries', 'christmas', 'pine', 'berries', 'صنوبر']
+  },
+  {
+    variantKey: 'paper_celestial_crane',
+    lotId: 'b0000000-0000-4000-8000-000000000004',
+    shortName: 'Swan',
+    title: 'Celestial Crane & Mountain (Swan) / ورق الرافعات والجبال الذهبي',
+    sellingPriceDa: 800,
+    approxMeters: 3,
+    provisionalTotalCostDa: 1627,
+    aliases: ['paper_celestial_crane', 'swan', 'celestial crane', 'crane', 'الرافعات']
+  }
+];
+
+const DEFAULT_PACKAGING_CONFIG = {
+  cmPerWrap: null,
+  mode: 'per_book',
+  includeHistorical: false
+};
+
+function parseJsonNoteTag(notes, tagName) {
+  const s = String(notes || '');
+  const marker = `[${tagName}:`;
+  const start = s.indexOf(marker);
+  if (start === -1) return null;
+  let depth = 0;
+  let jsonStart = start + marker.length;
+  for (let i = jsonStart; i < s.length; i++) {
+    const ch = s[i];
+    if (ch === '{' || ch === '[') depth++;
+    else if (ch === '}' || ch === ']') {
+      if (depth > 0) depth--;
+      else if (ch === ']' && depth === 0) {
+        try { return JSON.parse(s.slice(jsonStart, i)); } catch { return null; }
+      }
+    }
+  }
+  return null;
+}
+
+function parseAllJsonNoteTags(notes, tagName) {
+  const s = String(notes || '');
+  const marker = `[${tagName}:`;
+  const results = [];
+  let cursor = 0;
+  while (cursor < s.length) {
+    const start = s.indexOf(marker, cursor);
+    if (start === -1) break;
+    let depth = 0;
+    const jsonStart = start + marker.length;
+    let endIdx = -1;
+    for (let i = jsonStart; i < s.length; i++) {
+      const ch = s[i];
+      if (ch === '{' || ch === '[') depth++;
+      else if (ch === '}' || ch === ']') {
+        if (depth > 0) depth--;
+        else if (ch === ']' && depth === 0) {
+          endIdx = i;
+          break;
+        }
+      }
+    }
+    if (endIdx === -1) break;
+    try { results.push(JSON.parse(s.slice(jsonStart, endIdx))); } catch {}
+    cursor = endIdx + 1;
+  }
+  return results;
+}
+
+function upsertJsonNoteTag(notes, tagName, payload) {
+  const s = String(notes || '');
+  const marker = `[${tagName}:`;
+  let cleaned = '';
+  let cursor = 0;
+  while (cursor < s.length) {
+    const start = s.indexOf(marker, cursor);
+    if (start === -1) {
+      cleaned += s.slice(cursor);
+      break;
+    }
+    cleaned += s.slice(cursor, start);
+    let depth = 0;
+    let endIdx = -1;
+    for (let i = start + marker.length; i < s.length; i++) {
+      const ch = s[i];
+      if (ch === '{' || ch === '[') depth++;
+      else if (ch === '}' || ch === ']') {
+        if (depth > 0) depth--;
+        else if (ch === ']' && depth === 0) {
+          endIdx = i + 1;
+          break;
+        }
+      }
+    }
+    if (endIdx === -1) break;
+    cursor = endIdx;
+  }
+  cleaned = cleaned.replace(/\s*\|\s*$/, '').replace(/\n{2,}/g, '\n').trim();
+  if (payload === null || payload === undefined) return cleaned;
+  const serialized = `[${tagName}:${JSON.stringify(payload)}]`;
+  return cleaned ? `${cleaned} | ${serialized}` : serialized;
+}
+
+function stripHumanNotes(notes) {
+  let s = String(notes || '');
+  ['ACC_HISTORY', 'PRICE_HISTORY', 'PKG_META', 'PKG_CONFIG', 'ORDER_CORRECTION'].forEach(tag => {
+    s = upsertJsonNoteTag(s, tag, null);
+  });
+  return s;
+}
+
+function getPackagingConfig() {
+  const fromPos = parseJsonNoteTag(state.openingPosition?.notes, 'PKG_CONFIG');
+  if (fromPos && typeof fromPos === 'object') {
+    return {
+      cmPerWrap: (fromPos.cmPerWrap !== null && fromPos.cmPerWrap !== undefined && Number(fromPos.cmPerWrap) > 0) ? Number(fromPos.cmPerWrap) : null,
+      mode: fromPos.mode === 'per_order' ? 'per_order' : 'per_book',
+      includeHistorical: !!fromPos.includeHistorical
+    };
+  }
+  try {
+    const raw = localStorage.getItem('gr_packaging_config_v1');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return {
+        cmPerWrap: (parsed.cmPerWrap !== null && parsed.cmPerWrap !== undefined && Number(parsed.cmPerWrap) > 0) ? Number(parsed.cmPerWrap) : null,
+        mode: parsed.mode === 'per_order' ? 'per_order' : 'per_book',
+        includeHistorical: !!parsed.includeHistorical
+      };
+    }
+  } catch (e) {}
+  return { ...DEFAULT_PACKAGING_CONFIG };
+}
+
+async function savePackagingConfig(cfg) {
+  const normalized = {
+    cmPerWrap: (cfg?.cmPerWrap !== null && cfg?.cmPerWrap !== undefined && Number(cfg.cmPerWrap) > 0) ? Number(cfg.cmPerWrap) : null,
+    mode: cfg?.mode === 'per_order' ? 'per_order' : 'per_book',
+    includeHistorical: !!cfg?.includeHistorical
+  };
+  try {
+    localStorage.setItem('gr_packaging_config_v1', JSON.stringify(normalized));
+  } catch (e) {}
+
+  if (!state.openingPosition) {
+    state.openingPosition = { id: 1, cash_balance_da: 0, notes: 'Opening Position' };
+  }
+  state.openingPosition.notes = upsertJsonNoteTag(state.openingPosition.notes || '', 'PKG_CONFIG', normalized);
+  state.openingPosition.updated_at = new Date().toISOString();
+  if (idb.db) {
+    await idb.put('opening_position', state.openingPosition);
+    await idb.queueMutation('opening_position', 'upsert', state.openingPosition);
+  }
+  return normalized;
+}
+
+window.openPackagingConfigModal = function() {
+  const cfg = getPackagingConfig();
+  const cmEl = document.getElementById('pkg-cfg-cm');
+  const modeEl = document.getElementById('pkg-cfg-mode');
+  const histEl = document.getElementById('pkg-cfg-include-hist');
+  if (cmEl) cmEl.value = cfg.cmPerWrap !== null ? cfg.cmPerWrap : '';
+  if (modeEl) modeEl.value = cfg.mode || 'per_book';
+  if (histEl) histEl.checked = !!cfg.includeHistorical;
+  openModal('modal-packaging-config');
+};
+
+window.handleSavePackagingConfig = async function(event) {
+  event.preventDefault();
+  const rawCm = (document.getElementById('pkg-cfg-cm')?.value || '').trim();
+  const cmVal = rawCm !== '' && !isNaN(parseFloat(rawCm)) && parseFloat(rawCm) > 0 ? Math.round(parseFloat(rawCm)) : null;
+  const mode = document.getElementById('pkg-cfg-mode')?.value === 'per_order' ? 'per_order' : 'per_book';
+  const includeHistorical = !!document.getElementById('pkg-cfg-include-hist')?.checked;
+  await savePackagingConfig({ cmPerWrap: cmVal, mode, includeHistorical });
+  closeModal('modal-packaging-config');
+  renderAppViews();
+  if (state.online && auth.isAuthenticated()) sync.sync();
+};
+
 const state = {
   activeSection: 'dashboard',
   online: navigator.onLine,
@@ -510,6 +803,9 @@ const state = {
   debts: [],
   debtRepayments: [],
   orderAllocations: [],
+  cmsBooks: [],
+  cmsBookmarks: [],
+  cmsAccessories: [],
   syncStatus: 'synced', // 'synced', 'pending', 'syncing', 'error'
   lastSyncError: null,
   searchQuery: '',
@@ -668,6 +964,31 @@ class SyncCoordinator {
 
       // 3. Fetch other remote management data (when tables exist)
       await this.fetchRemoteManagementData();
+
+      // 4. Idempotently ensure starter accessories/packaging & Order #176 correction exist and sync
+      let autoQueued = false;
+      if (typeof ensureStarterAccessoriesAndPackaging === 'function') {
+        if (await ensureStarterAccessoriesAndPackaging({ queueRemote: true })) autoQueued = true;
+      }
+      if (typeof ensureOrder176Corrected === 'function') {
+        if (await ensureOrder176Corrected()) autoQueued = true;
+      }
+      if (autoQueued) {
+        const followUpMuts = await idb.getPendingMutations();
+        for (const mut of followUpMuts) {
+          try {
+            await this.executeMutation(mut);
+            mut.status = 'synced';
+            await idb.put('mutation_queue', mut);
+          } catch (followErr) {
+            console.warn('[Sync] Follow-up auto-reconcile notice on', mut.entity_table, followErr.message);
+            mut.retry_count = (mut.retry_count || 0) + 1;
+            mut.last_error = followErr.message;
+            await idb.put('mutation_queue', mut);
+          }
+        }
+        applyLiveOrdersToInventory();
+      }
 
       if (permissionBlockedTables.size > 0) {
         const tblList = Array.from(permissionBlockedTables).join(', ');
@@ -846,12 +1167,16 @@ class SyncCoordinator {
       const proxyHeaders = { 'Content-Type': 'application/json' };
       if (!adminPass && token) proxyHeaders['Authorization'] = `Bearer ${token}`;
 
-      let proxyRes = null;
-      try {
-        proxyRes = await fetch('/api/manager-api', {
-          method: 'POST',
-          headers: proxyHeaders,
-          body: JSON.stringify({
+      const reqBody = mut.action === 'correct_order'
+        ? {
+            ...(adminPass ? { password: adminPass } : {}),
+            action: 'correct_order',
+            order_id: mut.payload?.order_id || primaryVal,
+            items: mut.payload?.items,
+            total_price: mut.payload?.total_price,
+            audit_note: mut.payload?.audit_note || ''
+          }
+        : {
             ...(adminPass ? { password: adminPass } : {}),
             action: mut.action === 'rpc' ? 'rpc' : 'mutate',
             table: mut.entity_table,
@@ -861,7 +1186,14 @@ class SyncCoordinator {
             idValue: primaryVal,
             rpc_name: mut.entity_table,
             params: mut.payload
-          })
+          };
+
+      let proxyRes = null;
+      try {
+        proxyRes = await fetch('/api/manager-api', {
+          method: 'POST',
+          headers: proxyHeaders,
+          body: JSON.stringify(reqBody)
         });
       } catch (proxyNetErr) {
         if (!token) throw proxyNetErr;
@@ -1353,13 +1685,14 @@ async function loadLocalData() {
   state.orders = (allCachedOrders || []).filter(o => !(o.firstName === 'Test' && o.familyName === 'Test'));
   const rawInventory = await idb.getAll('inventory');
 
-  // Deduplicate inventory by normalized title and stock group / accessory role
+  // Deduplicate inventory by normalized title and stock group / accessory / packaging role
   const dedupMap = new Map();
   const prunedDuplicateIds = [];
   rawInventory.forEach(item => {
     if (!item.title) return;
-    const isAcc = isAccessoryItem(item);
-    const grp = isAcc ? 'ACCESSORIES' : (item.stock_group || 'NEW_STOCK').toUpperCase();
+    const isPkg = isPackagingPaperItem(item);
+    const isAcc = !isPkg && isAccessoryItem(item);
+    const grp = isPkg ? 'PACKAGING' : (isAcc ? 'ACCESSORIES' : (item.stock_group || 'NEW_STOCK').toUpperCase());
     const normT = (item.title || '')
       .toLowerCase()
       .replace(/[\u064B-\u065F\u0670]/g, '')
@@ -1411,20 +1744,250 @@ async function loadLocalData() {
   const openings = await idb.getAll('opening_position');
   state.openingPosition = openings.length > 0 ? openings[0] : { id: 1, cash_balance_da: 0, owner_contributions_da: 0, owner_withdrawals_da: 0, notes: 'Opening Position' };
 
-  // Load published storefront catalog count (150 books in cms-books.json)
+  // Load published storefront catalogs (books, bookmarks, accessories) for product linking & price reference
   try {
-    const cmsRes = await fetch('../cms-books.json');
-    if (cmsRes.ok) {
+    const [cmsRes, bmRes, accRes] = await Promise.all([
+      fetch('../cms-books.json').catch(() => null),
+      fetch('../cms-bookmarks.json').catch(() => null),
+      fetch('../cms-accessories.json').catch(() => null)
+    ]);
+    if (cmsRes && cmsRes.ok) {
       const cmsBooks = await cmsRes.json();
       if (Array.isArray(cmsBooks) && cmsBooks.length > 0) {
+        state.cmsBooks = cmsBooks;
         state.storefrontCatalogCount = cmsBooks.length;
       }
     }
+    if (bmRes && bmRes.ok) {
+      const bmList = await bmRes.json();
+      if (Array.isArray(bmList)) state.cmsBookmarks = bmList;
+    }
+    if (accRes && accRes.ok) {
+      const accList = await accRes.json();
+      if (Array.isArray(accList)) state.cmsAccessories = accList;
+    }
   } catch (err) {
-    // Retain default 150
+    // Retain offline defaults
+  }
+
+  if ((state.inventory && state.inventory.length > 0) || (state.orders && state.orders.length > 0)) {
+    await ensureStarterAccessoriesAndPackaging({ queueRemote: false });
+    applyLiveOrdersToInventory();
   }
 
   renderAppViews();
+}
+
+async function ensureStarterAccessoriesAndPackaging({ queueRemote = true } = {}) {
+  if (!state.inventory) state.inventory = [];
+  let changed = false;
+  const nowIso = new Date().toISOString();
+
+  for (const spec of WEBSITE_ACCESSORY_LINKS) {
+    const exists = state.inventory.some(item => {
+      if (!item) return false;
+      if (String(item.id) === String(spec.lotId)) return true;
+      const m = getWebsiteAccessoryMatch(item);
+      return m && m.webId === spec.webId;
+    });
+    if (exists) continue;
+
+    let noteParts = [
+      `Linked Web Product: ${spec.webId}`,
+      `Category: ${spec.category}`,
+      `StockGroup: ACCESSORIES`,
+      `[ACC_HISTORY:${JSON.stringify({
+        webId: spec.webId,
+        slug: spec.slug,
+        baselinePreLiveSold: spec.baselinePreLiveSold || 0,
+        salesTiers: spec.salesTiers || []
+      })}]`
+    ];
+    if (Array.isArray(spec.priceHistory)) {
+      spec.priceHistory.forEach(ph => {
+        noteParts.push(`[PRICE_HISTORY:${JSON.stringify(ph)}]`);
+      });
+    }
+
+    const newItem = {
+      id: spec.lotId,
+      title: spec.title,
+      author: 'Gentle Readers Collection',
+      isbn: null,
+      category: spec.category,
+      item_type: spec.category,
+      stock_group: 'NEW_STOCK',
+      batch_id: null,
+      quantity_received: spec.purchasedQty,
+      quantity_sold: spec.soldQty,
+      quantity_reserved: 0,
+      quantity_damaged: 0,
+      quantity_lost: 0,
+      quantity_promotional: 0,
+      quantity_returned_to_supplier: 0,
+      quantity_count_adjustment: 0,
+      unit_purchase_cost_da: spec.defaultCostDa,
+      selling_price_da: spec.defaultPriceDa,
+      supplier_name: 'Accessories Supplier',
+      acquisition_date: spec.acquisitionDate || '2026-10-15',
+      condition: 'New',
+      notes: noteParts.join(' | '),
+      created_at: nowIso,
+      updated_at: nowIso
+    };
+
+    ensureInventoryDbBaseline(newItem);
+    state.inventory.push(newItem);
+    if (idb.db) {
+      await idb.put('inventory', toRawIdbInventoryCopy(newItem));
+      if (queueRemote) {
+        await idb.queueMutation('inventory_items', 'upsert', toRawIdbInventoryCopy(newItem));
+      }
+    }
+    changed = true;
+  }
+
+  for (const spec of PACKAGING_VARIANTS) {
+    const exists = state.inventory.some(item => {
+      if (!item) return false;
+      if (String(item.id) === String(spec.lotId)) return true;
+      const vKey = resolvePackagingVariantKey(item.title) || parseJsonNoteTag(item.notes, 'PKG_META')?.variantKey;
+      return vKey === spec.variantKey;
+    });
+    if (exists) continue;
+
+    const pkgMeta = {
+      variantKey: spec.variantKey,
+      shortName: spec.shortName,
+      purchasedMeters: spec.approxMeters,
+      isProvisionalQty: true,
+      provisionalTotalCostDa: spec.provisionalTotalCostDa,
+      isCostConfirmed: false,
+      cmPerWrapOverride: null
+    };
+
+    const newItem = {
+      id: spec.lotId,
+      title: spec.title,
+      author: null,
+      isbn: null,
+      category: 'packaging',
+      item_type: 'packaging',
+      stock_group: 'NEW_STOCK',
+      batch_id: null,
+      quantity_received: Math.round((spec.approxMeters || 3) * 100),
+      quantity_sold: 0,
+      quantity_reserved: 0,
+      quantity_damaged: 0,
+      quantity_lost: 0,
+      quantity_promotional: 0,
+      quantity_returned_to_supplier: 0,
+      quantity_count_adjustment: 0,
+      unit_purchase_cost_da: null,
+      selling_price_da: spec.sellingPriceDa,
+      supplier_name: 'Packaging Supplier',
+      acquisition_date: '2026-11-01',
+      condition: 'New',
+      notes: `Category: packaging | StockGroup: PACKAGING | Provisional ~${spec.approxMeters}m roll | [PKG_META:${JSON.stringify(pkgMeta)}]`,
+      created_at: nowIso,
+      updated_at: nowIso
+    };
+
+    ensureInventoryDbBaseline(newItem);
+    state.inventory.push(newItem);
+    if (idb.db) {
+      await idb.put('inventory', toRawIdbInventoryCopy(newItem));
+      if (queueRemote) {
+        await idb.queueMutation('inventory_items', 'upsert', toRawIdbInventoryCopy(newItem));
+      }
+    }
+    changed = true;
+  }
+
+  return changed;
+}
+
+async function ensureOrder176Corrected() {
+  const order176 = (state.orders || []).find(o => Number(o.id) === 176);
+  if (!order176) return false;
+
+  if (!state.orderMeta) state.orderMeta = [];
+  let meta = state.orderMeta.find(m => Number(m.order_id) === 176);
+  if (meta && String(meta.notes || '').includes('[ORDER_CORRECTION:')) {
+    return false;
+  }
+
+  const rawItems = parseOrderItemsSafe(order176);
+  const targetIdx = rawItems.findIndex(raw => {
+    const pi = parseOrderItem(raw);
+    return normalizeText(pi.title).includes('يجب ان تكلم احدا');
+  });
+  if (targetIdx === -1) return false;
+
+  const removedRaw = rawItems[targetIdx];
+  const removedParsed = parseOrderItem(removedRaw);
+  const currentTotal = Number(order176.total_price) || 0;
+  const shippingFee = Number(order176.shipping_price) || 0;
+  const cmsBook = (state.cmsBooks || []).find(b => normalizeText(b.title) === normalizeText(removedParsed.title));
+  const verifiedUnitPrice = (typeof removedRaw === 'object' && removedRaw !== null && Number(removedRaw.price) > 0)
+    ? Number(removedRaw.price)
+    : (cmsBook && Number(cmsBook.price) > 0 ? Number(cmsBook.price) : 2500);
+  const removedAmount = verifiedUnitPrice * (removedParsed.qty || 1);
+
+  if (currentTotal < removedAmount || removedAmount <= 0) return false;
+
+  const nextItems = rawItems.filter((_, idx) => idx !== targetIdx);
+  const correctedTotal = currentTotal - removedAmount;
+  const nowIso = new Date().toISOString();
+
+  const correctionPayload = {
+    orderId: 176,
+    removedItems: [{
+      raw: typeof removedRaw === 'string' ? removedRaw : removedParsed.title,
+      title: removedParsed.title,
+      qty: removedParsed.qty || 1,
+      unitPriceDa: verifiedUnitPrice,
+      amountDa: removedAmount
+    }],
+    previousTotalDa: currentTotal,
+    correctedTotalDa: correctedTotal,
+    shippingDa: shippingFee,
+    correctedBookRevenueDa: Math.max(0, correctedTotal - shippingFee),
+    reason: 'Unavailable book ("ربما يجب أن تكلم أحدا") not delivered/taken by customer',
+    correctedAt: nowIso
+  };
+
+  const auditNote = `Order #176 Correction: Removed unavailable item "${removedParsed.title} × ${removedParsed.qty || 1}" (-${removedAmount.toLocaleString('fr-DZ')} DA). Order total adjusted from ${currentTotal.toLocaleString('fr-DZ')} DA to ${correctedTotal.toLocaleString('fr-DZ')} DA (${Math.max(0, correctedTotal - shippingFee).toLocaleString('fr-DZ')} DA books + ${shippingFee.toLocaleString('fr-DZ')} DA shipping). [ORDER_CORRECTION:${JSON.stringify(correctionPayload)}]`;
+
+  order176.items = nextItems;
+  order176.total_price = correctedTotal;
+  if (idb.db) await idb.put('orders', order176);
+
+  if (!meta) {
+    meta = {
+      order_id: 176,
+      fulfillment_status: order176.status || 'shipped',
+      payment_status: order176.payment_status || 'unpaid',
+      notes: auditNote,
+      updated_at: nowIso
+    };
+    state.orderMeta.push(meta);
+  } else {
+    meta.notes = meta.notes ? `${String(meta.notes).trim()}\n${auditNote}` : auditNote;
+    meta.updated_at = nowIso;
+  }
+
+  if (idb.db) {
+    await idb.put('order_meta', meta);
+    await idb.queueMutation('orders', 'correct_order', {
+      id: 176,
+      order_id: 176,
+      items: nextItems,
+      total_price: correctedTotal,
+      audit_note: auditNote
+    });
+  }
+  return true;
 }
 
 function renderAppViews() {
@@ -1464,18 +2027,63 @@ function getInventoryAvailableQty(item) {
   return Math.max(0, onHand - res);
 }
 window.getInventoryAvailableQty = getInventoryAvailableQty;
-function isAccessoryItem(item) {
+function resolvePackagingVariantKey(value) {
+  if (!value) return null;
+  const norm = normalizeText(value);
+  const rawLow = String(value).toLowerCase().trim();
+  if (!norm || rawLow === 'none' || rawLow === 'standard') return null;
+  if (rawLow === 'papier_craft' || norm.includes('craft') || norm.includes('كرافت')) return 'papier_craft';
+  for (const v of PACKAGING_VARIANTS) {
+    if (rawLow === v.variantKey || norm === normalizeText(v.title) || norm === normalizeText(v.shortName)) return v.variantKey;
+    if (v.aliases.some(a => norm.includes(normalizeText(a)) || rawLow.includes(a.toLowerCase()))) {
+      return v.variantKey;
+    }
+  }
+  return null;
+}
+
+function isPackagingPaperItem(item) {
   if (!item) return false;
+  const grp = (item.stock_group || '').toUpperCase();
+  if (grp === 'PACKAGING') return true;
+  const type = (item.item_type || item.category || '').toLowerCase();
+  if (type === 'packaging') return true;
+  const notes = (item.notes || '').toLowerCase();
+  if (notes.includes('stockgroup: packaging') || notes.includes('category: packaging') || notes.includes('[pkg_meta:')) return true;
+  const title = (item.title || '').toLowerCase();
+  if (title.includes('wrapping paper') || title.includes('ورق ') || title.includes('تغليف') || resolvePackagingVariantKey(item.title)) {
+    return true;
+  }
+  return false;
+}
+window.isPackagingPaperItem = isPackagingPaperItem;
+
+function getWebsiteAccessoryMatch(itemOrTitle) {
+  const title = typeof itemOrTitle === 'string' ? itemOrTitle : (itemOrTitle?.title || '');
+  const notes = typeof itemOrTitle === 'object' ? (itemOrTitle?.notes || '') : '';
+  const norm = normalizeText(title);
+  for (const spec of WEBSITE_ACCESSORY_LINKS) {
+    if (notes.includes(spec.webId) || notes.includes(spec.slug)) return spec;
+    if (norm === normalizeText(spec.title) || norm === normalizeText(spec.shortName)) return spec;
+    if (spec.keywords.some(k => norm.includes(normalizeText(k)) || title.toLowerCase().includes(k))) {
+      return spec;
+    }
+  }
+  return null;
+}
+
+function isAccessoryItem(item) {
+  if (!item || isPackagingPaperItem(item)) return false;
   const grp = (item.stock_group || '').toUpperCase();
   if (grp === 'ACCESSORIES') return true;
   const type = (item.item_type || item.category || '').toLowerCase();
-  if (['bookmark', 'accessory', 'packaging', 'read log'].includes(type)) return true;
+  if (['bookmark', 'accessory', 'read log', 'reading tracker'].includes(type)) return true;
   const bId = (item.batch_id || '').toLowerCase();
   if (bId.includes('accessor')) return true;
   const title = (item.title || '').toLowerCase();
-  if (title.includes('bookmark') || title.includes('فاصل') || title.includes('paper') || title.includes('تغليف') || title.includes('reading list') || title.includes('metalicleaves') || title.includes('tracker')) return true;
+  if (title.includes('bookmark') || title.includes('فاصل') || title.includes('reading list') || title.includes('reading log') || title.includes('book tracker') || title.includes('metalicleaves') || title.includes('tracker')) return true;
   const notes = (item.notes || '').toLowerCase();
-  if (notes.includes('stockgroup: accessories') || notes.includes('category: bookmark') || notes.includes('category: accessory') || notes.includes('category: packaging')) return true;
+  if (notes.includes('stockgroup: accessories') || notes.includes('category: bookmark') || notes.includes('category: accessory')) return true;
   return false;
 }
 window.isAccessoryItem = isAccessoryItem;
@@ -1803,7 +2411,7 @@ function computeLiveOrderInventoryEffects(providedNormTitleMap) {
     const parsedItems = rawItems.map(parseOrderItem);
 
     parsedItems.forEach(pi => {
-      const candidateLots = resolveCandidateLotsForTitle(pi.title, isHist, normTitleMap);
+      const candidateLots = resolveCandidateLotsForTitle(pi.title, isHist, normTitleMap).filter(l => !isPackagingPaperItem(l));
       if (candidateLots.length === 0) return;
 
       const returnKey = `${String(order.id)}::${normalizeText(pi.title)}`;
@@ -1867,14 +2475,498 @@ function applyLiveOrdersToInventory() {
   const { liveSoldByLotId, matchedOrdersByLotId } = computeLiveOrderInventoryEffects(normTitleMap);
   state._lotMatchedOrders = matchedOrdersByLotId;
 
-  // Preserve original quantity_received intact; take max(DB raw sold, confirmed paid/delivered FIFO demand)
+  // Preserve original quantity_received intact; combine pre-live accessory/offline baseline + confirmed live FIFO demand without double deduction
   state.inventory.forEach(inv => {
     const dbRawSold = Number(inv._dbRawSold) || 0;
     const confirmedLiveSold = liveSoldByLotId.get(String(inv.id)) || 0;
-    inv.quantity_sold = Math.max(dbRawSold, confirmedLiveSold);
+    const accHistory = isAccessoryItem(inv) ? parseJsonNoteTag(inv.notes, 'ACC_HISTORY') : null;
+    const baselinePreLiveSold = (accHistory && Number(accHistory.baselinePreLiveSold) > 0)
+      ? Number(accHistory.baselinePreLiveSold)
+      : 0;
+    const maxCap = Math.max(0, (Number(inv.quantity_received) || 0) + (Number(inv.quantity_count_adjustment) || 0) - (Number(inv.quantity_damaged) || 0) - (Number(inv.quantity_lost) || 0));
+    const computedSold = Math.max(dbRawSold, baselinePreLiveSold + confirmedLiveSold);
+    inv.quantity_sold = maxCap > 0 ? Math.min(maxCap, computedSold) : computedSold;
   });
 }
 window.applyLiveOrdersToInventory = applyLiveOrdersToInventory;
+
+function computeAccessoriesFinancialReport(salesByTitle, unpaidQtyByTitleKey) {
+  const breakdown = [];
+  const accItems = (state.inventory || []).filter(item => isAccessoryItem(item));
+
+  let totalPurchasedQty = 0;
+  let totalPurchaseCostAll = 0;
+  let allPurchasedCostKnown = true;
+  let totalSoldQty = 0;
+  let totalPaidSoldQty = 0;
+  let totalPaidRevenue = 0;
+  let totalPaidCogs = 0;
+  let totalPaidProfit = 0;
+  let hasUnpricedSold = false;
+  let totalAvail = 0;
+  let totalOnHand = 0;
+  let totalReserved = 0;
+  let totalDamaged = 0;
+  let remainingCostVal = 0;
+  let remainingRetailVal = 0;
+  let costedAvailUnits = 0;
+  let soldOutCount = 0;
+  let lowStockCount = 0;
+
+  accItems.forEach(item => {
+    const webMatch = getWebsiteAccessoryMatch(item);
+    const accHistory = parseJsonNoteTag(item.notes, 'ACC_HISTORY');
+    const tiers = (accHistory && Array.isArray(accHistory.salesTiers)) ? accHistory.salesTiers : [];
+
+    const purchasedQty = Number(item.quantity_received) || 0;
+    const soldQty = Number(item.quantity_sold) || 0;
+    const onHand = getInventoryOnHandQty(item);
+    const avail = getInventoryAvailableQty(item);
+    const res = Number(item.quantity_reserved) || 0;
+    const dmg = (Number(item.quantity_damaged) || 0) + (Number(item.quantity_lost) || 0);
+    const unitCost = (item.unit_purchase_cost_da !== null && item.unit_purchase_cost_da !== undefined && item.unit_purchase_cost_da !== '' && !isNaN(item.unit_purchase_cost_da))
+      ? Number(item.unit_purchase_cost_da)
+      : null;
+    const currentPrice = Number(item.selling_price_da) || (webMatch ? webMatch.defaultPriceDa : 0);
+
+    const normKey = normalizeText(item.title);
+    const orderSale = salesByTitle.get(normKey);
+    const orderPaidQty = orderSale ? (Number(orderSale.quantitySold) || 0) : 0;
+    const orderPaidRev = orderSale ? (Number(orderSale.revenue) || 0) : 0;
+    const unpaidQty = (unpaidQtyByTitleKey && unpaidQtyByTitleKey.get(normKey)) || 0;
+
+    let paidSoldQty = 0;
+    let paidSalesRevenue = 0;
+    let priceBreakdownText = '';
+
+    if (tiers.length > 0) {
+      const tierQty = tiers.reduce((s, t) => s + (Number(t.qty) || 0), 0);
+      const tierRev = tiers.reduce((s, t) => s + ((Number(t.qty) || 0) * (Number(t.unitPriceDa) || 0)), 0);
+      paidSoldQty = tierQty;
+      paidSalesRevenue = tierRev;
+      priceBreakdownText = tiers.map(t => `${t.qty} × ${Number(t.unitPriceDa).toLocaleString('fr-DZ')} DA`).join(' + ');
+
+      // Collect explicit order IDs already accounted for in tiers so new paid orders use their exact actual revenue
+      const coveredOrderIds = new Set();
+      tiers.forEach(t => {
+        if (t.orderId) coveredOrderIds.add(String(t.orderId));
+        if (Array.isArray(t.orderIds)) t.orderIds.forEach(oid => coveredOrderIds.add(String(oid)));
+      });
+
+      const paidOrdersList = (orderSale && Array.isArray(orderSale.paidOrdersList)) ? orderSale.paidOrdersList : [];
+      if (paidOrdersList.length > 0 && coveredOrderIds.size > 0) {
+        const extraOrders = paidOrdersList.filter(po => !coveredOrderIds.has(String(po.orderId)));
+        const extraQty = extraOrders.reduce((s, po) => s + (Number(po.qty) || 0), 0);
+        const extraRev = extraOrders.reduce((s, po) => s + (Number(po.revenue) || 0), 0);
+        if (extraQty > 0) {
+          paidSoldQty += extraQty;
+          paidSalesRevenue += extraRev;
+          const avgNewUnit = extraRev / extraQty;
+          priceBreakdownText += ` + ${extraQty} × ${Math.round(avgNewUnit).toLocaleString('fr-DZ')} DA (New Paid)`;
+        }
+      } else {
+        const orderCoveredByTiers = tiers.filter(t => t.orderId || (Array.isArray(t.orderIds) && t.orderIds.length > 0) || String(t.label || '').includes('#')).reduce((s, t) => s + (Number(t.qty) || 0), 0);
+        const baselineOrderCap = Math.max(orderCoveredByTiers, Math.min(orderPaidQty, tierQty));
+        const extraPaidOrdersQty = Math.max(0, orderPaidQty - baselineOrderCap);
+        if (extraPaidOrdersQty > 0 && orderPaidQty > 0) {
+          const avgExtraUnitPrice = orderPaidRev / orderPaidQty;
+          const extraRev = extraPaidOrdersQty * avgExtraUnitPrice;
+          paidSoldQty += extraPaidOrdersQty;
+          paidSalesRevenue += extraRev;
+          priceBreakdownText += ` + ${extraPaidOrdersQty} × ${Math.round(avgExtraUnitPrice).toLocaleString('fr-DZ')} DA (New Paid)`;
+        }
+      }
+    } else {
+      paidSoldQty = orderPaidQty;
+      paidSalesRevenue = orderPaidRev;
+      priceBreakdownText = paidSoldQty > 0
+        ? `${paidSoldQty} × ${Math.round(paidSalesRevenue / paidSoldQty).toLocaleString('fr-DZ')} DA`
+        : 'No paid sales yet';
+    }
+
+    const totalPurchaseCost = unitCost !== null ? (purchasedQty * unitCost) : null;
+    const soldCogs = unitCost !== null ? (paidSoldQty * unitCost) : null;
+    const earnedProfit = (soldCogs !== null) ? (paidSalesRevenue - soldCogs) : null;
+
+    const remRetail = avail * currentPrice;
+    const remCost = unitCost !== null ? (avail * unitCost) : null;
+    const remExpectedProfit = remCost !== null ? (remRetail - remCost) : null;
+    const stockStatus = avail <= 0 ? 'sold_out' : (avail <= 2 ? 'low_stock' : 'in_stock');
+
+    if (avail <= 0) soldOutCount++;
+    else if (avail <= 2) lowStockCount++;
+
+    totalPurchasedQty += purchasedQty;
+    if (totalPurchaseCost !== null) totalPurchaseCostAll += totalPurchaseCost;
+    else allPurchasedCostKnown = false;
+
+    totalSoldQty += soldQty;
+    totalPaidSoldQty += paidSoldQty;
+    totalPaidRevenue += paidSalesRevenue;
+    if (soldCogs !== null) {
+      totalPaidCogs += soldCogs;
+      totalPaidProfit += (paidSalesRevenue - soldCogs);
+    } else if (paidSoldQty > 0) {
+      hasUnpricedSold = true;
+    }
+
+    totalAvail += avail;
+    totalOnHand += onHand;
+    totalReserved += res;
+    totalDamaged += dmg;
+    remainingRetailVal += remRetail;
+    if (remCost !== null) {
+      remainingCostVal += remCost;
+      costedAvailUnits += avail;
+    }
+
+    breakdown.push({
+      id: item.id,
+      title: item.title,
+      shortName: webMatch ? webMatch.shortName : item.title,
+      webId: webMatch ? webMatch.webId : null,
+      slug: webMatch ? webMatch.slug : null,
+      category: item.category || item.item_type || 'accessory',
+      purchasedQty,
+      soldQty,
+      paidSoldQty,
+      unpaidQty,
+      availableQty: avail,
+      onHandQty: onHand,
+      reservedQty: res,
+      unitCost,
+      totalPurchaseCost: totalPurchaseCost !== null ? Math.round(totalPurchaseCost) : null,
+      currentPrice,
+      paidSalesRevenue: Math.round(paidSalesRevenue),
+      soldCogs: soldCogs !== null ? Math.round(soldCogs) : null,
+      earnedGrossProfit: earnedProfit !== null ? Math.round(earnedProfit) : null,
+      remainingRetailValue: Math.round(remRetail),
+      remainingCostValue: remCost !== null ? Math.round(remCost) : null,
+      remainingExpectedProfit: remExpectedProfit !== null ? Math.round(remExpectedProfit) : null,
+      stockStatus,
+      priceBreakdownText
+    });
+  });
+
+  return {
+    itemsCount: accItems.length,
+    purchasedQty: totalPurchasedQty,
+    counted: totalPurchasedQty,
+    totalPurchaseCost: allPurchasedCostKnown ? Math.round(totalPurchaseCostAll) : null,
+    soldQty: totalSoldQty,
+    paidSoldQty: totalPaidSoldQty,
+    revenue: Math.round(totalPaidRevenue),
+    cogs: Math.round(totalPaidCogs),
+    grossProfit: Math.round(totalPaidProfit),
+    hasUnpricedSold,
+    onHand: totalOnHand,
+    available: totalAvail,
+    reserved: totalReserved,
+    damaged: totalDamaged,
+    valuation: Math.round(remainingCostVal),
+    valuationAtCost: Math.round(remainingCostVal),
+    valuationAtRetail: Math.round(remainingRetailVal),
+    expectedProfit: Math.round(remainingRetailVal - remainingCostVal),
+    avgUnitCost: costedAvailUnits > 0 ? (remainingCostVal / costedAvailUnits) : 0,
+    marginPct: remainingRetailVal > 0 ? Math.round(((remainingRetailVal - remainingCostVal) / remainingRetailVal) * 1000) / 10 : 0,
+    soldOutCount,
+    lowStockCount,
+    breakdown
+  };
+}
+
+function computePackagingConsumptionMetrics() {
+  const cfg = getPackagingConfig();
+  const pkgItems = (state.inventory || []).filter(item => isPackagingPaperItem(item));
+
+  // Build per-variant stats across non-cancelled orders
+  const orderStatsByVariant = new Map();
+  const legacyKraft = { wrapsAll: 0, wrapsPaid: 0, unpaidLiveWraps: 0, paidRevenueDa: 0 };
+
+  const ensureVarStat = (k) => {
+    if (!orderStatsByVariant.has(k)) {
+      orderStatsByVariant.set(k, {
+        totalWrapsAll: 0,
+        paidWrapsCount: 0,
+        paidRevenueDa: 0,
+        unpaidLiveWrapsCount: 0,
+        consumableWrapsCount: 0,
+        consumableBooksCount: 0,
+        overrideCmTotal: 0,
+        autoWrapFactor: 0,
+        historicalWrapsCount: 0,
+        liveWrapsCount: 0
+      });
+    }
+    return orderStatsByVariant.get(k);
+  };
+
+  (state.orders || []).forEach(order => {
+    const meta = state.orderMeta ? state.orderMeta.find(m => String(m.order_id) === String(order.id)) : null;
+    const isHist = !!(order.is_historical || Number(order.id) <= 170);
+    const fulfillmentStatus = meta ? (meta.fulfillment_status || 'pending') : (isHist ? 'delivered' : (order.status || 'pending'));
+    const paymentStatus = meta ? (meta.payment_status || 'unpaid') : (isHist ? 'paid' : (order.payment_status || 'unpaid'));
+    const isPaid = paymentStatus === 'paid';
+
+    if (fulfillmentStatus === 'cancelled' || fulfillmentStatus === 'rejected') return;
+
+    const variantKey = resolvePackagingVariantKey(meta?.packaging_used || order.packaging_type);
+    if (!variantKey) return;
+
+    const pkgPrice = Number(order.packaging_price) || 0;
+    if (variantKey === 'papier_craft') {
+      legacyKraft.wrapsAll++;
+      if (isPaid) {
+        legacyKraft.wrapsPaid++;
+        legacyKraft.paidRevenueDa += pkgPrice;
+      } else if (!isHist) {
+        legacyKraft.unpaidLiveWraps++;
+      }
+      return;
+    }
+
+    const st = ensureVarStat(variantKey);
+    st.totalWrapsAll++;
+    if (isHist) st.historicalWrapsCount++;
+    else st.liveWrapsCount++;
+
+    if (isPaid) {
+      st.paidWrapsCount++;
+      st.paidRevenueDa += pkgPrice;
+    } else if (!isHist) {
+      st.unpaidLiveWrapsCount++;
+    }
+
+    // Deduct stock consumption for live orders or historical if configured
+    const shouldDeductRoll = !isHist || !!cfg.includeHistorical;
+    if (shouldDeductRoll) {
+      const parsed = parseOrderItemsSafe(order).map(parseOrderItem);
+      const bookUnits = parsed.reduce((sum, pi) => {
+        const isAccTitle = !!getWebsiteAccessoryMatch(pi.title) || pi.type === 'accessory';
+        return isAccTitle ? sum : sum + (Number(pi.qty) || 1);
+      }, 0);
+      const effectiveBooks = Math.max(1, bookUnits);
+      st.consumableWrapsCount++;
+      st.consumableBooksCount += effectiveBooks;
+
+      const metaTags = parseAllJsonNoteTags(meta?.notes, 'PKG_META');
+      const metaTag = metaTags.length > 0 ? metaTags[metaTags.length - 1] : null;
+      const customOrderCm = (metaTag && Number(metaTag.cmUsed) > 0) ? Number(metaTag.cmUsed) : 0;
+      if (customOrderCm > 0) {
+        st.overrideCmTotal += customOrderCm;
+      } else {
+        st.autoWrapFactor += (cfg.mode === 'per_order' ? 1 : effectiveBooks);
+      }
+    }
+  });
+
+  // Merge DB inventory packaging lots with configured variants
+  const variants = [];
+  const handledKeys = new Set();
+
+  const pushVariantRecord = (lot, spec) => {
+    const pkgMeta = lot ? (parseJsonNoteTag(lot.notes, 'PKG_META') || {}) : {};
+    const vKey = pkgMeta.variantKey || spec?.variantKey || resolvePackagingVariantKey(lot?.title) || String(lot?.id);
+    handledKeys.add(vKey);
+
+    const st = ensureVarStat(vKey);
+    const purchasedCm = (pkgMeta.purchasedMeters !== undefined && pkgMeta.purchasedMeters !== null && Number(pkgMeta.purchasedMeters) >= 0)
+      ? Math.round(Number(pkgMeta.purchasedMeters) * 100)
+      : (lot ? (Number(lot.quantity_received) || 0) : ((spec?.approxMeters || 3) * 100));
+    const manualUsedCm = lot ? (Number(lot.quantity_sold) || 0) : 0;
+    const dmgCm = lot ? ((Number(lot.quantity_damaged) || 0) + (Number(lot.quantity_lost) || 0)) : 0;
+    const isProvisionalQty = pkgMeta.isProvisionalQty !== undefined ? !!pkgMeta.isProvisionalQty : true;
+
+    const variantOverrideCm = (pkgMeta.cmPerWrapOverride !== undefined && pkgMeta.cmPerWrapOverride !== null && Number(pkgMeta.cmPerWrapOverride) > 0)
+      ? Number(pkgMeta.cmPerWrapOverride)
+      : null;
+    const effectiveCmRate = variantOverrideCm !== null ? variantOverrideCm : cfg.cmPerWrap;
+
+    let consumedCm = null;
+    if (effectiveCmRate !== null) {
+      consumedCm = Math.round(manualUsedCm + st.overrideCmTotal + (st.autoWrapFactor * effectiveCmRate));
+    } else if (manualUsedCm > 0 || st.overrideCmTotal > 0) {
+      consumedCm = Math.round(manualUsedCm + st.overrideCmTotal);
+    }
+
+    const remainingCm = consumedCm !== null
+      ? Math.max(0, purchasedCm - consumedCm - dmgCm)
+      : Math.max(0, purchasedCm - dmgCm);
+
+    const provCostTotal = (pkgMeta.provisionalTotalCostDa !== undefined)
+      ? (pkgMeta.provisionalTotalCostDa !== null ? Number(pkgMeta.provisionalTotalCostDa) : null)
+      : (spec ? spec.provisionalTotalCostDa : null);
+    const hasLotUnitCost = !!(lot && lot.unit_purchase_cost_da !== null && lot.unit_purchase_cost_da !== undefined && lot.unit_purchase_cost_da !== '' && !isNaN(lot.unit_purchase_cost_da));
+    const isCostConfirmed = !!pkgMeta.isCostConfirmed && (hasLotUnitCost || (provCostTotal !== null && purchasedCm > 0));
+    const confirmedUnitCostPerCm = isCostConfirmed
+      ? ((provCostTotal !== null && purchasedCm > 0) ? (provCostTotal / purchasedCm) : Number(lot.unit_purchase_cost_da))
+      : null;
+    const confirmedTotalPurchaseCost = (isCostConfirmed && confirmedUnitCostPerCm !== null)
+      ? (provCostTotal !== null ? Math.round(provCostTotal) : Math.round(purchasedCm * confirmedUnitCostPerCm))
+      : null;
+    const confirmedConsumedCogs = (isCostConfirmed && confirmedUnitCostPerCm !== null && consumedCm !== null)
+      ? Math.round(consumedCm * confirmedUnitCostPerCm)
+      : null;
+    const confirmedGrossProfit = (confirmedConsumedCogs !== null)
+      ? Math.round(st.paidRevenueDa - confirmedConsumedCogs)
+      : null;
+
+    const sellingPriceDa = lot && Number(lot.selling_price_da) > 0 ? Number(lot.selling_price_da) : (spec?.sellingPriceDa || 0);
+
+    variants.push({
+      id: lot ? lot.id : (spec?.lotId || vKey),
+      hasDbLot: !!lot,
+      variantKey: vKey,
+      shortName: pkgMeta.shortName || spec?.shortName || lot?.title || vKey,
+      title: lot ? lot.title : (spec?.title || vKey),
+      sellingPriceDa,
+      purchasedCm,
+      purchasedMeters: Math.round((purchasedCm / 100) * 100) / 100,
+      isProvisionalQty,
+      effectiveCmRate,
+      variantOverrideCm,
+      consumableWrapsCount: st.consumableWrapsCount,
+      consumableBooksCount: st.consumableBooksCount,
+      totalWrapsAll: st.totalWrapsAll,
+      paidWrapsCount: st.paidWrapsCount,
+      unpaidLiveWrapsCount: st.unpaidLiveWrapsCount,
+      historicalWrapsCount: st.historicalWrapsCount,
+      liveWrapsCount: st.liveWrapsCount,
+      consumedCm,
+      consumedMeters: consumedCm !== null ? Math.round((consumedCm / 100) * 100) / 100 : null,
+      remainingCm,
+      remainingMeters: Math.round((remainingCm / 100) * 100) / 100,
+      provisionalTotalCostDa: provCostTotal,
+      isCostConfirmed,
+      confirmedUnitCostPerCm,
+      confirmedTotalPurchaseCost,
+      confirmedConsumedCogs,
+      paidRevenueDa: Math.round(st.paidRevenueDa),
+      confirmedGrossProfit
+    });
+  };
+
+  pkgItems.forEach(lot => {
+    const k = resolvePackagingVariantKey(lot.title) || parseJsonNoteTag(lot.notes, 'PKG_META')?.variantKey;
+    const spec = PACKAGING_VARIANTS.find(v => v.variantKey === k) || null;
+    pushVariantRecord(lot, spec);
+  });
+
+  PACKAGING_VARIANTS.forEach(spec => {
+    if (!handledKeys.has(spec.variantKey)) {
+      pushVariantRecord(null, spec);
+    }
+  });
+
+  let totalPurchasedCm = 0;
+  let totalRemainingCm = 0;
+  let totalConsumedCm = 0;
+  let hasAnyConfiguredConsumption = cfg.cmPerWrap !== null;
+  let totalWrapsPaid = 0;
+  let totalWrapsAll = 0;
+  let totalLiveWraps = 0;
+  let totalPaidRevenue = 0;
+  let provisionalTotalCostPaid = 0;
+  let confirmedTotalCostPaid = 0;
+  let confirmedConsumedCogsTotal = 0;
+  let confirmedVariantsCount = 0;
+  let provisionalVariantsCount = 0;
+  let unconfirmedCostVariantsCount = 0;
+
+  variants.forEach(v => {
+    totalPurchasedCm += v.purchasedCm;
+    totalRemainingCm += v.remainingCm;
+    if (v.consumedCm !== null) {
+      totalConsumedCm += v.consumedCm;
+      hasAnyConfiguredConsumption = true;
+    }
+    totalWrapsPaid += v.paidWrapsCount;
+    totalWrapsAll += v.totalWrapsAll;
+    totalLiveWraps += v.liveWrapsCount;
+    totalPaidRevenue += v.paidRevenueDa;
+    if (v.isCostConfirmed && v.confirmedTotalPurchaseCost !== null) {
+      confirmedVariantsCount++;
+      confirmedTotalCostPaid += v.confirmedTotalPurchaseCost;
+      if (v.confirmedConsumedCogs !== null) confirmedConsumedCogsTotal += v.confirmedConsumedCogs;
+    } else {
+      provisionalVariantsCount++;
+      if (v.provisionalTotalCostDa !== null) provisionalTotalCostPaid += v.provisionalTotalCostDa;
+      else unconfirmedCostVariantsCount++;
+    }
+  });
+
+  return {
+    config: cfg,
+    variants,
+    totalPurchasedCm,
+    totalPurchasedMeters: Math.round((totalPurchasedCm / 100) * 100) / 100,
+    totalConsumedCm: hasAnyConfiguredConsumption ? totalConsumedCm : null,
+    totalConsumedMeters: hasAnyConfiguredConsumption ? Math.round((totalConsumedCm / 100) * 100) / 100 : null,
+    totalRemainingCm,
+    totalRemainingMeters: Math.round((totalRemainingCm / 100) * 100) / 100,
+    totalWrapsPaid,
+    totalWrapsAll,
+    totalLiveWraps,
+    totalPaidRevenue: Math.round(totalPaidRevenue),
+    paidRevenueInclLegacyKraft: Math.round(totalPaidRevenue + legacyKraft.paidRevenueDa),
+    provisionalTotalCostPaid: Math.round(provisionalTotalCostPaid),
+    confirmedTotalCostPaid: Math.round(confirmedTotalCostPaid),
+    confirmedConsumedCogsTotal: Math.round(confirmedConsumedCogsTotal),
+    confirmedVariantsCount,
+    provisionalVariantsCount,
+    unconfirmedCostVariantsCount,
+    legacyKraft
+  };
+}
+
+function resolveOrderItemHistoricalRefPrice(rawItem, matchedLot, order, meta) {
+  if (typeof rawItem === 'object' && rawItem !== null && Number(rawItem.price) > 0) {
+    return Number(rawItem.price);
+  }
+  const parsed = parseOrderItem(rawItem);
+  const normTitle = normalizeText(parsed.title);
+
+  // Check recorded order-level price lock inside [ORDER_CORRECTION] / meta
+  if (meta && meta.notes) {
+    const corrTags = parseAllJsonNoteTags(meta.notes, 'ORDER_CORRECTION');
+    for (const tag of corrTags) {
+      if (tag && tag.itemPrices && tag.itemPrices[normTitle] > 0) {
+        return Number(tag.itemPrices[normTitle]);
+      }
+    }
+  }
+
+  if (matchedLot) {
+    const accHistory = parseJsonNoteTag(matchedLot.notes, 'ACC_HISTORY');
+    if (accHistory && Array.isArray(accHistory.salesTiers)) {
+      const orderMatchTier = accHistory.salesTiers.find(t =>
+        (t.orderId && String(t.orderId) === String(order?.id)) ||
+        (Array.isArray(t.orderIds) && t.orderIds.some(oid => String(oid) === String(order?.id)))
+      );
+      if (orderMatchTier && Number(orderMatchTier.unitPriceDa) > 0) {
+        return Number(orderMatchTier.unitPriceDa);
+      }
+      if ((order?.is_historical || Number(order?.id) <= 170) && accHistory.salesTiers.length > 0) {
+        return Number(accHistory.salesTiers[0].unitPriceDa) || Number(matchedLot.selling_price_da) || 0;
+      }
+    }
+    const priceHistory = parseAllJsonNoteTags(matchedLot.notes, 'PRICE_HISTORY')
+      .filter(cp => cp && cp.beforeDate && Number(cp.unitPriceDa) > 0)
+      .sort((a, b) => String(a.beforeDate).localeCompare(String(b.beforeDate)));
+    if (priceHistory.length > 0 && order?.created_at) {
+      const orderDateStr = String(order.created_at);
+      const matchedCheckpoint = priceHistory.find(cp => orderDateStr <= String(cp.beforeDate));
+      if (matchedCheckpoint) return Number(matchedCheckpoint.unitPriceDa);
+    }
+    if (Number(matchedLot.selling_price_da) > 0) {
+      return Number(matchedLot.selling_price_da);
+    }
+  }
+
+  const cmsBook = (state.cmsBooks || []).find(b => normalizeText(b.title) === normTitle);
+  if (cmsBook && Number(cmsBook.price) > 0) return Number(cmsBook.price);
+  return 0;
+}
 
 function calculateFinancialMetrics() {
   applyLiveOrdersToInventory();
@@ -1897,6 +2989,7 @@ function calculateFinancialMetrics() {
   let unpaidDeliveryFees = 0;
   let unpaidGrossOrderValue = 0;
   const salesByTitle = new Map();
+  const unpaidQtyByTitleKey = new Map();
 
   const paidOrders = [];
   let paidGrossCustomerPaid = 0;
@@ -1936,6 +3029,11 @@ function calculateFinancialMetrics() {
       unpaidBookRevenue += bookRevenue;
       unpaidDeliveryFees += shippingFee;
       unpaidGrossOrderValue += orderTotal;
+      parseOrderItemsSafe(order).forEach(rawItem => {
+        const pi = parseOrderItem(rawItem);
+        const nk = normalizeText(pi.title);
+        if (nk) unpaidQtyByTitleKey.set(nk, (unpaidQtyByTitleKey.get(nk) || 0) + (pi.qty || 1));
+      });
       return;
     }
 
@@ -1994,12 +3092,10 @@ function calculateFinancialMetrics() {
     itemsList.forEach(rawItem => {
       const pi = parseOrderItem(rawItem);
       const matched = findInventoryItem(pi.title);
-      const explicitPrice = (typeof rawItem === 'object' && rawItem !== null && Number(rawItem.price) > 0)
-        ? Number(rawItem.price)
-        : (matched && Number(matched.selling_price_da) > 0 ? Number(matched.selling_price_da) : 0);
+      const explicitPrice = resolveOrderItemHistoricalRefPrice(rawItem, matched, order, meta);
       totalItemsInOrder += pi.qty;
       totalCatalogWeighted += (explicitPrice * pi.qty);
-      parsedItems.push({ title: pi.title || `Order #${order.id || 'N/A'}`, qty: pi.qty, unitRefPrice: explicitPrice, isHist });
+      parsedItems.push({ title: pi.title || `Order #${order.id || 'N/A'}`, qty: pi.qty, unitRefPrice: explicitPrice, isHist, orderId: order.id });
     });
 
     parsedItems.forEach(pi => {
@@ -2015,7 +3111,8 @@ function calculateFinancialMetrics() {
           liveSoldQty: 0,
           histSoldQty: 0,
           revenue: 0,
-          hasLiveSales: false
+          hasLiveSales: false,
+          paidOrdersList: []
         });
       }
       const entry = salesByTitle.get(normKey);
@@ -2023,6 +3120,7 @@ function calculateFinancialMetrics() {
       if (pi.isHist) entry.histSoldQty += pi.qty;
       else entry.liveSoldQty += pi.qty;
       entry.revenue += itemRev;
+      entry.paidOrdersList.push({ orderId: pi.orderId, qty: pi.qty, revenue: itemRev, isHist: pi.isHist });
       if (!pi.isHist) entry.hasLiveSales = true;
     });
   });
@@ -2066,8 +3164,9 @@ function calculateFinancialMetrics() {
     if (eligibleLots.length > 0) {
       const primaryLot = eligibleLots[0];
       primaryAuthor = primaryLot.author || '-';
-      const isAccLot = isAccessoryItem(primaryLot);
-      primaryStockGroup = isAccLot ? 'ACCESSORIES' : (primaryLot.stock_group || 'OLD_STOCK');
+      const isPkgLot = isPackagingPaperItem(primaryLot);
+      const isAccLot = !isPkgLot && isAccessoryItem(primaryLot);
+      primaryStockGroup = isPkgLot ? 'PACKAGING' : (isAccLot ? 'ACCESSORIES' : (primaryLot.stock_group || 'OLD_STOCK'));
       displayPrice = Number(primaryLot.selling_price_da) || unitPrice;
 
       if (primaryLot.unit_purchase_cost_da !== null && primaryLot.unit_purchase_cost_da !== undefined && primaryLot.unit_purchase_cost_da !== '' && !isNaN(primaryLot.unit_purchase_cost_da)) {
@@ -2084,12 +3183,12 @@ function calculateFinancialMetrics() {
           soldQtyAcc += saleData.quantitySold;
           revenueAcc += saleData.revenue;
           confirmedCogsAcc += titleCogs;
-        } else if (isNewBatchLot(primaryLot)) {
+        } else if (!isPkgLot && isNewBatchLot(primaryLot)) {
           soldQtyNew += saleData.quantitySold;
           revenueNew += saleData.revenue;
           confirmedCogsNew += titleCogs;
           confirmedProfitNew += profit;
-        } else {
+        } else if (!isPkgLot) {
           soldQtyOld += saleData.quantitySold;
           revenueOld += saleData.revenue;
           confirmedCogsOld += titleCogs;
@@ -2101,8 +3200,10 @@ function calculateFinancialMetrics() {
         isTitleConfirmed = false;
         unknownCostSalesCount++;
         unknownCostRevenueTotal += saleData.revenue;
-        soldQtyOld += saleData.quantitySold;
-        revenueOld += saleData.revenue;
+        if (!isAccLot && !isPkgLot) {
+          soldQtyOld += saleData.quantitySold;
+          revenueOld += saleData.revenue;
+        }
       }
     } else {
       displayCost = null;
@@ -2141,34 +3242,85 @@ function calculateFinancialMetrics() {
   // Include inventory items not yet matched in salesByTitle (zero duplicates)
   state.inventory.forEach(lot => {
     if (handledLotIds.has(lot.id)) return;
+    const isPkg = isPackagingPaperItem(lot);
+    const isAcc = !isPkg && isAccessoryItem(lot);
+    const isNew = !isPkg && !isAcc && isNewBatchLot(lot);
     const onHand = getInventoryOnHandQty(lot);
     const cost = (lot.unit_purchase_cost_da !== null && lot.unit_purchase_cost_da !== undefined && lot.unit_purchase_cost_da !== '' && !isNaN(lot.unit_purchase_cost_da)) ? Number(lot.unit_purchase_cost_da) : null;
     const price = Number(lot.selling_price_da) || 0;
-    const targetMargin = (cost !== null && price > 0) ? (price - cost) : null;
-    const marginPct = (cost !== null && price > 0) ? Math.round(((price - cost) / price) * 100) : null;
-    const isAcc = isAccessoryItem(lot);
-    const isNew = !isAcc && isNewBatchLot(lot);
+    const targetMargin = (!isPkg && cost !== null && price > 0) ? (price - cost) : null;
+    const marginPct = (!isPkg && cost !== null && price > 0) ? Math.round(((price - cost) / price) * 100) : null;
 
     titleProfits.push({
       title: lot.title,
       author: lot.author || '-',
-      stockGroup: isAcc ? 'ACCESSORIES' : (isNew ? 'NEW_STOCK' : (lot.stock_group || 'OLD_STOCK')),
+      stockGroup: isPkg ? 'PACKAGING' : (isAcc ? 'ACCESSORIES' : (isNew ? 'NEW_STOCK' : (lot.stock_group || 'OLD_STOCK'))),
       quantitySold: Number(lot.quantity_sold) || 0,
       quantityOnHand: onHand,
-      unitCost: cost,
+      unitCost: isPkg ? null : cost,
       sellingPrice: price,
       targetUnitMargin: targetMargin,
       revenue: 0,
       cogs: 0,
       grossProfit: null,
-      expectedRevenue: onHand * price,
-      expectedGrossProfit: (cost !== null) ? onHand * (price - cost) : null,
+      expectedRevenue: isPkg ? 0 : (onHand * price),
+      expectedGrossProfit: (!isPkg && cost !== null) ? onHand * (price - cost) : null,
       marginPct: marginPct,
-      isConfirmed: cost !== null
+      isConfirmed: !isPkg && cost !== null
     });
   });
 
-  // 4. Remaining physical inventory asset valuation (Phase 2 audit-safe quantities)
+  // 4. Separate Accessories, Packaging Paper & Remaining Book Stock Valuation (Phase 2 audit-safe)
+  const accReport = computeAccessoriesFinancialReport(salesByTitle, unpaidQtyByTitleKey);
+  const pkgReport = computePackagingConsumptionMetrics();
+
+  // Keep titleProfits Accessories & Packaging rows consistent with standalone accReport / pkgReport
+  const filteredTitleProfits = titleProfits.filter(tp => tp.stockGroup !== 'ACCESSORIES' && tp.stockGroup !== 'PACKAGING');
+  titleProfits.length = 0;
+  titleProfits.push(...filteredTitleProfits);
+  (accReport.breakdown || []).forEach(a => {
+    const hasSold = a.paidSoldQty > 0;
+    const marginPct = (hasSold && a.paidSalesRevenue > 0 && a.earnedGrossProfit !== null)
+      ? Math.round((a.earnedGrossProfit / a.paidSalesRevenue) * 100)
+      : ((a.unitCost !== null && a.currentPrice > 0) ? Math.round(((a.currentPrice - a.unitCost) / a.currentPrice) * 100) : null);
+    titleProfits.push({
+      title: a.title,
+      author: a.shortName || 'Accessory',
+      stockGroup: 'ACCESSORIES',
+      quantitySold: a.paidSoldQty,
+      quantityOnHand: a.onHandQty,
+      unitCost: a.unitCost,
+      sellingPrice: a.currentPrice,
+      targetUnitMargin: a.unitCost !== null ? (a.currentPrice - a.unitCost) : null,
+      revenue: a.paidSalesRevenue,
+      cogs: a.soldCogs !== null ? a.soldCogs : 0,
+      grossProfit: a.earnedGrossProfit,
+      expectedRevenue: a.remainingRetailValue,
+      expectedGrossProfit: a.remainingExpectedProfit,
+      marginPct,
+      isConfirmed: a.unitCost !== null
+    });
+  });
+  (pkgReport.variants || []).forEach(v => {
+    titleProfits.push({
+      title: v.title,
+      author: `Wrapping Paper (${v.shortName})`,
+      stockGroup: 'PACKAGING',
+      quantitySold: v.paidWrapsCount,
+      quantityOnHand: v.remainingMeters,
+      unitCost: v.confirmedUnitCostPerCm !== null ? Math.round(v.confirmedUnitCostPerCm * 100) : null,
+      sellingPrice: v.sellingPriceDa,
+      targetUnitMargin: null,
+      revenue: v.paidRevenueDa,
+      cogs: v.confirmedConsumedCogs,
+      grossProfit: v.confirmedGrossProfit,
+      expectedRevenue: 0,
+      expectedGrossProfit: null,
+      marginPct: (v.confirmedGrossProfit !== null && v.paidRevenueDa > 0) ? Math.round((v.confirmedGrossProfit / v.paidRevenueDa) * 100) : null,
+      isConfirmed: v.isCostConfirmed
+    });
+  });
+
   let remainingInventoryValueDa = 0;
   let unpricedTitlesCount = 0;
   let totalCountedPhysical = 0;
@@ -2208,6 +3360,9 @@ function calculateFinancialMetrics() {
   const accessoriesItems = new Set();
 
   state.inventory.forEach(item => {
+    const isPkg = isPackagingPaperItem(item);
+    if (isPkg) return; // Packaging rolls tracked separately in m/cm (never pollute unit book counts)
+
     const isAcc = isAccessoryItem(item);
     const isNew = !isAcc && isNewBatchLot(item);
     const isOld = !isAcc && !isNew;
@@ -2628,23 +3783,17 @@ function calculateFinancialMetrics() {
       avgUnitCost: combinedBooksCostUnits > 0 ? (combinedBooksCost / combinedBooksCostUnits) : 0,
       marginPct: combinedBooksRetail > 0 ? Math.round((combinedBooksProfit / combinedBooksRetail) * 1000) / 10 : 0
     },
-    accessories: {
-      itemsCount: finalAccItems,
-      soldQty: soldQtyAcc,
-      revenue: Math.round(revenueAcc),
-      cogs: Math.round(confirmedCogsAcc),
-      grossProfit: Math.round(revenueAcc - confirmedCogsAcc),
-      counted: finalAccCounted,
-      onHand: finalAccOnHand,
-      available: finalAccAvail,
-      reserved: accessoriesReserved,
-      damaged: accessoriesDamaged,
-      valuation: Math.round(finalAccCost),
-      valuationAtCost: Math.round(finalAccCost),
-      valuationAtRetail: Math.round(finalAccRetail),
-      expectedProfit: Math.round(finalAccRetail - finalAccCost),
-      avgUnitCost: accessoriesCostUnits > 0 ? (finalAccCost / accessoriesCostUnits) : 0,
-      marginPct: finalAccRetail > 0 ? Math.round(((finalAccRetail - finalAccCost) / finalAccRetail) * 1000) / 10 : 0
+    accessories: accReport,
+    packaging: pkgReport,
+    booksReport: {
+      soldQty: soldQtyOld + soldQtyNew,
+      revenue: Math.round(revenueOld + revenueNew),
+      costedRevenue: Math.round(confirmedSalesRevenue - revenueAcc),
+      cogs: Math.round(confirmedCogsOld + confirmedCogsNew),
+      grossProfit: Math.round(confirmedProfitOld + confirmedProfitNew),
+      remainingCostVal: Math.round(combinedBooksCost),
+      remainingRetailVal: Math.round(combinedBooksRetail),
+      remainingExpectedProfit: Math.round(combinedBooksProfit)
     },
     combined: {
       distinctItems: combinedDistinct,
@@ -3051,25 +4200,40 @@ function renderInventoryTable() {
 
   let items = state.inventory;
 
-  // Filter logic including OLD_STOCK, NEW_STOCK, and ACCESSORIES
+  // Filter logic including OLD_STOCK, NEW_STOCK, ACCESSORIES, and PACKAGING
+  const pkgMetrics = computePackagingConsumptionMetrics();
+  const pkgVariantById = new Map((pkgMetrics.variants || []).map(v => [String(v.id), v]));
+
   if (state.inventoryFilter === 'old_stock') {
-    items = items.filter(i => (i.stock_group || '').toUpperCase() === 'OLD_STOCK' && !isAccessoryItem(i));
+    items = items.filter(i => (i.stock_group || '').toUpperCase() === 'OLD_STOCK' && !isAccessoryItem(i) && !isPackagingPaperItem(i));
   } else if (state.inventoryFilter === 'new_stock') {
-    items = items.filter(i => (i.stock_group || 'NEW_STOCK').toUpperCase() === 'NEW_STOCK' && !isAccessoryItem(i));
+    items = items.filter(i => (i.stock_group || 'NEW_STOCK').toUpperCase() === 'NEW_STOCK' && !isAccessoryItem(i) && !isPackagingPaperItem(i));
   } else if (state.inventoryFilter === 'accessories') {
     items = items.filter(i => isAccessoryItem(i));
   } else if (state.inventoryFilter === 'bookmark') {
-    items = items.filter(i => (i.item_type || i.category || '').toLowerCase() === 'bookmark' || (i.notes || '').toLowerCase().includes('category: bookmark'));
+    items = items.filter(i => isAccessoryItem(i) && ((i.item_type || i.category || '').toLowerCase() === 'bookmark' || (i.notes || '').toLowerCase().includes('category: bookmark')));
   } else if (state.inventoryFilter === 'accessory') {
-    items = items.filter(i => (i.item_type || i.category || '').toLowerCase() === 'accessory' || (i.notes || '').toLowerCase().includes('category: accessory'));
+    items = items.filter(i => isAccessoryItem(i) && ((i.item_type || i.category || '').toLowerCase() === 'accessory' || (i.notes || '').toLowerCase().includes('category: accessory')));
   } else if (state.inventoryFilter === 'packaging') {
-    items = items.filter(i => (i.item_type || i.category || '').toLowerCase() === 'packaging' || (i.notes || '').toLowerCase().includes('category: packaging'));
+    items = items.filter(i => isPackagingPaperItem(i));
   } else if (state.inventoryFilter === 'book') {
-    items = items.filter(i => !isAccessoryItem(i));
+    items = items.filter(i => !isAccessoryItem(i) && !isPackagingPaperItem(i));
   } else if (state.inventoryFilter === 'unknown_cost') {
-    items = items.filter(i => i.unit_purchase_cost_da === null || i.unit_purchase_cost_da === undefined);
+    items = items.filter(i => {
+      if (isPackagingPaperItem(i)) {
+        const v = pkgVariantById.get(String(i.id));
+        return !v || !v.isCostConfirmed;
+      }
+      return i.unit_purchase_cost_da === null || i.unit_purchase_cost_da === undefined;
+    });
   } else if (state.inventoryFilter === 'low_stock') {
-    items = items.filter(i => getInventoryAvailableQty(i) <= 2);
+    items = items.filter(i => {
+      if (isPackagingPaperItem(i)) {
+        const v = pkgVariantById.get(String(i.id));
+        return v ? v.remainingCm <= 50 : false;
+      }
+      return getInventoryAvailableQty(i) <= 2;
+    });
   } else if (state.inventoryFilter !== 'all') {
     items = items.filter(i => (i.item_type || i.category || 'book').toLowerCase() === state.inventoryFilter.toLowerCase());
   }
@@ -3108,6 +4272,40 @@ function renderInventoryTable() {
           </div>
         </div>
       `;
+    } else if (state.inventoryFilter === 'accessories' || state.inventoryFilter === 'bookmark' || state.inventoryFilter === 'accessory') {
+      const fin = calculateFinancialMetrics();
+      const acc = fin.accessories;
+      groupBanner.style.display = 'block';
+      groupBanner.innerHTML = `
+        <div class="panel-body" style="padding: 14px 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+            <strong><i class="fa-solid fa-gem" style="color: #6D28D9;"></i> Accessories Stock &amp; Separate Profit Summary</strong>
+            <span class="badge" style="background: #EDE9FE; color: #5B21B6;">Linked to Website Products</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; font-size: 0.86rem;">
+            <div><span style="color: var(--text-muted);">Purchased / Paid Sold / Avail:</span><br/><strong>${acc.purchasedQty} / ${acc.paidSoldQty} / ${acc.available}</strong></div>
+            <div><span style="color: var(--text-muted);">Paid Sales Revenue:</span><br/><strong style="color: var(--vintage-blue);">${acc.revenue.toLocaleString('fr-DZ')} DA</strong></div>
+            <div><span style="color: var(--text-muted);">Earned Gross Profit:</span><br/><strong style="color: var(--success);">+${acc.grossProfit.toLocaleString('fr-DZ')} DA</strong></div>
+            <div><span style="color: var(--text-muted);">Remaining Stock Value:</span><br/><strong>${acc.valuationAtRetail.toLocaleString('fr-DZ')} DA retail (${acc.valuationAtCost.toLocaleString('fr-DZ')} DA cost)</strong></div>
+          </div>
+        </div>
+      `;
+    } else if (state.inventoryFilter === 'packaging') {
+      groupBanner.style.display = 'block';
+      groupBanner.innerHTML = `
+        <div class="panel-body" style="padding: 14px 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+            <strong><i class="fa-solid fa-gift" style="color: #B45309;"></i> Packaging Paper Variants &amp; Consumption</strong>
+            <button class="btn-secondary" style="padding: 4px 10px; font-size: 0.78rem;" onclick="openPackagingConfigModal()"><i class="fa-solid fa-sliders"></i> Configure cm/wrap</button>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; font-size: 0.86rem;">
+            <div><span style="color: var(--text-muted);">Purchased (Provisional):</span><br/><strong>~${pkgMetrics.totalPurchasedMeters.toFixed(2)} m</strong></div>
+            <div><span style="color: var(--text-muted);">Consumed:</span><br/><strong>${pkgMetrics.totalConsumedCm !== null ? `${pkgMetrics.totalConsumedMeters.toFixed(2)} m (${pkgMetrics.totalConsumedCm} cm)` : 'Not configured yet'}</strong></div>
+            <div><span style="color: var(--text-muted);">Remaining Stock:</span><br/><strong>${pkgMetrics.totalRemainingMeters.toFixed(2)} m (${pkgMetrics.totalRemainingCm} cm)</strong></div>
+            <div><span style="color: var(--text-muted);">Paid Wrapping Revenue:</span><br/><strong style="color: var(--vintage-blue);">${pkgMetrics.totalPaidRevenue.toLocaleString('fr-DZ')} DA (${pkgMetrics.totalWrapsPaid} paid wraps)</strong></div>
+          </div>
+        </div>
+      `;
     } else {
       groupBanner.style.display = 'none';
       groupBanner.innerHTML = '';
@@ -3122,13 +4320,59 @@ function renderInventoryTable() {
   }
 
   tbody.innerHTML = items.map(item => {
+    const isPkg = isPackagingPaperItem(item);
+    const isAcc = !isPkg && isAccessoryItem(item);
+    const isOld = (item.stock_group || '').toUpperCase() === 'OLD_STOCK';
+    const webMatch = isAcc ? getWebsiteAccessoryMatch(item) : null;
+
+    if (isPkg) {
+      const v = pkgVariantById.get(String(item.id));
+      const purchasedLabel = v ? `${v.isProvisionalQty ? '~' : ''}${v.purchasedMeters.toFixed(2)} m` : `${(Number(item.quantity_received) || 0) / 100} m`;
+      const consumedLabel = v && v.consumedCm !== null ? `${v.consumedMeters.toFixed(2)} m` : `${v ? v.totalWrapsAll : 0} wraps`;
+      const remMeters = v ? v.remainingMeters : ((Number(item.quantity_received) || 0) / 100);
+      const remCm = v ? v.remainingCm : (Number(item.quantity_received) || 0);
+      const pkgLow = remCm <= 50;
+      const pkgOut = remCm <= 0;
+      const costBadge = (v && v.isCostConfirmed && v.confirmedTotalPurchaseCost !== null)
+        ? `<span class="badge-confirmed">${v.confirmedTotalPurchaseCost.toLocaleString('fr-DZ')} DA (${v.confirmedUnitCostPerCm.toFixed(2)}/cm)</span>`
+        : (v && v.provisionalTotalCostDa !== null
+          ? `<span class="badge-provisional">~${v.provisionalTotalCostDa.toLocaleString('fr-DZ')} DA (Prov.)</span>`
+          : `<span class="badge-provisional"><i class="fa-solid fa-clock"></i> Unconfirmed</span>`);
+
+      return `
+        <tr>
+          <td>
+            <div style="font-weight: 600; font-family: var(--font-serif); font-size: 0.96rem; cursor: pointer;" onclick="openEditInventoryModal('${escapeHtml(String(item.id))}')">${escapeHtml(item.title)}</div>
+            <div style="font-size: 0.82rem; color: var(--text-muted);">Variant: ${escapeHtml(v ? v.shortName : 'Wrapping Paper')}</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);"><i class="fa-solid fa-gift"></i> ${escapeHtml(item.supplier_name || 'Packaging Supplier')}</div>
+          </td>
+          <td><span class="badge" style="background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A;"><i class="fa-solid fa-gift"></i> PACKAGING</span></td>
+          <td><span class="badge badge-neutral">Wrapping Paper</span></td>
+          <td><strong title="Purchased roll length">${purchasedLabel}</strong></td>
+          <td><strong style="color: var(--vintage-blue);">${consumedLabel}</strong></td>
+          <td>—</td>
+          <td>
+            <span class="badge ${pkgOut || pkgLow ? 'badge-rose' : 'badge-green'}">
+              ${remMeters.toFixed(2)} m ${pkgOut ? '(Out)' : (pkgLow ? '(Low)' : 'Avail')}
+            </span>
+          </td>
+          <td>${costBadge}</td>
+          <td><strong style="color: var(--vintage-blue); font-size: 1rem;">${item.selling_price_da ? Number(item.selling_price_da).toLocaleString('fr-DZ') + ' DA' : '-'}</strong></td>
+          <td style="white-space: nowrap;">
+            <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.78rem;" onclick="openEditInventoryModal('${escapeHtml(String(item.id))}')" title="Edit Variant & Provisional Costs">
+              <i class="fa-solid fa-eye"></i> Details / Edit
+            </button>
+          </td>
+        </tr>
+      `;
+    }
+
     const origReceived = Number(item.quantity_received) || 0;
     const sold = Number(item.quantity_sold) || 0;
     const reserved = Number(item.quantity_reserved) || 0;
     const available = getInventoryAvailableQty(item);
-    const isLow = available <= 2;
-    const isOld = (item.stock_group || '').toUpperCase() === 'OLD_STOCK';
-    const isAcc = isAccessoryItem(item);
+    const isOut = available <= 0;
+    const isLow = available > 0 && available <= 2;
 
     const costBadge = (item.unit_purchase_cost_da !== null && item.unit_purchase_cost_da !== undefined && item.unit_purchase_cost_da !== '' && !isNaN(item.unit_purchase_cost_da))
       ? `<span class="badge-confirmed">${Number(item.unit_purchase_cost_da).toLocaleString('fr-DZ')} DA</span>`
@@ -3138,11 +4382,15 @@ function renderInventoryTable() {
       ? `<span class="badge" style="background: #EDE9FE; color: #5B21B6; border: 1px solid #DDD6FE;"><i class="fa-solid fa-gem"></i> ACCESSORIES</span>`
       : `<span class="${isOld ? 'badge-oldstock' : 'badge-newstock'}"><i class="fa-solid ${isOld ? 'fa-clock-rotate-left' : 'fa-boxes-stacked'}"></i> ${isOld ? 'OLD STOCK' : 'NEW STOCK'}</span>`;
 
+    const webLinkHtml = webMatch
+      ? `<a href="../index.html#cute-card-${escapeHtml(webMatch.slug)}" target="_blank" style="font-size:0.74rem; color:var(--vintage-blue); margin-left:6px;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Storefront</a>`
+      : '';
+
     return `
       <tr>
         <td>
           <div style="font-weight: 600; font-family: var(--font-serif); font-size: 0.96rem; cursor: pointer;" onclick="openEditInventoryModal('${escapeHtml(String(item.id))}')">${escapeHtml(item.title)}</div>
-          <div style="font-size: 0.82rem; color: var(--text-muted);">${escapeHtml(item.author || '-')} ${item.isbn ? `• ISBN: ${escapeHtml(item.isbn)}` : ''}</div>
+          <div style="font-size: 0.82rem; color: var(--text-muted);">${escapeHtml(item.author || '-')} ${item.isbn ? `• ISBN: ${escapeHtml(item.isbn)}` : ''}${webLinkHtml}</div>
           <div style="font-size: 0.78rem; color: var(--text-muted);"><i class="fa-solid fa-boxes-packing"></i> ${escapeHtml(item.supplier_name || (isAcc ? 'Accessories' : 'Book Fair'))}</div>
         </td>
         <td>
@@ -3153,8 +4401,8 @@ function renderInventoryTable() {
         <td><strong style="color: ${sold > 0 ? 'var(--vintage-blue)' : 'var(--text-muted)'};">${sold}</strong></td>
         <td><strong>${reserved}</strong></td>
         <td>
-          <span class="badge ${isLow ? 'badge-rose' : 'badge-green'}">
-            ${available} ${isLow ? '(Low)' : 'Avail'}
+          <span class="badge ${isOut ? 'badge-rose' : (isLow ? 'badge-amber' : 'badge-green')}">
+            ${available} ${isOut ? '(Sold Out)' : (isLow ? '(Low)' : 'Avail')}
           </span>
         </td>
         <td>${costBadge}</td>
@@ -3487,30 +4735,219 @@ function renderFinanceSection() {
 
   const combFooterEl = document.getElementById('finance-combined-books-footer');
   if (combFooterEl) {
-    combFooterEl.innerHTML = `<span><i class="fa-solid fa-books"></i> Baseline: ${base.combined.retailValueDa.toLocaleString('fr-DZ')} / ${base.combined.paidCostDa.toLocaleString('fr-DZ')} / ${base.combined.expectedProfitDa.toLocaleString('fr-DZ')} DA</span><span>DB Remaining: <strong>${fin.combinedBooks.valuationAtRetail.toLocaleString('fr-DZ')} DA retail</strong></span>`;
+    const br = fin.booksReport;
+    combFooterEl.innerHTML = `<span><i class="fa-solid fa-books"></i> Paid Book Sales (Separate): <strong>${br.revenue.toLocaleString('fr-DZ')} DA</strong> rev − ${br.cogs.toLocaleString('fr-DZ')} DA COGS = <strong style="color:var(--success);">+${br.grossProfit.toLocaleString('fr-DZ')} DA earned</strong></span><span>DB Remaining: <strong>${fin.combinedBooks.valuationAtRetail.toLocaleString('fr-DZ')} DA retail</strong></span>`;
   }
 
-  // 3c. Accessories Breakdown Card (Standalone / Separate)
+  // 3c. Accessories Breakdown Card — uses actual paid sales figures (not expected)
+  const acc = fin.accessories; // full accReport from computeAccessoriesFinancialReport
   const accStatusEl = document.getElementById('finance-accessories-status');
   if (accStatusEl) {
-    accStatusEl.innerHTML = `<i class="fa-solid fa-gem"></i> ${fin.accessories.soldQty} Sold • ${fin.accessories.available} Avail`;
+    const statusTxt = acc.paidSoldQty > 0
+      ? `<i class="fa-solid fa-circle-check"></i> ${acc.paidSoldQty} Paid Sold • ${acc.available} Avail`
+      : `<i class="fa-solid fa-gem"></i> ${acc.soldQty} Sold • ${acc.available} Avail`;
+    accStatusEl.innerHTML = statusTxt;
   }
 
   const accSoldEl = document.getElementById('finance-acc-stock-qty');
-  if (accSoldEl) accSoldEl.textContent = `${fin.accessories.soldQty} Sold (${fin.accessories.available} on hand)`;
+  if (accSoldEl) accSoldEl.textContent = `${acc.paidSoldQty} Paid Sold (${acc.available} avail, ${acc.reserved} reserved)`;
 
   const accRevEl = document.getElementById('finance-acc-revenue');
-  if (accRevEl) accRevEl.textContent = `${fin.accessories.valuationAtRetail.toLocaleString('fr-DZ')} DA`;
+  if (accRevEl) accRevEl.textContent = acc.paidSoldQty > 0
+    ? `${acc.revenue.toLocaleString('fr-DZ')} DA`
+    : `${acc.valuationAtRetail.toLocaleString('fr-DZ')} DA (Remaining Retail)`;
 
   const accCogsEl = document.getElementById('finance-acc-cogs');
-  if (accCogsEl) accCogsEl.textContent = `${fin.accessories.valuationAtCost.toLocaleString('fr-DZ')} DA`;
+  if (accCogsEl) accCogsEl.textContent = `${acc.cogs.toLocaleString('fr-DZ')} DA (Sold COGS)`;
 
   const accProfitEl = document.getElementById('finance-acc-profit');
-  if (accProfitEl) accProfitEl.textContent = `+${fin.accessories.expectedProfit.toLocaleString('fr-DZ')} DA (${fin.accessories.marginPct}%)`;
+  if (accProfitEl) {
+    if (acc.hasUnpricedSold) {
+      accProfitEl.textContent = `${acc.grossProfit.toLocaleString('fr-DZ')} DA (partial — unknown cost)`;
+      accProfitEl.style.color = 'var(--text-muted)';
+    } else if (acc.paidSoldQty > 0) {
+      accProfitEl.textContent = `+${acc.grossProfit.toLocaleString('fr-DZ')} DA earned`;
+      accProfitEl.style.color = 'var(--success)';
+    } else {
+      accProfitEl.textContent = 'No paid sales yet';
+      accProfitEl.style.color = 'var(--text-muted)';
+    }
+  }
 
   const accFooterEl = document.getElementById('finance-accessories-footer');
   if (accFooterEl) {
-    accFooterEl.innerHTML = `<span><i class="fa-solid fa-gem"></i> ${fin.accessories.itemsCount} Items</span><span>Avg Cost: <strong>${fin.accessories.avgUnitCost.toFixed(2)} DA</strong> • Reserved: <strong>${fin.accessories.reserved}</strong></span>`;
+    const totalCostTxt = acc.totalPurchaseCost !== null
+      ? `${acc.totalPurchaseCost.toLocaleString('fr-DZ')} DA total purchase`
+      : 'Purchase cost partial';
+    accFooterEl.innerHTML = `<span><i class="fa-solid fa-gem"></i> ${acc.itemsCount} Items • ${acc.purchasedQty} Purchased</span><span>${totalCostTxt} • Avg unit: <strong>${acc.avgUnitCost.toFixed(2)} DA</strong></span>`;
+  }
+
+  // 3d. Packaging Paper Card
+  const pkg = fin.packaging;
+  const pkgStatusEl = document.getElementById('finance-packaging-status');
+  if (pkgStatusEl) {
+    const allConfirmed = pkg.confirmedVariantsCount > 0 && pkg.provisionalVariantsCount === 0 && pkg.unconfirmedCostVariantsCount === 0;
+    pkgStatusEl.innerHTML = allConfirmed
+      ? `<i class="fa-solid fa-circle-check"></i> ${pkg.variants.length} Variants Confirmed`
+      : `<i class="fa-solid fa-ruler"></i> ${pkg.variants.length} Variants (${pkg.provisionalVariantsCount} Provisional)`;
+    pkgStatusEl.style.background = allConfirmed ? '#D1FAE5' : '#FEF3C7';
+    pkgStatusEl.style.color = allConfirmed ? '#065F46' : '#92400E';
+  }
+
+  const pkgStockEl = document.getElementById('finance-pkg-stock-qty');
+  if (pkgStockEl) pkgStockEl.textContent = `${pkg.totalRemainingMeters.toFixed(2)} m remaining (of ${pkg.totalPurchasedMeters.toFixed(2)} m)`;
+
+  const pkgRevEl = document.getElementById('finance-pkg-revenue');
+  if (pkgRevEl) pkgRevEl.textContent = `${pkg.totalPaidRevenue.toLocaleString('fr-DZ')} DA (${pkg.totalWrapsPaid} paid wraps)`;
+
+  const pkgCogsEl = document.getElementById('finance-pkg-cogs');
+  if (pkgCogsEl) {
+    const costTxt = pkg.confirmedTotalCostPaid > 0
+      ? `${pkg.confirmedTotalCostPaid.toLocaleString('fr-DZ')} DA confirmed`
+      : (pkg.provisionalTotalCostPaid > 0 ? `~${pkg.provisionalTotalCostPaid.toLocaleString('fr-DZ')} DA prov.` : 'Unknown');
+    pkgCogsEl.textContent = costTxt;
+  }
+
+  const pkgProfitEl = document.getElementById('finance-pkg-profit');
+  if (pkgProfitEl) {
+    pkgProfitEl.textContent = pkg.totalConsumedCm !== null
+      ? `${pkg.totalConsumedCm} cm consumed (${pkg.totalWrapsAll} total wraps)`
+      : `${pkg.totalWrapsAll} wraps (cm/wrap not configured)`;
+  }
+
+  const pkgFooterEl = document.getElementById('finance-packaging-footer');
+  if (pkgFooterEl) {
+    const legacyNote = pkg.legacyKraft && pkg.legacyKraft.wrapsAll > 0
+      ? ` • Legacy Papier Craft: ${pkg.legacyKraft.wrapsAll} wraps (${pkg.legacyKraft.paidRevenueDa.toLocaleString('fr-DZ')} DA paid rev)`
+      : '';
+    pkgFooterEl.innerHTML = `<span><i class="fa-solid fa-gift"></i> ${pkg.variants.length} tracked variants${legacyNote}</span><button class="btn-secondary" style="padding:3px 10px; font-size:0.76rem;" onclick="openPackagingConfigModal()"><i class="fa-solid fa-sliders"></i> Configure cm/wrap</button>`;
+  }
+
+  // 3e. Accessories Financial Report Panel (detailed per-item table)
+  const accReportTbody = document.getElementById('finance-accessories-report-tbody');
+  if (accReportTbody) {
+    if (!acc.breakdown || acc.breakdown.length === 0) {
+      accReportTbody.innerHTML = `<tr><td colspan="9" class="empty-state">No accessory inventory items found. Add accessories to inventory to see this report.</td></tr>`;
+    } else {
+      accReportTbody.innerHTML = acc.breakdown.map(a => {
+        const statusBadge = a.stockStatus === 'sold_out'
+          ? `<span class="badge" style="background:#FFF1F2;color:#9F1239;">SOLD OUT</span>`
+          : (a.stockStatus === 'low_stock'
+            ? `<span class="badge badge-amber">LOW STOCK</span>`
+            : `<span class="badge badge-green">IN STOCK</span>`);
+        const webLink = a.slug
+          ? `<a href="../index.html#cute-card-${escapeHtml(a.slug)}" target="_blank" style="font-size:0.76rem; color:var(--vintage-blue); display:block; margin-top:2px;"><i class="fa-solid fa-arrow-up-right-from-square"></i> View on site</a>`
+          : '';
+        const costTxt = a.unitCost !== null ? `${a.unitCost.toLocaleString('fr-DZ')} DA` : '<span style="color:var(--text-muted);font-style:italic;">Unknown</span>';
+        const totalCostTxt = a.totalPurchaseCost !== null ? `${a.totalPurchaseCost.toLocaleString('fr-DZ')} DA` : '<span style="color:var(--text-muted);font-style:italic;">Unknown</span>';
+        const earnedTxt = a.earnedGrossProfit !== null
+          ? `<strong style="color:var(--success);">+${a.earnedGrossProfit.toLocaleString('fr-DZ')} DA</strong>`
+          : (a.paidSoldQty > 0 ? '<span style="color:var(--text-muted);font-style:italic;">Unknown cost</span>' : '—');
+        const cogsTxt = a.soldCogs !== null ? `${a.soldCogs.toLocaleString('fr-DZ')} DA` : (a.paidSoldQty > 0 ? '<span style="color:var(--text-muted);font-style:italic;">?</span>' : '—');
+        return `
+          <tr>
+            <td>
+              <strong>${escapeHtml(a.shortName || a.title)}</strong>
+              ${webLink}
+              ${statusBadge}
+            </td>
+            <td>
+              <span title="Purchased / Paid Sold / Available"><strong>${a.purchasedQty}</strong> / <strong style="color:var(--vintage-blue);">${a.paidSoldQty}</strong> / <strong style="color:${a.availableQty > 0 ? 'var(--success)' : 'var(--danger)'};">${a.availableQty}</strong></span>
+              ${a.unpaidQty > 0 ? `<div style="font-size:0.72rem;color:var(--text-muted);">${a.unpaidQty} unpaid pending</div>` : ''}
+            </td>
+            <td>${costTxt}</td>
+            <td>${totalCostTxt}</td>
+            <td>${a.currentPrice.toLocaleString('fr-DZ')} DA</td>
+            <td>
+              <strong style="color:var(--vintage-blue);">${a.paidSalesRevenue.toLocaleString('fr-DZ')} DA</strong>
+              <div style="font-size:0.72rem;color:var(--text-muted);">${escapeHtml(a.priceBreakdownText)}</div>
+            </td>
+            <td>${cogsTxt}</td>
+            <td>${earnedTxt}</td>
+            <td>
+              <span style="font-size:0.82rem;color:var(--text-muted);">${a.remainingRetailValue.toLocaleString('fr-DZ')} DA retail</span>
+              ${a.remainingCostValue !== null ? `<div style="font-size:0.72rem;color:var(--text-muted);">(${a.remainingCostValue.toLocaleString('fr-DZ')} DA cost)</div>` : ''}
+            </td>
+          </tr>
+        `;
+      }).join('') + `
+        <tr style="background:#F0FDF4;font-weight:700;border-top:2px solid #86EFAC;">
+          <td>TOTAL</td>
+          <td>${acc.purchasedQty} / ${acc.paidSoldQty} / ${acc.available}</td>
+          <td>—</td>
+          <td>${acc.totalPurchaseCost !== null ? acc.totalPurchaseCost.toLocaleString('fr-DZ') + ' DA' : 'Partial'}</td>
+          <td>—</td>
+          <td><strong style="color:var(--vintage-blue);">${acc.revenue.toLocaleString('fr-DZ')} DA</strong></td>
+          <td>${acc.cogs.toLocaleString('fr-DZ')} DA</td>
+          <td><strong style="color:var(--success);">+${acc.grossProfit.toLocaleString('fr-DZ')} DA${acc.hasUnpricedSold ? ' (partial)' : ''}</strong></td>
+          <td>${acc.valuationAtRetail.toLocaleString('fr-DZ')} DA retail</td>
+        </tr>
+      `;
+    }
+  }
+
+  // 3f. Packaging Paper Variants Report Panel
+  const pkgReportTbody = document.getElementById('finance-packaging-report-tbody');
+  if (pkgReportTbody) {
+    if (!pkg.variants || pkg.variants.length === 0) {
+      pkgReportTbody.innerHTML = `<tr><td colspan="9" class="empty-state">No packaging variants configured.</td></tr>`;
+    } else {
+      const cfgSummaryEl = document.getElementById('finance-packaging-config-summary');
+      if (cfgSummaryEl) {
+        const cfg = pkg.config;
+        cfgSummaryEl.textContent = cfg.cmPerWrap !== null
+          ? `${cfg.cmPerWrap} cm per ${cfg.mode === 'per_order' ? 'order' : 'book'} configured${cfg.includeHistorical ? ' • including historical orders' : ''}`
+          : 'Provisional — configure exact wrapping cm per book when measured.';
+      }
+      pkgReportTbody.innerHTML = pkg.variants.map(v => {
+        const purchasedTxt = v.isProvisionalQty
+          ? `~${v.purchasedMeters.toFixed(2)} m (prov.)`
+          : `${v.purchasedMeters.toFixed(2)} m`;
+        const consumedTxt = v.consumedCm !== null
+          ? `${(v.consumedCm / 100).toFixed(2)} m`
+          : '<span style="color:var(--text-muted);font-style:italic;">Not configured</span>';
+        const remainingStyle = v.remainingCm < 50 ? 'color:var(--danger);font-weight:700;' : 'color:var(--success);font-weight:700;';
+        const costTxt = v.isCostConfirmed && v.confirmedTotalPurchaseCost !== null
+          ? `${v.confirmedTotalPurchaseCost.toLocaleString('fr-DZ')} DA <span class="badge badge-green" style="font-size:0.65rem;">Confirmed</span>`
+          : (v.provisionalTotalCostDa !== null
+            ? `~${v.provisionalTotalCostDa.toLocaleString('fr-DZ')} DA <span class="badge badge-amber" style="font-size:0.65rem;">Provisional</span>`
+            : '<span style="color:var(--text-muted);font-style:italic;">Unknown</span>');
+        const profitTxt = v.confirmedGrossProfit !== null
+          ? `<strong style="color:${v.confirmedGrossProfit >= 0 ? 'var(--success)' : 'var(--danger)'};">${v.confirmedGrossProfit >= 0 ? '+' : ''}${v.confirmedGrossProfit.toLocaleString('fr-DZ')} DA</strong>`
+          : (v.paidRevenueDa > 0 ? '<span style="color:var(--text-muted);font-style:italic;">Unknown cost</span>' : '—');
+        return `
+          <tr>
+            <td>
+              <strong>${escapeHtml(v.shortName || v.variantKey)}</strong>
+              ${!v.hasDbLot ? '<div style="font-size:0.72rem;color:var(--text-muted);">Virtual (no DB lot)</div>' : ''}
+            </td>
+            <td>${purchasedTxt}</td>
+            <td>
+              <strong>${v.paidWrapsCount}</strong> paid
+              <div style="font-size:0.72rem;color:var(--text-muted);">${v.totalWrapsAll} total (${v.liveWrapsCount} live${v.historicalWrapsCount > 0 ? `, ${v.historicalWrapsCount} hist` : ''})</div>
+            </td>
+            <td>${consumedTxt}</td>
+            <td style="${remainingStyle}">${v.remainingMeters.toFixed(2)} m</td>
+            <td>${v.sellingPriceDa > 0 ? v.sellingPriceDa.toLocaleString('fr-DZ') + ' DA' : '—'}</td>
+            <td>${costTxt}</td>
+            <td><strong style="color:var(--vintage-blue);">${v.paidRevenueDa.toLocaleString('fr-DZ')} DA</strong></td>
+            <td>${profitTxt}</td>
+          </tr>
+        `;
+      }).join('') + (pkg.legacyKraft && pkg.legacyKraft.wrapsAll > 0 ? `
+        <tr style="background:#FFFBEB;font-style:italic;">
+          <td><strong>Papier Craft (Legacy)</strong><div style="font-size:0.72rem;color:var(--text-muted);">Pre-system, roll not tracked</div></td>
+          <td>—</td>
+          <td><strong>${pkg.legacyKraft.wrapsPaid}</strong> paid / ${pkg.legacyKraft.wrapsAll} total</td>
+          <td>—</td>
+          <td>—</td>
+          <td>500 DA</td>
+          <td><span style="color:var(--text-muted);">Not recorded</span></td>
+          <td><strong style="color:var(--vintage-blue);">${pkg.legacyKraft.paidRevenueDa.toLocaleString('fr-DZ')} DA</strong></td>
+          <td>—</td>
+        </tr>
+      ` : '');
+    }
   }
 
   // 4. Profit Per Title Table
@@ -3526,6 +4963,10 @@ function renderFinanceSection() {
       list = list.filter(tp => tp.isConfirmed);
     } else if (state.profitFilter === 'provisional') {
       list = list.filter(tp => !tp.isConfirmed);
+    } else if (state.profitFilter === 'accessories') {
+      list = list.filter(tp => tp.stockGroup === 'ACCESSORIES');
+    } else if (state.profitFilter === 'packaging') {
+      list = list.filter(tp => tp.stockGroup === 'PACKAGING');
     }
 
     if (state.searchQuery) {
@@ -3540,10 +4981,12 @@ function renderFinanceSection() {
         const isOld = tp.stockGroup === 'OLD_STOCK';
         const isNew = tp.stockGroup === 'NEW_STOCK';
         const isAcc = tp.stockGroup === 'ACCESSORIES';
+        const isPkg = tp.stockGroup === 'PACKAGING';
         const hasSold = tp.quantitySold > 0;
         let badgeClass = 'badge-neutral';
         let badgeLabel = 'HISTORICAL';
-        if (isAcc) { badgeClass = 'badge-neutral'; badgeLabel = 'ACCESSORIES'; }
+        if (isPkg) { badgeClass = 'badge-neutral'; badgeLabel = 'PACKAGING'; }
+        else if (isAcc) { badgeClass = 'badge-neutral'; badgeLabel = 'ACCESSORIES'; }
         else if (isOld) { badgeClass = 'badge-oldstock'; badgeLabel = 'OLD STOCK'; }
         else if (isNew) { badgeClass = 'badge-newstock'; badgeLabel = 'NEW STOCK'; }
 
@@ -4060,8 +5503,15 @@ function formatOrderItems(items) {
     const list = Array.isArray(items) ? items : JSON.parse(items);
     if (Array.isArray(list)) {
       return list.map(item => {
-        let str = typeof item === 'object' ? (item.title || item.name || JSON.stringify(item)) : String(item);
-        return `<div style="margin-bottom: 2px;">• ${escapeHtml(str)}</div>`;
+        const pi = parseOrderItem(item);
+        const isAccItem = !!getWebsiteAccessoryMatch(pi.title) || pi.type === 'accessory' || (typeof item === 'string' && item.includes('[Accessory]'));
+        let str = typeof item === 'object'
+          ? `${pi.title}${pi.qty > 1 ? ` × ${pi.qty}` : ''}`
+          : String(item);
+        const badge = isAccItem
+          ? ` <span class="badge" style="background:#EDE9FE;color:#5B21B6;font-size:0.68rem;">Accessory</span>`
+          : '';
+        return `<div style="margin-bottom: 2px;">• ${escapeHtml(str)}${badge}</div>`;
       }).join('');
     }
     return escapeHtml(String(items));
@@ -4445,12 +5895,41 @@ window.openEditInventoryModal = function(itemId) {
   setVal('edit-inv-author', item.author || '');
   setVal('edit-inv-isbn', item.isbn || '');
   setVal('edit-inv-group', (item.stock_group || '').toUpperCase() === 'OLD_STOCK' ? 'OLD_STOCK' : 'NEW_STOCK');
-  setVal('edit-inv-category', String(item.category || item.item_type || (isAccessoryItem(item) ? 'accessory' : 'book')).toLowerCase());
+  const categoryVal = String(item.category || item.item_type || (isPackagingPaperItem(item) ? 'packaging' : (isAccessoryItem(item) ? 'accessory' : 'book'))).toLowerCase();
+  setVal('edit-inv-category', categoryVal);
   setVal('edit-inv-cost', (item.unit_purchase_cost_da !== null && item.unit_purchase_cost_da !== undefined && !isNaN(item.unit_purchase_cost_da)) ? item.unit_purchase_cost_da : '');
   setVal('edit-inv-price', (item.selling_price_da !== null && item.selling_price_da !== undefined && !isNaN(item.selling_price_da)) ? item.selling_price_da : '');
   setVal('edit-inv-supplier', item.supplier_name || '');
   setVal('edit-inv-location', item.location || '');
-  setVal('edit-inv-notes', item.notes || '');
+  setVal('edit-inv-notes', stripHumanNotes(item.notes || ''));
+
+  // Show/hide packaging-specific section & populate all 5 packaging fields
+  const pkgSection = document.getElementById('edit-inv-pkg-section');
+  if (pkgSection) {
+    const isPkg = categoryVal === 'packaging';
+    pkgSection.style.display = isPkg ? 'block' : 'none';
+    if (isPkg) {
+      const pkgMeta = parseJsonNoteTag(item.notes, 'PKG_META') || {};
+      const defaultMeters = Math.round((Number(item.quantity_received) || 0) / 100 * 100) / 100;
+      setVal('edit-inv-pkg-meters', pkgMeta.purchasedMeters != null ? pkgMeta.purchasedMeters : defaultMeters);
+      setVal('edit-inv-pkg-cm-wrap', (pkgMeta.cmPerWrapOverride != null && Number(pkgMeta.cmPerWrapOverride) > 0) ? pkgMeta.cmPerWrapOverride : '');
+      setVal('edit-inv-pkg-total-paid', pkgMeta.provisionalTotalCostDa != null ? pkgMeta.provisionalTotalCostDa : '');
+      const qtyConfirmedEl = document.getElementById('edit-inv-pkg-qty-confirmed');
+      if (qtyConfirmedEl) qtyConfirmedEl.checked = pkgMeta.isProvisionalQty === false;
+      const costConfirmedEl = document.getElementById('edit-inv-pkg-cost-confirmed');
+      if (costConfirmedEl) costConfirmedEl.checked = !!pkgMeta.isCostConfirmed;
+    }
+  }
+
+  // Add onchange handler to category dropdown to toggle pkg section
+  const catEl = document.getElementById('edit-inv-category');
+  if (catEl && !catEl._pkgHandlerAttached) {
+    catEl._pkgHandlerAttached = true;
+    catEl.addEventListener('change', () => {
+      const ps = document.getElementById('edit-inv-pkg-section');
+      if (ps) ps.style.display = catEl.value === 'packaging' ? 'block' : 'none';
+    });
+  }
 
   openModal('modal-edit-inventory');
 };
@@ -4472,7 +5951,7 @@ window.handleSaveInventoryEdit = async function(event) {
 
   const rawCost = (document.getElementById('edit-inv-cost')?.value || '').trim();
   const rawPrice = (document.getElementById('edit-inv-price')?.value || '').trim();
-  const cost = rawCost !== '' && !isNaN(parseFloat(rawCost)) ? Math.round(parseFloat(rawCost) * 100) / 100 : null;
+  let cost = rawCost !== '' && !isNaN(parseFloat(rawCost)) ? Math.round(parseFloat(rawCost) * 100) / 100 : null;
   const price = rawPrice !== '' && !isNaN(parseFloat(rawPrice)) ? Math.round(parseFloat(rawPrice)) : null;
 
   const stockGroup = document.getElementById('edit-inv-group')?.value === 'OLD_STOCK' ? 'OLD_STOCK' : 'NEW_STOCK';
@@ -4481,8 +5960,61 @@ window.handleSaveInventoryEdit = async function(event) {
   const isbn = (document.getElementById('edit-inv-isbn')?.value || '').trim() || null;
   const supplier = (document.getElementById('edit-inv-supplier')?.value || '').trim() || null;
   const location = (document.getElementById('edit-inv-location')?.value || '').trim() || null;
-  const notes = (document.getElementById('edit-inv-notes')?.value || '').trim() || null;
+  const humanNotes = (document.getElementById('edit-inv-notes')?.value || '').trim();
   const nowIso = new Date().toISOString();
+
+  // Preserve historical system tags ([ACC_HISTORY], [PRICE_HISTORY]) while updating human notes
+  const prevAccHistory = parseJsonNoteTag(item.notes, 'ACC_HISTORY');
+  const prevPriceCheckpoints = parseAllJsonNoteTags(item.notes, 'PRICE_HISTORY');
+  const prevPrice = (item.selling_price_da !== null && item.selling_price_da !== undefined && !isNaN(item.selling_price_da))
+    ? Number(item.selling_price_da)
+    : null;
+
+  // Never overwrite historical sale prices when current selling price changes
+  if (prevPrice !== null && prevPrice > 0 && price !== null && price !== prevPrice) {
+    prevPriceCheckpoints.push({ beforeDate: nowIso, unitPriceDa: prevPrice });
+  }
+
+  let noteParts = [];
+  if (humanNotes) noteParts.push(humanNotes);
+  if (prevAccHistory) noteParts.push(`[ACC_HISTORY:${JSON.stringify(prevAccHistory)}]`);
+  prevPriceCheckpoints.forEach(cp => {
+    if (cp && cp.beforeDate && Number(cp.unitPriceDa) > 0) {
+      noteParts.push(`[PRICE_HISTORY:${JSON.stringify(cp)}]`);
+    }
+  });
+  let notes = noteParts.join(' | ') || null;
+
+  // For packaging items: preserve variantKey/shortName and embed full PKG_META tag
+  if (category === 'packaging') {
+    const existingPkgMeta = parseJsonNoteTag(item.notes, 'PKG_META') || {};
+    const rawMeters = (document.getElementById('edit-inv-pkg-meters')?.value || '').trim();
+    const rawCmWrap = (document.getElementById('edit-inv-pkg-cm-wrap')?.value || '').trim();
+    const rawTotalCost = (document.getElementById('edit-inv-pkg-total-paid')?.value || '').trim();
+    const isQtyConfirmed = !!(document.getElementById('edit-inv-pkg-qty-confirmed')?.checked);
+    const isCostConfirmed = !!(document.getElementById('edit-inv-pkg-cost-confirmed')?.checked);
+
+    const parsedMeters = (rawMeters !== '' && !isNaN(parseFloat(rawMeters))) ? parseFloat(rawMeters) : (existingPkgMeta.purchasedMeters ?? 3);
+    const parsedCmWrap = (rawCmWrap !== '' && !isNaN(parseFloat(rawCmWrap)) && parseFloat(rawCmWrap) > 0) ? Math.round(parseFloat(rawCmWrap)) : null;
+    const parsedTotalCost = (rawTotalCost !== '' && !isNaN(parseFloat(rawTotalCost))) ? parseFloat(rawTotalCost) : null;
+
+    if (isCostConfirmed && parsedTotalCost !== null && parsedMeters > 0 && rawCost === '') {
+      cost = Math.round((parsedTotalCost / (parsedMeters * 100)) * 100) / 100;
+    }
+
+    const pkgMetaPayload = {
+      ...existingPkgMeta,
+      variantKey: existingPkgMeta.variantKey || resolvePackagingVariantKey(title) || null,
+      shortName: existingPkgMeta.shortName || title,
+      purchasedMeters: parsedMeters,
+      cmPerWrapOverride: parsedCmWrap,
+      provisionalTotalCostDa: parsedTotalCost,
+      isProvisionalQty: !isQtyConfirmed,
+      isCostConfirmed,
+      updatedAt: nowIso
+    };
+    notes = upsertJsonNoteTag(notes || '', 'PKG_META', pkgMetaPayload);
+  }
 
   // Merge strictly metadata/pricing updates onto local copy (quantities untouched)
   Object.assign(item, {
@@ -5148,7 +6680,7 @@ window.exportToExcel = function(scope) {
       Title: item.title || '',
       Author: item.author || '',
       ISBN: item.isbn || '',
-      StockGroup: isAccessoryItem(item) ? 'ACCESSORIES' : (item.stock_group || 'OLD_STOCK'),
+      StockGroup: isPackagingPaperItem(item) ? 'PACKAGING' : (isAccessoryItem(item) ? 'ACCESSORIES' : (item.stock_group || 'OLD_STOCK')),
       Category: item.category || item.item_type || 'book',
       Received: Number(item.quantity_received) || 0,
       Sold: Number(item.quantity_sold) || 0,
@@ -5164,7 +6696,7 @@ window.exportToExcel = function(scope) {
       SellingPriceDA: item.selling_price_da !== null && item.selling_price_da !== undefined ? Number(item.selling_price_da) : null,
       Supplier: item.supplier_name || '',
       Location: item.location || '',
-      Notes: item.notes || ''
+      Notes: stripHumanNotes(item.notes || '')
     }));
     const ws = XLSX.utils.json_to_sheet(rows);
     XLSX.utils.book_append_sheet(wb, ws, 'Inventory');
@@ -5237,6 +6769,8 @@ window.exportToExcel = function(scope) {
     { Group: 'ACCESSORIES', Titles: fin.accessories.itemsCount, Sold: fin.accessories.soldQty, OnHand: fin.accessories.onHand, Available: fin.accessories.available, CostValueDA: fin.accessories.valuationAtCost, RetailValueDA: fin.accessories.valuationAtRetail, ExpectedProfitDA: fin.accessories.expectedProfit, MarginPct: fin.accessories.marginPct }
   ];
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(catRows), 'Category Valuation');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(fin.accessories?.breakdown || []), 'Accessories Report');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(fin.packaging?.variants || []), 'Packaging Paper');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(fin.titleProfits), 'Profit By Title');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(state.expenses || []), 'Operating Expenses');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(state.debts || []), 'Debts');
@@ -5286,6 +6820,16 @@ window.viewOrderDetails = function(orderId) {
   const paymentMethod = meta?.payment_method || '';
 
   const allocs = state.orderAllocations ? state.orderAllocations.filter(a => String(a.order_id) === String(orderId)) : [];
+  const rawOrderItems = parseOrderItemsSafe(order);
+  const pkgSpec = PACKAGING_VARIANTS.find(v => v.variantKey === resolvePackagingVariantKey(meta?.packaging_used || order.packaging_type));
+  const pkgLabel = pkgSpec
+    ? `${pkgSpec.shortName}${Number(order.packaging_price) > 0 ? ` (${Number(order.packaging_price).toLocaleString('fr-DZ')} DA)` : ''}`
+    : (order.packaging_type && order.packaging_type !== 'none'
+      ? `${order.packaging_type}${Number(order.packaging_price) > 0 ? ` (${Number(order.packaging_price).toLocaleString('fr-DZ')} DA)` : ''}`
+      : 'None');
+  const orderCorrections = parseAllJsonNoteTags(meta?.notes, 'ORDER_CORRECTION');
+  const orderPkgMeta = parseJsonNoteTag(meta?.notes, 'PKG_META') || {};
+  const canCorrectLineItems = !isHistorical && !['cancelled', 'rejected'].includes(status);
 
   title.textContent = `Order Details #${order.id} — تفاصيل الطلب`;
   body.innerHTML = `
@@ -5308,19 +6852,51 @@ window.viewOrderDetails = function(orderId) {
         </div>
       </div>
 
+      ${orderCorrections.length > 0 ? `
+        <div style="background: #EFF6FF; border: 1px solid #93C5FD; border-radius: 8px; padding: 10px 14px; font-size: 0.82rem;">
+          <div style="font-weight: 700; color: #1E40AF; margin-bottom: 4px;">
+            <i class="fa-solid fa-file-pen"></i> Order Correction Audit Trail (${orderCorrections.length})
+          </div>
+          ${orderCorrections.map(c => {
+            const remNames = Array.isArray(c.removedItems) ? c.removedItems.map(r => `${r.title} (-${Number(r.amountDa || 0).toLocaleString('fr-DZ')} DA)`).join(', ') : '';
+            return `<div style="color: #1E3A8A; margin-top: 3px;">• Removed: <strong>${escapeHtml(remNames)}</strong> • Total: ${Number(c.previousTotalDa || 0).toLocaleString('fr-DZ')} → <strong>${Number(c.correctedTotalDa || 0).toLocaleString('fr-DZ')} DA</strong> (${escapeHtml(c.reason || '')})</div>`;
+          }).join('')}
+        </div>
+      ` : ''}
+
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; background: var(--bg-card-subtle); padding: 14px; border-radius: 8px;">
         <div><strong>Customer:</strong> ${escapeHtml(order.firstName || '')} ${escapeHtml(order.familyName || '')}</div>
         <div><strong>Phone:</strong> ${escapeHtml(order.phoneNumber || '')}</div>
         <div><strong>Instagram:</strong> ${order.instagramUsername ? '@' + escapeHtml(order.instagramUsername) : 'None'}</div>
         <div><strong>Date:</strong> ${formatDate(order.created_at)}</div>
         <div><strong>Delivery:</strong> ${(order.deliveryMethod || '-').toUpperCase()} (${escapeHtml(order.wilaya || '')})</div>
-        <div><strong>Packaging:</strong> ${escapeHtml(order.packaging_type || 'none')}</div>
+        <div><strong>Packaging:</strong> ${escapeHtml(pkgLabel)}</div>
       </div>
 
       <div>
-        <h4 style="font-family: var(--font-serif); margin-bottom: 8px;">Ordered Items (قائمة الكتب):</h4>
+        <h4 style="font-family: var(--font-serif); margin-bottom: 8px;">Ordered Items (قائمة المنتجات):</h4>
         <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
-          ${formatOrderItems(order.items)}
+          ${rawOrderItems.length === 0 ? '<span class="text-muted">-</span>' : rawOrderItems.map((rawItm, idx) => {
+            const pi = parseOrderItem(rawItm);
+            const matchedLot = findInventoryItem(pi.title);
+            const isAccItem = !!getWebsiteAccessoryMatch(pi.title) || pi.type === 'accessory' || (typeof rawItm === 'string' && rawItm.includes('[Accessory]'));
+            const unitRef = resolveOrderItemHistoricalRefPrice(rawItm, matchedLot, order, meta);
+            const labelStr = typeof rawItm === 'object' ? `${pi.title}${pi.qty > 1 ? ` × ${pi.qty}` : ''}` : String(rawItm);
+            return `
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px dashed var(--border-subtle);">
+                <div>
+                  • ${escapeHtml(labelStr)}
+                  ${isAccItem ? '<span class="badge" style="background:#EDE9FE;color:#5B21B6;font-size:0.68rem;margin-left:4px;">Accessory</span>' : ''}
+                  ${unitRef > 0 ? `<span style="font-size:0.76rem;color:var(--text-muted);margin-left:6px;">(${unitRef.toLocaleString('fr-DZ')} DA)</span>` : ''}
+                </div>
+                ${canCorrectLineItems && rawOrderItems.length > 1 ? `
+                  <button type="button" class="btn-secondary" style="padding: 2px 8px; font-size: 0.72rem; color: var(--danger); border-color: #FECDD3;" onclick="openOrderLineCorrection(${order.id}, ${idx})" title="Remove unavailable item &amp; adjust order total">
+                    <i class="fa-solid fa-eraser"></i> Remove / Adjust
+                  </button>
+                ` : ''}
+              </div>
+            `;
+          }).join('')}
         </div>
       </div>
 
@@ -5387,8 +6963,19 @@ window.viewOrderDetails = function(orderId) {
             <input type="text" id="modal-meta-tracking" class="input" value="${escapeHtml(meta?.tracking_number || '')}" placeholder="Tracking number" style="padding: 6px 10px; font-size: 0.85rem;" ${isHistorical ? 'disabled' : ''}>
           </div>
           <div>
-            <label style="font-size: 0.75rem; color: var(--text-muted);">Packaging Used</label>
-            <input type="text" id="modal-meta-packaging" class="input" value="${escapeHtml(meta?.packaging_used || '')}" placeholder="e.g. Bubble envelope, Box" style="padding: 6px 10px; font-size: 0.85rem;" ${isHistorical ? 'disabled' : ''}>
+            <label style="font-size: 0.75rem; color: var(--text-muted);">Packaging Used (Variant)</label>
+            <input type="text" id="modal-meta-packaging" list="pkg-variant-options" class="input" value="${escapeHtml(meta?.packaging_used || '')}" placeholder="e.g. Surprise, Vintage, Christmas, Swan" style="padding: 6px 10px; font-size: 0.85rem;" ${isHistorical ? 'disabled' : ''}>
+            <datalist id="pkg-variant-options">
+              <option value="surprise">Surprise (500 DA)</option>
+              <option value="paper_wildflowers">Vintage Wildflowers (600 DA)</option>
+              <option value="paper_pine_berries">Festive Pine &amp; Berries / Christmas (600 DA)</option>
+              <option value="paper_celestial_crane">Celestial Crane &amp; Mountain / Swan (800 DA)</option>
+              <option value="none">No packaging</option>
+            </datalist>
+          </div>
+          <div>
+            <label style="font-size: 0.75rem; color: var(--text-muted);">Wrapping Used (cm, Optional)</label>
+            <input type="number" id="modal-meta-pkg-cm" class="input" min="0" step="1" value="${orderPkgMeta.cmUsed > 0 ? orderPkgMeta.cmUsed : ''}" placeholder="Uses global cm/wrap" style="padding: 6px 10px; font-size: 0.85rem;" ${isHistorical ? 'disabled' : ''}>
           </div>
           <div>
             <label style="font-size: 0.75rem; color: var(--text-muted);">Packaging Cost (DA)</label>
@@ -5422,7 +7009,7 @@ window.viewOrderDetails = function(orderId) {
           <strong style="font-size: 1.1rem; color: var(--text-muted);">− ${eff.shippingFee.toLocaleString('fr-DZ')} DA</strong>
         </div>
         <div>
-          <div style="font-size: 0.76rem; color: var(--text-muted);">Book Sales Revenue</div>
+          <div style="font-size: 0.76rem; color: var(--text-muted);">Bookstore Revenue</div>
           <strong style="font-size: 1.15rem; color: var(--success);">${eff.bookRevenue.toLocaleString('fr-DZ')} DA</strong>
         </div>
       </div>
@@ -5472,18 +7059,157 @@ window.viewOrderDetails = function(orderId) {
   modal.classList.add('active');
 };
 
+window.openOrderLineCorrection = function(orderId, itemIndex) {
+  const order = (state.orders || []).find(o => String(o.id) === String(orderId));
+  if (!order) return;
+  const isHistorical = !!(order.is_historical || Number(order.id) <= 170);
+  if (isHistorical) {
+    alert('Historical orders are read-only.');
+    return;
+  }
+
+  const rawItems = parseOrderItemsSafe(order);
+  if (itemIndex < 0 || itemIndex >= rawItems.length || rawItems.length <= 1) {
+    alert('Cannot remove the only item in an order — cancel the order instead.');
+    return;
+  }
+
+  const targetRaw = rawItems[itemIndex];
+  const pi = parseOrderItem(targetRaw);
+  const meta = state.orderMeta ? state.orderMeta.find(m => String(m.order_id) === String(order.id)) : null;
+  const matchedLot = findInventoryItem(pi.title);
+  const suggestedUnitPrice = resolveOrderItemHistoricalRefPrice(targetRaw, matchedLot, order, meta);
+  const suggestedDeduction = suggestedUnitPrice > 0 ? Math.round(suggestedUnitPrice * (pi.qty || 1)) : '';
+  const currentTotal = Number(order.total_price) || 0;
+
+  const modal = document.getElementById('generic-modal');
+  const title = document.getElementById('modal-title');
+  const body = document.getElementById('modal-body');
+
+  title.textContent = `Correct Order #${order.id} — تصحيح عنصر غير متوفر`;
+  body.innerHTML = `
+    <form onsubmit="handleCorrectOrderLineSubmit(event, ${order.id}, ${itemIndex})">
+      <div style="background: #FFFBEB; border: 1px solid #FCD34D; border-radius: 8px; padding: 12px; margin-bottom: 14px; font-size: 0.86rem; color: #92400E;">
+        <strong>Removing Unavailable Item:</strong> ${escapeHtml(pi.title)} (×${pi.qty || 1})<br/>
+        All other ${rawItems.length - 1} item(s) in Order #${order.id} will remain preserved and an audit trail record will be saved.
+      </div>
+      <div class="form-row" style="margin-bottom: 12px;">
+        <div class="form-group">
+          <label>Current Order Total (DA)</label>
+          <input type="text" class="form-control" readonly value="${currentTotal.toLocaleString('fr-DZ')} DA" style="background: #F8F5EE;" />
+        </div>
+        <div class="form-group">
+          <label for="corr-deduct-amount">Amount to Remove (DA) *</label>
+          <input type="number" id="corr-deduct-amount" class="form-control" min="0" max="${currentTotal}" step="1" value="${suggestedDeduction}" required />
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom: 14px;">
+        <label for="corr-reason">Correction Reason / Audit Note *</label>
+        <input type="text" id="corr-reason" class="form-control" value="Unavailable item not delivered or taken by customer" required />
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn-secondary" onclick="viewOrderDetails(${order.id})">Back</button>
+        <button type="submit" class="btn-primary"><i class="fa-solid fa-check"></i> Confirm Order Correction</button>
+      </div>
+    </form>
+  `;
+  modal.classList.add('active');
+};
+
+window.handleCorrectOrderLineSubmit = async function(event, orderId, itemIndex) {
+  event.preventDefault();
+  const order = (state.orders || []).find(o => String(o.id) === String(orderId));
+  if (!order) return;
+
+  const rawItems = parseOrderItemsSafe(order);
+  const removedRaw = rawItems[itemIndex];
+  if (removedRaw === undefined) return;
+  const pi = parseOrderItem(removedRaw);
+
+  const deductAmt = parseFloat(document.getElementById('corr-deduct-amount')?.value);
+  const reason = (document.getElementById('corr-reason')?.value || '').trim();
+  const currentTotal = Number(order.total_price) || 0;
+  if (isNaN(deductAmt) || deductAmt < 0 || deductAmt > currentTotal) {
+    alert('Please enter a valid deduction amount between 0 and the current order total.');
+    return;
+  }
+
+  const nextItems = rawItems.filter((_, idx) => idx !== itemIndex);
+  const correctedTotal = Math.max(0, Math.round(currentTotal - deductAmt));
+  const shippingFee = Number(order.shipping_price) || 0;
+  const nowIso = new Date().toISOString();
+
+  const correctionPayload = {
+    orderId: Number(orderId),
+    removedItems: [{
+      raw: typeof removedRaw === 'string' ? removedRaw : pi.title,
+      title: pi.title,
+      qty: pi.qty || 1,
+      unitPriceDa: (pi.qty || 1) > 0 ? Math.round(deductAmt / (pi.qty || 1)) : deductAmt,
+      amountDa: deductAmt
+    }],
+    previousTotalDa: currentTotal,
+    correctedTotalDa: correctedTotal,
+    shippingDa: shippingFee,
+    correctedBookRevenueDa: Math.max(0, correctedTotal - shippingFee),
+    reason: reason || 'Item unavailable and removed from order',
+    correctedAt: nowIso
+  };
+  const auditNote = `Order #${orderId} Correction: Removed "${pi.title} × ${pi.qty || 1}" (-${deductAmt.toLocaleString('fr-DZ')} DA). Total: ${currentTotal.toLocaleString('fr-DZ')} → ${correctedTotal.toLocaleString('fr-DZ')} DA. [ORDER_CORRECTION:${JSON.stringify(correctionPayload)}]`;
+
+  order.items = nextItems;
+  order.total_price = correctedTotal;
+  await idb.put('orders', order);
+
+  let meta = state.orderMeta ? state.orderMeta.find(m => String(m.order_id) === String(orderId)) : null;
+  if (!meta) {
+    meta = {
+      order_id: Number(orderId),
+      fulfillment_status: order.status || 'pending',
+      payment_status: order.payment_status || 'unpaid',
+      notes: auditNote,
+      updated_at: nowIso
+    };
+    if (!state.orderMeta) state.orderMeta = [];
+    state.orderMeta.push(meta);
+  } else {
+    meta.notes = meta.notes ? `${String(meta.notes).trim()}\n${auditNote}` : auditNote;
+    meta.updated_at = nowIso;
+  }
+  await idb.put('order_meta', meta);
+
+  await idb.queueMutation('orders', 'correct_order', {
+    id: Number(orderId),
+    order_id: Number(orderId),
+    items: nextItems,
+    total_price: correctedTotal,
+    audit_note: auditNote
+  });
+
+  renderAppViews();
+  viewOrderDetails(orderId);
+  if (state.online && auth.isAuthenticated()) sync.sync();
+};
+
 window.saveOrderOperationalDetails = async function(orderId) {
   const paymentStatus = document.getElementById('modal-meta-payment-status')?.value || 'unpaid';
   const paymentMethod = (document.getElementById('modal-meta-payment-method')?.value || '').trim();
   const carrier = (document.getElementById('modal-meta-carrier')?.value || '').trim();
   const trackingNumber = (document.getElementById('modal-meta-tracking')?.value || '').trim();
   const packagingUsed = (document.getElementById('modal-meta-packaging')?.value || '').trim();
+  const rawPkgCm = (document.getElementById('modal-meta-pkg-cm')?.value || '').trim();
+  const pkgCmVal = (rawPkgCm !== '' && !isNaN(parseFloat(rawPkgCm)) && parseFloat(rawPkgCm) > 0) ? Math.round(parseFloat(rawPkgCm)) : null;
   const packagingCost = parseFloat(document.getElementById('modal-meta-pkg-cost')?.value) || 0;
   const shippingFee = parseFloat(document.getElementById('modal-meta-ship-fee')?.value) || 0;
   const actualShipping = parseFloat(document.getElementById('modal-meta-act-ship')?.value) || 0;
 
   const orderNumId = Number(orderId);
   let meta = state.orderMeta ? state.orderMeta.find(m => String(m.order_id) === String(orderId)) : null;
+  const prevPkgMetaList = parseAllJsonNoteTags(meta?.notes, 'PKG_META');
+  const prevPkgCm = prevPkgMetaList.length > 0 ? prevPkgMetaList[prevPkgMetaList.length - 1]?.cmUsed : null;
+  const pkgCmChanged = (pkgCmVal !== null && pkgCmVal !== prevPkgCm);
+  const pkgCmNoteAppend = pkgCmChanged ? `[PKG_META:${JSON.stringify({ cmUsed: pkgCmVal, updatedAt: new Date().toISOString() })}]` : null;
+
   if (!meta) {
     meta = {
       order_id: orderNumId,
@@ -5496,6 +7222,7 @@ window.saveOrderOperationalDetails = async function(orderId) {
       packaging_cost_da: packagingCost,
       shipping_fee_da: shippingFee,
       actual_shipping_cost_da: actualShipping,
+      notes: pkgCmNoteAppend || null,
       updated_at: new Date().toISOString()
     };
     if (!state.orderMeta) state.orderMeta = [];
@@ -5509,6 +7236,9 @@ window.saveOrderOperationalDetails = async function(orderId) {
     meta.packaging_cost_da = packagingCost;
     meta.shipping_fee_da = shippingFee;
     meta.actual_shipping_cost_da = actualShipping;
+    if (pkgCmNoteAppend) {
+      meta.notes = meta.notes ? `${String(meta.notes).trim()}\n${pkgCmNoteAppend}` : pkgCmNoteAppend;
+    }
     meta.updated_at = new Date().toISOString();
   }
   await idb.put('order_meta', meta);
@@ -5523,7 +7253,8 @@ window.saveOrderOperationalDetails = async function(orderId) {
     p_shipping_fee_da: shippingFee,
     p_actual_shipping_cost_da: actualShipping,
     p_payment_status: paymentStatus,
-    p_payment_method: paymentMethod || null
+    p_payment_method: paymentMethod || null,
+    ...(pkgCmNoteAppend ? { p_notes: pkgCmNoteAppend } : {})
   });
 
   renderAppViews();

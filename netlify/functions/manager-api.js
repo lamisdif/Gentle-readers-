@@ -232,6 +232,76 @@ exports.handler = async function (event) {
       return jsonResponse(200, { success: true, result: respData });
     }
 
+    if (action === 'correct_order') {
+      const orderNum = parseInt(body.order_id, 10);
+      const nextItems = body.items;
+      const nextTotal = Number(body.total_price);
+      const auditNote = (typeof body.audit_note === 'string') ? body.audit_note.trim() : '';
+
+      if (!Number.isInteger(orderNum) || orderNum <= 0 || !Array.isArray(nextItems) || isNaN(nextTotal) || nextTotal < 0) {
+        return jsonResponse(400, { error: 'Invalid order correction payload: requires integer order_id, items array, and non-negative total_price.' });
+      }
+
+      const existingResp = await fetch(`${supabaseUrl}/rest/v1/orders?id=eq.${orderNum}&select=id,items,total_price,shipping_price,packaging_price,is_historical`, { headers });
+      if (!existingResp.ok) {
+        return jsonResponse(existingResp.status, { error: 'Failed to inspect target order before correction.' });
+      }
+      const existingRows = await existingResp.json();
+      if (!Array.isArray(existingRows) || existingRows.length === 0) {
+        return jsonResponse(404, { error: `Order #${orderNum} not found.` });
+      }
+      const existingOrder = existingRows[0];
+      if (orderNum <= 170 || existingOrder.is_historical) {
+        return jsonResponse(403, { error: `Order #${orderNum} is an archived historical order and cannot be modified.` });
+      }
+
+      const patchResp = await fetch(`${supabaseUrl}/rest/v1/orders?id=eq.${orderNum}`, {
+        method: 'PATCH',
+        headers: { ...headers, 'Prefer': 'return=representation' },
+        body: JSON.stringify({
+          items: nextItems,
+          total_price: nextTotal
+        })
+      });
+      if (!patchResp.ok) {
+        const errText = await patchResp.text();
+        return jsonResponse(patchResp.status, { error: `Order #${orderNum} update failed: ${errText}` });
+      }
+      const updatedOrder = await patchResp.json();
+
+      if (auditNote) {
+        const metaResp = await fetch(`${supabaseUrl}/rest/v1/order_meta?order_id=eq.${orderNum}&select=order_id,notes`, { headers });
+        const metaRows = metaResp.ok ? await metaResp.json() : [];
+        const existingNotes = (Array.isArray(metaRows) && metaRows[0]?.notes) ? String(metaRows[0].notes).trim() : '';
+        const alreadyLogged = existingNotes && existingNotes.includes(auditNote);
+        const mergedNotes = alreadyLogged ? existingNotes : (existingNotes ? `${existingNotes}\n${auditNote}` : auditNote);
+
+        if (Array.isArray(metaRows) && metaRows.length > 0) {
+          if (!alreadyLogged) {
+            await fetch(`${supabaseUrl}/rest/v1/order_meta?order_id=eq.${orderNum}`, {
+              method: 'PATCH',
+              headers: { ...headers, 'Prefer': 'return=minimal' },
+              body: JSON.stringify({ notes: mergedNotes, updated_at: new Date().toISOString() })
+            });
+          }
+        } else {
+          await fetch(`${supabaseUrl}/rest/v1/order_meta`, {
+            method: 'POST',
+            headers: { ...headers, 'Prefer': 'return=minimal' },
+            body: JSON.stringify({
+              order_id: orderNum,
+              fulfillment_status: 'pending',
+              payment_status: 'unpaid',
+              notes: mergedNotes,
+              updated_at: new Date().toISOString()
+            })
+          });
+        }
+      }
+
+      return jsonResponse(200, { success: true, result: updatedOrder });
+    }
+
     if (action === 'rpc') {
       const rpcName = body.rpc_name;
       const params = body.params || {};
