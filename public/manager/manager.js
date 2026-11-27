@@ -4996,7 +4996,7 @@ function renderOrdersTable() {
         <td>
           <div style="font-weight: 600;">${escapeHtml(o.firstName || '')} ${escapeHtml(o.familyName || '')}</div>
           <div style="font-size: 0.8rem; color: var(--text-muted);">${escapeHtml(o.phoneNumber || '')}</div>
-          ${o.instagramUsername ? `<div style="font-size: 0.78rem; color: #B33D62;">@${escapeHtml(o.instagramUsername)}</div>` : ''}
+          ${o.instagramUsername ? `<div style="font-size: 0.78rem; color: var(--danger);">@${escapeHtml(o.instagramUsername)}</div>` : ''}
         </td>
         <td style="font-size: 0.86rem; max-width: 300px;">${formatOrderItems(o.items)}</td>
         <td style="white-space: nowrap;">
@@ -5014,9 +5014,16 @@ function renderOrdersTable() {
           ${!isHist ? `<div style="font-size: 0.74rem; color: ${paymentStatus === 'paid' ? 'var(--success)' : 'var(--text-muted)'}; margin-top: 3px;">${escapeHtml(paymentStatus.toUpperCase())}</div>` : ''}
         </td>
         <td>
-          <button class="btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="viewOrderDetails(${o.id})">
-            <i class="fa-regular fa-eye"></i> Manage
-          </button>
+          <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+            ${!isHist && paymentStatus !== 'paid' && !['cancelled', 'rejected'].includes(status) ? `
+              <button type="button" class="btn-secondary btn-xs btn-mark-paid" onclick="confirmOrderPaid(${o.id})" title="Mark Order #${o.id} as Paid">
+                <i class="fa-solid fa-check"></i> Paid
+              </button>
+            ` : ''}
+            <button type="button" class="btn-secondary btn-xs" onclick="viewOrderDetails(${o.id})">
+              <i class="fa-regular fa-eye"></i> Manage
+            </button>
+          </div>
         </td>
       </tr>
     `;
@@ -7920,7 +7927,7 @@ window.viewOrderDetails = function(orderId) {
   title.textContent = `Order Details #${order.id} — تفاصيل الطلب`;
   body.innerHTML = `
     <div style="display: flex; flex-direction: column; gap: 16px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; background: #F8F5EE; padding: 10px 14px; border-radius: 8px; flex-wrap: wrap; gap: 8px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-card-subtle); padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-subtle); flex-wrap: wrap; gap: 8px;">
         <div>
           <span style="font-size: 0.85rem; color: var(--text-muted);">Fulfillment:</span>
           <span class="badge ${status === 'delivered' ? 'badge-green' : (status === 'cancelled' ? 'badge-rose' : 'badge-gold')}" style="margin-left: 6px; font-weight: bold;">
@@ -7939,13 +7946,13 @@ window.viewOrderDetails = function(orderId) {
       </div>
 
       ${orderCorrections.length > 0 ? `
-        <div style="background: #EFF6FF; border: 1px solid #93C5FD; border-radius: 8px; padding: 10px 14px; font-size: 0.82rem;">
-          <div style="font-weight: 700; color: #1E40AF; margin-bottom: 4px;">
+        <div style="background: var(--vintage-blue-soft); border: 1px solid var(--vintage-blue-border); border-radius: 10px; padding: 10px 14px; font-size: 0.82rem;">
+          <div style="font-weight: 700; color: var(--vintage-blue); margin-bottom: 4px;">
             <i class="fa-solid fa-file-pen"></i> Order Correction Audit Trail (${orderCorrections.length})
           </div>
           ${orderCorrections.map(c => {
             const remNames = Array.isArray(c.removedItems) ? c.removedItems.map(r => `${r.title} (-${Number(r.amountDa || 0).toLocaleString('fr-DZ')} DA)`).join(', ') : '';
-            return `<div style="color: #1E3A8A; margin-top: 3px;">• Removed: <strong>${escapeHtml(remNames)}</strong> • Total: ${Number(c.previousTotalDa || 0).toLocaleString('fr-DZ')} → <strong>${Number(c.correctedTotalDa || 0).toLocaleString('fr-DZ')} DA</strong> (${escapeHtml(c.reason || '')})</div>`;
+            return `<div style="color: var(--text-secondary); margin-top: 3px;">• Removed: <strong>${escapeHtml(remNames)}</strong> • Total: ${Number(c.previousTotalDa || 0).toLocaleString('fr-DZ')} → <strong>${Number(c.correctedTotalDa || 0).toLocaleString('fr-DZ')} DA</strong> (${escapeHtml(c.reason || '')})</div>`;
           }).join('')}
         </div>
       ` : ''}

@@ -9,7 +9,7 @@
   <link rel="icon" type="image/svg+xml" href="../img/Perfectly made ones right.svg" />
   <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png" />
-  <meta name="theme-color" content="#FFF9EC" />
+  <meta name="theme-color" content="#FAF4E6" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="GR Manager" />
@@ -18,11 +18,11 @@
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500&family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-  <!-- Bespoke Vintage Stylesheet -->
-  <link rel="stylesheet" href="manager.css?v=26" />
+  <!-- Bespoke Vintage Journal Stylesheet -->
+  <link rel="stylesheet" href="manager.css?v=29" />
   <style>
     /* Critical shell protection: prevent unstyled modal flash before CSS finishes parsing */
     .modal-overlay { display: none !important; }
@@ -94,17 +94,12 @@
       </div>
     </div>
 
-    <!-- 9 Main Navigation Sections -->
+    <!-- Grouped Vintage Journal Navigation -->
     <nav class="sidebar-nav">
+      <div class="nav-group-label">Bookshop Desk</div>
       <a class="nav-item active" data-section="dashboard">
         <i class="fa-solid fa-compass"></i>
         <span>Dashboard / لوحة القيادة</span>
-      </a>
-
-      <a class="nav-item" data-section="inventory">
-        <i class="fa-solid fa-book-bookmark"></i>
-        <span>Inventory / المخزون</span>
-        <span id="inventory-nav-badge" class="nav-badge">-</span>
       </a>
 
       <a class="nav-item" data-section="orders">
@@ -119,19 +114,27 @@
         <span id="paid-orders-nav-badge" class="nav-badge">-</span>
       </a>
 
+      <div class="nav-group-label">Collection &amp; Stock</div>
+      <a class="nav-item" data-section="inventory">
+        <i class="fa-solid fa-book-bookmark"></i>
+        <span>Inventory / المخزون</span>
+        <span id="inventory-nav-badge" class="nav-badge">-</span>
+      </a>
+
       <a class="nav-item" data-section="purchases">
         <i class="fa-solid fa-boxes-packing"></i>
         <span>Purchases / المشتريات</span>
       </a>
 
-      <a class="nav-item" data-section="expenses">
-        <i class="fa-solid fa-receipt"></i>
-        <span>Expenses / المصاريف</span>
-      </a>
-
+      <div class="nav-group-label">Ledger &amp; Growth</div>
       <a class="nav-item" data-section="finance">
         <i class="fa-solid fa-coins"></i>
         <span>Finance / المالية والأرباح</span>
+      </a>
+
+      <a class="nav-item" data-section="expenses">
+        <i class="fa-solid fa-receipt"></i>
+        <span>Expenses / المصاريف</span>
       </a>
 
       <a class="nav-item" data-section="debts">
@@ -144,6 +147,7 @@
         <span>Advertising / الإعلانات</span>
       </a>
 
+      <div class="nav-group-label">System</div>
       <a class="nav-item" data-section="settings">
         <i class="fa-solid fa-gear"></i>
         <span>Settings / الإعدادات</span>
@@ -156,7 +160,7 @@
         <div class="owner-avatar">LD</div>
         <div class="owner-info">
           <span class="owner-name">Lamis Dif</span>
-          <span class="owner-role">Store Owner & Founder • v26</span>
+          <span class="owner-role">Store Owner & Founder • v29</span>
         </div>
       </div>
       <button id="logout-btn" class="logout-btn" title="Log Out / تسجيل الخروج">
@@ -181,8 +185,8 @@
 
       <div class="header-right">
         <!-- Excel Importer Quick Button -->
-        <button class="btn-secondary" style="padding: 6px 14px; font-size: 0.82rem; display: flex; align-items: center; gap: 6px;" onclick="openExcelImportModal()">
-          <i class="fa-solid fa-file-excel" style="color: #1D6F42;"></i>
+        <button class="btn-secondary header-pill-btn" onclick="openExcelImportModal()">
+          <i class="fa-solid fa-file-excel" style="color: var(--success);"></i>
           <span>Import Excel</span>
         </button>
 
@@ -198,8 +202,8 @@
         </div>
 
         <!-- Push Notifications Activation Pill -->
-        <button id="push-notification-btn" class="date-pill" onclick="enablePushNotifications()" title="Enable Phone Push Notifications / تفعيل إشعارات الهاتف" style="cursor: pointer; border: 1px solid var(--border-color); background: var(--bg-card); display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; font-size: 13px;">
-          <i class="fa-solid fa-bell" style="color: #0284c7;"></i>
+        <button id="push-notification-btn" class="btn-secondary header-pill-btn" onclick="enablePushNotifications()" title="Enable Phone Push Notifications / تفعيل إشعارات الهاتف">
+          <i class="fa-solid fa-bell" style="color: var(--vintage-blue);"></i>
           <span>Notifications</span>
         </button>
       </div>
@@ -214,10 +218,21 @@
       <section id="section-dashboard" class="section-view active">
         <div class="dashboard-overview">
           
-          <!-- Cozy Vintage Welcome Banner -->
+          <!-- Warm Stationery Sanctuary Welcome Banner -->
           <div class="welcome-banner">
-            <h3>Gentle Readers Management System</h3>
-            <p>Welcome back, Lamis. Here is your bookstore's live status, real orders history, and book fair batch progress.</p>
+            <div class="welcome-copy">
+              <div class="welcome-eyebrow"><i class="fa-solid fa-feather-pointed"></i> Bookstore Journal &bull; مفكرة المكتبة</div>
+              <h3>Gentle Readers Sanctuary</h3>
+              <p>Welcome back, Lamis. A calm overview of today’s orders, book collection valuation, and verified ledger profit.</p>
+            </div>
+            <div class="welcome-quick-actions">
+              <button class="btn-secondary" onclick="switchSection('orders'); setOrdersFilter('pending');">
+                <i class="fa-solid fa-inbox"></i> Review Orders
+              </button>
+              <button class="btn-primary" onclick="switchSection('paid-orders')">
+                <i class="fa-solid fa-book-open-reader"></i> Paid Ledger
+              </button>
+            </div>
           </div>
 
           <!-- Minimal Key Metrics Grid (4 Core Figures Only) -->
@@ -314,6 +329,10 @@
                 </div>
                 <div class="panel-body">
                   <div class="action-buttons-list">
+                    <button class="action-btn" onclick="switchSection('orders'); setOrdersFilter('pending');">
+                      <i class="fa-solid fa-hourglass-half"></i>
+                      <span>Pending Orders / الطلبات قيد التأكيد</span>
+                    </button>
                     <button class="action-btn" onclick="switchSection('paid-orders')">
                       <i class="fa-solid fa-circle-check"></i>
                       <span>View Paid Orders &amp; Profit / الطلبات المدفوعة</span>
@@ -325,6 +344,10 @@
                     <button class="action-btn" onclick="openModal('modal-add-expense')">
                       <i class="fa-solid fa-receipt"></i>
                       <span>Record Expense / إضافة مصروف</span>
+                    </button>
+                    <button class="action-btn" onclick="switchSection('inventory'); openModal('modal-add-inventory');">
+                      <i class="fa-solid fa-book-medical"></i>
+                      <span>Add Book or Accessory / إضافة منتج</span>
                     </button>
                   </div>
                 </div>
@@ -351,10 +374,10 @@
               <i class="fa-solid fa-sliders"></i> Adjust Stock / تسوية
             </button>
             <button class="btn-secondary" onclick="exportToExcel('inventory')">
-              <i class="fa-solid fa-file-arrow-down" style="color: #1D6F42;"></i> Export Excel
+              <i class="fa-solid fa-file-arrow-down" style="color: var(--success);"></i> Export Excel
             </button>
             <button class="btn-secondary" onclick="openExcelImportModal()">
-              <i class="fa-solid fa-file-excel" style="color: #1D6F42;"></i> Import Excel (.xlsx)
+              <i class="fa-solid fa-file-excel" style="color: var(--success);"></i> Import Excel (.xlsx)
             </button>
             <button class="btn-primary" onclick="openModal('modal-add-inventory')">
               <i class="fa-solid fa-plus"></i> Add Item
@@ -403,7 +426,7 @@
               </tbody>
             </table>
           </div>
-          <div id="inventory-pagination" style="padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; border-top: 1px solid var(--border-color); flex-wrap: wrap;"></div>
+          <div id="inventory-pagination" class="pagination-bar"></div>
         </div>
       </section>
 
@@ -454,7 +477,7 @@
               </tbody>
             </table>
           </div>
-          <div id="orders-pagination" style="padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; border-top: 1px solid var(--border-color); flex-wrap: wrap;"></div>
+          <div id="orders-pagination" class="pagination-bar"></div>
         </div>
       </section>
 
@@ -469,7 +492,7 @@
           </div>
           <div style="display: flex; gap: 10px; flex-wrap: wrap;">
             <button class="btn-secondary" onclick="exportToExcel('paid-orders')">
-              <i class="fa-solid fa-file-arrow-down" style="color: #1D6F42;"></i> Export Paid Orders (.xlsx)
+              <i class="fa-solid fa-file-arrow-down" style="color: var(--success);"></i> Export Paid Orders (.xlsx)
             </button>
             <button class="btn-secondary" onclick="triggerManualSync()">
               <i class="fa-solid fa-rotate"></i> Refresh from Supabase
@@ -535,7 +558,7 @@
               </tbody>
             </table>
           </div>
-          <div id="paid-orders-pagination" style="padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; border-top: 1px solid var(--border-color); flex-wrap: wrap;"></div>
+          <div id="paid-orders-pagination" class="pagination-bar"></div>
         </div>
       </section>
 
@@ -547,7 +570,7 @@
           <h3 style="font-family: var(--font-serif); font-size: 1.25rem;">Purchase Batches & Supplier Records</h3>
           <div style="display: flex; gap: 10px;">
             <button class="btn-secondary" onclick="openExcelImportModal()">
-              <i class="fa-solid fa-file-excel" style="color: #1D6F42;"></i> Import Batches (.xlsx)
+              <i class="fa-solid fa-file-excel" style="color: var(--success);"></i> Import Batches (.xlsx)
             </button>
             <button class="btn-primary" onclick="openModal('modal-add-batch')">
               <i class="fa-solid fa-plus"></i> New Purchase Batch
@@ -651,10 +674,10 @@
               <i class="fa-solid fa-minus-circle"></i> Withdrawal / مسحوبات المالك
             </button>
             <button class="btn-secondary" onclick="openExcelImportModal()">
-              <i class="fa-solid fa-file-excel" style="color: #1D6F42;"></i> Import Excel
+              <i class="fa-solid fa-file-excel" style="color: var(--success);"></i> Import Excel
             </button>
             <button class="btn-secondary" onclick="exportToExcel('finance')">
-              <i class="fa-solid fa-file-arrow-down" style="color: #1D6F42;"></i> Export Report (.xlsx)
+              <i class="fa-solid fa-file-arrow-down" style="color: var(--success);"></i> Export Report (.xlsx)
             </button>
             <button class="btn-secondary" onclick="exportLocalBackup()">
               <i class="fa-solid fa-download"></i> Export Ledger (JSON)
@@ -775,10 +798,10 @@
           </div>
 
           <!-- Combined Book Inventory Card -->
-          <div class="profit-group-card" style="border-top-color: #0F766E;">
+          <div class="profit-group-card books-combined">
             <div class="profit-group-header">
               <div>
-                <span class="badge" style="background: #CCFBF1; color: #0F766E; font-weight: 700;"><i class="fa-solid fa-book-bookmark"></i> COMBINED BOOKS</span>
+                <span class="badge badge-green"><i class="fa-solid fa-book-bookmark"></i> COMBINED BOOKS</span>
                 <h4 style="margin-top: 4px;">Total Book Inventory / إجمالي الكتب</h4>
               </div>
               <span id="finance-combined-books-status" class="badge badge-green"><i class="fa-solid fa-check"></i> Syncing...</span>
@@ -807,13 +830,13 @@
           </div>
 
           <!-- Accessories Card (Standalone / Separate from Books & Packaging) -->
-          <div id="finance-accessories-card" class="profit-group-card" style="border-top-color: #6D28D9;">
+          <div id="finance-accessories-card" class="profit-group-card accessories-card">
             <div class="profit-group-header">
               <div>
-                <span class="badge" style="background: #EDE9FE; color: #5B21B6;"><i class="fa-solid fa-gem"></i> ACCESSORIES (SEPARATE)</span>
+                <span class="badge badge-plum"><i class="fa-solid fa-gem"></i> ACCESSORIES (SEPARATE)</span>
                 <h4 style="margin-top: 4px;">Bookmarks &amp; Reading Lists / الفواصل</h4>
               </div>
-              <span id="finance-accessories-status" class="badge" style="background: #EDE9FE; color: #5B21B6;"><i class="fa-solid fa-check"></i> Syncing...</span>
+              <span id="finance-accessories-status" class="badge badge-plum"><i class="fa-solid fa-check"></i> Syncing...</span>
             </div>
             <div class="profit-metrics-row">
               <div class="profit-metric-item">
@@ -839,13 +862,13 @@
           </div>
 
           <!-- Packaging Paper Card (Standalone Variants & Meter/cm Consumption) -->
-          <div id="finance-packaging-card" class="profit-group-card" style="border-top-color: #B45309;">
+          <div id="finance-packaging-card" class="profit-group-card packaging-card">
             <div class="profit-group-header">
               <div>
-                <span class="badge" style="background: #FEF3C7; color: #92400E;"><i class="fa-solid fa-gift"></i> PACKAGING PAPER (SEPARATE)</span>
+                <span class="badge badge-gold"><i class="fa-solid fa-gift"></i> PACKAGING PAPER (SEPARATE)</span>
                 <h4 style="margin-top: 4px;">Wrapping Paper Variants / ورق التغليف</h4>
               </div>
-              <span id="finance-packaging-status" class="badge" style="background: #FEF3C7; color: #92400E;"><i class="fa-solid fa-ruler"></i> Provisional</span>
+              <span id="finance-packaging-status" class="badge badge-gold"><i class="fa-solid fa-ruler"></i> Provisional</span>
             </div>
             <div class="profit-metrics-row">
               <div class="profit-metric-item">
@@ -876,7 +899,7 @@
         <div id="finance-accessories-report-panel" class="card-panel" style="margin-bottom: 20px;">
           <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <div>
-              <h4><i class="fa-solid fa-bookmark" style="color: #6D28D9;"></i> Accessories Financial Report / تقرير أرباح الفواصل والملحقات</h4>
+              <h4><i class="fa-solid fa-bookmark" style="color: var(--plum);"></i> Accessories Financial Report / تقرير أرباح الفواصل والملحقات</h4>
               <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">
                 Separate revenue, purchase cost, COGS, earned gross profit from paid sales, and remaining stock valuation (historical sale prices preserved).
               </p>
@@ -911,7 +934,7 @@
         <div id="finance-packaging-report-panel" class="card-panel" style="margin-bottom: 20px;">
           <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <div>
-              <h4><i class="fa-solid fa-gift" style="color: #B45309;"></i> Packaging Paper Variants &amp; Consumption / تقرير ورق التغليف والاستهلاك</h4>
+              <h4><i class="fa-solid fa-gift" style="color: var(--vintage-gold-dark);"></i> Packaging Paper Variants &amp; Consumption / تقرير ورق التغليف والاستهلاك</h4>
               <p id="finance-packaging-config-summary" style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">
                 Provisional quantities &amp; purchase totals — configure exact wrapping cm per book when measured.
               </p>
@@ -987,7 +1010,7 @@
               </tbody>
             </table>
           </div>
-          <div id="finance-titles-pagination" style="padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; border-top: 1px solid var(--border-color); flex-wrap: wrap;"></div>
+          <div id="finance-titles-pagination" class="pagination-bar"></div>
         </div>
 
         <!-- Monthly & Yearly Financial Summaries (Single Unified Source) -->
@@ -1241,7 +1264,7 @@
                   <i class="fa-solid fa-sync"></i> Test Full Synchronization
                 </button>
                 <button class="btn-secondary" onclick="forceUpdateApp()">
-                  <i class="fa-solid fa-broom"></i> Force App Update / Clear Cache (v28)
+                  <i class="fa-solid fa-broom"></i> Force App Update / Clear Cache (v29)
                 </button>
               </div>
             </div>
@@ -1778,7 +1801,7 @@
   <div class="modal-card importer-modal-card">
     <div class="modal-header">
       <div style="display: flex; align-items: center; gap: 10px;">
-        <i class="fa-solid fa-file-excel" style="font-size: 1.5rem; color: #1D6F42;"></i>
+        <i class="fa-solid fa-file-excel" style="font-size: 1.5rem; color: var(--success);"></i>
         <div>
           <h3 style="margin: 0; font-size: 1.2rem;">Import Bookstore Excel Workbook</h3>
           <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0;">استيراد سجلات المخزون والديون من ملف الإكسيل</p>
@@ -2225,6 +2248,6 @@
     document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>');
   }
 </script>
-<script src="manager.js?v=28"></script>
+<script src="manager.js?v=29"></script>
 </body>
 </html>
