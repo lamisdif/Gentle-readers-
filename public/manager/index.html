@@ -9,7 +9,7 @@
   <link rel="icon" type="image/svg+xml" href="../img/Perfectly made ones right.svg" />
   <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png" />
-  <meta name="theme-color" content="#FAF4E6" />
+  <meta name="theme-color" content="#FCF6EA" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="GR Manager" />
@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <!-- Bespoke Vintage Journal Stylesheet -->
-  <link rel="stylesheet" href="manager.css?v=29" />
+  <link rel="stylesheet" href="manager.css?v=30" />
   <style>
     /* Critical shell protection: prevent unstyled modal flash before CSS finishes parsing */
     .modal-overlay { display: none !important; }
@@ -160,7 +160,7 @@
         <div class="owner-avatar">LD</div>
         <div class="owner-info">
           <span class="owner-name">Lamis Dif</span>
-          <span class="owner-role">Store Owner & Founder • v29</span>
+          <span class="owner-role">Store Owner & Founder • v30</span>
         </div>
       </div>
       <button id="logout-btn" class="logout-btn" title="Log Out / تسجيل الخروج">
@@ -1264,7 +1264,7 @@
                   <i class="fa-solid fa-sync"></i> Test Full Synchronization
                 </button>
                 <button class="btn-secondary" onclick="forceUpdateApp()">
-                  <i class="fa-solid fa-broom"></i> Force App Update / Clear Cache (v29)
+                  <i class="fa-solid fa-broom"></i> Force App Update / Clear Cache (v30)
                 </button>
               </div>
             </div>
@@ -1848,7 +1848,7 @@
         </div>
 
         <!-- Sheet Warnings Banner (Alerts if rows are missing cost, price, or quantity) -->
-        <div id="importer-warning-banner" style="display: none; margin-bottom: 12px; padding: 10px 14px; border-radius: 6px; background: #FFFBEB; border: 1px solid #FCD34D; color: #92400E; font-size: 0.84rem; line-height: 1.5;"></div>
+        <div id="importer-warning-banner" style="display: none; margin-bottom: 12px; padding: 10px 14px; border-radius: 9px; background: var(--warning-bg); border: 1px solid var(--warning-border); color: var(--warning); font-size: 0.84rem; line-height: 1.5;"></div>
 
         <!-- Sheet Controls & Row Count Header -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
@@ -1947,11 +1947,11 @@
               <div class="stat-lbl">New Stock Titles</div>
             </div>
             <div class="importer-stat-box">
-              <div id="report-old-stock-count" class="stat-val" style="color: #8C5523;">0</div>
+              <div id="report-old-stock-count" class="stat-val" style="color: var(--warning);">0</div>
               <div class="stat-lbl">Old Stock Titles</div>
             </div>
             <div class="importer-stat-box">
-              <div id="report-accessories-count" class="stat-val" style="color: #6D28D9;">0</div>
+              <div id="report-accessories-count" class="stat-val" style="color: var(--plum);">0</div>
               <div class="stat-lbl">Accessories & Bookmarks</div>
             </div>
             <div class="importer-stat-box">
@@ -1967,7 +1967,7 @@
               <div class="stat-lbl">Duplicates Skipped</div>
             </div>
             <div class="importer-stat-box">
-              <div id="report-null-costs-count" class="stat-val" style="color: #B45309;">0</div>
+              <div id="report-null-costs-count" class="stat-val" style="color: var(--warning);">0</div>
               <div class="stat-lbl">Unknown Costs (NULL)</div>
             </div>
           </div>
@@ -2064,8 +2064,8 @@
           </div>
         </div>
 
-        <div id="edit-inv-pkg-section" style="display: none; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 12px 14px; margin-bottom: 14px;">
-          <div style="font-weight: 700; font-size: 0.86rem; color: #92400E; margin-bottom: 8px;">
+        <div id="edit-inv-pkg-section" style="display: none; background: var(--warning-bg); border: 1px solid var(--warning-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px;">
+          <div style="font-weight: 700; font-size: 0.86rem; color: var(--warning); margin-bottom: 8px;">
             <i class="fa-solid fa-gift"></i> Packaging Paper Stock &amp; Provisional Cost Settings
           </div>
           <div class="form-row">
@@ -2248,6 +2248,6 @@
     document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>');
   }
 </script>
-<script src="manager.js?v=29"></script>
+<script src="manager.js?v=30"></script>
 </body>
 </html>

@@ -1632,15 +1632,15 @@ class SyncCoordinator {
 
     if (status === 'synced') {
       dot.className = 'status-dot';
-      dot.style.background = '#10B981';
+      dot.style.background = 'var(--success)';
       text.textContent = 'Online & Synced';
     } else if (status === 'syncing') {
       dot.className = 'status-dot syncing';
-      dot.style.background = '#3B82F6';
+      dot.style.background = 'var(--vintage-blue)';
       text.textContent = 'Syncing...';
     } else if (status === 'permission_pending') {
       dot.className = 'status-dot';
-      dot.style.background = '#10B981';
+      dot.style.background = 'var(--success)';
       text.textContent = 'Online & Synced';
     } else if (status === 'offline') {
       dot.className = 'status-dot offline';
@@ -1648,11 +1648,11 @@ class SyncCoordinator {
       text.textContent = 'Offline (IndexedDB)';
     } else if (status === 'error') {
       dot.className = 'status-dot';
-      dot.style.background = '#10B981';
+      dot.style.background = 'var(--success)';
       text.textContent = 'Online & Synced';
     } else if (status === 'unauthenticated') {
       dot.className = 'status-dot offline';
-      dot.style.background = '#F59E0B';
+      dot.style.background = 'var(--warning)';
       text.textContent = 'Login Required';
     }
   }
@@ -5254,8 +5254,8 @@ function renderInventoryTable() {
       groupBanner.innerHTML = `
         <div class="panel-body" style="padding: 14px 18px;">
           <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
-            <strong><i class="fa-solid fa-gem" style="color: #6D28D9;"></i> Accessories Stock &amp; Separate Profit Summary</strong>
-            <span class="badge" style="background: #EDE9FE; color: #5B21B6;">Linked to Website Products</span>
+            <strong><i class="fa-solid fa-gem" style="color: var(--plum);"></i> Accessories Stock &amp; Separate Profit Summary</strong>
+            <span class="badge" style="background: var(--plum-bg); color: var(--plum);">Linked to Website Products</span>
           </div>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; font-size: 0.86rem;">
             <div><span style="color: var(--text-muted);">Purchased / Paid Sold / Avail:</span><br/><strong>${acc.purchasedQty} / ${acc.paidSoldQty} / ${acc.available}</strong></div>
@@ -5270,7 +5270,7 @@ function renderInventoryTable() {
       groupBanner.innerHTML = `
         <div class="panel-body" style="padding: 14px 18px;">
           <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
-            <strong><i class="fa-solid fa-gift" style="color: #B45309;"></i> Packaging Paper Variants &amp; Consumption</strong>
+            <strong><i class="fa-solid fa-gift" style="color: var(--warning);"></i> Packaging Paper Variants &amp; Consumption</strong>
             <button class="btn-secondary" style="padding: 4px 10px; font-size: 0.78rem;" onclick="openPackagingConfigModal()"><i class="fa-solid fa-sliders"></i> Configure cm/wrap</button>
           </div>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; font-size: 0.86rem;">
@@ -5325,7 +5325,7 @@ function renderInventoryTable() {
             <div style="font-size: 0.82rem; color: var(--text-muted);">Variant: ${escapeHtml(v ? v.shortName : 'Wrapping Paper')}</div>
             <div style="font-size: 0.78rem; color: var(--text-muted);"><i class="fa-solid fa-gift"></i> ${escapeHtml(item.supplier_name || 'Packaging Supplier')}</div>
           </td>
-          <td><span class="badge" style="background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A;"><i class="fa-solid fa-gift"></i> PACKAGING</span></td>
+          <td><span class="badge" style="background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning-border);"><i class="fa-solid fa-gift"></i> PACKAGING</span></td>
           <td><span class="badge badge-neutral">Wrapping Paper</span></td>
           <td><strong title="Purchased roll length">${purchasedLabel}</strong></td>
           <td><strong style="color: var(--vintage-blue);">${consumedLabel}</strong></td>
@@ -5358,7 +5358,7 @@ function renderInventoryTable() {
       : `<span class="badge-provisional"><i class="fa-solid fa-clock"></i> Unknown (NULL)</span>`;
 
     const groupBadge = isAcc
-      ? `<span class="badge" style="background: #EDE9FE; color: #5B21B6; border: 1px solid #DDD6FE;"><i class="fa-solid fa-gem"></i> ACCESSORIES</span>`
+      ? `<span class="badge" style="background: var(--plum-bg); color: var(--plum); border: 1px solid var(--plum-border);"><i class="fa-solid fa-gem"></i> ACCESSORIES</span>`
       : `<span class="${isOld ? 'badge-oldstock' : 'badge-newstock'}"><i class="fa-solid ${isOld ? 'fa-clock-rotate-left' : 'fa-boxes-stacked'}"></i> ${isOld ? 'OLD STOCK' : 'NEW STOCK'}</span>`;
 
     const webLinkHtml = webMatch
@@ -5551,28 +5551,28 @@ function renderFinanceSection() {
           <div style="color: var(--text-muted); font-size: 0.75rem;">Opening Cash (${escapeHtml(fin.openingDate || 'Unset')})</div>
           <strong>${fin.openingCash.toLocaleString('fr-DZ')} DA</strong> ${ca.openingVerified ? '<span class="badge badge-green" style="font-size:0.68rem;">Verified</span>' : '<span class="badge badge-amber" style="font-size:0.68rem;">Unverified</span>'}
         </div>
-        <div style="padding: 10px; border-radius: 8px; background: #F0FDF4; border: 1px solid #BBF7D0;">
-          <div style="color: #166534; font-size: 0.75rem;">+ Paid Live Inflow + Capital</div>
+        <div style="padding: 10px; border-radius: 8px; background: var(--success-bg); border: 1px solid var(--success-border);">
+          <div style="color: var(--success); font-size: 0.75rem;">+ Paid Live Inflow + Capital</div>
           <strong style="color: var(--success);">+${(fin.totalCashInflowsFromSales + (ca.totalCashInflows - fin.openingCash - fin.totalCashInflowsFromSales)).toLocaleString('fr-DZ')} DA</strong>
         </div>
-        <div style="padding: 10px; border-radius: 8px; background: #FFF1F2; border: 1px solid #FECDD3;">
-          <div style="color: #9F1239; font-size: 0.75rem;">− Recorded Outflows</div>
+        <div style="padding: 10px; border-radius: 8px; background: var(--danger-bg); border: 1px solid var(--danger-border);">
+          <div style="color: var(--danger); font-size: 0.75rem;">− Recorded Outflows</div>
           <strong style="color: var(--danger);">−${ca.totalCashOutflows.toLocaleString('fr-DZ')} DA</strong>
         </div>
-        <div style="padding: 10px; border-radius: 8px; background: ${ca.isComplete ? '#F0FDF4' : '#FFFBEB'}; border: 1px solid ${ca.isComplete ? '#86EFAC' : '#FCD34D'};">
+        <div style="padding: 10px; border-radius: 8px; background: ${ca.isComplete ? 'var(--success-bg)' : 'var(--warning-bg)'}; border: 1px solid ${ca.isComplete ? 'var(--success-border)' : 'var(--warning-border)'};">
           <div style="color: var(--text-muted); font-size: 0.75rem;">Tracked Cash Movement</div>
           <strong>${ca.netTrackedMovement.toLocaleString('fr-DZ')} DA</strong>
           <span class="badge ${ca.isComplete ? 'badge-green' : 'badge-amber'}" style="margin-left: 4px; font-size: 0.68rem;">${ca.isComplete ? 'Complete' : 'Incomplete'}</span>
         </div>
       </div>
       ${ca.issues.length > 0 ? `
-        <div style="background: #FFFBEB; border: 1px solid #FCD34D; border-radius: 8px; padding: 12px 14px;">
-          <div style="font-weight: 700; color: #92400E; margin-bottom: 8px; font-size: 0.88rem;">
+        <div style="background: var(--warning-bg); border: 1px solid var(--warning-border); border-radius: 8px; padding: 12px 14px;">
+          <div style="font-weight: 700; color: var(--warning); margin-bottom: 8px; font-size: 0.88rem;">
             <i class="fa-solid fa-triangle-exclamation"></i> Why Money on Hand is Marked Unverified (${ca.issues.length} Incomplete Check${ca.issues.length === 1 ? '' : 's'}):
           </div>
           <div style="display: flex; flex-direction: column; gap: 8px;">
             ${ca.issues.map(iss => `
-              <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 0.83rem; color: #78350F; border-bottom: 1px dashed #FDE68A; padding-bottom: 6px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 0.83rem; color: var(--text-secondary); border-bottom: 1px dashed var(--warning-border); padding-bottom: 6px;">
                 <span>• ${escapeHtml(iss.label)}</span>
                 <button class="btn-secondary" style="padding: 3px 10px; font-size: 0.76rem;" onclick="${iss.action}">${escapeHtml(iss.btn)}</button>
               </div>
@@ -5580,7 +5580,7 @@ function renderFinanceSection() {
           </div>
         </div>
       ` : `
-        <div style="background: #F0FDF4; border: 1px solid #86EFAC; border-radius: 8px; padding: 10px 14px; color: #166534; font-size: 0.86rem;">
+        <div style="background: var(--success-bg); border: 1px solid var(--success-border); border-radius: 8px; padding: 10px 14px; color: var(--success); font-size: 0.86rem;">
           <i class="fa-solid fa-circle-check"></i> All opening cash, live order payments, batches, debts, capital, and inventory cost checks passed.
         </div>
       `}
@@ -5772,8 +5772,8 @@ function renderFinanceSection() {
     pkgStatusEl.innerHTML = allConfirmed
       ? `<i class="fa-solid fa-circle-check"></i> ${pkg.variants.length} Variants Confirmed`
       : `<i class="fa-solid fa-ruler"></i> ${pkg.variants.length} Variants (${pkg.provisionalVariantsCount} Provisional)`;
-    pkgStatusEl.style.background = allConfirmed ? '#D1FAE5' : '#FEF3C7';
-    pkgStatusEl.style.color = allConfirmed ? '#065F46' : '#92400E';
+    pkgStatusEl.style.background = allConfirmed ? 'var(--success-bg)' : 'var(--warning-bg)';
+    pkgStatusEl.style.color = allConfirmed ? 'var(--success)' : 'var(--warning)';
   }
 
   const pkgStockEl = document.getElementById('finance-pkg-stock-qty');
@@ -5813,7 +5813,7 @@ function renderFinanceSection() {
     } else {
       accReportTbody.innerHTML = acc.breakdown.map(a => {
         const statusBadge = a.stockStatus === 'sold_out'
-          ? `<span class="badge" style="background:#FFF1F2;color:#9F1239;">SOLD OUT</span>`
+          ? `<span class="badge" style="background:var(--danger-bg);color:var(--danger);">SOLD OUT</span>`
           : (a.stockStatus === 'low_stock'
             ? `<span class="badge badge-amber">LOW STOCK</span>`
             : `<span class="badge badge-green">IN STOCK</span>`);
@@ -5853,7 +5853,7 @@ function renderFinanceSection() {
           </tr>
         `;
       }).join('') + `
-        <tr style="background:#F0FDF4;font-weight:700;border-top:2px solid #86EFAC;">
+        <tr style="background:var(--success-bg);font-weight:700;border-top:2px solid var(--success-border);">
           <td>TOTAL</td>
           <td>${acc.purchasedQty} / ${acc.paidSoldQty} / ${acc.available}</td>
           <td>—</td>
@@ -5917,7 +5917,7 @@ function renderFinanceSection() {
           </tr>
         `;
       }).join('') + (pkg.legacyKraft && pkg.legacyKraft.wrapsAll > 0 ? `
-        <tr style="background:#FFFBEB;font-style:italic;">
+        <tr style="background:var(--warning-bg);font-style:italic;">
           <td><strong>Papier Craft (Legacy)</strong><div style="font-size:0.72rem;color:var(--text-muted);">Pre-system, roll not tracked</div></td>
           <td>—</td>
           <td><strong>${pkg.legacyKraft.wrapsPaid}</strong> paid / ${pkg.legacyKraft.wrapsAll} total</td>
@@ -6058,7 +6058,7 @@ function renderFinanceSection() {
   if (auditReviewBody && fin.auditSummary) {
     const items = fin.auditSummary.needsReviewItems || [];
     if (items.length === 0) {
-      auditReviewBody.innerHTML = `<div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:10px 14px;color:#166534;font-size:0.86rem;"><i class="fa-solid fa-circle-check"></i> All paid order items are cleanly attributed to verified inventory lots with known purchase costs.</div>`;
+      auditReviewBody.innerHTML = `<div style="background:var(--success-bg);border:1px solid var(--success-border);border-radius:8px;padding:10px 14px;color:var(--success);font-size:0.86rem;"><i class="fa-solid fa-circle-check"></i> All paid order items are cleanly attributed to verified inventory lots with known purchase costs.</div>`;
     } else {
       const sample = items.slice(0, 25);
       auditReviewBody.innerHTML = `
@@ -6076,7 +6076,7 @@ function renderFinanceSection() {
                   <td><strong>${escapeHtml(it.title)}</strong></td>
                   <td>${it.qty}</td>
                   <td>${(it.revenueDa || 0).toLocaleString('fr-DZ')} DA</td>
-                  <td style="color:#92400E;">${escapeHtml(it.reason || 'Needs review')}</td>
+                  <td style="color:var(--warning);">${escapeHtml(it.reason || 'Needs review')}</td>
                   <td><button class="btn-secondary" style="padding:2px 8px;font-size:0.74rem;" onclick="viewOrderDetails(${it.orderId})">Inspect</button></td>
                 </tr>
               `).join('')}
@@ -6091,7 +6091,7 @@ function renderFinanceSection() {
   const stockTbody = document.getElementById('finance-stock-summary-tbody');
   if (stockTbody) {
     stockTbody.innerHTML = `
-      <tr style="background: #EFF6FF;">
+      <tr style="background: var(--vintage-blue-soft);">
         <td><span class="badge-newstock"><i class="fa-solid fa-image"></i> NEW BATCH (Owner Verified Photo)</span></td>
         <td><strong>${fin.newStock.titlesCount} Titles</strong></td>
         <td><strong>Initial Baseline</strong></td>
@@ -6113,7 +6113,7 @@ function renderFinanceSection() {
         <td><strong>${fin.newStock.marginPct}%</strong></td>
         <td><span class="badge ${fin.newStock.soldQty > 0 ? 'badge-blue' : 'badge-green'}">${fin.newStock.soldQty} Sold</span></td>
       </tr>
-      <tr style="background: #FFFBEB;">
+      <tr style="background: var(--warning-bg);">
         <td><span class="badge-oldstock"><i class="fa-solid fa-image"></i> OLD STOCK (Owner Verified Photo)</span></td>
         <td><strong>${fin.oldStock.titlesCount} Titles</strong></td>
         <td><strong>Initial Baseline</strong></td>
@@ -6135,8 +6135,8 @@ function renderFinanceSection() {
         <td><strong>${fin.oldStock.marginPct}%</strong></td>
         <td><span class="badge badge-amber">${fin.oldStock.soldQty} Sold</span></td>
       </tr>
-      <tr style="background: #F0FDF4; font-weight: bold; border-top: 2px solid #86EFAC;">
-        <td><span class="badge" style="background: #DCFCE7; color: #166534;"><i class="fa-solid fa-book-bookmark"></i> COMBINED BASELINE (Photos Total)</span></td>
+      <tr style="background: var(--success-bg); font-weight: bold; border-top: 2px solid var(--success-border);">
+        <td><span class="badge" style="background: var(--success-bg); color: var(--success);"><i class="fa-solid fa-book-bookmark"></i> COMBINED BASELINE (Photos Total)</span></td>
         <td><strong>${fin.combinedBooks.titlesCount} Titles</strong></td>
         <td><strong>Baseline Total</strong></td>
         <td style="color: var(--text-primary); font-size: 1.02rem;"><strong>${base.combined.paidCostDa.toLocaleString('fr-DZ')} DA</strong></td>
@@ -6147,7 +6147,7 @@ function renderFinanceSection() {
         <td><span class="badge badge-green">Configured</span></td>
       </tr>
       <tr style="background: #FFFDF8; font-weight: bold;">
-        <td><span class="badge" style="background: #DCFCE7; color: #166534;"><i class="fa-solid fa-warehouse"></i> LIVE DB REMAINING BOOKS</span></td>
+        <td><span class="badge" style="background: var(--success-bg); color: var(--success);"><i class="fa-solid fa-warehouse"></i> LIVE DB REMAINING BOOKS</span></td>
         <td><strong>${fin.combinedBooks.titlesCount} Titles</strong></td>
         <td><strong style="color: var(--success); font-size: 1.02rem;">${fin.combinedBooks.available} units</strong></td>
         <td style="color: var(--text-primary); font-size: 1.02rem;"><strong>${fin.combinedBooks.valuationAtCost.toLocaleString('fr-DZ')} DA</strong></td>
@@ -6158,7 +6158,7 @@ function renderFinanceSection() {
         <td><span class="badge badge-green">${fin.combinedBooks.soldQty} Sold</span></td>
       </tr>
       <tr>
-        <td><span class="badge" style="background: #EDE9FE; color: #5B21B6;"><i class="fa-solid fa-gem"></i> ACCESSORIES (Separate)</span></td>
+        <td><span class="badge" style="background: var(--plum-bg); color: var(--plum);"><i class="fa-solid fa-gem"></i> ACCESSORIES (Separate)</span></td>
         <td><strong>${fin.accessories.itemsCount} Items</strong></td>
         <td><strong style="color: var(--success);">${fin.accessories.available} units</strong></td>
         <td><strong>${fin.accessories.valuationAtCost.toLocaleString('fr-DZ')} DA</strong></td>
@@ -6166,7 +6166,7 @@ function renderFinanceSection() {
         <td><strong style="color: var(--vintage-blue);">${fin.accessories.valuationAtRetail.toLocaleString('fr-DZ')} DA</strong></td>
         <td><strong style="color: var(--success);">+${fin.accessories.expectedProfit.toLocaleString('fr-DZ')} DA</strong></td>
         <td><strong>${fin.accessories.marginPct}%</strong></td>
-        <td><span class="badge" style="background: #EDE9FE; color: #5B21B6;">${fin.accessories.soldQty} Sold</span></td>
+        <td><span class="badge" style="background: var(--plum-bg); color: var(--plum);">${fin.accessories.soldQty} Sold</span></td>
       </tr>
     `;
   }
@@ -6184,15 +6184,15 @@ function renderFinanceSection() {
           <div style="font-size: 0.78rem; color: var(--text-muted);">Opening Cash (${escapeHtml(fin.openingDate || 'Unset')})</div>
           <div style="font-size: 1.15rem; font-weight: 700; color: var(--vintage-blue);">${fin.openingCash.toLocaleString('fr-DZ')} DA</div>
         </div>
-        <div class="stat-box" style="padding: 12px; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px;">
-          <div style="font-size: 0.78rem; color: #166534;">Owner Capital Injected (${capitals.length})</div>
+        <div class="stat-box" style="padding: 12px; background: var(--success-bg); border: 1px solid var(--success-border); border-radius: 8px;">
+          <div style="font-size: 0.78rem; color: var(--success);">Owner Capital Injected (${capitals.length})</div>
           <div style="font-size: 1.15rem; font-weight: 700; color: var(--success);">+${fin.totalCapitalInjected.toLocaleString('fr-DZ')} DA</div>
         </div>
-        <div class="stat-box" style="padding: 12px; background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 8px;">
-          <div style="font-size: 0.78rem; color: #9F1239;">Owner Withdrawals (${withdrawals.length})</div>
+        <div class="stat-box" style="padding: 12px; background: var(--danger-bg); border: 1px solid var(--danger-border); border-radius: 8px;">
+          <div style="font-size: 0.78rem; color: var(--danger);">Owner Withdrawals (${withdrawals.length})</div>
           <div style="font-size: 1.15rem; font-weight: 700; color: var(--danger);">-${fin.totalOwnerWithdrawals.toLocaleString('fr-DZ')} DA</div>
         </div>
-        <div class="stat-box" style="padding: 12px; background: #F8FAFC; border: 1px solid var(--border-color); border-radius: 8px;">
+        <div class="stat-box" style="padding: 12px; background: var(--bg-card-subtle); border: 1px solid var(--border-color); border-radius: 8px;">
           <div style="font-size: 0.78rem; color: var(--text-muted);">Post-Opening Outflows</div>
           <div style="font-size: 0.92rem; font-weight: 600;">Batches: ${fin.postOpeningBatchPaid.toLocaleString('fr-DZ')} DA • Debts: ${fin.postOpeningDebtsRepaid.toLocaleString('fr-DZ')} DA • Exp: ${fin.postOpeningOperatingExpenses.toLocaleString('fr-DZ')} DA</div>
         </div>
@@ -6573,7 +6573,7 @@ function formatOrderItems(items) {
           ? `${pi.title}${pi.qty > 1 ? ` × ${pi.qty}` : ''}`
           : String(item);
         const badge = isAccItem
-          ? ` <span class="badge" style="background:#EDE9FE;color:#5B21B6;font-size:0.68rem;">Accessory</span>`
+          ? ` <span class="badge" style="background:var(--plum-bg);color:var(--plum);font-size:0.68rem;">Accessory</span>`
           : '';
         return `<div style="margin-bottom: 2px;">• ${escapeHtml(str)}${badge}</div>`;
       }).join('');
@@ -6944,17 +6944,17 @@ window.openEditInventoryModal = function(itemId) {
           <div style="font-size: 0.72rem; color: var(--text-muted);">Original Qty Received</div>
           <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-primary);">${origQty}</div>
         </div>
-        <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 6px; padding: 8px; text-align: center;">
-          <div style="font-size: 0.72rem; color: #1E40AF;">Quantity Sold</div>
+        <div style="background: var(--vintage-blue-soft); border: 1px solid var(--vintage-blue-border); border-radius: 6px; padding: 8px; text-align: center;">
+          <div style="font-size: 0.72rem; color: var(--vintage-blue);">Quantity Sold</div>
           <div style="font-size: 1.2rem; font-weight: 700; color: var(--vintage-blue);">${soldQty}</div>
         </div>
-        <div style="background: ${availQty <= 0 ? '#FFF1F2' : '#F0FDF4'}; border: 1px solid ${availQty <= 0 ? '#FECDD3' : '#BBF7D0'}; border-radius: 6px; padding: 8px; text-align: center;">
-          <div style="font-size: 0.72rem; color: ${availQty <= 0 ? '#9F1239' : '#166534'};">Current Available</div>
+        <div style="background: ${availQty <= 0 ? 'var(--danger-bg)' : 'var(--success-bg)'}; border: 1px solid ${availQty <= 0 ? 'var(--danger-border)' : 'var(--success-border)'}; border-radius: 6px; padding: 8px; text-align: center;">
+          <div style="font-size: 0.72rem; color: ${availQty <= 0 ? 'var(--danger)' : 'var(--success)'};">Current Available</div>
           <div style="font-size: 1.2rem; font-weight: 700; color: ${availQty <= 0 ? 'var(--danger)' : 'var(--success)'};">${availQty}</div>
         </div>
-        <div style="background: ${resQty > 0 ? '#FFFBEB' : '#FFFFFF'}; border: 1px solid ${resQty > 0 ? '#FDE68A' : 'var(--border-color)'}; border-radius: 6px; padding: 8px; text-align: center;">
-          <div style="font-size: 0.72rem; color: ${resQty > 0 ? '#92400E' : 'var(--text-muted)'};">Quantity Reserved</div>
-          <div style="font-size: 1.2rem; font-weight: 700; color: ${resQty > 0 ? '#B45309' : 'var(--text-primary)'};">${resQty}</div>
+        <div style="background: ${resQty > 0 ? 'var(--warning-bg)' : '#FFFFFF'}; border: 1px solid ${resQty > 0 ? 'var(--warning-border)' : 'var(--border-color)'}; border-radius: 6px; padding: 8px; text-align: center;">
+          <div style="font-size: 0.72rem; color: ${resQty > 0 ? 'var(--warning)' : 'var(--text-muted)'};">Quantity Reserved</div>
+          <div style="font-size: 1.2rem; font-weight: 700; color: ${resQty > 0 ? 'var(--warning)' : 'var(--text-primary)'};">${resQty}</div>
         </div>
       </div>
       <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 8px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
@@ -7985,10 +7985,10 @@ window.viewOrderDetails = function(orderId) {
               <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px dashed var(--border-subtle); flex-wrap: wrap;">
                 <div>
                   • <strong>${escapeHtml(labelStr)}</strong>
-                  ${isAccItem ? '<span class="badge" style="background:#EDE9FE;color:#5B21B6;font-size:0.68rem;margin-left:4px;">Accessory</span>' : ''}
+                  ${isAccItem ? '<span class="badge" style="background:var(--plum-bg);color:var(--plum);font-size:0.68rem;margin-left:4px;">Accessory</span>' : ''}
                   ${unitRef > 0 ? `<span style="font-size:0.76rem;color:var(--text-muted);margin-left:6px;">(${unitRef.toLocaleString('fr-DZ')} DA retail)</span>` : ''}
                   ${lotBadge}
-                  ${lineInfo?.reviewReason ? `<div style="font-size:0.72rem;color:#92400E;margin-top:2px;">⚠ ${escapeHtml(lineInfo.reviewReason)}</div>` : ''}
+                  ${lineInfo?.reviewReason ? `<div style="font-size:0.72rem;color:var(--warning);margin-top:2px;">⚠ ${escapeHtml(lineInfo.reviewReason)}</div>` : ''}
                 </div>
                 <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
                   ${showLotSelector ? `
@@ -8001,7 +8001,7 @@ window.viewOrderDetails = function(orderId) {
                     </select>
                   ` : ''}
                   ${canCorrectLineItems && rawOrderItems.length > 1 ? `
-                    <button type="button" class="btn-secondary" style="padding: 2px 8px; font-size: 0.72rem; color: var(--danger); border-color: #FECDD3;" onclick="openOrderLineCorrection(${order.id}, ${idx})" title="Remove unavailable item &amp; adjust order total">
+                    <button type="button" class="btn-secondary" style="padding: 2px 8px; font-size: 0.72rem; color: var(--danger); border-color: var(--danger-border);" onclick="openOrderLineCorrection(${order.id}, ${idx})" title="Remove unavailable item &amp; adjust order total">
                       <i class="fa-solid fa-eraser"></i> Remove / Adjust
                     </button>
                   ` : ''}
@@ -8271,7 +8271,7 @@ window.openOrderLineCorrection = function(orderId, itemIndex) {
   title.textContent = `Correct Order #${order.id} — تصحيح عنصر غير متوفر`;
   body.innerHTML = `
     <form onsubmit="handleCorrectOrderLineSubmit(event, ${order.id}, ${itemIndex})">
-      <div style="background: #FFFBEB; border: 1px solid #FCD34D; border-radius: 8px; padding: 12px; margin-bottom: 14px; font-size: 0.86rem; color: #92400E;">
+      <div style="background: var(--warning-bg); border: 1px solid var(--warning-border); border-radius: 8px; padding: 12px; margin-bottom: 14px; font-size: 0.86rem; color: var(--warning);">
         <strong>Removing Unavailable Item:</strong> ${escapeHtml(pi.title)} (×${pi.qty || 1})<br/>
         All other ${rawItems.length - 1} item(s) in Order #${order.id} will remain preserved and an audit trail record will be saved.
       </div>
@@ -9243,7 +9243,7 @@ function showImporterPreview() {
       return `
         <button type="button" class="importer-tab-btn ${idx === 0 ? 'active' : ''}" data-sheet="${escapeHtml(sName)}" onclick="switchImporterSheet('${escapeHtml(sName)}')">
           <i class="fa-solid ${icon}"></i> ${escapeHtml(label)}
-          <span class="badge ${badgeColor}" style="${s.role === 'ACCESSORIES' ? 'background: #EDE9FE; color: #5B21B6;' : ''}">${countText}</span>
+          <span class="badge ${badgeColor}" style="${s.role === 'ACCESSORIES' ? 'background: var(--plum-bg); color: var(--plum);' : ''}">${countText}</span>
         </button>
       `;
     }).join('');
@@ -9515,7 +9515,7 @@ function renderSheetPreviewTable(sheetName) {
         <tr style="${isEmpty ? 'opacity: 0.5; background: #FAF9F6;' : ''}">
           <td><strong style="color: var(--text-muted);">${rowNum}</strong></td>
           <td><strong>${escapeHtml(name || '(Empty name)')}</strong></td>
-          <td><span class="badge badge-purple" style="background: #EDE9FE; color: #5B21B6;">${escapeHtml(cat)}</span></td>
+          <td><span class="badge badge-purple" style="background: var(--plum-bg); color: var(--plum);">${escapeHtml(cat)}</span></td>
           <td>${qty !== null ? `<strong>${qty}</strong>` : '<span style="color: var(--text-muted);">(Consumable / Pack)</span>'}</td>
           <td>${cost !== null ? cost.toLocaleString('fr-DZ') + ' DA' : '<span class="badge-provisional">NULL</span>'}</td>
           <td><strong>${price !== null ? price.toLocaleString('fr-DZ') + ' DA' : '-'}</strong></td>
