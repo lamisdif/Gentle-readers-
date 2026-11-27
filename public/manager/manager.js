@@ -420,7 +420,7 @@ class AuthManager {
   }
 
   isAuthenticated() {
-    if (this.adminPassword) return true;
+    if (this.adminPassword || sessionStorage.getItem('gr_owner_pass')) return true;
     return Boolean(this.session && this.session.access_token && this.isOwnerSession(this.session));
   }
 
@@ -853,13 +853,63 @@ function invalidateAccountingCache() {
 }
 window.invalidateAccountingCache = invalidateAccountingCache;
 
+// Deterministic RFC4122 v4 UUID generator from string key (shared across orders, lot allocations, and Excel import)
+function deterministicUuid(str) {
+  let hash1 = 0xdeadbeef, hash2 = 0x41c64e6d;
+  const s = String(str || '');
+  for (let i = 0; i < s.length; i++) {
+    const ch = s.charCodeAt(i);
+    hash1 = Math.imul(hash1 ^ ch, 2654435761);
+    hash2 = Math.imul(hash2 ^ ch, 1597334677);
+  }
+  hash1 = Math.imul(hash1 ^ (hash1 >>> 16), 2246822507) ^ Math.imul(hash2 ^ (hash2 >>> 13), 3266489909);
+  hash2 = Math.imul(hash2 ^ (hash2 >>> 16), 2246822507) ^ Math.imul(hash1 ^ (hash1 >>> 13), 3266489909);
+  const hex1 = ('00000000' + (hash1 >>> 0).toString(16)).slice(-8);
+  const hex2 = ('00000000' + (hash2 >>> 0).toString(16)).slice(-8);
+  const hex3 = ('00000000' + ((Math.imul(hash1, 31) + hash2) >>> 0).toString(16)).slice(-8);
+  const hex4 = ('00000000' + ((Math.imul(hash2, 37) + hash1) >>> 0).toString(16)).slice(-8);
+  return `${hex1}-${hex2.slice(0, 4)}-4${hex2.slice(4, 7)}-a${hex3.slice(1, 4)}-${hex3.slice(4, 8)}${hex4.slice(0, 8)}`;
+}
+
+function isNetworkOfflineError(err) {
+  if (!navigator.onLine) return true;
+  if (!err) return false;
+  const msg = String(err.message || err || '').toLowerCase();
+  return (
+    err.name === 'TypeError' ||
+    msg.includes('failed to fetch') ||
+    msg.includes('load failed') ||
+    msg.includes('networkerror') ||
+    msg.includes('network request failed') ||
+    msg.includes('offline')
+  );
+}
+
 class SyncCoordinator {
   constructor() {
     this.isSyncing = false;
+    this._resyncRequested = false;
+    this._activeSyncPromise = null;
   }
 
   async sync() {
-    if (this.isSyncing) return;
+    if (this.isSyncing) {
+      this._resyncRequested = true;
+      return this._activeSyncPromise;
+    }
+    this._activeSyncPromise = this._runSyncLoop();
+    return this._activeSyncPromise;
+  }
+
+  async _runSyncLoop() {
+    do {
+      this._resyncRequested = false;
+      await this._executeSingleSyncPass();
+    } while (this._resyncRequested && state.online && auth.isAuthenticated());
+    this._activeSyncPromise = null;
+  }
+
+  async _executeSingleSyncPass() {
     if (!state.online) {
       this.updateStatus('offline');
       return;
@@ -947,7 +997,7 @@ class SyncCoordinator {
       if (pendingMutations.length > 0) {
         console.log(`[Sync] Processing ${pendingMutations.length} pending mutations...`);
 
-        // Dependency sorting: parents (suppliers, batches, debts) must be created before children
+        // Dependency sorting: parents (suppliers, batches, debts) -> order_meta -> lifecycle RPCs -> allocations -> returns
         const tableOrder = {
           'suppliers': 1,
           'purchase_batches': 2,
@@ -957,13 +1007,18 @@ class SyncCoordinator {
           'operating_expenses': 6,
           'opening_position': 7,
           'order_meta': 8,
+          'transition_order_fulfillment_status': 8,
+          'update_order_operational_meta': 8,
+          'confirm_order_delivery': 8,
+          'cancel_order': 8,
           'order_stock_allocations': 9,
           'order_returns': 10
         };
         pendingMutations.sort((a, b) => {
           const orderA = tableOrder[a.entity_table] || 99;
           const orderB = tableOrder[b.entity_table] || 99;
-          return orderA - orderB;
+          if (orderA !== orderB) return orderA - orderB;
+          return String(a.created_at || '').localeCompare(String(b.created_at || ''));
         });
 
         for (const mut of pendingMutations) {
@@ -976,8 +1031,8 @@ class SyncCoordinator {
             mut.retry_count = (mut.retry_count || 0) + 1;
             mut.last_error = err.message;
 
-            // Truly offline? Pause outbox flush
-            if (!navigator.onLine || (err.message && err.message.toLowerCase().includes('failed to fetch'))) {
+            // Truly offline (desktop Chrome or iOS Safari)? Pause outbox flush cleanly and keep pending
+            if (isNetworkOfflineError(err)) {
               await idb.put('mutation_queue', mut);
               this.updateStatus('offline');
               return;
@@ -1034,7 +1089,7 @@ class SyncCoordinator {
       }
     } catch (err) {
       console.warn('[Sync] Non-blocking sync notice:', err.message);
-      if (!navigator.onLine || (err.message && err.message.toLowerCase().includes('failed to fetch'))) {
+      if (isNetworkOfflineError(err)) {
         this.updateStatus('offline');
       } else {
         state.lastSyncError = err.message;
@@ -1482,8 +1537,34 @@ class SyncCoordinator {
             if (d.debts && d.debts.length > 0) batchWrites.push(idb.putBatch('debts', d.debts));
             if (d.debtRepayments && d.debtRepayments.length > 0) batchWrites.push(idb.putBatch('debt_repayments', d.debtRepayments));
             if (d.openingPosition && d.openingPosition.length > 0) batchWrites.push(idb.put('opening_position', d.openingPosition[0]));
-            if (d.orderMeta && d.orderMeta.length > 0) batchWrites.push(idb.putBatch('order_meta', d.orderMeta));
-            if (d.orderStockAllocations && d.orderStockAllocations.length > 0) batchWrites.push(idb.putBatch('order_stock_allocations', d.orderStockAllocations));
+            const stillPending = await idb.getPendingMutations();
+            const pendingOrderIds = new Set();
+            stillPending.forEach(m => {
+              const oid = m.payload?.p_order_id ?? m.payload?.order_id ?? m.entity_id;
+              if (oid !== null && oid !== undefined && [
+                'order_meta',
+                'update_order_operational_meta',
+                'confirm_order_delivery',
+                'transition_order_fulfillment_status',
+                'cancel_order',
+                'correct_order',
+                'order_stock_allocations'
+              ].includes(m.entity_table)) {
+                pendingOrderIds.add(String(oid));
+              }
+            });
+            if (d.orderMeta && d.orderMeta.length > 0) {
+              const safeMeta = pendingOrderIds.size > 0
+                ? d.orderMeta.filter(m => !pendingOrderIds.has(String(m.order_id)))
+                : d.orderMeta;
+              if (safeMeta.length > 0) batchWrites.push(idb.putBatch('order_meta', safeMeta));
+            }
+            if (d.orderStockAllocations && d.orderStockAllocations.length > 0) {
+              const safeAllocs = pendingOrderIds.size > 0
+                ? d.orderStockAllocations.filter(a => !pendingOrderIds.has(String(a.order_id)))
+                : d.orderStockAllocations;
+              if (safeAllocs.length > 0) batchWrites.push(idb.putBatch('order_stock_allocations', safeAllocs));
+            }
             if (d.orderReturns && d.orderReturns.length > 0) batchWrites.push(idb.putBatch('order_returns', d.orderReturns));
             if (d.capitalContributions && d.capitalContributions.length > 0) batchWrites.push(idb.putBatch('capital_contributions', d.capitalContributions));
             if (d.ownerWithdrawals && d.ownerWithdrawals.length > 0) batchWrites.push(idb.putBatch('owner_withdrawals', d.ownerWithdrawals));
@@ -8055,32 +8136,37 @@ window.viewOrderDetails = function(orderId) {
         <div style="border-top: 1px solid var(--border-color); padding-top: 14px; margin-top: 10px;">
           <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Order Actions &amp; Fulfillment Status:</div>
           <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
+            ${paymentStatus !== 'paid' && !['cancelled', 'rejected'].includes(status) ? `
+              <button type="button" class="btn-primary" style="background: var(--success); border-color: var(--success);" onclick="confirmOrderPaid(${order.id})">
+                <i class="fa-solid fa-circle-check"></i> Mark as Paid / تأكيد الدفع
+              </button>
+            ` : ''}
             ${status === 'pending' ? `
-              <button class="btn-secondary" onclick="updateOrderStatus(${order.id}, 'processing')">
+              <button type="button" class="btn-secondary" onclick="updateOrderStatus(${order.id}, 'processing')">
                 <i class="fa-solid fa-gears"></i> Mark Processing
               </button>
-              <button class="btn-primary" onclick="updateOrderStatus(${order.id}, 'shipped')">
+              <button type="button" class="btn-primary" onclick="updateOrderStatus(${order.id}, 'shipped')">
                 <i class="fa-solid fa-truck-fast"></i> Mark Shipped
               </button>
-              <button class="btn-secondary" style="color: var(--danger); border-color: var(--danger);" onclick="updateOrderStatus(${order.id}, 'cancelled')">
+              <button type="button" class="btn-secondary" style="color: var(--danger); border-color: var(--danger);" onclick="updateOrderStatus(${order.id}, 'cancelled')">
                 <i class="fa-solid fa-ban"></i> Cancel Order (Release Stock)
               </button>
             ` : (status === 'processing' ? `
-              <button class="btn-primary" onclick="updateOrderStatus(${order.id}, 'shipped')">
+              <button type="button" class="btn-primary" onclick="updateOrderStatus(${order.id}, 'shipped')">
                 <i class="fa-solid fa-truck-fast"></i> Mark Shipped
               </button>
-              <button class="btn-secondary" style="color: var(--danger); border-color: var(--danger);" onclick="updateOrderStatus(${order.id}, 'cancelled')">
+              <button type="button" class="btn-secondary" style="color: var(--danger); border-color: var(--danger);" onclick="updateOrderStatus(${order.id}, 'cancelled')">
                 <i class="fa-solid fa-ban"></i> Cancel Order
               </button>
             ` : (status === 'shipped' ? `
-              <button class="btn-primary" onclick="updateOrderStatus(${order.id}, 'delivered')">
+              <button type="button" class="btn-primary" onclick="updateOrderStatus(${order.id}, 'delivered')">
                 <i class="fa-solid fa-check-double"></i> Confirm Delivery &amp; Paid
               </button>
-              <button class="btn-secondary" style="color: var(--danger); border-color: var(--danger);" onclick="updateOrderStatus(${order.id}, 'cancelled')">
+              <button type="button" class="btn-secondary" style="color: var(--danger); border-color: var(--danger);" onclick="updateOrderStatus(${order.id}, 'cancelled')">
                 <i class="fa-solid fa-ban"></i> Cancel Order
               </button>
             ` : (status === 'delivered' || status === 'partially_returned' ? `
-              <button class="btn-secondary" onclick="openOrderReturnModal(${order.id})">
+              <button type="button" class="btn-secondary" onclick="openOrderReturnModal(${order.id})">
                 <i class="fa-solid fa-arrow-rotate-left"></i> Record Return / إرجاع كتاب
               </button>
               <span style="font-size: 0.85rem; color: var(--text-muted); align-self: center;">Status: <strong>${escapeHtml(status)}</strong></span>
@@ -8280,231 +8366,351 @@ window.handleCorrectOrderLineSubmit = async function(event, orderId, itemIndex) 
   if (state.online && auth.isAuthenticated()) sync.sync();
 };
 
-window.saveOrderOperationalDetails = async function(orderId) {
-  const paymentStatus = document.getElementById('modal-meta-payment-status')?.value || 'unpaid';
-  const paymentMethod = (document.getElementById('modal-meta-payment-method')?.value || '').trim();
-  const carrier = (document.getElementById('modal-meta-carrier')?.value || '').trim();
-  const trackingNumber = (document.getElementById('modal-meta-tracking')?.value || '').trim();
-  const packagingUsed = (document.getElementById('modal-meta-packaging')?.value || '').trim();
-  const rawPkgCm = (document.getElementById('modal-meta-pkg-cm')?.value || '').trim();
-  const pkgCmVal = (rawPkgCm !== '' && !isNaN(parseFloat(rawPkgCm)) && parseFloat(rawPkgCm) > 0) ? Math.round(parseFloat(rawPkgCm)) : null;
-  const packagingCost = parseFloat(document.getElementById('modal-meta-pkg-cost')?.value) || 0;
-  const shippingFee = parseFloat(document.getElementById('modal-meta-ship-fee')?.value) || 0;
-  const actualShipping = parseFloat(document.getElementById('modal-meta-act-ship')?.value) || 0;
-
+/**
+ * Persists operational/payment metadata to local state + IndexedDB and queues update_order_operational_meta RPC.
+ */
+async function persistOrderOperationalMetaLocalAndQueue(orderId, metaPatch, rpcParams) {
   const orderNumId = Number(orderId);
+  const order = (state.orders || []).find(o => String(o.id) === String(orderId));
   let meta = state.orderMeta ? state.orderMeta.find(m => String(m.order_id) === String(orderId)) : null;
-  const prevPkgMetaList = parseAllJsonNoteTags(meta?.notes, 'PKG_META');
-  const prevPkgCm = prevPkgMetaList.length > 0 ? prevPkgMetaList[prevPkgMetaList.length - 1]?.cmUsed : null;
-  const pkgCmChanged = (pkgCmVal !== null && pkgCmVal !== prevPkgCm);
-  const pkgCmNoteAppend = pkgCmChanged ? `[PKG_META:${JSON.stringify({ cmUsed: pkgCmVal, updatedAt: new Date().toISOString() })}]` : null;
 
   if (!meta) {
     meta = {
       order_id: orderNumId,
-      fulfillment_status: 'pending',
-      payment_status: paymentStatus,
-      payment_method: paymentMethod || null,
-      carrier,
-      tracking_number: trackingNumber,
-      packaging_used: packagingUsed,
-      packaging_cost_da: packagingCost,
-      shipping_fee_da: shippingFee,
-      actual_shipping_cost_da: actualShipping,
-      notes: pkgCmNoteAppend || null,
+      fulfillment_status: order?.status || 'pending',
+      payment_status: order?.payment_status || 'unpaid',
+      carrier: '',
+      tracking_number: '',
+      packaging_used: '',
+      packaging_cost_da: 0,
+      shipping_fee_da: 0,
+      actual_shipping_cost_da: 0,
+      notes: null,
+      ...metaPatch,
       updated_at: new Date().toISOString()
     };
     if (!state.orderMeta) state.orderMeta = [];
     state.orderMeta.push(meta);
   } else {
-    meta.payment_status = paymentStatus;
-    meta.payment_method = paymentMethod || null;
-    meta.carrier = carrier;
-    meta.tracking_number = trackingNumber;
-    meta.packaging_used = packagingUsed;
-    meta.packaging_cost_da = packagingCost;
-    meta.shipping_fee_da = shippingFee;
-    meta.actual_shipping_cost_da = actualShipping;
-    if (pkgCmNoteAppend) {
-      meta.notes = meta.notes ? `${String(meta.notes).trim()}\n${pkgCmNoteAppend}` : pkgCmNoteAppend;
-    }
-    meta.updated_at = new Date().toISOString();
+    Object.assign(meta, metaPatch, { updated_at: new Date().toISOString() });
   }
+
   await idb.put('order_meta', meta);
-
-  // Queue RPC mutation strictly via update_order_operational_meta
-  await idb.queueMutation('update_order_operational_meta', 'rpc', {
+  const queuedMut = await idb.queueMutation('update_order_operational_meta', 'rpc', {
     p_order_id: orderNumId,
-    p_carrier: carrier || null,
-    p_tracking_number: trackingNumber || null,
-    p_packaging_used: packagingUsed || null,
-    p_packaging_cost_da: packagingCost,
-    p_shipping_fee_da: shippingFee,
-    p_actual_shipping_cost_da: actualShipping,
-    p_payment_status: paymentStatus,
-    p_payment_method: paymentMethod || null,
-    ...(pkgCmNoteAppend ? { p_notes: pkgCmNoteAppend } : {})
+    ...rpcParams
   });
+  return { meta, queuedMut };
+}
 
-  renderAppViews();
-  alert('Payment and operational metadata saved successfully.');
-  if (state.online && auth.isAuthenticated()) sync.sync();
+window.confirmOrderPaid = async function(orderId) {
+  try {
+    const order = (state.orders || []).find(o => String(o.id) === String(orderId));
+    if (!order) return;
+
+    const orderNumId = Number(orderId);
+    const isHistorical = !!(order.is_historical || orderNumId <= 170);
+    if (isHistorical) {
+      alert('Historical orders (Order #1 to #170) are archived and read-only.');
+      return;
+    }
+
+    const eff = getEffectiveOrderStatus(order);
+    if (eff.paymentStatus === 'paid') {
+      alert(`Order #${orderId} is already marked as paid.`);
+      return;
+    }
+
+    if (!confirm(`Confirm Order #${orderId} as Paid?`)) return;
+
+    const selectedMethod = (document.getElementById('modal-meta-payment-method')?.value || '').trim() || eff.meta?.payment_method || null;
+    const { queuedMut } = await persistOrderOperationalMetaLocalAndQueue(
+      orderId,
+      {
+        payment_status: 'paid',
+        ...(selectedMethod ? { payment_method: selectedMethod } : {})
+      },
+      {
+        p_payment_status: 'paid',
+        ...(selectedMethod ? { p_payment_method: selectedMethod } : {})
+      }
+    );
+
+    renderAppViews();
+    if (document.getElementById('generic-modal')?.classList.contains('active')) {
+      viewOrderDetails(orderId);
+    }
+
+    if (state.online && auth.isAuthenticated()) {
+      await sync.sync();
+      if (document.getElementById('generic-modal')?.classList.contains('active')) {
+        viewOrderDetails(orderId);
+      }
+      const afterMut = await idb.get('mutation_queue', queuedMut.client_mutation_id);
+      if (afterMut && afterMut.status === 'local_persisted' && afterMut.last_error) {
+        alert(`Failed to save Paid status to database: ${afterMut.last_error}`);
+        return;
+      }
+    }
+  } catch (err) {
+    console.error('[Order] confirmOrderPaid failed:', err);
+    alert(`Could not mark order #${orderId} as paid: ${err.message || err}`);
+  }
+};
+
+window.saveOrderOperationalDetails = async function(orderId) {
+  try {
+    const order = (state.orders || []).find(o => String(o.id) === String(orderId));
+    if (!order) return;
+
+    const orderNumId = Number(orderId);
+    if (order.is_historical || orderNumId <= 170) {
+      alert('Historical orders (Order #1 to #170) are archived and read-only.');
+      return;
+    }
+
+    const paymentStatus = document.getElementById('modal-meta-payment-status')?.value || 'unpaid';
+    const paymentMethod = (document.getElementById('modal-meta-payment-method')?.value || '').trim();
+    const carrier = (document.getElementById('modal-meta-carrier')?.value || '').trim();
+    const trackingNumber = (document.getElementById('modal-meta-tracking')?.value || '').trim();
+    const packagingUsed = (document.getElementById('modal-meta-packaging')?.value || '').trim();
+    const rawPkgCm = (document.getElementById('modal-meta-pkg-cm')?.value || '').trim();
+    const pkgCmVal = (rawPkgCm !== '' && !isNaN(parseFloat(rawPkgCm)) && parseFloat(rawPkgCm) > 0) ? Math.round(parseFloat(rawPkgCm)) : null;
+    const packagingCost = parseFloat(document.getElementById('modal-meta-pkg-cost')?.value) || 0;
+    const shippingFee = parseFloat(document.getElementById('modal-meta-ship-fee')?.value) || 0;
+    const actualShipping = parseFloat(document.getElementById('modal-meta-act-ship')?.value) || 0;
+
+    const existingMeta = state.orderMeta ? state.orderMeta.find(m => String(m.order_id) === String(orderId)) : null;
+    const prevPkgMetaList = parseAllJsonNoteTags(existingMeta?.notes, 'PKG_META');
+    const prevPkgCm = prevPkgMetaList.length > 0 ? prevPkgMetaList[prevPkgMetaList.length - 1]?.cmUsed : null;
+    const pkgCmChanged = (pkgCmVal !== null && pkgCmVal !== prevPkgCm);
+    const pkgCmNoteAppend = pkgCmChanged ? `[PKG_META:${JSON.stringify({ cmUsed: pkgCmVal, updatedAt: new Date().toISOString() })}]` : null;
+
+    const mergedNotes = pkgCmNoteAppend
+      ? (existingMeta?.notes ? `${String(existingMeta.notes).trim()}\n${pkgCmNoteAppend}` : pkgCmNoteAppend)
+      : (existingMeta?.notes ?? null);
+
+    const { queuedMut } = await persistOrderOperationalMetaLocalAndQueue(
+      orderId,
+      {
+        payment_status: paymentStatus,
+        payment_method: paymentMethod || null,
+        carrier,
+        tracking_number: trackingNumber,
+        packaging_used: packagingUsed,
+        packaging_cost_da: packagingCost,
+        shipping_fee_da: shippingFee,
+        actual_shipping_cost_da: actualShipping,
+        notes: mergedNotes
+      },
+      {
+        p_carrier: carrier || null,
+        p_tracking_number: trackingNumber || null,
+        p_packaging_used: packagingUsed || null,
+        p_packaging_cost_da: packagingCost,
+        p_shipping_fee_da: shippingFee,
+        p_actual_shipping_cost_da: actualShipping,
+        p_payment_status: paymentStatus,
+        p_payment_method: paymentMethod || null,
+        ...(pkgCmNoteAppend ? { p_notes: pkgCmNoteAppend } : {})
+      }
+    );
+
+    renderAppViews();
+    if (document.getElementById('generic-modal')?.classList.contains('active')) {
+      viewOrderDetails(orderId);
+    }
+
+    if (state.online && auth.isAuthenticated()) {
+      await sync.sync();
+      if (document.getElementById('generic-modal')?.classList.contains('active')) {
+        viewOrderDetails(orderId);
+      }
+      const afterMut = await idb.get('mutation_queue', queuedMut.client_mutation_id);
+      if (afterMut && afterMut.status === 'local_persisted' && afterMut.last_error) {
+        alert(`Error syncing payment details to database: ${afterMut.last_error}`);
+        return;
+      }
+      alert('Payment and operational metadata saved successfully.');
+    } else {
+      alert('Saved locally (offline mode). It will sync automatically when back online.');
+    }
+  } catch (err) {
+    console.error('[Order] saveOrderOperationalDetails failed:', err);
+    alert(`Failed to save payment details: ${err.message || err}`);
+  }
 };
 
 window.updateOrderStatus = async function(orderId, newStatus) {
-  const order = state.orders.find(o => String(o.id) === String(orderId));
-  if (!order) return;
-
-  const orderNumId = Number(orderId);
-  const isHistorical = !!(order.is_historical || orderNumId <= 170);
-  if (isHistorical) {
-    alert('Historical orders (Order #1 to #170) are archived and read-only. Their fulfillment status and inventory cannot be modified.');
-    return;
-  }
-
-  let meta = state.orderMeta ? state.orderMeta.find(m => String(m.order_id) === String(orderId)) : null;
-  const currentStatus = meta ? meta.fulfillment_status : 'pending';
-
-  if (currentStatus === newStatus) {
-    alert(`Order is already marked as ${newStatus}.`);
-    return;
-  }
-
-  // Reject invalid state transitions
-  if (currentStatus === 'cancelled' && newStatus === 'delivered') {
-    alert('Invalid transition: Cannot deliver a cancelled order.');
-    return;
-  }
-  if (currentStatus === 'delivered' && newStatus === 'cancelled') {
-    alert('Invalid transition: Cannot cancel an already delivered order. Process a return instead.');
-    return;
-  }
-
-  // Parse items safely using robust parseOrderItem helper
-  let rawItems = [];
   try {
-    rawItems = typeof order.items === 'string' ? JSON.parse(order.items) : (Array.isArray(order.items) ? order.items : []);
-  } catch (e) {
-    rawItems = Array.isArray(order.items) ? order.items : (order.items ? [order.items] : []);
-  }
-  if (!Array.isArray(rawItems)) rawItems = [rawItems];
-  const items = rawItems.map(parseOrderItem);
+    const order = state.orders.find(o => String(o.id) === String(orderId));
+    if (!order) return;
 
-  // 1. Transition to Cancelled or Rejected: Release reserved stock
-  if (newStatus === 'cancelled' || newStatus === 'rejected') {
-    const actionLabel = newStatus === 'rejected' ? 'reject' : 'cancel';
-    if (!confirm(`Are you sure you want to ${actionLabel} this order? Any reserved stock will be safely released.`)) return;
+    const orderNumId = Number(orderId);
+    const isHistorical = !!(order.is_historical || orderNumId <= 170);
+    if (isHistorical) {
+      alert('Historical orders (Order #1 to #170) are archived and read-only. Their fulfillment status and inventory cannot be modified.');
+      return;
+    }
 
-    for (const itm of items) {
-      const inv = findInventoryItem(itm.title);
-      if (inv) {
-        const reservedCount = Number(inv.quantity_reserved) || 0;
-        const releaseQty = Math.min(reservedCount, itm.qty);
-        if (releaseQty > 0) {
-          inv.quantity_reserved = reservedCount - releaseQty;
-          syncInventoryDbBaseline(inv);
-          await idb.put('inventory', toRawIdbInventoryCopy(inv));
+    let meta = state.orderMeta ? state.orderMeta.find(m => String(m.order_id) === String(orderId)) : null;
+    const currentStatus = meta ? meta.fulfillment_status : 'pending';
+
+    if (currentStatus === newStatus) {
+      alert(`Order is already marked as ${newStatus}.`);
+      return;
+    }
+
+    // Reject invalid state transitions
+    if (currentStatus === 'cancelled' && newStatus === 'delivered') {
+      alert('Invalid transition: Cannot deliver a cancelled order.');
+      return;
+    }
+    if (currentStatus === 'delivered' && newStatus === 'cancelled') {
+      alert('Invalid transition: Cannot cancel an already delivered order. Process a return instead.');
+      return;
+    }
+
+    const items = parseOrderItemsSafe(order).map(parseOrderItem);
+    let primaryMut = null;
+
+    // 1. Transition to Cancelled or Rejected: Release reserved stock
+    if (newStatus === 'cancelled' || newStatus === 'rejected') {
+      const actionLabel = newStatus === 'rejected' ? 'reject' : 'cancel';
+      if (!confirm(`Are you sure you want to ${actionLabel} this order? Any reserved stock will be safely released.`)) return;
+
+      for (const itm of items) {
+        const inv = findInventoryItem(itm.title);
+        if (inv) {
+          const reservedCount = Number(inv.quantity_reserved) || 0;
+          const releaseQty = Math.min(reservedCount, itm.qty);
+          if (releaseQty > 0) {
+            inv.quantity_reserved = reservedCount - releaseQty;
+            syncInventoryDbBaseline(inv);
+            await idb.put('inventory', toRawIdbInventoryCopy(inv));
+          }
         }
       }
-    }
 
-    const allocs = state.orderAllocations ? state.orderAllocations.filter(a => String(a.order_id) === String(orderId)) : [];
-    for (const al of allocs) {
-      al.allocation_status = 'released';
-      await idb.put('order_stock_allocations', al);
-    }
-    // Perform lifecycle cancellation strictly via SECURITY DEFINER RPC
-    await idb.queueMutation('cancel_order', 'rpc', { p_order_id: orderNumId });
-  }
-
-  // 2. Transition to Delivered: Confirm reservation into sold
-  else if (newStatus === 'delivered') {
-    if (!confirm('Mark order as delivered? This will convert reserved stock to permanently sold.')) return;
-
-    for (const itm of items) {
-      const inv = findInventoryItem(itm.title);
-      if (inv) {
-        const reservedCount = Number(inv.quantity_reserved) || 0;
-        const convertQty = Math.min(reservedCount, itm.qty);
-        if (convertQty > 0) {
-          inv.quantity_reserved = Math.max(0, reservedCount - convertQty);
-          inv.quantity_sold = (Number(inv.quantity_sold) || 0) + convertQty;
-          syncInventoryDbBaseline(inv);
-          await idb.put('inventory', toRawIdbInventoryCopy(inv));
-        } else {
-          console.warn(`[Inventory] Order #${orderId} item "${itm.title}" has 0 reserved quantity. Sold count was not incremented to prevent unallocated phantom sales.`);
-        }
-      }
-    }
-
-    const allocsSource = (Array.isArray(state.orderStockAllocations) && state.orderStockAllocations.length > 0)
-      ? state.orderStockAllocations
-      : (state.orderAllocations || []);
-    const allocs = allocsSource.filter(a => String(a.order_id) === String(orderId) && a.allocation_status !== 'released');
-    if (allocs.length > 0) {
+      const allocsSource = (Array.isArray(state.orderStockAllocations) && state.orderStockAllocations.length > 0)
+        ? state.orderStockAllocations
+        : (state.orderAllocations || []);
+      const allocs = allocsSource.filter(a => String(a.order_id) === String(orderId));
       for (const al of allocs) {
-        al.allocation_status = 'confirmed';
+        al.allocation_status = 'released';
         await idb.put('order_stock_allocations', al);
-        await idb.queueMutation('order_stock_allocations', 'upsert', al);
       }
+      // Perform lifecycle cancellation strictly via SECURITY DEFINER RPC
+      primaryMut = await idb.queueMutation('cancel_order', 'rpc', { p_order_id: orderNumId });
+    }
+
+    // 2. Transition to Delivered: Confirm reservation into sold & mark Paid
+    else if (newStatus === 'delivered') {
+      if (!confirm('Mark order as delivered & paid? This will confirm payment and finalize inventory allocations.')) return;
+
+      for (const itm of items) {
+        const inv = findInventoryItem(itm.title);
+        if (inv) {
+          const reservedCount = Number(inv.quantity_reserved) || 0;
+          const convertQty = Math.min(reservedCount, itm.qty);
+          if (convertQty > 0) {
+            inv.quantity_reserved = Math.max(0, reservedCount - convertQty);
+            inv.quantity_sold = (Number(inv.quantity_sold) || 0) + convertQty;
+            syncInventoryDbBaseline(inv);
+            await idb.put('inventory', toRawIdbInventoryCopy(inv));
+          } else {
+            console.warn(`[Inventory] Order #${orderId} item "${itm.title}" has 0 reserved quantity. Sold count was not incremented to prevent unallocated phantom sales.`);
+          }
+        }
+      }
+
+      const allocsSource = (Array.isArray(state.orderStockAllocations) && state.orderStockAllocations.length > 0)
+        ? state.orderStockAllocations
+        : (state.orderAllocations || []);
+      const allocs = allocsSource.filter(a => String(a.order_id) === String(orderId) && a.allocation_status !== 'released');
+
+      // Queue confirm_order_delivery FIRST so Postgres atomically converts any pre-existing 'reserved'
+      // allocations and reserved inventory quantities before inserting fallback lot records.
+      primaryMut = await idb.queueMutation('confirm_order_delivery', 'rpc', { p_order_id: orderNumId });
+
+      if (allocs.length > 0) {
+        for (const al of allocs) {
+          const wasReserved = al.allocation_status === 'reserved';
+          al.allocation_status = 'confirmed';
+          await idb.put('order_stock_allocations', al);
+          if (!wasReserved) {
+            await idb.queueMutation('order_stock_allocations', 'upsert', al);
+          }
+        }
+      } else {
+        // Persist confirmed stock lot allocations permanently so future COGS never relies on guesswork
+        const detail = computePaidOrderDetails(order);
+        if (!Array.isArray(state.orderStockAllocations)) state.orderStockAllocations = [];
+        state.orderAllocations = state.orderStockAllocations;
+        for (let idx = 0; idx < (detail.itemBreakdowns || []).length; idx++) {
+          const bd = detail.itemBreakdowns[idx];
+          if (!bd || !bd.lotId) continue;
+          const allocRow = {
+            id: deterministicUuid(`alloc::${orderNumId}::${idx}::${bd.lotId}`),
+            order_id: orderNumId,
+            inventory_item_id: String(bd.lotId),
+            quantity: bd.qty || 1,
+            unit_purchase_cost_da: bd.unitCost,
+            cost_basis: bd.costBasis === 'specific_lot' ? 'specific_lot' : 'fifo',
+            allocation_status: 'confirmed',
+            created_at: new Date().toISOString()
+          };
+          state.orderStockAllocations.push(allocRow);
+          await idb.put('order_stock_allocations', allocRow);
+          await idb.queueMutation('order_stock_allocations', 'upsert', allocRow);
+        }
+      }
+    }
+
+    // 3. Transition to Processing or Shipped via secured RPC
+    else if (newStatus === 'processing' || newStatus === 'shipped') {
+      primaryMut = await idb.queueMutation('transition_order_fulfillment_status', 'rpc', {
+        p_order_id: orderNumId,
+        p_new_status: newStatus
+      });
+    }
+
+    // Update local IndexedDB for immediate responsive offline & online UI
+    if (!meta) {
+      meta = {
+        order_id: orderNumId,
+        fulfillment_status: newStatus,
+        payment_status: newStatus === 'delivered' ? 'paid' : (order.payment_status || 'unpaid'),
+        updated_at: new Date().toISOString()
+      };
+      if (!state.orderMeta) state.orderMeta = [];
+      state.orderMeta.push(meta);
     } else {
-      // Persist confirmed stock lot allocations permanently so future COGS never relies on guesswork
-      const detail = computePaidOrderDetails(order);
-      if (!Array.isArray(state.orderStockAllocations)) state.orderStockAllocations = [];
-      state.orderAllocations = state.orderStockAllocations;
-      for (let idx = 0; idx < (detail.itemBreakdowns || []).length; idx++) {
-        const bd = detail.itemBreakdowns[idx];
-        if (!bd || !bd.lotId) continue;
-        const allocRow = {
-          id: deterministicUuid(`alloc::${orderNumId}::${idx}::${bd.lotId}`),
-          order_id: orderNumId,
-          inventory_item_id: String(bd.lotId),
-          quantity: bd.qty || 1,
-          unit_purchase_cost_da: bd.unitCost,
-          cost_basis: bd.costBasis === 'specific_lot' ? 'specific_lot' : 'fifo',
-          allocation_status: 'confirmed',
-          created_at: new Date().toISOString()
-        };
-        state.orderStockAllocations.push(allocRow);
-        await idb.put('order_stock_allocations', allocRow);
-        await idb.queueMutation('order_stock_allocations', 'upsert', allocRow);
+      meta.fulfillment_status = newStatus;
+      if (newStatus === 'delivered') {
+        meta.payment_status = 'paid';
+      }
+      meta.updated_at = new Date().toISOString();
+    }
+
+    await idb.put('order_meta', meta);
+
+    closeGenericModal();
+    renderAppViews();
+
+    if (state.online && auth.isAuthenticated()) {
+      await sync.sync();
+      if (primaryMut) {
+        const afterMut = await idb.get('mutation_queue', primaryMut.client_mutation_id);
+        if (afterMut && afterMut.status === 'local_persisted' && afterMut.last_error) {
+          alert(`Database update warning for Order #${orderId}: ${afterMut.last_error}`);
+        }
       }
     }
-    // Perform lifecycle delivery confirmation strictly via SECURITY DEFINER RPC
-    await idb.queueMutation('confirm_order_delivery', 'rpc', { p_order_id: orderNumId });
+  } catch (err) {
+    console.error('[Order] updateOrderStatus failed:', err);
+    alert(`Failed to update Order #${orderId} status: ${err.message || err}`);
   }
-
-  // 3. Transition to Processing or Shipped via secured RPC
-  else if (newStatus === 'processing' || newStatus === 'shipped') {
-    await idb.queueMutation('transition_order_fulfillment_status', 'rpc', {
-      p_order_id: orderNumId,
-      p_new_status: newStatus
-    });
-  }
-
-  // Update local IndexedDB for immediate responsive offline UI
-  if (!meta) {
-    meta = {
-      order_id: orderNumId,
-      fulfillment_status: newStatus,
-      payment_status: newStatus === 'delivered' ? 'paid' : 'unpaid',
-      updated_at: new Date().toISOString()
-    };
-    if (!state.orderMeta) state.orderMeta = [];
-    state.orderMeta.push(meta);
-  } else {
-    meta.fulfillment_status = newStatus;
-    if (newStatus === 'delivered') {
-      meta.payment_status = 'paid';
-    }
-    meta.updated_at = new Date().toISOString();
-  }
-
-  await idb.put('order_meta', meta);
-
-  closeGenericModal();
-  renderAppViews();
-  if (state.online && auth.isAuthenticated()) sync.sync();
 };
 
 window.openOrderReturnModal = function(orderId) {
@@ -9431,22 +9637,7 @@ window.executeExcelImport = async function() {
       .trim();
   }
 
-  // Deterministic RFC4122 v4 UUID generator from string key (ensures idempotent imports without creating duplicates)
-  function deterministicUuid(str) {
-    let hash1 = 0xdeadbeef, hash2 = 0x41c64e6d;
-    for (let i = 0; i < str.length; i++) {
-      const ch = str.charCodeAt(i);
-      hash1 = Math.imul(hash1 ^ ch, 2654435761);
-      hash2 = Math.imul(hash2 ^ ch, 1597334677);
-    }
-    hash1 = Math.imul(hash1 ^ (hash1 >>> 16), 2246822507) ^ Math.imul(hash2 ^ (hash2 >>> 13), 3266489909);
-    hash2 = Math.imul(hash2 ^ (hash2 >>> 16), 2246822507) ^ Math.imul(hash1 ^ (hash1 >>> 13), 3266489909);
-    const hex1 = ('00000000' + (hash1 >>> 0).toString(16)).slice(-8);
-    const hex2 = ('00000000' + (hash2 >>> 0).toString(16)).slice(-8);
-    const hex3 = ('00000000' + ((Math.imul(hash1, 31) + hash2) >>> 0).toString(16)).slice(-8);
-    const hex4 = ('00000000' + ((Math.imul(hash2, 37) + hash1) >>> 0).toString(16)).slice(-8);
-    return `${hex1}-${hex2.slice(0, 4)}-4${hex2.slice(4, 7)}-a${hex3.slice(1, 4)}-${hex3.slice(4, 8)}${hex4.slice(0, 8)}`;
-  }
+  // Shared top-level deterministicUuid(str) handles idempotent import UUIDs without duplication
 
   // Multi-index existing inventory mapping with automatic duplicate pruning
   const existingMap = new Map();
